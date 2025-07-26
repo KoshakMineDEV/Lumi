@@ -1,0 +1,45 @@
+package cn.nukkit.level.vibration;
+
+public class VanillaVibrationTypes {
+    public static final VibrationType STEP = new VibrationType(1, "minecraft:step");
+     public static final VibrationType FLAP = new VibrationType(2, "minecraft:flap");
+     public static final VibrationType SWIM = new VibrationType(3, "minecraft:swim");
+     public static final VibrationType ELYTRA_GLIDE = new VibrationType(4, "minecraft:elytra_glide");
+     public static final VibrationType HIT_GROUND = new VibrationType(5, "minecraft:hit_ground");
+     public static final VibrationType TELEPORT  = new VibrationType(5, "minecraft:teleport");
+     public static final VibrationType BLOCK_CHANGE = new VibrationType(6, "minecraft:block_change");
+     public static final VibrationType ENTITY_SHAKING = new VibrationType(6, "minecraft:entity_shaking");
+     public static final VibrationType NOTE_BLOCK_PLAY = new VibrationType(6, "minecraft:note_block_play");
+     public static final VibrationType SPLASH = new VibrationType(6, "minecraft:splash");
+     public static final VibrationType DRINKING = new VibrationType(7, "minecraft:drinking");
+     public static final VibrationType PRIME_FUSE = new VibrationType(7, "minecraft:prime_fuse");
+     public static final VibrationType PROJECTILE_SHOOT = new VibrationType(7, "minecraft:projectile_shot");
+     public static final VibrationType EAT = new VibrationType(8, "minecraft:eat");
+     public static final VibrationType ENTITY_DAMAGE = new VibrationType(8, "minecraft:entity_damage");
+     public static final VibrationType ENTITY_INTERACT = new VibrationType(8, "minecraft:entity_interact");
+     public static final VibrationType PROJECTILE_LAND = new VibrationType(8, "minecraft:projectile_land");
+     public static final VibrationType ENTITY_ROAR = new VibrationType(9, "minecraft:entity_roar");
+     public static final VibrationType EQUIP = new VibrationType(9, "minecraft:equip");
+     public static final VibrationType SHEAR = new VibrationType(9, "minecraft:shear");
+     public static final VibrationType BLOCK_CLOSE = new VibrationType(10, "minecraft:block_close");
+     public static final VibrationType BLOCK_DEACTIVATE = new VibrationType(10, "minecraft:block_deactivate");
+     public static final VibrationType BLOCK_DETACH = new VibrationType(10, "minecraft:block_detach");
+     public static final VibrationType DISPENSE_FAIL = new VibrationType(10, "minecraft:dispense_fail");
+     public static final VibrationType BLOCK_ACTIVATE = new VibrationType(11, "minecraft:block_activate");
+     public static final VibrationType BLOCK_ATTACH = new VibrationType(11, "minecraft:block_attach");
+     public static final VibrationType BLOCK_OPEN = new VibrationType(11, "minecraft:block_open");
+     public static final VibrationType BLOCK_PLACE = new VibrationType(12, "minecraft:block_place");
+     public static final VibrationType ENTITY_PLACE = new VibrationType(12, "minecraft:entity_place");
+     public static final VibrationType FLUID_PLACE = new VibrationType(12, "minecraft:fluid_place");
+     public static final VibrationType BLOCK_DESTROY = new VibrationType(13, "minecraft:block_destroy");
+     public static final VibrationType ENTITY_DIE = new VibrationType(13, "minecraft:entity_die");
+     public static final VibrationType FLUID_PICKUP = new VibrationType(13, "minecraft:fluid_pickup");
+     public static final VibrationType CONTAINER_CLOSE = new VibrationType(14, "minecraft:container_close");
+     public static final VibrationType ITEM_INTERACT_FINISH = new VibrationType(14, "minecraft:item_interact_finish");
+     public static final VibrationType PISTON_CONTRACT = new VibrationType(14, "minecraft:piston_contract");
+     public static final VibrationType CONTAINER_OPEN = new VibrationType(15, "minecraft:container_open");
+     public static final VibrationType EXPLODE = new VibrationType(15, "minecraft:explode");
+     public static final VibrationType INSTRUMENT_PLAY = new VibrationType(15, "minecraft:instrument_play");
+     public static final VibrationType LIGHTNING_STRIKE = new VibrationType(15, "minecraft:lightning_strike");
+     public static final VibrationType PISTON_EXTEND = new VibrationType(15, "minecraft:piston_extend");
+}
