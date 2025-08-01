@@ -28,10 +28,8 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 @Slf4j
 @UtilityClass
@@ -92,6 +90,8 @@ public class CustomBlockUtil {
                 }
             }
         }
+
+        System.out.println(statesBuilder.toString());
 
         NbtMap state = NbtMap.builder()
                 .putString("name", identifier)
@@ -186,17 +186,19 @@ public class CustomBlockUtil {
             legacyIds.add(entry.getIntKey());
         }
 
-        for (CustomBlockState definition : Block.getLegacy2CustomState().values()) {
-            NbtMap state = definition.getBlockState();
+        for(List<CustomBlockState> variants : Block.getLegacy2CustomState().values()) {
+            for (CustomBlockState definition : variants) {
+                NbtMap state = definition.getBlockState();
 
-            final List<NbtMap> states = vanillaPaletteList.computeIfAbsent(state.getString("name"), (k) -> new ObjectArrayList<>());
+                final List<NbtMap> states = vanillaPaletteList.computeIfAbsent(state.getString("name"), (k) -> new ObjectArrayList<>());
 
-            if (state.getInt("version") != paletteVersion) {
-                state = state.toBuilder().putInt("version", paletteVersion).build();
+                if (state.getInt("version") != paletteVersion) {
+                    state = state.toBuilder().putInt("version", paletteVersion).build();
+                }
+
+                states.add(definition.getBlockState());
+                state2Legacy.computeIfAbsent(state, s -> new IntOpenHashSet()).add(convertLegacyToFullId(definition.getLegacyId()));
             }
-
-            states.add(definition.getBlockState());
-            state2Legacy.computeIfAbsent(state, s -> new IntOpenHashSet()).add(convertLegacyToFullId(definition.getLegacyId()));
         }
 
         palette.clearStates();

@@ -89,7 +89,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     private static final List<CustomBlockDefinition> CUSTOM_BLOCK_DEFINITIONS = new ArrayList<>();
     public static final Int2ObjectMap<CustomBlock> ID_TO_CUSTOM_BLOCK = new Int2ObjectOpenHashMap<>();
     public static final ConcurrentHashMap<String, Integer> CUSTOM_BLOCK_ID_MAP = new ConcurrentHashMap<>();
-    private static final Int2ObjectMap<CustomBlockState> LEGACY_2_CUSTOM_STATE = new Int2ObjectOpenHashMap<>();
+    private static final Map<String, List<CustomBlockState>> LEGACY_2_CUSTOM_STATE = new HashMap<>();
 
     /**
      * A commonly used block face pattern
@@ -1618,7 +1618,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
                                 return; // Nukkit has more states than our block
                             }
 
-                            Block.LEGACY_2_CUSTOM_STATE.put(state.getLegacyId(), state);
+                            Block.LEGACY_2_CUSTOM_STATE.computeIfAbsent(identifier, (key) -> new ArrayList<>()).add(state);
                         });
             }
 
@@ -1696,8 +1696,8 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         return new HashMap<>(ID_TO_CUSTOM_BLOCK);
     }
 
-    public static Int2ObjectMap<CustomBlockState> getLegacy2CustomState() {
-        return new Int2ObjectOpenHashMap<>(LEGACY_2_CUSTOM_STATE);
+    public static Map<String, List<CustomBlockState>> getLegacy2CustomState() {
+        return LEGACY_2_CUSTOM_STATE;
     }
 
     /**
