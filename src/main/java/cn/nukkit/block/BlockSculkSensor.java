@@ -7,10 +7,19 @@ import cn.nukkit.item.ItemTool;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Sound;
+import cn.nukkit.math.BlockFace;
 import cn.nukkit.utils.BlockColor;
 import cn.nukkit.utils.RedstoneComponent;
 
-public class BlockSculkSensor extends BlockTransparent implements BlockEntityHolder<BlockEntitySculkSensor>, RedstoneComponent {
+public class BlockSculkSensor extends BlockTransparentMeta implements BlockEntityHolder<BlockEntitySculkSensor>, RedstoneComponent {
+
+    public BlockSculkSensor() {
+        super(0);
+    }
+
+    public BlockSculkSensor(int meta) {
+        super(meta);
+    }
 
     @Override
     public int getId() {
@@ -88,6 +97,22 @@ public class BlockSculkSensor extends BlockTransparent implements BlockEntityHol
         }
         return 0;
     }
+
+    @Override
+    public int getStrongPower(BlockFace side) {
+        return super.getStrongPower(side);
+    }
+
+    @Override
+    public int getWeakPower(BlockFace face) {
+        var blockEntity = this.getOrCreateBlockEntity();
+        if (this.getSide(face.getOpposite()) instanceof BlockRedstoneComparator) {
+            return blockEntity.getComparatorPower();
+        } else {
+            return blockEntity.getPower();
+        }
+    }
+
 
     public void setPhase(int phase) {
         if (phase == 1) this.level.addSound(this.add(0.5, 0.5, 0.5), Sound.POWER_ON_SCULK_SENSOR);
