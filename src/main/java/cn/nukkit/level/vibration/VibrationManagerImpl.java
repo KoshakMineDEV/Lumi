@@ -38,7 +38,9 @@ public class VibrationManagerImpl implements VibrationManager {
                     listener.getListenerVector().distanceSquared(event.source()) <= Math.pow(listener.getListenRange(), 2) &&
                     canVibrationArrive(level, event.source(), listener.getListenerVector()) && listener.onVibrationOccur(event)) {
 
-                this.createVibration(listener, event);
+                if(listener.createParticle()) {
+                    this.createVibration(listener, event);
+                }
                 this.level.getServer().getScheduler().scheduleDelayedTask(InternalPlugin.INSTANCE, () -> {
                     VibrationArriveEvent vibrationArriveEvent = new VibrationArriveEvent(event, listener);
                     if (!vibrationArriveEvent.call()) {
