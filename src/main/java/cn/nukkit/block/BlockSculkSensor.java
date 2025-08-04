@@ -1,11 +1,16 @@
 package cn.nukkit.block;
 
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntitySculkSensor;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.Sound;
 import cn.nukkit.utils.BlockColor;
+import cn.nukkit.utils.RedstoneComponent;
 
-public class BlockSculkSensor extends BlockTransparent {
+public class BlockSculkSensor extends BlockTransparent implements BlockEntityHolder<BlockEntitySculkSensor>, RedstoneComponent {
 
     @Override
     public int getId() {
@@ -60,5 +65,34 @@ public class BlockSculkSensor extends BlockTransparent {
             };
         }
         return Item.EMPTY_ARRAY;
+    }
+
+    @Override
+    public Class<? extends BlockEntitySculkSensor> getBlockEntityClass() {
+        return BlockEntitySculkSensor.class;
+    }
+
+    @Override
+    public String getBlockEntityType() {
+        return BlockEntity.SCULK_SENSOR;
+    }
+
+    @Override
+    public int onUpdate(int type) {
+        getOrCreateBlockEntity();
+        if (type == Level.BLOCK_UPDATE_SCHEDULED) {
+            this.getBlockEntity().calPower();
+            this.setPhase(0);
+            updateAroundRedstone();
+            return type;
+        }
+        return 0;
+    }
+
+    public void setPhase(int phase) {
+        if (phase == 1) this.level.addSound(this.add(0.5, 0.5, 0.5), Sound.POWER_ON_SCULK_SENSOR);
+        else this.level.addSound(this.add(0.5, 0.5, 0.5), Sound.POWER_OFF_SCULK_SENSOR);
+        this.setDamage(phase);
+        this.level.setBlock(this, this, true, false);
     }
 }
