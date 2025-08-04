@@ -1,7 +1,7 @@
 package cn.nukkit.level.vibration;
 
 import cn.nukkit.Server;
-import cn.nukkit.block.BlockWool;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.level.VibrationArriveEvent;
 import cn.nukkit.event.level.VibrationOccurEvent;
@@ -96,6 +96,6 @@ public class VibrationManagerImpl implements VibrationManager {
     protected boolean canVibrationArrive(Level level, Vector3 from, Vector3 to) {
         return VectorMath.getPassByVector3(from, to)
                 .stream()
-                .noneMatch(vec -> level.getBlock(vec) instanceof BlockWool);
+                .noneMatch(vec -> level.getBlock(vec).hasBlockTag(BlockTags.WOOL));
     }
 }

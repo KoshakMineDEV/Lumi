@@ -2,6 +2,7 @@ package cn.nukkit;
 
 import cn.nukkit.AdventureSettings.Type;
 import cn.nukkit.block.*;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.blockentity.*;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
@@ -2053,7 +2054,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 if (this.getGamemode() != Player.SPECTATOR && (lastX != to.x || lastY != to.y || lastX != to.z)) {
                     if (this.isOnGround() && this.isGliding()) {
                         this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.ELYTRA_GLIDE));
-                    } else if (this.isOnGround() && !(this.getSide(BlockFace.DOWN).getLevelBlock() instanceof BlockWool) && !this.isSneaking()) {
+                    } else if (this.isOnGround() && !(this.getSide(BlockFace.DOWN).getLevelBlock().hasBlockTag(BlockTags.WOOL)) && !this.isSneaking()) {
                         this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.STEP));
                     } else if (this.isSwimming()) {
                         this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this.getLocation().clone(), VanillaVibrationTypes.SWIM));
