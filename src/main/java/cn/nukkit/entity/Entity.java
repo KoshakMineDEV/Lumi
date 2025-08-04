@@ -1628,9 +1628,8 @@ public abstract class Entity extends Location implements Metadatable {
 
         this.setHealth(newHealth);
 
-        Entity attacker = source instanceof EntityDamageByEntityEvent event ? event.getDamager() : null;
-
         if (!(this instanceof EntityArmorStand)) {
+            Entity attacker = source instanceof EntityDamageByEntityEvent event ? event.getDamager() : null;
             this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(attacker, this, VanillaVibrationTypes.ENTITY_DAMAGE));
         }
 
