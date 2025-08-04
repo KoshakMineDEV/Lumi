@@ -33,7 +33,7 @@ public class VibrationManagerImpl implements VibrationManager {
             return;
         }
 
-        for (var listener : listeners) {
+        listeners.parallelStream().forEach((listener) -> {
             if (!listener.getListenerVector().equals(event.source()) &&
                     listener.getListenerVector().distanceSquared(event.source()) <= Math.pow(listener.getListenRange(), 2) &&
                     canVibrationArrive(level, event.source(), listener.getListenerVector()) && listener.onVibrationOccur(event)) {
@@ -47,7 +47,7 @@ public class VibrationManagerImpl implements VibrationManager {
                     listener.onVibrationArrive(event);
                 }, (int) event.source().distance(listener.getListenerVector()));
             }
-        }
+        });
     }
 
     @Override

@@ -6,6 +6,8 @@ import cn.nukkit.event.block.BlockIgniteEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.particle.ItemBreakParticle;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
 import cn.nukkit.utils.Utils;
@@ -63,6 +65,7 @@ public class ItemFlintSteel extends ItemTool {
                     level.setBlock(fire, fire, true);
                     level.scheduleUpdate(fire, fire.tickRate() + Utils.random.nextInt(10));
                     level.addLevelSoundEvent(block, LevelSoundEventPacket.SOUND_IGNITE);
+                    block.getLevel().getVibrationManager().callVibrationEvent(new VibrationEvent(player, block.add(0.5, 0.5, 0.5), VanillaVibrationTypes.BLOCK_PLACE));
 
                     if (!player.isCreative()) {
                         this.useOn(block);

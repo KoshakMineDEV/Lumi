@@ -5,6 +5,8 @@ import cn.nukkit.block.BlockDispenser;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.nbt.tag.CompoundTag;
 
@@ -37,6 +39,7 @@ public class ShulkerBoxDispenseBehavior extends DefaultDispenseBehavior {
 
             BlockEntity.createBlockEntity(BlockEntity.SHULKER_BOX, block.level.getChunk(target.getChunkX(), target.getChunkZ()), nbt);
             block.level.updateComparatorOutputLevel(target);
+            block.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, target.add(0.5, 0.5 , 0.5), VanillaVibrationTypes.BLOCK_PLACE));
         }
 
         return null;

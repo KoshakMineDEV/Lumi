@@ -60,4 +60,13 @@ public interface VibrationListener {
     default Entity asEntity() {
         return (Entity) this;
     }
+
+    /**
+     * True if particle should be created, false if not
+     *
+     * @return should be particle created or not
+     */
+    default boolean createParticle() {
+        return true;
+    }
 }

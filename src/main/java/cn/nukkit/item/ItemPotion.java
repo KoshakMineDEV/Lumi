@@ -3,6 +3,8 @@ package cn.nukkit.item;
 import cn.nukkit.Player;
 import cn.nukkit.entity.effect.PotionType;
 import cn.nukkit.event.player.PlayerItemConsumeEvent;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.Vector3;
 
 import javax.annotation.Nullable;
@@ -91,6 +93,8 @@ public class ItemPotion extends Item {
             return false;
         }
         PotionType potion = PotionType.get(this.getDamage());
+
+        player.level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, player.getLocation(), VanillaVibrationTypes.DRINKING));
 
         if (player.isAdventure() || player.isSurvival()) {
             --this.count;

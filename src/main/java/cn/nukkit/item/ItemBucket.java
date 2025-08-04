@@ -12,6 +12,8 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.particle.ExplodeParticle;
 import cn.nukkit.level.sound.FizzSound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.BlockFace.Plane;
 import cn.nukkit.math.Vector3;
@@ -113,6 +115,7 @@ public class ItemBucket extends Item {
 
                 useBucket(player, ev.getItem());
 
+                level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, target.add(0.5, 0.5, 0.5), VanillaVibrationTypes.FLUID_PICKUP));
                 level.addLevelSoundEvent(block, LevelSoundEventPacket.SOUND_BUCKET_FILL_POWDER_SNOW);
                 return true;
             } else {
@@ -300,6 +303,9 @@ public class ItemBucket extends Item {
             player.getInventory().setItemInHand(this);
             player.getLevel().addSound(player, Sound.RANDOM_BURP);
         }
+
+        player.getLevel().getVibrationManager().callVibrationEvent(new VibrationEvent(player, player.add(0, player.getEyeHeight()), VanillaVibrationTypes.DRINKING));
+
         return true;
     }
 

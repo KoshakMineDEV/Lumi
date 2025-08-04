@@ -16,6 +16,8 @@ import cn.nukkit.entity.passive.EntitySheep;
 import cn.nukkit.event.entity.CreatureSpawnEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -124,6 +126,8 @@ public class ItemSpawnEgg extends Item {
             }
 
             entity.spawnToAll();
+
+            level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, entity.clone(), VanillaVibrationTypes.ENTITY_PLACE));
 
             if (Utils.rand(1, 20) == 1 &&
                     (entity instanceof EntityCow ||

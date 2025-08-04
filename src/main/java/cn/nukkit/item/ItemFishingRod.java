@@ -1,6 +1,8 @@
 package cn.nukkit.item;
 
 import cn.nukkit.Player;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.Vector3;
 
 public class ItemFishingRod extends ItemTool {
@@ -26,7 +28,8 @@ public class ItemFishingRod extends ItemTool {
     public boolean onClickAir(Player player, Vector3 directionVector) {
         if (player.fishing != null) {
 			player.stopFishing(true);
-		} else {
+            player.level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, player.getLocation(), VanillaVibrationTypes.ITEM_INTERACT_FINISH));
+        } else {
 			player.startFishing(this);
             this.meta++;
         }

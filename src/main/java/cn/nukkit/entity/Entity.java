@@ -14,9 +14,12 @@ import cn.nukkit.entity.data.*;
 import cn.nukkit.entity.data.property.*;
 import cn.nukkit.entity.effect.Effect;
 import cn.nukkit.entity.effect.EffectType;
+import cn.nukkit.entity.item.EntityArmorStand;
+import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.entity.item.EntityVehicle;
 import cn.nukkit.entity.mob.EntityCreeper;
 import cn.nukkit.entity.mob.EntityWolf;
+import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.entity.*;
 import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -26,8 +29,11 @@ import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemTotem;
 import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.material.tags.ItemTags;
 import cn.nukkit.level.*;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.*;
 import cn.nukkit.metadata.MetadataValue;
 import cn.nukkit.metadata.Metadatable;
@@ -1619,7 +1625,15 @@ public abstract class Entity extends Location implements Metadatable {
                 }
             }
         }
+
+        Entity attacker = source instanceof EntityDamageByEntityEvent ? ((EntityDamageByEntityEvent) source).getDamager() : null;
+
         this.setHealth(newHealth);
+
+        if (!(this instanceof EntityArmorStand)) {
+            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(attacker, this, VanillaVibrationTypes.ENTITY_DAMAGE));
+        }
+
         return true;
     }
 
@@ -1935,6 +1949,14 @@ public abstract class Entity extends Location implements Metadatable {
         double diffMotion = (this.motionX - this.lastMotionX) * (this.motionX - this.lastMotionX) + (this.motionY - this.lastMotionY) * (this.motionY - this.lastMotionY) + (this.motionZ - this.lastMotionZ) * (this.motionZ - this.lastMotionZ);
 
         if (diffPosition > 0.0001 || diffRotation > 1.0) { //0.2 ** 2, 1.5 ** 2
+            if (diffPosition > 0.0001) {
+                if (this.isOnGround()) {
+                    this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this instanceof EntityProjectile projectile ? projectile.shootingEntity : this, this, VanillaVibrationTypes.STEP));
+                } else if (this.isSwimming()) {
+                    this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this instanceof EntityProjectile projectile ? projectile.shootingEntity : this, this, VanillaVibrationTypes.SWIM));
+                }
+            }
+
             this.addMovement(this.x, this.isPlayer ? this.y : this.y + this.getBaseOffset(), this.z, this.yaw, this.pitch, this.headYaw == 0.0 || this.isPlayer ? this.yaw : this.headYaw);
 
             this.lastX = this.x;
@@ -2272,6 +2294,12 @@ public abstract class Entity extends Location implements Metadatable {
                     }
 
                     if (damage > 0 && (!this.isPlayer || level.getGameRules().getBoolean(GameRule.FALL_DAMAGE))) {
+                        if (!this.isSneaking()) {
+                            if (!(this instanceof EntityItem item) ||
+                                    !item.getItem().hasItemTag(ItemTags.WOOL)) {
+                                this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.HIT_GROUND));
+                            }
+                        }
                         this.attack(new EntityDamageEvent(this, DamageCause.FALL, damage));
                     }
                 }

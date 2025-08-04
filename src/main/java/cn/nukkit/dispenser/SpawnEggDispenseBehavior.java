@@ -4,6 +4,8 @@ import cn.nukkit.block.BlockDispenser;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 
@@ -24,6 +26,8 @@ public class SpawnEggDispenseBehavior extends DefaultDispenseBehavior {
             }
 
             entity.spawnToAll();
+
+            block.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, pos.clone(), VanillaVibrationTypes.ENTITY_PLACE));
             return null;
         }
 

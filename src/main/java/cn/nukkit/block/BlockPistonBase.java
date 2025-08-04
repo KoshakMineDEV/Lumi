@@ -10,6 +10,9 @@ import cn.nukkit.event.block.BlockPistonEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Sound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.Vector3;
@@ -264,6 +267,13 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
 
         BlockEntityPistonArm blockEntity = (BlockEntityPistonArm) this.level.getBlockEntity(this);
         blockEntity.move(extending, attached);
+        if (extending) {
+            this.getLevel().addSound(this, Sound.TILE_PISTON_OUT);
+            this.getLevel().getVibrationManager().callVibrationEvent(new VibrationEvent(this, this.add(0.5, 0.5, 0.5), VanillaVibrationTypes.PISTON_EXTEND));
+        } else {
+            this.getLevel().addSound(this, Sound.TILE_PISTON_IN);
+            this.getLevel().getVibrationManager().callVibrationEvent(new VibrationEvent(this, this.add(0.5, 0.5, 0.5), VanillaVibrationTypes.PISTON_CONTRACT));
+        }
         return true;
     }
 

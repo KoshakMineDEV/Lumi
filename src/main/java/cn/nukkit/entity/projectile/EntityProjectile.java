@@ -12,6 +12,8 @@ import cn.nukkit.event.entity.*;
 import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 import cn.nukkit.level.MovingObjectPosition;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
@@ -76,6 +78,8 @@ public abstract class EntityProjectile extends Entity {
         if (hitEvent.isCancelled()) {
             return;
         }
+
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.PROJECTILE_LAND));
 
         float damage = this instanceof EntitySnowball && entity instanceof EntityBlaze ? 3 : this.getResultDamage();
 
@@ -247,6 +251,7 @@ public abstract class EntityProjectile extends Entity {
     }
 
     protected void onHitGround(Vector3 vector3) {
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.PROJECTILE_LAND));
         this.collidedTick = this.level.getServer().getTick();
         Block block = this.level.getBlock(this.chunk, vector3.getFloorX(), vector3.getFloorY(), vector3.getFloorZ(), 0, false);
         if (block.hasEntityCollision()) {

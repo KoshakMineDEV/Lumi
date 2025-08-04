@@ -11,6 +11,8 @@ import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.sound.TNTPrimeSound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
 import cn.nukkit.nbt.tag.FloatTag;
@@ -89,6 +91,8 @@ public class BlockTNT extends BlockSolid {
         );
         tnt.spawnToAll();
         this.level.addSound(new TNTPrimeSound(this));
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(
+                source != null ? source : this, this.add(0.5, 0.5, 0.5), VanillaVibrationTypes.PRIME_FUSE));
     }
 
     @Override

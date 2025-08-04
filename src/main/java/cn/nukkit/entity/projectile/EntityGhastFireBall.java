@@ -9,6 +9,8 @@ import cn.nukkit.event.entity.EntityExplosionPrimeEvent;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.WeakExplosion;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.nbt.tag.CompoundTag;
 
 public class EntityGhastFireBall extends EntityProjectile implements EntityExplosive {
@@ -74,6 +76,7 @@ public class EntityGhastFireBall extends EntityProjectile implements EntityExplo
         if (this.age > 1200 || this.isCollided || this.hadCollision) {
             if (this.isCollided && this.canExplode) {
                 this.explode();
+                this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.PROJECTILE_LAND));
             } else {
                 this.close();
             }

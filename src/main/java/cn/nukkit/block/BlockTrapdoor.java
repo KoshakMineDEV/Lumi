@@ -8,6 +8,8 @@ import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Sound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.SimpleAxisAlignedBB;
@@ -178,6 +180,13 @@ public class BlockTrapdoor extends BlockTransparentMeta implements Faceable {
         this.setDamage(this.getDamage() ^ TRAPDOOR_OPEN_BIT);
         this.getLevel().setBlock(this, this, true);
         this.playOpenCloseSound();
+        var source = this.add(0.5, 0.5, 0.5);
+        VibrationEvent vibrationEvent = isOpen()
+                ? new VibrationEvent(player != null ? player : this, source, VanillaVibrationTypes.BLOCK_OPEN)
+                : new VibrationEvent(player != null ? player : this, source, VanillaVibrationTypes.BLOCK_CLOSE);
+
+        this.level.getVibrationManager().callVibrationEvent(vibrationEvent);
+
         return true;
     }
 

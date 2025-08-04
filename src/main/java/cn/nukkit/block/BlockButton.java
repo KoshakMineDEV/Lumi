@@ -5,8 +5,11 @@ import cn.nukkit.event.block.BlockRedstoneEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.sound.ButtonClickSound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.utils.Faceable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by CreeperFace on 27. 11. 2016.
@@ -67,7 +70,7 @@ public abstract class BlockButton extends BlockFlowable implements Faceable {
         }
 
         this.level.getServer().getPluginManager().callEvent(new BlockRedstoneEvent(this, 0, 15));
-        this.setDamage(this.getDamage() ^ BUTTON_PRESSED_BIT);
+        setActivated(true, player);
         this.level.setBlock(this, this, true, false);
         this.level.addSound(new ButtonClickSound(this.add(0.5, 0.5, 0.5)));
         this.level.scheduleUpdate(this, 30);
@@ -88,7 +91,7 @@ public abstract class BlockButton extends BlockFlowable implements Faceable {
             if (this.isActivated()) {
                 this.level.getServer().getPluginManager().callEvent(new BlockRedstoneEvent(this, 15, 0));
 
-                this.setDamage(this.getDamage() ^ BUTTON_PRESSED_BIT);
+                this.setActivated(false);
                 this.level.setBlock(this, this, true, false);
                 this.level.addSound(new ButtonClickSound(this.add(0.5, 0.5, 0.5)));
 
@@ -110,6 +113,20 @@ public abstract class BlockButton extends BlockFlowable implements Faceable {
             return Block.canStayOnFullSolid(block);
         }
         return Block.canConnectToFullSolid(block);
+    }
+
+    public void setActivated(boolean activated) {
+        setActivated(activated, null);
+    }
+
+    public void setActivated(boolean activated, @Nullable Player player) {
+        this.setDamage(this.getDamage() ^ BUTTON_PRESSED_BIT);
+        var pos = this.add(0.5, 0.5, 0.5);
+        if (activated) {
+            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(player != null ? player : this, pos, VanillaVibrationTypes.BLOCK_ACTIVATE));
+        } else {
+            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(player != null ? player : this, pos, VanillaVibrationTypes.BLOCK_DEACTIVATE));
+        }
     }
 
     public boolean isActivated() {

@@ -6,6 +6,8 @@ import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Sound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.SimpleAxisAlignedBB;
@@ -18,7 +20,7 @@ import cn.nukkit.utils.Faceable;
  */
 public class BlockFenceGate extends BlockTransparentMeta implements Faceable {
 
-    public static final int DIRECTIO_BIT = 0x03;
+    public static final int DIRECTION_BIT = 0x03;
     public static final int OPEN_BIT = 0x04;
     public static final int IN_WALL_BIT = 0x08;
 
@@ -70,7 +72,7 @@ public class BlockFenceGate extends BlockTransparentMeta implements Faceable {
         if (this.isOpen()) {
             return null;
         }
-        int i = this.getDamage() & DIRECTIO_BIT;
+        int i = this.getDamage() & DIRECTION_BIT;
         if (i == 2 || i == 0) {
             return new SimpleAxisAlignedBB(x, y, z + 0.375, x + 1, y + 1.5, z + 0.625);
         } else {
@@ -154,6 +156,11 @@ public class BlockFenceGate extends BlockTransparentMeta implements Faceable {
         this.setDamage(direction | ((~this.getDamage()) & OPEN_BIT));
         this.level.setBlock(this, this, false, false);
         this.playOpenCloseSound();
+
+        var source = this.add(0.5, 0.5, 0.5);
+        VibrationEvent vibrationEvent = isOpen() ? new VibrationEvent(player != null ? player : this, source, VanillaVibrationTypes.BLOCK_OPEN) : new VibrationEvent(player != null ? player : this, source, VanillaVibrationTypes.BLOCK_CLOSE);
+        this.level.getVibrationManager().callVibrationEvent(vibrationEvent);
+
         return true;
     }
 
@@ -197,7 +204,7 @@ public class BlockFenceGate extends BlockTransparentMeta implements Faceable {
 
     @Override
     public BlockFace getBlockFace() {
-        return BlockFace.fromHorizontalIndex(this.getDamage() & DIRECTIO_BIT);
+        return BlockFace.fromHorizontalIndex(this.getDamage() & DIRECTION_BIT);
     }
 
     @Override

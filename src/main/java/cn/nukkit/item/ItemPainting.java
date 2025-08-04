@@ -5,6 +5,8 @@ import cn.nukkit.block.Block;
 import cn.nukkit.entity.item.EntityPainting;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -109,6 +111,8 @@ public class ItemPainting extends Item {
             player.getInventory().decreaseCount(player.getInventory().getHeldItemIndex());
         }
         entity.spawnToAll();
+
+        level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, position.clone(), VanillaVibrationTypes.ENTITY_PLACE));
 
         return true;
     }

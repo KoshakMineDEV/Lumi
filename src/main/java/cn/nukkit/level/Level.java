@@ -52,6 +52,8 @@ import cn.nukkit.level.particle.Particle;
 import cn.nukkit.level.persistence.PersistentDataContainer;
 import cn.nukkit.level.persistence.impl.DelegatePersistentDataContainer;
 import cn.nukkit.level.sound.Sound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.level.vibration.VibrationManager;
 import cn.nukkit.level.vibration.VibrationManagerImpl;
 import cn.nukkit.math.*;
@@ -2483,6 +2485,8 @@ public class Level implements ChunkManager, Metadatable {
 
         target.onBreak(item, player);
 
+        this.getVibrationManager().callVibrationEvent(new VibrationEvent(player, target.add(0.5, 0.5, 0.5), VanillaVibrationTypes.BLOCK_DESTROY));
+
         item.useOn(target);
         if (item.isTool() && item.getDamage() >= item.getMaxDurability()) {
             this.addSoundToViewers(target, cn.nukkit.level.Sound.RANDOM_BREAK);
@@ -2834,6 +2838,7 @@ public class Level implements ChunkManager, Metadatable {
         if (item.getCount() <= 0) {
             item = new ItemBlock(Block.get(BlockID.AIR), 0, 0);
         }
+        this.getVibrationManager().callVibrationEvent(new VibrationEvent(player, block.add(0.5, 0.5, 0.5), VanillaVibrationTypes.BLOCK_PLACE));
         return item;
     }
 

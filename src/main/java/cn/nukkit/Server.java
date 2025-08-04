@@ -2155,9 +2155,6 @@ public class Server {
         Entity.registerEntity("ThrownPotion", EntityPotionSplash.class);
         Entity.registerEntity("Egg", EntityEgg.class);
         Entity.registerEntity("SmallFireBall", EntitySmallFireBall.class);
-        // 和原版名称不一样，已弃用
-        // The name is different from the vanilla version and has been deprecated
-        Entity.registerEntity("BlazeFireBall", EntityBlazeFireBall.class);
         Entity.registerEntity("GhastFireBall", EntityGhastFireBall.class);
         Entity.registerEntity("ShulkerBullet", EntityShulkerBullet.class);
         Entity.registerEntity("ThrownLingeringPotion", EntityPotionLingering.class);
