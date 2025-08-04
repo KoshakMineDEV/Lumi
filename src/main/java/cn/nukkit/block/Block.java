@@ -610,8 +610,12 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
         if (this instanceof CustomBlock customBlock) {
             this.type = BlockTypes.get(customBlock.getIdentifier());
+        } else if (this.isAir()) {
+            this.type = BlockTypes.AIR;
         } else {
-            this.type = BlockTypes.getFromRuntime(this.getItemId());
+            var mapping = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
+            var entry = mapping.toRuntime(this.getItemId(), this.getDamage());
+            this.type = BlockTypes.getFromRuntime(entry.getRuntimeId());
         }
 
         // Throw an exception if for some reason the type cannot be determined.
