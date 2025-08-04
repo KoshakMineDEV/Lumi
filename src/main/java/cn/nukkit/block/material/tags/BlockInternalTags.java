@@ -3,7 +3,7 @@ package cn.nukkit.block.material.tags;
 import cn.nukkit.block.material.BlockTypes;
 import cn.nukkit.block.material.tags.impl.SimpleBlockTag;
 
-public interface InternalBlockTags {
+public interface BlockInternalTags {
     BlockTag VIBRATION_DAMPER = BlockTags.register("lumi:vibration_damper", new SimpleBlockTag(
             BlockTypes.WHITE_WOOL,
             BlockTypes.BLACK_WOOL,
@@ -38,5 +38,12 @@ public interface InternalBlockTags {
             BlockTypes.PURPLE_CARPET,
             BlockTypes.RED_CARPET,
             BlockTypes.YELLOW_CARPET
+    ));
+
+    BlockTag JUNGLE = BlockTags.register("lumi:jungle", new SimpleBlockTag(
+            BlockTypes.JUNGLE_WOOD,
+            BlockTypes.JUNGLE_LOG,
+            BlockTypes.STRIPPED_JUNGLE_WOOD,
+            BlockTypes.STRIPPED_JUNGLE_LOG
     ));
 }
