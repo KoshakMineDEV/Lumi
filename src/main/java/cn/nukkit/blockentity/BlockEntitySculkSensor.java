@@ -12,7 +12,6 @@ import cn.nukkit.nbt.tag.CompoundTag;
  * @author Kevims KCodeYT
  */
 
-
 public class BlockEntitySculkSensor extends BlockEntity implements VibrationListener {
 
     protected long lastActiveTime = getLevel().getCurrentTick();
