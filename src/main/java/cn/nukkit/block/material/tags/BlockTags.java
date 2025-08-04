@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * This class is generated automatically, do not change it manually.
  */
-public final class BlockTags {
+public final class BlockTags implements InternalBlockTags {
     private static final Map<String, BlockTag> NAME_2_TAG = new HashMap<>();
 
     private static final Map<String, Set<BlockTag>> BLOCK_2_TAGS = new HashMap<>();
