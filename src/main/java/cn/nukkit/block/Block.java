@@ -53,6 +53,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import static cn.nukkit.utils.Utils.dynamic;
 
@@ -116,7 +117,8 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
             Blocks.init();
 
-            for (int id = 0; id < MAX_BLOCK_ID; id++) {
+            IntStream idStream = IntStream.range(0, MAX_BLOCK_ID);
+            idStream.parallel().forEach(id -> {
                 Class<?> c = list[id];
                 if (c != null) {
                     Block block;
@@ -184,7 +186,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
                         fullList[(id << DATA_BITS) | data] = BLOCK_UNKNOWN;
                     }
                 }
-            }
+            });
         }
     }
 
