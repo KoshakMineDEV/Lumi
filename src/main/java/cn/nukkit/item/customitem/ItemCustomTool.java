@@ -14,12 +14,12 @@ public abstract class ItemCustomTool extends StringItemToolBase implements ItemD
     private final String textureName;
 
     public ItemCustomTool(@NotNull String id, @Nullable String name) {
-        super(id, StringItem.notEmpty(name));
+        super(id, StringItem.checkNotEmpty(name));
         this.textureName = name;
     }
 
     public ItemCustomTool(@NotNull String id, @Nullable String name, @NotNull String textureName) {
-        super(id, StringItem.notEmpty(name));
+        super(id, StringItem.checkNotEmpty(name));
         this.textureName = textureName;
     }
 

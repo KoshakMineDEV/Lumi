@@ -12,9 +12,9 @@ public interface BlockID {
     int COBBLESTONE = 4;
     int COBBLE = 4;
     int PLANK = 5;
+    @Deprecated
     int PLANKS = 5;
-    int WOODEN_PLANK = 5;
-    int WOODEN_PLANKS = 5;
+    int OAK_PLANKS = 5;
     int SAPLING = 6;
     int SAPLINGS = 6;
     int BEDROCK = 7;
@@ -765,6 +765,13 @@ public interface BlockID {
     int CALIBRATED_SCULK_SENSOR = 835;
     int SNIFFER_EGG = 851;
     int PITCHER_PLANT = 867;
+
+    int SPRUCE_PLANKS = 994;
+    int BIRCH_PLANKS = 995;
+    int JUNGLE_PLANKS = 996;
+    int ACACIA_PLANKS = 997;
+    int DARK_OAK_PLANKS = 998;
+
     int TUFF_SLAB = 999;
     int TUFF_DOUBLE_SLAB = 1000;
     int TUFF_STAIRS = 1001;

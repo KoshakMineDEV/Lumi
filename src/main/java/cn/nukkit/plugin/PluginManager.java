@@ -87,6 +87,7 @@ public class PluginManager {
         }
         PluginDescription description = new PluginDescription(info);
         plugin.init(pluginLoader, this.getClass().getClassLoader(), server, description, new File("Lumi"), file);
+        plugin.onLoad();
         plugins.put(description.getName(), plugin);
         enablePlugin(plugin);
     }

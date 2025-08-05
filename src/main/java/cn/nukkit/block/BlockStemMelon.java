@@ -10,7 +10,7 @@ import cn.nukkit.math.BlockFace.Plane;
 import cn.nukkit.utils.Faceable;
 import cn.nukkit.utils.Utils;
 
-import cn.nukkit.block.custom.properties.BlockProperties;
+import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.properties.VanillaProperties;
 import cn.nukkit.block.properties.BlockPropertiesHelper;
 

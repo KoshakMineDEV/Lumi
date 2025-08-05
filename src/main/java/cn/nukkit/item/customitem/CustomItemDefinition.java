@@ -1,12 +1,13 @@
 package cn.nukkit.item.customitem;
 
-import cn.nukkit.inventory.ItemTag;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.item.customitem.data.DigProperty;
 import cn.nukkit.item.customitem.data.ItemCreativeCategory;
 import cn.nukkit.item.customitem.data.ItemCreativeGroup;
 import cn.nukkit.item.customitem.data.RenderOffsets;
+import cn.nukkit.item.material.tags.ItemTag;
+import cn.nukkit.item.material.tags.ItemTags;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
@@ -457,7 +458,7 @@ public class CustomItemDefinition {
                 .putBoolean("use_efficiency", true)
                 .putList(new ListTag<>("destroy_speeds"));
 
-        public static Map<Identifier, Map<String, DigProperty>> toolBlocks = new HashMap<>();
+        public static Map<ItemTag, Map<String, DigProperty>> toolBlocks = new HashMap<>();
 
         static {
             var pickaxeBlocks = new Object2ObjectOpenHashMap<String, DigProperty>();
@@ -470,27 +471,27 @@ public class CustomItemDefinition {
                     /* 珊瑚块  */"minecraft:coral_block", "minecraft:tube_coral_block", "minecraft:brain_coral_block", "minecraft:brain_coral_block", "minecraft:brain_coral_block", "minecraft:brain_coral_block", "minecraft:brain_coral_block", "minecraft:dead_brain_coral_block", "minecraft:dead_brain_coral_block", "minecraft:dead_brain_coral_block", "minecraft:dead_brain_coral_block")) {
                 pickaxeBlocks.put(name, new DigProperty());
             }
-            toolBlocks.put(ItemTag.IS_PICKAXE, pickaxeBlocks);
+            toolBlocks.put(ItemTags.IS_PICKAXE, pickaxeBlocks);
 
             for (var name : List.of("minecraft:chest", "minecraft:bookshelf", "minecraft:melon_block", "minecraft:warped_stem", "minecraft:crimson_stem", "minecraft:warped_stem", "minecraft:crimson_stem", "minecraft:crafting_table", "minecraft:crimson_planks", "minecraft:warped_planks", "minecraft:warped_stairs", "minecraft:warped_trapdoor", "minecraft:crimson_stairs", "minecraft:crimson_trapdoor", "minecraft:crimson_door", "minecraft:crimson_double_slab", "minecraft:warped_door", "minecraft:warped_double_slab", "minecraft:crafting_table", "minecraft:composter", "minecraft:cartography_table", "minecraft:lectern", "minecraft:stripped_crimson_stem", "minecraft:stripped_warped_stem", "minecraft:trapdoor", "minecraft:spruce_trapdoor", "minecraft:birch_trapdoor", "minecraft:jungle_trapdoor", "minecraft:acacia_trapdoor", "minecraft:dark_oak_trapdoor", "minecraft:wooden_door", "minecraft:spruce_door", "minecraft:birch_door", "minecraft:jungle_door", "minecraft:acacia_door", "minecraft:dark_oak_door", "minecraft:fence", "minecraft:fence_gate", "minecraft:spruce_fence_gate", "minecraft:birch_fence_gate", "minecraft:jungle_fence_gate", "minecraft:acacia_fence_gate", "minecraft:dark_oak_fence_gate", "minecraft:log", "minecraft:log2", "minecraft:wood", "minecraft:planks", "minecraft:wooden_slab", "minecraft:double_wooden_slab", "minecraft:oak_stairs", "minecraft:spruce_stairs", "minecraft:birch_stairs", "minecraft:jungle_stairs", "minecraft:acacia_stairs", "minecraft:dark_oak_stairs", "minecraft:wall_sign", "minecraft:spruce_wall_sign", "minecraft:birch_wall_sign", "minecraft:jungle_wall_sign", "minecraft:acacia_wall_sign", "minecraft:darkoak_wall_sign", "minecraft:wooden_pressure_plate", "minecraft:spruce_pressure_plate", "minecraft:birch_pressure_plate", "minecraft:jungle_pressure_plate", "minecraft:acacia_pressure_plate", "minecraft:dark_oak_pressure_plate", "minecraft:smithing_table", "minecraft:fletching_table", "minecraft:barrel", "minecraft:beehive", "minecraft:bee_nest", "minecraft:ladder", "minecraft:pumpkin", "minecraft:carved_pumpkin", "minecraft:lit_pumpkin", "minecraft:mangrove_door", "minecraft:mangrove_double_slab", "minecraft:mangrove_fence", "minecraft:mangrove_fence_gate", "minecraft:mangrove_log", "minecraft:mangrove_planks", "minecraft:mangrove_pressure_plate", "minecraft:mangrove_slab", "minecraft:mangrove_stairs", "minecraft:mangrove_wall_sign", "minecraft:mangrove_wood", "minecraft:wooden_button", "minecraft:spruce_button", "minecraft:birch_button", "minecraft:jungle_button", "minecraft:acacia_button", "minecraft:dark_oak_button", "minecraft:mangrove_button", "minecraft:stripped_oak_wood", "minecraft:stripped_spruce_wood", "minecraft:stripped_birch_wood", "minecraft:stripped_jungle_wood", "minecraft:stripped_acacia_wood", "minecraft:stripped_dark_oak_wood", "minecraft:stripped_mangrove_wood", "minecraft:stripped_oak_log", "minecraft:stripped_spruce_log", "minecraft:stripped_birch_log", "minecraft:stripped_jungle_log", "minecraft:stripped_acacia_log", "minecraft:stripped_dark_oak_log", "minecraft:stripped_mangrove_log", "minecraft:standing_sign", "minecraft:spruce_standing_sign", "minecraft:birch_standing_sign", "minecraft:jungle_standing_sign", "minecraft:acacia_standing_sign", "minecraft:darkoak_standing_sign", "minecraft:mangrove_standing_sign", "minecraft:mangrove_trapdoor", "minecraft:warped_standing_sign", "minecraft:warped_wall_sign", "minecraft:crimson_standing_sign", "minecraft:crimson_wall_sign", "minecraft:mangrove_roots")) {
                 axeBlocks.put(name, new DigProperty());
             }
-            toolBlocks.put(ItemTag.IS_AXE, axeBlocks);
+            toolBlocks.put(ItemTags.IS_AXE, axeBlocks);
 
             for (var name : List.of("minecraft:soul_sand", "minecraft:soul_soil", "minecraft:dirt_with_roots", "minecraft:mycelium", "minecraft:podzol", "minecraft:dirt", "minecraft:farmland", "minecraft:sand", "minecraft:gravel", "minecraft:grass", "minecraft:grass_path", "minecraft:snow", "minecraft:mud", "minecraft:packed_mud", "minecraft:clay")) {
                 shovelBlocks.put(name, new DigProperty());
             }
-            toolBlocks.put(ItemTag.IS_SHOVEL, shovelBlocks);
+            toolBlocks.put(ItemTags.IS_SHOVEL, shovelBlocks);
 
             for (var name : List.of("minecraft:nether_wart_block", "minecraft:hay_block", "minecraft:target", "minecraft:shroomlight", "minecraft:leaves", "minecraft:leaves2", "minecraft:azalea_leaves_flowered", "minecraft:azalea_leaves", "minecraft:warped_wart_block")) {
                 hoeBlocks.put(name, new DigProperty());
             }
-            toolBlocks.put(ItemTag.IS_HOE, hoeBlocks);
+            toolBlocks.put(ItemTags.IS_HOE, hoeBlocks);
 
             for (var name : List.of("minecraft:web", "minecraft:bamboo")) {
                 swordBlocks.put(name, new DigProperty());
             }
-            toolBlocks.put(ItemTag.IS_SWORD, swordBlocks);
+            toolBlocks.put(ItemTags.IS_SWORD, swordBlocks);
         }
 
         @Deprecated
@@ -671,12 +672,12 @@ public class CustomItemDefinition {
                     default -> 1;
                 };
             }
-            Identifier type = null;
+            ItemTag type = null;
             if (item.isPickaxe()) {
                 //添加可挖掘方块Tags
                 this.blockTags.addAll(List.of("'stone'", "'metal'", "'diamond_pick_diggable'", "'mob_spawner'", "'rail'", "'slab_block'", "'stair_block'", "'smooth stone slab'", "'sandstone slab'", "'cobblestone slab'", "'brick slab'", "'stone bricks slab'", "'quartz slab'", "'nether brick slab'", "'glazed terracotta'", "coral"));
                 //添加可挖掘方块
-                type = ItemTag.IS_PICKAXE;
+                type = ItemTags.IS_PICKAXE;
                 //附加附魔信息
                 this.nbt.getCompound("components").getCompound("item_properties")
                         .putString("enchantable_slot", "pickaxe");
@@ -684,14 +685,14 @@ public class CustomItemDefinition {
                 //this.isWeapon();
             } else if (item.isAxe()) {
                 this.blockTags.addAll(List.of("'wood'", "'pumpkin'", "'plant'"));
-                type = ItemTag.IS_AXE;
+                type = ItemTags.IS_AXE;
                 this.nbt.getCompound("components").getCompound("item_properties")
                         .putString("enchantable_slot", "axe");
                 this.tag("minecraft:is_axe");
                 //this.isWeapon();
             } else if (item.isShovel()) {
                 this.blockTags.addAll(List.of("'sand'", "'dirt'", "'gravel'", "'grass'", "'snow'"));
-                type = ItemTag.IS_SHOVEL;
+                type = ItemTags.IS_SHOVEL;
                 this.nbt.getCompound("components").getCompound("item_properties")
                         .putString("enchantable_slot", "shovel");
                 this.tag("minecraft:is_shovel");
@@ -699,19 +700,19 @@ public class CustomItemDefinition {
             } else if (item.isHoe()) {
                 this.nbt.getCompound("components").getCompound("item_properties")
                         .putString("enchantable_slot", "hoe");
-                type = ItemTag.IS_HOE;
+                type = ItemTags.IS_HOE;
                 this.tag("minecraft:is_hoe");
                 //this.isWeapon();
             } else if (item.isSword()) {
                 this.nbt.getCompound("components").getCompound("item_properties")
                         .putString("enchantable_slot", "sword");
-                type = ItemTag.IS_SWORD;
+                type = ItemTags.IS_SWORD;
                 //this.isWeapon();
             } else {
                 if (this.nbt.getCompound("components").contains("item_tags")) {
                     var list = this.nbt.getCompound("components").getList("item_tags", StringTag.class).getAll();
                     for (var tag : list) {
-                        var id = new Identifier(tag.parseValue());
+                        var id = ItemTags.getTag(tag.parseValue());
                         if (toolBlocks.containsKey(id)) {
                             type = id;
                             break;

@@ -1,7 +1,6 @@
 package cn.nukkit;
 
 import cn.nukkit.block.Block;
-import cn.nukkit.block.custom.CustomBlockManager;
 import cn.nukkit.blockentity.*;
 import cn.nukkit.command.*;
 import cn.nukkit.console.NukkitConsole;
@@ -28,7 +27,6 @@ import cn.nukkit.event.server.ServerStopEvent;
 import cn.nukkit.inventory.CraftingManager;
 import cn.nukkit.inventory.Recipe;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItemMapping;
 import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.lang.BaseLang;
@@ -341,7 +339,6 @@ public class Server {
         EnumBiome.values();
         Attribute.init();
         DispenseBehaviorRegister.init();
-        CustomBlockManager.init(this);
         GlobalBlockPalette.getOrCreateRuntimeId(ProtocolInfo.CURRENT_PROTOCOL, 0, 0);
 
         // Convert legacy data before plugins get the chance to mess with it
@@ -387,17 +384,8 @@ public class Server {
             this.enablePlugins(PluginLoadOrder.STARTUP);
         }
 
-        try {
-            if (CustomBlockManager.get().closeRegistry()) {
-                for (RuntimeItemMapping runtimeItemMapping : RuntimeItems.VALUES) {
-                    runtimeItemMapping.generatePalette();
-                }
-            }
-
-            Item.initCreativeItems();
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to init custom blocks", e);
-        }
+        Item.initCreativeItems();
+        Block.initCustomBlocks();
 
         LevelProviderManager.addProvider(this, Anvil.class);
         LevelProviderManager.addProvider(this, LevelDBProvider.class);
@@ -2167,9 +2155,6 @@ public class Server {
         Entity.registerEntity("ThrownPotion", EntityPotionSplash.class);
         Entity.registerEntity("Egg", EntityEgg.class);
         Entity.registerEntity("SmallFireBall", EntitySmallFireBall.class);
-        // 和原版名称不一样，已弃用
-        // The name is different from the vanilla version and has been deprecated
-        Entity.registerEntity("BlazeFireBall", EntityBlazeFireBall.class);
         Entity.registerEntity("GhastFireBall", EntityGhastFireBall.class);
         Entity.registerEntity("ShulkerBullet", EntityShulkerBullet.class);
         Entity.registerEntity("ThrownLingeringPotion", EntityPotionLingering.class);
@@ -2319,6 +2304,7 @@ public class Server {
         BlockEntity.registerBlockEntity(BlockEntity.CONDUIT, BlockEntityConduit.class);
         BlockEntity.registerBlockEntity(BlockEntity.CHISELED_BOOKSHELF, BlockEntityChiseledBookshelf.class);
         BlockEntity.registerBlockEntity(BlockEntity.HANGING_SIGN, BlockEntityHangingSign.class);
+        BlockEntity.registerBlockEntity(BlockEntity.SCULK_SENSOR, BlockEntitySculkSensor.class);
 
         // Persistent container, not on vanilla
         BlockEntity.registerBlockEntity(BlockEntity.PERSISTENT_CONTAINER, PersistentDataContainerBlockEntity.class);

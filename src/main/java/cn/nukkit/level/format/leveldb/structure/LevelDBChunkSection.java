@@ -2,13 +2,12 @@ package cn.nukkit.level.format.leveldb.structure;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
-import cn.nukkit.block.custom.container.BlockStorageContainer;
+import cn.nukkit.block.properties.BlockPropertiesHelper;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import cn.nukkit.level.format.leveldb.BlockStateMapping;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.Binary;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.Utils;
@@ -18,7 +17,6 @@ import lombok.extern.log4j.Log4j2;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -324,7 +322,7 @@ public class LevelDBChunkSection implements ChunkSection {
 
                 storage = this.storages[layer];
 
-                if (block instanceof BlockStorageContainer container) {
+                if (block instanceof BlockPropertiesHelper container) {
                     state = BlockStateMapping.get().getStateUnsafe(container.getStateNbt());
                 }
 
@@ -333,7 +331,7 @@ public class LevelDBChunkSection implements ChunkSection {
                 storage = this.storages[layer];
                 previous = storage.get(x, y, z);
 
-                if (block instanceof BlockStorageContainer container) {
+                if (block instanceof BlockPropertiesHelper container) {
                     state = BlockStateMapping.get().getStateUnsafe(container.getStateNbt());
                 }
 

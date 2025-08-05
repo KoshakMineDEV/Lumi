@@ -8,6 +8,8 @@ import cn.nukkit.event.block.BlockIgniteEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
@@ -139,5 +141,11 @@ public class EntityLightning extends Entity implements EntityLightningStrike {
         }
 
         return true;
+    }
+
+    @Override
+    public void spawnToAll() {
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.LIGHTNING_STRIKE));
+        super.spawnToAll();
     }
 }

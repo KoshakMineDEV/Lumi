@@ -40,6 +40,7 @@ public class EntityWindCharge extends EntityProjectile {
         }
         entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.PROJECTILE, 1f));
         this.level.addLevelSoundEvent(entity.getPosition().add(0, 1), LevelSoundEventPacket.SOUND_WIND_CHARGE_BURST);
+        this.level.addParticle(new GenericParticle(this, Particle.TYPE_WIND_EXPLOSION));
         this.knockBack(entity);
         this.kill();
     }
@@ -54,9 +55,8 @@ public class EntityWindCharge extends EntityProjectile {
             }
         }
         this.level.addLevelSoundEvent(this.add(0, 1), LevelSoundEventPacket.SOUND_WIND_CHARGE_BURST);
-        this.kill();
-
         this.level.addParticle(new GenericParticle(this, Particle.TYPE_WIND_EXPLOSION));
+        this.kill();
     }
 
     @Override
@@ -127,7 +127,6 @@ public class EntityWindCharge extends EntityProjectile {
         knockback.x -= (this.getX() - entity.getX()) * getKnockbackStrength();
         knockback.y += 1.0f;
         knockback.z -= (this.getZ() - entity.getZ()) * getKnockbackStrength();
-
         entity.setMotion(knockback);
     }
 

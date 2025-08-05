@@ -240,7 +240,7 @@ public class EntityFallingBlock extends Entity {
                             } else {
                                 getLevel().addLevelEvent(block, LevelEventPacket.EVENT_SOUND_POINTED_DRIPSTONE_LAND);
                             }
-                            System.out.println(fallDistance + " " + y);
+
                             Entity[] e = level.getCollidingEntities(this.getBoundingBox(), this);
                             for (Entity entity : e) {
                                 if (entity instanceof EntityLiving && fallDistance > 0) {

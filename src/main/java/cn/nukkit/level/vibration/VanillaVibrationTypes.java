@@ -1,0 +1,45 @@
+package cn.nukkit.level.vibration;
+
+public interface VanillaVibrationTypes {
+    VibrationType STEP = new VibrationType(1, "minecraft:step");
+    VibrationType FLAP = new VibrationType(2, "minecraft:flap");
+    VibrationType SWIM = new VibrationType(3, "minecraft:swim");
+    VibrationType ELYTRA_GLIDE = new VibrationType(4, "minecraft:elytra_glide");
+    VibrationType HIT_GROUND = new VibrationType(5, "minecraft:hit_ground");
+    VibrationType TELEPORT = new VibrationType(5, "minecraft:teleport");
+    VibrationType BLOCK_CHANGE = new VibrationType(6, "minecraft:block_change");
+    VibrationType ENTITY_SHAKING = new VibrationType(6, "minecraft:entity_shaking");
+    VibrationType NOTE_BLOCK_PLAY = new VibrationType(6, "minecraft:note_block_play");
+    VibrationType SPLASH = new VibrationType(6, "minecraft:splash");
+    VibrationType DRINKING = new VibrationType(7, "minecraft:drinking");
+    VibrationType PRIME_FUSE = new VibrationType(7, "minecraft:prime_fuse");
+    VibrationType PROJECTILE_SHOOT = new VibrationType(7, "minecraft:projectile_shot");
+    VibrationType EAT = new VibrationType(8, "minecraft:eat");
+    VibrationType ENTITY_DAMAGE = new VibrationType(8, "minecraft:entity_damage");
+    VibrationType ENTITY_INTERACT = new VibrationType(8, "minecraft:entity_interact");
+    VibrationType PROJECTILE_LAND = new VibrationType(8, "minecraft:projectile_land");
+    VibrationType ENTITY_ROAR = new VibrationType(9, "minecraft:entity_roar");
+    VibrationType EQUIP = new VibrationType(9, "minecraft:equip");
+    VibrationType SHEAR = new VibrationType(9, "minecraft:shear");
+    VibrationType BLOCK_CLOSE = new VibrationType(10, "minecraft:block_close");
+    VibrationType BLOCK_DEACTIVATE = new VibrationType(10, "minecraft:block_deactivate");
+    VibrationType BLOCK_DETACH = new VibrationType(10, "minecraft:block_detach");
+    VibrationType DISPENSE_FAIL = new VibrationType(10, "minecraft:dispense_fail");
+    VibrationType BLOCK_ACTIVATE = new VibrationType(11, "minecraft:block_activate");
+    VibrationType BLOCK_ATTACH = new VibrationType(11, "minecraft:block_attach");
+    VibrationType BLOCK_OPEN = new VibrationType(11, "minecraft:block_open");
+    VibrationType BLOCK_PLACE = new VibrationType(12, "minecraft:block_place");
+    VibrationType ENTITY_PLACE = new VibrationType(12, "minecraft:entity_place");
+    VibrationType FLUID_PLACE = new VibrationType(12, "minecraft:fluid_place");
+    VibrationType BLOCK_DESTROY = new VibrationType(13, "minecraft:block_destroy");
+    VibrationType ENTITY_DIE = new VibrationType(13, "minecraft:entity_die");
+    VibrationType FLUID_PICKUP = new VibrationType(13, "minecraft:fluid_pickup");
+    VibrationType CONTAINER_CLOSE = new VibrationType(14, "minecraft:container_close");
+    VibrationType ITEM_INTERACT_FINISH = new VibrationType(14, "minecraft:item_interact_finish");
+    VibrationType PISTON_CONTRACT = new VibrationType(14, "minecraft:piston_contract");
+    VibrationType CONTAINER_OPEN = new VibrationType(15, "minecraft:container_open");
+    VibrationType EXPLODE = new VibrationType(15, "minecraft:explode");
+    VibrationType INSTRUMENT_PLAY = new VibrationType(15, "minecraft:instrument_play");
+    VibrationType LIGHTNING_STRIKE = new VibrationType(15, "minecraft:lightning_strike");
+    VibrationType PISTON_EXTEND = new VibrationType(15, "minecraft:piston_extend");
+}

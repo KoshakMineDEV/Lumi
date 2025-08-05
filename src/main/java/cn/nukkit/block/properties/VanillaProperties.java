@@ -1,8 +1,8 @@
 package cn.nukkit.block.properties;
 
-import cn.nukkit.block.custom.properties.BlockProperty;
-import cn.nukkit.block.custom.properties.BooleanBlockProperty;
-import cn.nukkit.block.custom.properties.EnumBlockProperty;
+import cn.nukkit.block.customblock.properties.BlockProperty;
+import cn.nukkit.block.customblock.properties.BooleanBlockProperty;
+import cn.nukkit.block.customblock.properties.EnumBlockProperty;
 import cn.nukkit.block.properties.enums.CrackedState;
 import cn.nukkit.math.BlockFace;
 

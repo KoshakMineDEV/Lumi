@@ -28,6 +28,8 @@ players
 players/*
 resource_packs
 resource_packs/*
+vanilla_palettes
+vanilla_palettes/*
 .DS_Store
 .factorypath
 *.log

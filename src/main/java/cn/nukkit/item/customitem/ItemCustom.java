@@ -18,12 +18,12 @@ public abstract class ItemCustom extends StringItemBase implements CustomItem {
     private final String textureName;
 
     public ItemCustom(@NotNull String id, @Nullable String name) {
-        super(id, StringItem.notEmpty(name));
+        super(id, StringItem.checkNotEmpty(name));
         this.textureName = name;
     }
 
     public ItemCustom(@NotNull String id, @Nullable String name, @NotNull String textureName) {
-        super(id, StringItem.notEmpty(name));
+        super(id, StringItem.checkNotEmpty(name));
         this.textureName = textureName;
     }
 

@@ -4,6 +4,8 @@ package cn.nukkit.item;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.BlockFace;
 
 public class ItemGlassBottle extends Item {
@@ -41,6 +43,8 @@ public class ItemGlassBottle extends Item {
                     player.getLevel().dropItem(player.add(0, 1.3, 0), potion, player.getDirectionVector().multiply(0.4));
                 }
             }
+
+            level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, target.add(0.5, 0.5, 0.5), VanillaVibrationTypes.FLUID_PICKUP));
         }
         return false;
     }

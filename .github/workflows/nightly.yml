@@ -55,8 +55,7 @@ jobs:
             🔗 Commit: [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
 
             ### Artifacts
-            - `Lumi-1.0.0-SNAPSHOT.jar` – recommended, includes all dependencies.
-            - `Lumi-1.0.0-SNAPSHOT-dev.jar` – same build without dependencies (for developers).
+            - `Lumi-1.1.0-SNAPSHOT.jar` – includes all dependencies.
           draft: false
           prerelease: false
           files: artifacts/*.jar

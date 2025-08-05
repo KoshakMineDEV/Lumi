@@ -8,6 +8,8 @@ import cn.nukkit.level.GameRule;
 import cn.nukkit.level.StrongExplosion;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.SmokeParticle;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
 
@@ -47,6 +49,7 @@ public class EntityBlueWitherSkull extends EntityWitherSkull implements EntityEx
         if (this.age > 1200 || this.isCollided || this.hadCollision) {
             if (this.level.getGameRules().getBoolean(GameRule.PROJECTILES_CAN_BREAK_BLOCKS) && this.canExplode) {
                 this.explode();
+                this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.PROJECTILE_LAND));
             }else {
                 this.close();
             }

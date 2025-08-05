@@ -7,6 +7,8 @@ import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemDye;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.ItemBreakParticle;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.EntityEventPacket;
@@ -108,6 +110,7 @@ public class EntitySheep extends EntityWalkingAnimal {
         } else {
             this.unshearTicks = -1;
         }
+        level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.SHEAR));
     }
 
     @Override

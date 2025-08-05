@@ -8,11 +8,8 @@ public interface StringItem {
         return this.getNamespaceId();
     }
 
-    static String notEmpty(String value) {
-        if (value != null && value.trim().isEmpty()) {
-            throw new IllegalArgumentException("The name cannot be empty");
-        }
-        return value;
+    default int getId() {
+        return ItemID.STRING_IDENTIFIED_ITEM;
     }
 
     static String createItemName(String namespaceId) {
@@ -27,7 +24,10 @@ public interface StringItem {
         return name.toString();
     }
 
-    default int getId() {
-        return ItemID.STRING_IDENTIFIED_ITEM;
+    static String checkNotEmpty(String value) {
+        if (value != null && value.isBlank()) {
+            throw new IllegalArgumentException("The name cannot be empty");
+        }
+        return value;
     }
 }

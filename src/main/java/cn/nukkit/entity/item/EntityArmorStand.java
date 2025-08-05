@@ -263,7 +263,7 @@ public class EntityArmorStand extends Entity implements InventoryHolder, EntityI
 
         if (!source.isCancelled() && !this.closed) {
             this.setGenericFlag(Entity.DATA_FLAG_VIBRATING, true);
-            this.level.addParticle(new DestroyBlockParticle(this, Block.get(Block.WOODEN_PLANKS)));
+            this.level.addParticle(new DestroyBlockParticle(this, Block.get(Block.PLANKS)));
             this.kill(); // Using close() here would not leave any time for the vibrating effect to display
             if (source instanceof EntityDamageByEntityEvent event) {
                 if (event.getDamager() instanceof Player player) {

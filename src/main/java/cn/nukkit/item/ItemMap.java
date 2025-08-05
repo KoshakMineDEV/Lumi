@@ -139,6 +139,11 @@ public class ItemMap extends Item {
     }
 
     @Override
+    public int getMaxStackSize() {
+        return 1;
+    }
+
+    @Override
     public boolean canBeActivated() {
         return true;
     }

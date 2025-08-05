@@ -1,7 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
+import cn.nukkit.block.material.tags.BlockInternalTags;
 import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemDye;
@@ -16,7 +16,7 @@ import cn.nukkit.utils.Faceable;
 import cn.nukkit.utils.Utils;
 
 /**
- * Created by CreeperFace on 27. 10. 2016.
+ * Created by CreeperFace on 27.10.2016.
  */
 public class BlockCocoa extends BlockTransparentMeta implements Faceable {
 
@@ -58,49 +58,32 @@ public class BlockCocoa extends BlockTransparentMeta implements Faceable {
 
     @Override
     public AxisAlignedBB getBoundingBox() {
-        if (boundingBox == null) {
+        if (this.boundingBox == null) {
             this.boundingBox = recalculateBoundingBox();
         }
-
         return this.boundingBox;
     }
 
     @Override
     protected AxisAlignedBB recalculateBoundingBox() {
-        AxisAlignedBB[] bbs;
-
         int damage = this.getDamage();
         if (damage > 11) {
             this.setDamage(11);
         }
 
-        switch (getDamage()) {
-            case 1:
-            case 5:
-            case 9:
-                bbs = EAST;
-                break;
-            case 2:
-            case 6:
-            case 10:
-                bbs = SOUTH;
-                break;
-            case 3:
-            case 7:
-            case 11:
-                bbs = WEST;
-                break;
-            default:
-                bbs = NORTH;
-                break;
-        }
+        AxisAlignedBB[] aabb = switch (this.getDamage()) {
+            case 1, 5, 9 -> EAST;
+            case 2, 6, 10 -> SOUTH;
+            case 3, 7, 11 -> WEST;
+            default -> NORTH;
+        };
 
-        return bbs[(this.getDamage() >> 2)].getOffsetBoundingBox(x, y, z);
+        return aabb[(this.getDamage() >> 2)].getOffsetBoundingBox(x, y, z);
     }
 
     @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
-        if (target.getId() == Block.WOOD && (target.getDamage() & 0x03) == BlockWood.JUNGLE) {
+        if (target.hasBlockTag(BlockInternalTags.JUNGLE)) {
             if (face != BlockFace.DOWN && face != BlockFace.UP) {
                 this.setDamage(faces[face.getIndex()]);
                 this.level.setBlock(block, this, true, true);
@@ -113,9 +96,9 @@ public class BlockCocoa extends BlockTransparentMeta implements Faceable {
     @Override
     public int onUpdate(int type) {
         if (type == Level.BLOCK_UPDATE_NORMAL) {
-            Block side = this.getSide(BlockFace.fromIndex(faces2[this.getDamage()]));
+            Block side = this.getSide(BlockFace.fromIndex(faces2[Math.min(this.getDamage(), 11)]));
 
-            if (side.getId() != Block.WOOD && (side.getDamage() & 0x03) != BlockWood.JUNGLE) {
+            if (!side.hasBlockTag(BlockInternalTags.JUNGLE)) {
                 this.getLevel().useBreakOn(this, null, null, true);
                 return Level.BLOCK_UPDATE_NORMAL;
             }
@@ -124,11 +107,10 @@ public class BlockCocoa extends BlockTransparentMeta implements Faceable {
                 if (this.getDamage() >> 2 < 2) {
                     BlockCocoa block = (BlockCocoa) this.clone();
                     block.setDamage(block.getDamage() + 4);
-                    BlockGrowEvent ev = new BlockGrowEvent(this, block);
-                    Server.getInstance().getPluginManager().callEvent(ev);
+                    BlockGrowEvent event = new BlockGrowEvent(this, block);
 
-                    if (!ev.isCancelled()) {
-                        this.getLevel().setBlock(this, ev.getNewState(), true, true);
+                    if (event.call()) {
+                        this.getLevel().setBlock(this, event.getNewState(), true, true);
                     } else {
                         return Level.BLOCK_UPDATE_RANDOM;
                     }
@@ -152,14 +134,13 @@ public class BlockCocoa extends BlockTransparentMeta implements Faceable {
             Block block = this.clone();
             if (this.getDamage() >> 2 < 2) {
                 block.setDamage(block.getDamage() + 4);
-                BlockGrowEvent ev = new BlockGrowEvent(this, block);
-                Server.getInstance().getPluginManager().callEvent(ev);
+                BlockGrowEvent event = new BlockGrowEvent(this, block);
 
-                if (ev.isCancelled()) {
+                if (!event.call()) {
                     return false;
                 }
 
-                this.getLevel().setBlock(this, ev.getNewState(), true, true);
+                this.getLevel().setBlock(this, event.getNewState(), true, true);
                 this.level.addParticle(new BoneMealParticle(this));
 
                 if (player != null && !player.isCreative()) {
@@ -194,11 +175,6 @@ public class BlockCocoa extends BlockTransparentMeta implements Faceable {
     }
 
     @Override
-    public boolean canBeFlowedInto() {
-        return false;
-    }
-
-    @Override
     public boolean breaksWhenMoved() {
         return true;
     }
@@ -216,13 +192,9 @@ public class BlockCocoa extends BlockTransparentMeta implements Faceable {
     @Override
     public Item[] getDrops(Item item) {
         if (this.getDamage() >= 8) {
-            return new Item[]{
-                    new ItemDye(3, Utils.rand(2, 3))
-            };
+            return new Item[]{new ItemDye(3, Utils.rand(2, 3))};
         } else {
-            return new Item[]{
-                    new ItemDye(3, 1)
-            };
+            return new Item[]{new ItemDye(3, 1)};
         }
     }
 

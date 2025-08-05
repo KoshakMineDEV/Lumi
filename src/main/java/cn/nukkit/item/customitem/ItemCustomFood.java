@@ -16,13 +16,13 @@ public abstract class ItemCustomFood extends ItemFood implements CustomItem {
     private final String textureName;
 
     public ItemCustomFood(@NotNull String id, @Nullable String name) {
-        super(ItemID.STRING_IDENTIFIED_ITEM, 0, 1, StringItem.notEmpty(name));
+        super(ItemID.STRING_IDENTIFIED_ITEM, 0, 1, StringItem.checkNotEmpty(name));
         this.id = id;
         this.textureName = name;
     }
 
     public ItemCustomFood(@NotNull String id, @Nullable String name, @NotNull String textureName) {
-        super(ItemID.STRING_IDENTIFIED_ITEM, 0, 1, StringItem.notEmpty(name));
+        super(ItemID.STRING_IDENTIFIED_ITEM, 0, 1, StringItem.checkNotEmpty(name));
         this.id = id;
         this.textureName = textureName;
     }

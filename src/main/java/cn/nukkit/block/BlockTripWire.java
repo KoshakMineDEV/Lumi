@@ -5,6 +5,8 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemString;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.SimpleAxisAlignedBB;
@@ -159,6 +161,8 @@ public class BlockTripWire extends BlockFlowable {
             this.level.setBlock(this, this, true, false);
             this.updateHook(false);
             this.getLevel().setBlock(this, Block.get(BlockID.AIR), true, true);
+            var pos = this.add(0.5, 0.5, 0.5);
+            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, pos, isPowered() ? VanillaVibrationTypes.BLOCK_ACTIVATE : VanillaVibrationTypes.BLOCK_DEACTIVATE));
         } else {
             this.setPowered(true);
             this.getLevel().setBlock(this, Block.get(BlockID.AIR), true, true);

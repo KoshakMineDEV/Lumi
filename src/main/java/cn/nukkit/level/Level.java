@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.api.NonComputationAtomic;
 import cn.nukkit.block.*;
+import cn.nukkit.block.customblock.CustomBlock;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.BaseEntity;
 import cn.nukkit.entity.Entity;
@@ -51,6 +52,10 @@ import cn.nukkit.level.particle.Particle;
 import cn.nukkit.level.persistence.PersistentDataContainer;
 import cn.nukkit.level.persistence.impl.DelegatePersistentDataContainer;
 import cn.nukkit.level.sound.Sound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
+import cn.nukkit.level.vibration.VibrationManager;
+import cn.nukkit.level.vibration.VibrationManagerImpl;
 import cn.nukkit.math.*;
 import cn.nukkit.math.BlockFace.Plane;
 import cn.nukkit.metadata.BlockMetadataStore;
@@ -270,6 +275,9 @@ public class Level implements ChunkManager, Metadatable {
     private final Long2ObjectOpenHashMap<Boolean> chunkGenerationQueue = new Long2ObjectOpenHashMap<>();
     private final int chunkGenerationQueueSize;
     private final int chunkPopulationQueueSize;
+
+    @Getter
+    private final VibrationManager vibrationManager = new VibrationManagerImpl(this);
 
     private boolean autoSave;
     private boolean autoCompaction;
@@ -2387,7 +2395,15 @@ public class Level implements ChunkManager, Metadatable {
                 }
             }
 
-            double breakTime = target.calculateBreakTime(item, player);
+            double breakTime = target.calculateBreakTimeNotInAir(item, player);
+            //对于自定义方块，由于用户可以自由设置客户端侧的挖掘时间，拿服务端硬度计算出来的挖掘时间来判断是否为fastBreak是不准确的。
+            if (target instanceof CustomBlock customBlock) {
+                var comp = customBlock.getDefinition().nbt().getCompound("components");
+                if (comp.containsCompound("minecraft:destructible_by_mining")) {
+                    var clientBreakTime = comp.getCompound("minecraft:destructible_by_mining").getFloat("value");
+                    breakTime = Math.min(breakTime, clientBreakTime);
+                }
+            }
 
             if (player.isCreative() && breakTime > 0.15) {
                 breakTime = 0.15;
@@ -2468,6 +2484,8 @@ public class Level implements ChunkManager, Metadatable {
         }
 
         target.onBreak(item, player);
+
+        this.getVibrationManager().callVibrationEvent(new VibrationEvent(player, target.add(0.5, 0.5, 0.5), VanillaVibrationTypes.BLOCK_DESTROY));
 
         item.useOn(target);
         if (item.isTool() && item.getDamage() >= item.getMaxDurability()) {
@@ -2820,6 +2838,7 @@ public class Level implements ChunkManager, Metadatable {
         if (item.getCount() <= 0) {
             item = new ItemBlock(Block.get(BlockID.AIR), 0, 0);
         }
+        this.getVibrationManager().callVibrationEvent(new VibrationEvent(player, block.add(0.5, 0.5, 0.5), VanillaVibrationTypes.BLOCK_PLACE));
         return item;
     }
 

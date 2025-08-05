@@ -2,6 +2,7 @@ package cn.nukkit;
 
 import cn.nukkit.AdventureSettings.Type;
 import cn.nukkit.block.*;
+import cn.nukkit.block.material.tags.BlockInternalTags;
 import cn.nukkit.blockentity.*;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
@@ -54,6 +55,8 @@ import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.particle.ItemBreakParticle;
 import cn.nukkit.level.particle.PunchBlockParticle;
 import cn.nukkit.level.sound.ExperienceOrbSound;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.*;
 import cn.nukkit.metadata.MetadataValue;
 import cn.nukkit.nbt.NBTIO;
@@ -2044,8 +2047,19 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.collisionBlocks = null;
 
             if (!to.equals(moveEvent.getTo())) { // If plugins modify the destination
+                if (this.getGamemode() != Player.SPECTATOR)
+                    this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, moveEvent.getTo().clone(), VanillaVibrationTypes.TELEPORT));
                 this.teleport(moveEvent.getTo(), null);
             } else {
+                if (this.getGamemode() != Player.SPECTATOR && (lastX != to.x || lastY != to.y || lastX != to.z)) {
+                    if (this.isOnGround() && this.isGliding()) {
+                        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.ELYTRA_GLIDE));
+                    } else if (this.isOnGround() && !(this.getSide(BlockFace.DOWN).getLevelBlock().hasBlockTag(BlockInternalTags.VIBRATION_DAMPER)) && !this.isSneaking()) {
+                        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.STEP));
+                    } else if (this.isSwimming()) {
+                        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this.getLocation().clone(), VanillaVibrationTypes.SWIM));
+                    }
+                }
                 this.broadcastMovement();
             }
         } else {

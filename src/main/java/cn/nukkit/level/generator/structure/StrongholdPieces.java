@@ -35,7 +35,7 @@ public final class StrongholdPieces {
     private static final BlockState WATER = new BlockState(Block.WATER);
     private static final BlockState LAVA = new BlockState(Block.LAVA);
     private static final BlockState OAK_FENCE = new BlockState(Block.FENCE, BlockFence.FENCE_OAK);
-    private static final BlockState OAK_PLANKS = new BlockState(Block.PLANKS, BlockPlanks.OAK);
+    private static final BlockState OAK_PLANKS = new BlockState(Block.OAK_PLANKS);
     private static final BlockState OAK_DOOR = new BlockState(Block.WOODEN_DOOR_BLOCK);
     private static final BlockState IRON_DOOR = new BlockState(Block.IRON_DOOR_BLOCK);
     private static final BlockState IRON_BARS = new BlockState(Block.IRON_BARS);

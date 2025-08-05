@@ -4,9 +4,12 @@ import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemCake;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.SimpleAxisAlignedBB;
+import cn.nukkit.network.protocol.LevelSoundEventPacket;
 import cn.nukkit.utils.BlockColor;
 
 /**
@@ -125,6 +128,8 @@ public class BlockCake extends BlockTransparentMeta {
                 player.getFoodData().addFood(2, 0.4F);
                 getLevel().setBlock(this, this, true);
             }
+            this.level.addLevelSoundEvent(this, LevelSoundEventPacket.SOUND_BURP);
+            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, this.add(0.5, 0.5, 0.5), VanillaVibrationTypes.EAT));
             return true;
         }
         return false;

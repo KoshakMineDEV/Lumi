@@ -5,6 +5,9 @@ import cn.nukkit.event.block.BlockRedstoneEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
+import cn.nukkit.level.vibration.VibrationType;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
@@ -210,12 +213,19 @@ public class BlockTripWireHook extends BlockFlowable {
         if (value ^ this.isPowered()) {
             this.setDamage(this.getDamage() ^ 0x08);
         }
+        var pos = this.add(0.5, 0.5, 0.5);
+        VibrationType vibrationType = (value) ? VanillaVibrationTypes.BLOCK_ACTIVATE : VanillaVibrationTypes.BLOCK_DEACTIVATE;
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, pos, vibrationType));
+
     }
 
     public void setAttached(boolean value) {
         if (value ^ this.isAttached()) {
             this.setDamage(this.getDamage() ^ 0x04);
         }
+        var pos = this.add(0.5, 0.5, 0.5);
+        VibrationType vibrationType = (value) ? VanillaVibrationTypes.BLOCK_ATTACH : VanillaVibrationTypes.BLOCK_DETACH;
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, pos, vibrationType));
     }
 
     public void setFace(BlockFace face) {

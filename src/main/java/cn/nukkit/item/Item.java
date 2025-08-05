@@ -4,21 +4,24 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
-import cn.nukkit.block.custom.CustomBlockManager;
+import cn.nukkit.block.customblock.CustomBlock;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.inventory.Fuel;
-import cn.nukkit.inventory.ItemTag;
 import cn.nukkit.item.RuntimeItemMapping.RuntimeEntry;
 import cn.nukkit.item.customitem.CustomItem;
 import cn.nukkit.item.customitem.CustomItemDefinition;
 import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.material.CustomItemType;
+import cn.nukkit.item.material.ItemType;
+import cn.nukkit.item.material.ItemTypes;
+import cn.nukkit.item.material.tags.ItemTag;
+import cn.nukkit.item.material.tags.ItemTags;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.protocol.ProtocolInfo;
-import cn.nukkit.plugin.Plugin;
 import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemCategory;
 import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemData;
 import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemGroup;
@@ -32,8 +35,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import me.sunlan.fastreflection.FastConstructor;
-import me.sunlan.fastreflection.FastMemberLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -47,7 +48,6 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author MagicDroidX
@@ -72,7 +72,8 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
      */
     private static final Pattern ITEM_STRING_PATTERN = Pattern.compile(
             //       1:namespace    2:name           3:damage   4:num-id    5:damage
-            "^(?:(?:([a-z_]\\w*):)?([a-z._]\\w*)(?::(-?\\d+))?|(-?\\d+)(?::(-?\\d+))?)$");
+            "^(?:(?:([a-z_]\\w*):)?([a-z._]\\w*)(?::(-?\\d+))?|(-?\\d+)(?::(-?\\d+))?)$"
+    );
 
     public static final String UNKNOWN_STR = "Unknown";
     public static Class<?>[] list = null;
@@ -82,8 +83,9 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
     private static final HashMap<String, CustomItemDefinition> CUSTOM_ITEM_DEFINITIONS = new HashMap<>();
     private static final HashMap<String, CustomItem> CUSTOM_ITEM_NEED_ADD_CREATIVE = new HashMap<>();
 
-    protected Block block = null;
     protected final int id;
+    protected ItemType type;
+    protected Block block = null;
     protected int meta;
     protected boolean hasMeta = true;
     private byte[] tags = new byte[0];
@@ -104,7 +106,6 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
     }
 
     public Item(int id, Integer meta, int count, String name) {
-        //this.id = id & 0xffff;
         this.id = id;
         if (meta != null && meta >= 0) {
             this.meta = meta & 0xffff;
@@ -906,7 +907,7 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
     }
 
     public static OK<?> registerCustomItem(@NotNull Class<? extends CustomItem> clazz) {
-        return registerCustomItem(clazz, true);
+        return registerCustomItem(clazz,true);
     }
 
     public static OK<?> registerCustomItem(@NotNull Class<? extends CustomItem> clazz, boolean addCreativeItem) {
@@ -937,18 +938,10 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
         if (CUSTOM_ITEMS.containsKey(customItem.getNamespaceId())) {
             return new OK<>(false, "The custom item with the namespace ID \"" + customItem.getNamespaceId() + "\" is already registered!");
         }
-        CUSTOM_ITEMS.put(customItem.getNamespaceId(), supplier);
-        CustomItemDefinition customDef = customItem.getDefinition();
-        CUSTOM_ITEM_DEFINITIONS.put(customItem.getNamespaceId(), customDef);
-        registerNamespacedIdItem(customItem.getNamespaceId(), supplier);
 
-        // 在服务端注册自定义物品的tag
-        if (customDef.getNbt(ProtocolInfo.CURRENT_PROTOCOL).get("components") instanceof CompoundTag componentTag) {
-            var tagList = componentTag.getList("item_tags", StringTag.class);
-            if (!tagList.isEmpty()) {
-                ItemTag.registerItemTag(customItem.getNamespaceId(), tagList.getAll().stream().map(tag -> tag.data).collect(Collectors.toSet()));
-            }
-        }
+        CUSTOM_ITEMS.put(customItem.getNamespaceId(), supplier);
+        CUSTOM_ITEM_DEFINITIONS.put(customItem.getNamespaceId(), customItem.getDefinition());
+        registerNamespacedIdItem(customItem.getNamespaceId(), supplier);
 
         registerCustomItem(customItem, v1_16_100, addCreativeItem, v1_16_0);
         registerCustomItem(customItem, v1_17_0, addCreativeItem, v1_17_0);
@@ -981,6 +974,9 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
         registerCustomItem(customItem, v1_21_90, addCreativeItem, v1_21_90);
         registerCustomItem(customItem, v1_21_93, addCreativeItem, v1_21_93);
         //TODO Multiversion 添加新版本支持时修改这里
+
+        // Registering custom item type
+        ItemTypes.register(new CustomItemType(customItem));
 
         if (addCreativeItem) {
             CUSTOM_ITEM_NEED_ADD_CREATIVE.put(customItem.getNamespaceId(), customItem);
@@ -1067,14 +1063,16 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
 
     public static Item get(int id, Integer meta, int count, byte[] tags) {
         try {
-            Class<?> c = null;
-            if (id < 0) {
+            Class<?> c;
+            if (id < 255 - Block.MAX_BLOCK_ID) {
+                var customBlockItem = Block.get(255 - id).toItem();
+                customBlockItem.setCount(count);
+                customBlockItem.setDamage(meta);
+                customBlockItem.setCompoundTag(tags);
+                return customBlockItem;
+            } else if (id < 0) {
                 int blockId = 255 - id;
-                if (blockId >= CustomBlockManager.LOWEST_CUSTOM_BLOCK_ID) {
-                    c = CustomBlockManager.get().getClassType(blockId);
-                } else {
-                    c = Block.list[blockId];
-                }
+                c = Block.list[blockId];
             } else {
                 c = list[id];
             }
@@ -1149,6 +1147,8 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
                 } catch (Exception e) {
                     log.warn("Could not create a new instance of {} using the namespaced id {}", constructor, namespacedId, e);
                 }
+            } else {
+                return RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL).getItemByNamespaceId(namespacedId, 1);
             }
 
             //common item
@@ -1820,6 +1820,62 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
 
     public int getId() {
         return id;
+    }
+
+    /**
+     * Gets the type of the item.
+     *
+     * @return ItemType
+     */
+    public ItemType getItemType() {
+        if (this.type != null) {
+            return this.type;
+        }
+
+        if (this instanceof StringItem stringItem) {
+            this.type = ItemTypes.get(stringItem.getNamespaceId());
+        } else if (this.block instanceof CustomBlock customBlock) {
+            this.type = ItemTypes.get(customBlock.getIdentifier());
+        } else {
+            var mappings = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
+            var entry = mappings.toRuntime(this.getId(), this.getDamage());
+            this.type = ItemTypes.getFromRuntime(entry.getRuntimeId());
+        }
+
+        // Throw an exception if for some reason the type cannot be determined.
+        if (this.type == null) {
+            throw new IllegalStateException("Failed to initialize item type");
+        }
+
+        return this.type;
+    }
+
+    /**
+     * Gets all item tags.
+     *
+     * @return Set<ItemTag>
+     */
+    public Set<ItemTag> getItemTags() {
+        return ItemTags.getTagsSet(this.getIdentifier());
+    }
+
+    /**
+     * Checks whether the item has a tag.
+     *
+     * @param itemTag ItemTag to check
+     * @return true if there is, otherwise false
+     */
+    public boolean hasItemTag(ItemTag itemTag) {
+        return this.getItemTags().contains(itemTag);
+    }
+
+    /**
+     * Gets the item string identifier from the type.
+     *
+     * @return String identifier
+     */
+    public String getIdentifier() {
+        return this.getItemType().getIdentifier();
     }
 
     public int getDamage() {

@@ -6,6 +6,8 @@ import cn.nukkit.block.BlockID;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.block.BlockIgniteEvent;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 
@@ -71,6 +73,7 @@ public class EntitySmallFireBall extends EntityProjectile {
     @Override
     public void onCollideWithEntity(Entity entity) {
         super.onCollideWithEntity(entity);
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.PROJECTILE_LAND));
         this.isCollided = true;
         entity.setOnFire(5);
     }
@@ -82,6 +85,7 @@ public class EntitySmallFireBall extends EntityProjectile {
             block.onEntityCollide(this);
             return;
         }
+        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.PROJECTILE_LAND));
         if (this.getLevelBlock().getId() == Block.AIR) {
             BlockFire fire = (BlockFire) Block.get(BlockID.FIRE);
             fire.x = this.x;

@@ -16,7 +16,7 @@ public class Blocks {
         list[GRASS] = BlockGrass.class; //2
         list[DIRT] = BlockDirt.class; //3
         list[COBBLESTONE] = BlockCobblestone.class; //4
-        list[PLANKS] = BlockPlanks.class; //5
+        list[OAK_PLANKS] = BlockOakPlanks.class; //5
         list[SAPLING] = BlockSapling.class; //6
         list[BEDROCK] = BlockBedrock.class; //7
         list[WATER] = BlockWater.class; //8
@@ -704,6 +704,12 @@ public class Blocks {
         list[SNIFFER_EGG] = BlockSnifferEgg.class; //851
 
         list[PITCHER_PLANT] = BlockPitcherPlant.class; //867
+
+        list[SPRUCE_PLANKS] = BlockSprucePlanks.class; //994
+        list[BIRCH_PLANKS] = BlockBirchPlanks.class; ///995
+        list[JUNGLE_PLANKS] = BlockJunglePlanks.class; //996
+        list[ACACIA_PLANKS] = BlockAcaciaPlanks.class; //997
+        list[DARK_OAK_PLANKS] = BlockDarkOakPlanks.class; //998
 
         list[TUFF_SLAB] = BlockSlabTuff.class; //999
         list[TUFF_DOUBLE_SLAB] = BlockDoubleSlabTuff.class; //1000

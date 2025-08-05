@@ -11,11 +11,11 @@ public abstract class StringItemBase extends Item implements StringItem {
     private final String namespaceId;
 
     public StringItemBase(@NotNull String namespaceId, @Nullable String name) {
-        super(STRING_IDENTIFIED_ITEM, 0, 1, StringItem.notEmpty(name));
+        super(STRING_IDENTIFIED_ITEM, 0, 1, StringItem.checkNotEmpty(name));
         Preconditions.checkNotNull(namespaceId, "id can't be null");
         Preconditions.checkArgument(namespaceId.contains(":"), "The ID must be a namespaced ID, like minecraft:stone");
         this.namespaceId = namespaceId;
-        clearNamedTag();
+        this.clearNamedTag();
     }
 
     @Override

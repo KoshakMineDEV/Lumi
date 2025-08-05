@@ -1,5 +1,6 @@
 package cn.nukkit.inventory;
 
+import cn.nukkit.block.BlockID;
 import cn.nukkit.item.Item;
 
 import java.util.Map;
@@ -17,7 +18,12 @@ public abstract class Fuel {
         duration.put(Item.COAL, (short) 1600);
         duration.put(Item.COAL_BLOCK, (short) 16000);
         duration.put(Item.TRUNK, (short) 300);
-        duration.put(Item.WOODEN_PLANKS, (short) 300);
+        duration.put(Item.OAK_PLANKS, (short) 300);
+        duration.put(255 - BlockID.SPRUCE_PLANKS, (short) 300);
+        duration.put(255 - BlockID.BIRCH_PLANKS, (short) 300);
+        duration.put(255 - BlockID.JUNGLE_PLANKS, (short) 300);
+        duration.put(255 - BlockID.ACACIA_PLANKS, (short) 300);
+        duration.put(255 - BlockID.DARK_OAK_PLANKS, (short) 300);
         duration.put(Item.SAPLING, (short) 100);
         duration.put(Item.WOODEN_AXE, (short) 200);
         duration.put(Item.WOODEN_PICKAXE, (short) 200);

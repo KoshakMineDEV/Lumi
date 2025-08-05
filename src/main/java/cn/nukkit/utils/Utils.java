@@ -3,7 +3,6 @@ package cn.nukkit.utils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.block.custom.CustomBlockManager;
 import cn.nukkit.entity.mob.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
@@ -17,7 +16,6 @@ import com.google.gson.JsonParser;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nullable;
@@ -86,8 +84,8 @@ public class Utils {
     public static boolean hasItemOrBlock(int id) {
         if (id < 0) {
             int blockId = 255 - id;
-            if (blockId > CustomBlockManager.LOWEST_CUSTOM_BLOCK_ID) {
-                return CustomBlockManager.get().getBlock(blockId) != null;
+            if (blockId > Block.LOWEST_CUSTOM_BLOCK_ID) {
+                return Block.get(blockId) != null;
             }
             return blockId < Block.MAX_BLOCK_ID && Block.list[blockId] != null;
         } else {

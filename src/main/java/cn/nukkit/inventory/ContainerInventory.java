@@ -3,6 +3,8 @@ package cn.nukkit.inventory;
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.vibration.VanillaVibrationTypes;
+import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.ContainerClosePacket;
@@ -54,6 +56,10 @@ public abstract class ContainerInventory extends BaseInventory {
         who.dataPacket(pk);
 
         this.sendContents(who);
+
+        if (canCauseVibration() && holder instanceof Vector3 vector3) {
+            who.level.getVibrationManager().callVibrationEvent(new VibrationEvent(who, vector3.add(0.5, 0.5, 0.5), VanillaVibrationTypes.CONTAINER_OPEN));
+        }
     }
 
     @Override
@@ -66,7 +72,20 @@ public abstract class ContainerInventory extends BaseInventory {
             who.dataPacket(pk);
         }
 
+        if (canCauseVibration() && getHolder() instanceof Vector3 vector3) {
+            who.level.getVibrationManager().callVibrationEvent(new VibrationEvent(who, vector3.add(0.5, 0.5, 0.5), VanillaVibrationTypes.CONTAINER_CLOSE));
+        }
+
         super.onClose(who);
+    }
+
+    /**
+     * 若返回为true,则在inventory打开和关闭时会发生振动事件 (InventoryHolder为Vector3子类的前提下)
+     *
+     * @return boolean
+     */
+    public boolean canCauseVibration() {
+        return false;
     }
 
     public static int calculateRedstone(Inventory inv) {
