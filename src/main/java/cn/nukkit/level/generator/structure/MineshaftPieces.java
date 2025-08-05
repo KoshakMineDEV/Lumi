@@ -29,8 +29,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 
 public final class MineshaftPieces {
-    private static final BlockState OAK_PLANKS = new BlockState(Block.PLANKS, BlockPlanks.OAK);
-    private static final BlockState DARK_OAK_PLANKS = new BlockState(Block.PLANKS, BlockPlanks.DARK_OAK);
+    private static final BlockState OAK_PLANKS = new BlockState(Block.OAK_PLANKS);
+    private static final BlockState DARK_OAK_PLANKS = new BlockState(Block.DARK_OAK_PLANKS);
     private static final BlockState OAK_FENCE = new BlockState(Block.FENCE, BlockFence.FENCE_OAK);
     private static final BlockState DARK_OAK_FENCE = new BlockState(Block.FENCE, BlockFence.FENCE_DARK_OAK);
     private static final BlockState COBWEB = new BlockState(Block.COBWEB);
