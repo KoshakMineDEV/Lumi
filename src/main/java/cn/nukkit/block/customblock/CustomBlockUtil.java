@@ -91,8 +91,6 @@ public class CustomBlockUtil {
             }
         }
 
-        System.out.println(statesBuilder.toString());
-
         NbtMap state = NbtMap.builder()
                 .putString("name", identifier)
                 .putCompound("states", statesBuilder.build())
