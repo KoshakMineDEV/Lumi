@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.data.ByteEntityData;
 import cn.nukkit.entity.projectile.EntityGhastFireBall;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
@@ -76,6 +77,8 @@ public class EntityGhast extends EntityFlyingMob {
                 return;
             }
             if (this.attackDelay == 50) {
+                this.setDataProperty(new ByteEntityData(DATA_CHARGE_AMOUNT, 0x1));
+                this.setDataFlag(DATA_FLAGS, DATA_FLAG_CHARGED, true);
                 this.level.addLevelEvent(this, LevelEventPacket.EVENT_SOUND_GHAST);
             }
             if (this.attackDelay > 60) {
@@ -93,6 +96,9 @@ public class EntityGhast extends EntityFlyingMob {
                         return;
                     }
                 }
+
+                this.setDataProperty(new ByteEntityData(DATA_CHARGE_AMOUNT, 0x0));
+                this.setDataFlag(DATA_FLAGS, DATA_FLAG_CHARGED, false);
 
                 EntityGhastFireBall fireball = (EntityGhastFireBall) Entity.createEntity("GhastFireBall", pos, this);
                 fireball.setExplode(true);
