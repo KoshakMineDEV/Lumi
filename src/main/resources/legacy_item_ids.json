@@ -1,4 +1,9 @@
 {
+  "minecraft:spruce_planks": -739,
+  "minecraft:birch_planks": -740,
+  "minecraft:jungle_planks": -741,
+  "minecraft:acacia_planks": -742,
+  "minecraft:dark_oak_planks": -743,
   "minecraft:cactus_flower": -1030,
   "minecraft:tall_dry_grass": -1029,
   "minecraft:short_dry_grass": -1028,
@@ -604,6 +609,7 @@
   "minecraft:dirt": 3,
   "minecraft:cobblestone": 4,
   "minecraft:planks": 5,
+  "minecraft:oak_planks": 5,
   "minecraft:sapling": 6,
   "minecraft:bedrock": 7,
   "minecraft:flowing_water": 8,
