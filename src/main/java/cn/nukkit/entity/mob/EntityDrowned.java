@@ -42,12 +42,12 @@ public class EntityDrowned extends EntityWalkingMob implements EntitySmite {
 
     @Override
     public float getWidth() {
-        return 0.6f;
+        return this.isBaby() ? 0.3f : 0.6f;
     }
 
     @Override
     public float getHeight() {
-        return 1.95f;
+        return this.isBaby() ? 0.95f : 1.9f;
     }
 
     @Override
@@ -151,7 +151,7 @@ public class EntityDrowned extends EntityWalkingMob implements EntitySmite {
             drops.add(Item.get(Item.ROTTEN_FLESH, 0, Utils.rand(0, 2)));
 
             if (Utils.rand(1, 100) <= 11) {
-                drops.add(Item.get(Item.GOLD_INGOT, 0, 1));
+                drops.add(Item.fromString(Item.COPPER_INGOT));
             }
 
             if (tool != null && Utils.rand(1, 4) == 1) {
