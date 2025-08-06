@@ -44,6 +44,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
     private static final byte[] TAG_544;
     private static final byte[] TAG_786;
 
+    private LinkedHashMap<String, BiomeDefinitionData> biomeDefinitions800;
     private LinkedHashMap<String, BiomeDefinitionData> biomeDefinitions;
 
     static {
@@ -103,7 +104,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
         }
         try {
             BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_800.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
+            pk.biomeDefinitions800 = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_800.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
             }.getType());
             pk.protocol = ProtocolInfo.v1_21_80;
             pk.tryEncode();
@@ -156,15 +157,22 @@ public class BiomeDefinitionListPacket extends DataPacket {
     @Override
     public void encode() {
         this.reset();
+        LinkedHashMap<String, BiomeDefinitionData> biomeDefinitionsEncode = null;
+        if(protocol >= ProtocolInfo.v1_21_100) {
+            biomeDefinitionsEncode = biomeDefinitions;
+        }
+        if(protocol >= ProtocolInfo.v1_21_80) {
+            biomeDefinitionsEncode = biomeDefinitions800;
+        }
         if (this.protocol >= ProtocolInfo.v1_21_80) {
-            if (this.biomeDefinitions == null) {
+            if (biomeDefinitionsEncode == null) {
                 throw new RuntimeException("biomeDefinitions == null, use getCachedPacket!");
             }
 
             SequencedHashSet<String> strings = new SequencedHashSet<>();
 
-            this.putUnsignedVarInt(this.biomeDefinitions.size());
-            for (Map.Entry<String, BiomeDefinitionData> entry : this.biomeDefinitions.entrySet()) {
+            this.putUnsignedVarInt(biomeDefinitionsEncode.size());
+            for (Map.Entry<String, BiomeDefinitionData> entry : biomeDefinitionsEncode.entrySet()) {
                 String name = entry.getKey();
                 BiomeDefinitionData definition = entry.getValue();
                 this.putLShort(strings.addAndGetIndex(name));
