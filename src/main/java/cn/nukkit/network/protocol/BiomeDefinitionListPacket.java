@@ -115,13 +115,13 @@ public class BiomeDefinitionListPacket extends DataPacket {
 
         try {
             BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_800.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
+            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_827.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
             }.getType());
             pk.protocol = ProtocolInfo.v1_21_100;
             pk.tryEncode();
             CACHED_PACKET = pk.compress(Deflater.BEST_COMPRESSION);
         } catch (Exception e) {
-            throw new AssertionError("Error whilst loading biome definitions 800(827)", e);
+            throw new AssertionError("Error whilst loading biome definitions 827", e);
         }
     }
 
@@ -158,11 +158,11 @@ public class BiomeDefinitionListPacket extends DataPacket {
     public void encode() {
         this.reset();
         LinkedHashMap<String, BiomeDefinitionData> biomeDefinitionsEncode = null;
-        if(protocol >= ProtocolInfo.v1_21_100) {
-            biomeDefinitionsEncode = biomeDefinitions;
-        }
         if(protocol >= ProtocolInfo.v1_21_80) {
             biomeDefinitionsEncode = biomeDefinitions800;
+        }
+        if(protocol >= ProtocolInfo.v1_21_100) {
+            biomeDefinitionsEncode = biomeDefinitions;
         }
         if (this.protocol >= ProtocolInfo.v1_21_80) {
             if (biomeDefinitionsEncode == null) {
