@@ -62,7 +62,7 @@ public class NetworkInventoryAction {
 
     public int sourceType;
     public int windowId;
-    public long unknown;
+    public long flags;
     public int inventorySlot;
     public Item oldItem;
     public Item newItem;
@@ -76,7 +76,7 @@ public class NetworkInventoryAction {
                 this.windowId = packet.getVarInt();
                 break;
             case SOURCE_WORLD:
-                this.unknown = packet.getUnsignedVarInt();
+                this.flags = packet.getUnsignedVarInt();
                 break;
             case SOURCE_CREATIVE:
                 break;
@@ -128,7 +128,7 @@ public class NetworkInventoryAction {
                 packet.putVarInt(this.windowId);
                 break;
             case SOURCE_WORLD:
-                packet.putUnsignedVarInt(this.unknown);
+                packet.putUnsignedVarInt(this.flags);
                 break;
             case SOURCE_CREATIVE:
                 break;

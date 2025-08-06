@@ -163,6 +163,10 @@ public class StartGamePacket extends DataPacket {
      * @since v685
      */
     public String scenarioId = "";
+    /**
+     * @since v827
+     */
+    public boolean tickDeathSystemsEnabled;
 
     @Override
     public void decode() {
@@ -375,6 +379,9 @@ public class StartGamePacket extends DataPacket {
                                 this.putBoolean(this.blockNetworkIdsHashed);
                                 if (protocol >= ProtocolInfo.v1_20_0_23) {
                                     this.putBoolean(this.networkPermissions.isServerAuthSounds());
+                                    if(protocol >= ProtocolInfo.v1_21_100) {
+                                        this.putBoolean(this.tickDeathSystemsEnabled);
+                                    }
                                 }
                             }
                         }

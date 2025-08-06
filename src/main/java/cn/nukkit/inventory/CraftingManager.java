@@ -63,6 +63,7 @@ public class CraftingManager {
     private static BatchPacket packet776;
     private static BatchPacket packet800;
     private static BatchPacket packet818;
+    private static BatchPacket packet827;
 
     private final Map<Integer, Map<UUID, ShapedRecipe>> shapedRecipes388 = new Int2ObjectOpenHashMap<>();
     private final Map<Integer, Map<UUID, ShapedRecipe>> shapedRecipes419 = new Int2ObjectOpenHashMap<>();
@@ -639,6 +640,7 @@ public class CraftingManager {
 
     public void rebuildPacket() {
         //TODO Multiversion 添加新版本支持时修改这里
+        packet827 = null;
         packet818 = null;
         packet800 = null;
         packet776 = null;
@@ -688,7 +690,12 @@ public class CraftingManager {
      */
     public BatchPacket getCachedPacket(int protocol) {
         //TODO Multiversion 添加新版本支持时修改这里
-        if (protocol >= ProtocolInfo.v1_21_93) {
+        if(protocol >= ProtocolInfo.v1_21_100) {
+            if (packet827 == null) {
+                packet827 = packetFor(ProtocolInfo.v1_21_100);
+            }
+            return packet827;
+        } else if (protocol >= ProtocolInfo.v1_21_93) {
             if (packet818 == null) {
                 packet818 = packetFor(ProtocolInfo.v1_21_90);
             }

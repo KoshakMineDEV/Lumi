@@ -1689,6 +1689,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
                     Item.addCreativeItem(ProtocolInfo.v1_21_80, block.toItem());
                     Item.addCreativeItem(ProtocolInfo.v1_21_90, block.toItem());
                     Item.addCreativeItem(ProtocolInfo.v1_21_93, block.toItem());
+                    Item.addCreativeItem(ProtocolInfo.v1_21_100, block.toItem());
                 }
             });
         }

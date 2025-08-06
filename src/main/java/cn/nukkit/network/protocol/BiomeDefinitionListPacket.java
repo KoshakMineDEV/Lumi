@@ -154,7 +154,11 @@ public class BiomeDefinitionListPacket extends DataPacket {
                 String name = entry.getKey();
                 BiomeDefinitionData definition = entry.getValue();
                 this.putLShort(strings.addAndGetIndex(name));
-                this.putBoolean(false); // Optional ID
+                if(protocol >= ProtocolInfo.v1_21_100) {
+                    this.putLShort(-1);
+                } else {
+                    this.putBoolean(false); // Optional ID
+                }
                 this.putLFloat(definition.getTemperature());
                 this.putLFloat(definition.getDownfall());
                 this.putLFloat(definition.getRedSporeDensity());
