@@ -34,6 +34,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
     private static final BatchPacket CACHED_PACKET_527;
     private static final BatchPacket CACHED_PACKET_544;
     private static final BatchPacket CACHED_PACKET_786;
+    private static final BatchPacket CACHED_PACKET_800;
     private static final BatchPacket CACHED_PACKET;
 
     private static final byte[] TAG_361;
@@ -106,15 +107,28 @@ public class BiomeDefinitionListPacket extends DataPacket {
             }.getType());
             pk.protocol = ProtocolInfo.v1_21_80;
             pk.tryEncode();
-            CACHED_PACKET = pk.compress(Deflater.BEST_COMPRESSION);
+            CACHED_PACKET_800 = pk.compress(Deflater.BEST_COMPRESSION);
         } catch (Exception e) {
             throw new AssertionError("Error whilst loading biome definitions 800", e);
+        }
+
+        try {
+            BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
+            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_800.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
+            }.getType());
+            pk.protocol = ProtocolInfo.v1_21_100;
+            pk.tryEncode();
+            CACHED_PACKET = pk.compress(Deflater.BEST_COMPRESSION);
+        } catch (Exception e) {
+            throw new AssertionError("Error whilst loading biome definitions 800(827)", e);
         }
     }
 
     public static BatchPacket getCachedPacket(int protocol) {
-        if (protocol >= ProtocolInfo.v1_21_80) {
+        if (protocol >= ProtocolInfo.v1_21_100) {
             return CACHED_PACKET;
+        } else if (protocol >= ProtocolInfo.v1_21_80) {
+            return CACHED_PACKET_800;
         } else if (protocol >= ProtocolInfo.v1_21_70_24) {
             return CACHED_PACKET_786;
         } else if (protocol >= ProtocolInfo.v1_19_30_23) {
