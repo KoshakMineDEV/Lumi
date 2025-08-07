@@ -232,6 +232,22 @@ public class NetworkInventoryAction {
                             this.windowId = Player.SMITHING_WINDOW_ID;
                             this.inventorySlot = 2;
                             break;
+                        case GrindstoneInventory.GRINDSTONE_EQUIPMENT_UI_SLOT:
+                            if (!(player.getWindowById(Player.GRINDSTONE_WINDOW_ID) instanceof GrindstoneInventory)) {
+                                player.getServer().getLogger().debug(player.getName() + " does not have grindstone window open");
+                                return null;
+                            }
+                            this.windowId = Player.GRINDSTONE_WINDOW_ID;
+                            this.inventorySlot = 0;
+                            break;
+                        case GrindstoneInventory.GRINDSTONE_INGREDIENT_UI_SLOT:
+                            if (!(player.getWindowById(Player.GRINDSTONE_WINDOW_ID) instanceof GrindstoneInventory)) {
+                                player.getServer().getLogger().debug(player.getName() + " does not have grindstone window open");
+                                return null;
+                            }
+                            this.windowId = Player.GRINDSTONE_WINDOW_ID;
+                            this.inventorySlot = 1;
+                            break;
                         //124:4 -> 500:0
                         case TradeInventory.TRADE_INPUT1_UI_SLOT:
                             if (player.getWindowById(Player.TRADE_WINDOW_ID) == null) {
@@ -336,6 +352,13 @@ public class NetworkInventoryAction {
                             case SOURCE_TYPE_ANVIL_OUTPUT:
                             case SOURCE_TYPE_ANVIL_RESULT:
                                 return new SmithingItemAction(this.oldItem, this.newItem, this.inventorySlot);
+                        }
+                    } else if (player.getWindowById(Player.GRINDSTONE_WINDOW_ID) instanceof GrindstoneInventory) {
+                        switch (this.windowId) {
+                            case SOURCE_TYPE_ANVIL_INPUT:
+                            case SOURCE_TYPE_ANVIL_MATERIAL:
+                            case SOURCE_TYPE_ANVIL_RESULT:
+                                return new GrindstoneItemAction(this.oldItem, this.newItem, this.windowId);
                         }
                     } else {
                         player.getServer().getLogger().debug("Player " + player.getName() + " has no open anvil or smithing inventory");

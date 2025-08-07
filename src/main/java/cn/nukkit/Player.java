@@ -101,11 +101,13 @@ import org.apache.commons.math3.util.FastMath;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.*;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -155,9 +157,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public static final int ANVIL_WINDOW_ID = 2;
     public static final int ENCHANT_WINDOW_ID = 3;
     public static final int BEACON_WINDOW_ID = 4;
-    public static final int LOOM_WINDOW_ID = 2;
-    public static final int GRINDSTONE_WINDOW_ID = 5;
+    public static final int LOOM_WINDOW_ID = 5;
     public static final int SMITHING_WINDOW_ID = 6;
+    public static final int GRINDSTONE_WINDOW_ID = 7;
     /**
      * @since 649 1.20.60
      * 自1.20.60开始，需要发送ContainerOpenPacket给玩家才能正常打开讲台上的书
@@ -166,7 +168,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public static final int LECTERN_WINDOW_ID = 7;
 
     // 后续创建的窗口应该从此数值开始
-    public static final int MINIMUM_OTHER_WINDOW_ID = Utils.dynamic(8);
+    public static final int MINIMUM_OTHER_WINDOW_ID = Utils.dynamic(10);
 
     public static final int RESOURCE_PACK_CHUNK_SIZE = 8 * 1024; // 8KB
 
@@ -211,6 +213,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     protected LoomTransaction loomTransaction;
     protected SmithingTransaction smithingTransaction;
     protected TradingTransaction tradingTransaction;
+    protected GrindstoneTransaction grindstoneTransaction;
 
     protected long randomClientId;
 
@@ -4211,7 +4214,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 }
 
                 if (transactionPacket.isCraftingPart) {
-                    if (LoomTransaction.checkForItemPart(actions)) {
+                    if (LoomTransaction.isIn(actions)) {
                         if (this.loomTransaction == null) {
                             this.loomTransaction = new LoomTransaction(this, actions);
                         } else {
@@ -4260,7 +4263,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     return;
                 } else if (this.protocol >= ProtocolInfo.v1_16_0 && transactionPacket.isRepairItemPart) {
                     Sound sound = null;
-                    if (SmithingTransaction.checkForItemPart(actions)) {
+                    if (SmithingTransaction.isIn(actions)) {
                         if (this.smithingTransaction == null) {
                             this.smithingTransaction = new SmithingTransaction(this, actions);
                         } else {
@@ -4276,6 +4279,24 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                             } finally {
                                 this.smithingTransaction = null;
                             }
+                        }
+                    } else if (GrindstoneTransaction.isIn(actions)) {
+                        if (this.grindstoneTransaction == null) {
+                            this.grindstoneTransaction = new GrindstoneTransaction(this, actions);
+                        } else {
+                            for (InventoryAction action : actions) {
+                                this.grindstoneTransaction.addAction(action);
+                            }
+                        }
+                        if (this.grindstoneTransaction.canExecute()) {
+                            if (this.grindstoneTransaction.execute()) {
+                                Collection<Player> players = level.getChunkPlayers(getChunkX(), getChunkZ()).values();
+                                players.remove(this);
+                                if (!players.isEmpty()) {
+                                    level.addLevelSoundEvent(this, LevelSoundEventPacket.SOUND_BLOCK_GRINDSTONE_USE);
+                                }
+                            }
+                            this.grindstoneTransaction = null;
                         }
                     } else {
                         if (this.repairItemTransaction == null) {
@@ -4370,7 +4391,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                         this.repairItemTransaction = null;
                     }
                 } else if (this.protocol >= ProtocolInfo.v1_16_0 && this.smithingTransaction != null) {
-                    if (SmithingTransaction.checkForItemPart(actions)) {
+                    if (SmithingTransaction.isIn(actions)) {
                         for (InventoryAction action : actions) {
                             this.smithingTransaction.addAction(action);
                         }
@@ -4380,6 +4401,18 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                         this.removeAllWindows(false);
                         this.needSendInventory = true;
                         this.smithingTransaction = null;
+                    }
+                } else if (this.grindstoneTransaction != null) {
+                    if (GrindstoneTransaction.isIn(actions)) {
+                        for (InventoryAction action : actions) {
+                            this.grindstoneTransaction.addAction(action);
+                        }
+                        return;
+                    } else {
+                        this.server.getLogger().debug("Got unexpected normal inventory action with incomplete repair item transaction from " + this.username + ", refusing to execute repair item " + transactionPacket.toString());
+                        this.removeAllWindows(false);
+                        this.needSendInventory = true;
+                        this.repairItemTransaction = null;
                     }
                 }
 
@@ -7266,6 +7299,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             }
             if (protocol >= ProtocolInfo.v1_21_80) {
                 experiments.add(new ExperimentData("experimental_graphics", true));
+            }
+            if(protocol >= ProtocolInfo.v1_21_100) {
+                //experiments.add()
             }
         }
         return experiments;
