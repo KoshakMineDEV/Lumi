@@ -482,6 +482,17 @@ public class Item implements Cloneable, BlockID, ItemID, ItemNamespaceId, Protoc
             registerNamespacedIdItem(ItemRecordTears.class);
             registerNamespacedIdItem(ItemRecordLavaChicken.class);
 
+            registerNamespacedIdItem(ItemSwordCopper.class);
+            registerNamespacedIdItem(ItemAxeCopper.class);
+            registerNamespacedIdItem(ItemPickaxeCopper.class);
+            registerNamespacedIdItem(ItemHoeCopper.class);
+            registerNamespacedIdItem(ItemShovelCopper.class);
+            registerNamespacedIdItem(ItemHelmetCopper.class);
+            registerNamespacedIdItem(ItemChestplateCopper.class);
+            registerNamespacedIdItem(ItemLeggingsCopper.class);
+            registerNamespacedIdItem(ItemBootsCopper.class);
+            registerNamespacedIdItem(ItemNuggetCopper.class);
+
             // 添加原版物品到NAMESPACED_ID_ITEM
             // Add vanilla items to NAMESPACED_ID_ITEM
             RuntimeItemMapping mapping = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
