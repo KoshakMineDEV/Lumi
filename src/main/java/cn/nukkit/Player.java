@@ -7301,7 +7301,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 experiments.add(new ExperimentData("experimental_graphics", true));
             }
             if(protocol >= ProtocolInfo.v1_21_100) {
-                //experiments.add()
+                experiments.add(new ExperimentData("y_2025_drop_3", true));
             }
         }
         return experiments;

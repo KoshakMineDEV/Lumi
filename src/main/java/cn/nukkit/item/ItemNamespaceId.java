@@ -63,4 +63,15 @@ public interface ItemNamespaceId {
 
     String MUSIC_DISC_LAVA_CHICKEN = "minecraft:music_disc_lava_chicken";
 
+    String COPPER_SWORD = "minecraft:copper_sword";
+    String COPPER_AXE = "minecraft:copper_axe";
+    String COPPER_PICKAXE = "minecraft:copper_pickaxe";
+    String COPPER_HOE = "minecraft:copper_hoe";
+    String COPPER_SHOVEL = "minecraft:copper_shovel";
+    String COPPER_HELMET = "minecraft:copper_helmet";
+    String COPPER_CHESTPLATE = "minecraft:copper_chestplate";
+    String COPPER_LEGGINGS = "minecraft:copper_leggings";
+    String COPPER_BOOTS = "minecraft:copper_boots";
+    String COPPER_NUGGET = "minecraft:copper_nugget";
+
 }
