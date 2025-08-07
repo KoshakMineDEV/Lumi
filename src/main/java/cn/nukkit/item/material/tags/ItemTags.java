@@ -48,6 +48,8 @@ public final class ItemTags {
 
     public static final ItemTag HANGING_SIGN = register("minecraft:hanging_sign", new LazyItemTag("minecraft:hanging_sign"));
 
+    public static final ItemTag HARNESS = register("minecraft:harness", new LazyItemTag("minecraft:harness"));
+
     public static final ItemTag HORSE_ARMOR = register("minecraft:horse_armor", new LazyItemTag("minecraft:horse_armor"));
 
     public static final ItemTag IRON_TIER = register("minecraft:iron_tier", new LazyItemTag("minecraft:iron_tier"));
