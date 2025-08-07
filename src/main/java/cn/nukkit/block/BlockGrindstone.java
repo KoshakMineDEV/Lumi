@@ -140,6 +140,12 @@ public class BlockGrindstone extends BlockTransparentMeta implements Faceable {
         return true;
     }
 
+    public void releaseExperience(int experience) {
+        if (experience >= 1) {
+            this.level.dropExpOrb(this, experience);
+        }
+    }
+
     @Override
     public boolean onActivate(Item item, Player player) {
         if (player != null) {
