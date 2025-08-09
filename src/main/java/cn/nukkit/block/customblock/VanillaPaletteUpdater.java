@@ -1,6 +1,7 @@
 package cn.nukkit.block.customblock;
 
 import cn.nukkit.Server;
+import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -47,6 +48,9 @@ public class VanillaPaletteUpdater {
         int maxProtocol = Server.getInstance().getSettings().general().multiversion().maxProtocol();
         for (int protocol : VanillaPaletteUpdater.getProtocolList()) {
             if (minProtocol != 0 && protocol < minProtocol || maxProtocol != -1 && protocol > maxProtocol) {
+                continue;
+            }
+            if (!ProtocolInfo.SUPPORTED_PROTOCOLS.contains(protocol)) {
                 continue;
             }
             Path path = CustomBlockUtil.getVanillaPalettePath(protocol);
