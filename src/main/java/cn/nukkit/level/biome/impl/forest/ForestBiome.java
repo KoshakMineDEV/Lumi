@@ -48,8 +48,8 @@ public class ForestBiome extends GrassyBiome {
             PopulatorFlower flower = new PopulatorFlower();
             flower.setRandomAmount(3);
             flower.addType(DANDELION, 0);
-            flower.addType(RED_FLOWER, BlockFlower.TYPE_POPPY);
-            flower.addType(RED_FLOWER, BlockFlower.TYPE_LILY_OF_THE_VALLEY);
+            flower.addType(POPPY, 0);
+            flower.addType(LILY_OF_THE_VALLEY, 0);
             flower.addType(DOUBLE_PLANT, BlockDoublePlant.LILAC);
             flower.addType(DOUBLE_PLANT, BlockDoublePlant.ROSE_BUSH);
             flower.addType(DOUBLE_PLANT, BlockDoublePlant.PEONY);

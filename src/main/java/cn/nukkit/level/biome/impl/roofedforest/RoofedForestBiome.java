@@ -20,7 +20,7 @@ public class RoofedForestBiome extends GrassyBiome {
         PopulatorFlower flower = new PopulatorFlower();
         flower.setBaseAmount(3);
         flower.addType(Block.DANDELION, 0);
-        flower.addType(Block.RED_FLOWER, BlockFlower.TYPE_POPPY);
+        flower.addType(Block.POPPY, 0);
 
         MushroomPopulator mushroom = new MushroomPopulator();
         mushroom.setBaseAmount(1);

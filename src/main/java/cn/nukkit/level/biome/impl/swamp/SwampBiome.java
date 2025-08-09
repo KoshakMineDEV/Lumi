@@ -31,7 +31,7 @@ public class SwampBiome extends GrassyBiome {
 
         PopulatorFlower flower = new PopulatorFlower();
         flower.setBaseAmount(2);
-        flower.addType(Block.RED_FLOWER, BlockFlower.TYPE_BLUE_ORCHID);
+        flower.addType(BLUE_ORCHID, 0);
         this.addPopulator(flower);
 
         MushroomPopulator mushroom = new MushroomPopulator(1);

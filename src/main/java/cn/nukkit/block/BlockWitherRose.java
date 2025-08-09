@@ -23,6 +23,7 @@ public class BlockWitherRose extends BlockFlower {
     public int getId() {
         return WITHER_ROSE;
     }
+
     @Override
     public boolean canBeActivated() {
         return false;
@@ -43,6 +44,11 @@ public class BlockWitherRose extends BlockFlower {
     @Override
     public boolean hasEntityCollision() {
         return true;
+    }
+
+    @Override
+    public String getName() {
+        return "Wither Rose";
     }
 
     @Override

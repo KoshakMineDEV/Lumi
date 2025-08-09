@@ -21,7 +21,7 @@ public class SavannaBiome extends GrassyBiome {
         PopulatorFlower flower = new PopulatorFlower();
         flower.setRandomAmount(3);
         flower.addType(DANDELION, 0);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_POPPY);
+        flower.addType(POPPY, 0);
         this.addPopulator(flower);
 
         this.setBaseHeight(0.125f);

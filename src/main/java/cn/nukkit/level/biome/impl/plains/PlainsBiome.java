@@ -26,14 +26,14 @@ public class PlainsBiome extends GrassyBiome {
         PopulatorFlower flower = new PopulatorFlower();
         flower.setRandomAmount(3);
         flower.addType(DANDELION, 0);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_POPPY);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_AZURE_BLUET);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_RED_TULIP);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_ORANGE_TULIP);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_WHITE_TULIP);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_PINK_TULIP);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_OXEYE_DAISY);
-        flower.addType(RED_FLOWER, BlockFlower.TYPE_CORNFLOWER);
+        flower.addType(POPPY, 0);
+        flower.addType(AZURE_BLUET, 0);
+        flower.addType(RED_TULIP, 0);
+        flower.addType(ORANGE_TULIP, 0);
+        flower.addType(WHITE_TULIP, 0);
+        flower.addType(PINK_TULIP, 0);
+        flower.addType(OXEYE_DAISY, 0);
+        flower.addType(CORNFLOWER, 0);
         flower.addType(DOUBLE_PLANT, BlockDoublePlant.LILAC);
         this.addPopulator(flower);
 

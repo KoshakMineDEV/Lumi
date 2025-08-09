@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.material.tags.BlockInternalTags;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityFlowerPot;
 import cn.nukkit.item.Item;
@@ -26,23 +27,8 @@ public class BlockFlowerPot extends BlockFlowable implements BlockEntityHolder<B
         super(meta);
     }
 
-    protected static boolean canPlaceIntoFlowerPot(int id, int dmg) {
-        switch (id) {
-            case SAPLING:
-            case DEAD_BUSH:
-            case DANDELION:
-            case ROSE:
-            case RED_MUSHROOM:
-            case BROWN_MUSHROOM:
-            case CACTUS:
-                return true;
-            case TALL_GRASS:
-                if (dmg == 2 || dmg == 3) {
-                    return true;
-                }
-            default:
-                return false;
-        }
+    protected static boolean canPlaceIntoFlowerPot(Block block) {
+        return block.hasBlockTag(BlockInternalTags.POTTABLE);
     }
 
     @Override
@@ -124,7 +110,7 @@ public class BlockFlowerPot extends BlockFlowable implements BlockEntityHolder<B
         if (!(blockEntity instanceof BlockEntityFlowerPot)) return false;
 
         if (blockEntity.namedTag.getShort("item") != AIR || blockEntity.namedTag.getInt("mData") != AIR) {
-            if (!canPlaceIntoFlowerPot(item.getId(), item.getDamage())) {
+            if (!canPlaceIntoFlowerPot(item.getBlock())) {
                 int id = blockEntity.namedTag.getShort("item");
                 if (id == AIR) id = blockEntity.namedTag.getInt("mData");
                 for (Item drop : player.getInventory().addItem(Item.get(id, blockEntity.namedTag.getInt("data")))) {
@@ -140,17 +126,7 @@ public class BlockFlowerPot extends BlockFlowable implements BlockEntityHolder<B
             }
             return false;
         }
-        int itemID;
-        if (!canPlaceIntoFlowerPot(item.getId(), item.getDamage())) {
-            Block b = item.getBlockUnsafe();
-            if (b == null || !canPlaceIntoFlowerPot(b.getId(), b.getDamage())) {
-                return true;
-            }
-            itemID = b.getId();
-        } else {
-            itemID = item.getId();
-        }
-        blockEntity.namedTag.putShort("item", itemID);
+        blockEntity.namedTag.putShort("item", item.getId());
         blockEntity.namedTag.putInt("data", item.getDamage());
 
         this.setDamage(1);

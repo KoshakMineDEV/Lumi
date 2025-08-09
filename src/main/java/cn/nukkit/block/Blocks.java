@@ -48,7 +48,7 @@ public class Blocks {
         list[PISTON_HEAD] = BlockPistonHead.class; //34
         list[WOOL] = BlockWool.class; //35
         list[DANDELION] = BlockDandelion.class; //37
-        list[FLOWER] = BlockFlower.class; //38
+        list[POPPY] = BlockPoppy.class; //38
         list[BROWN_MUSHROOM] = BlockMushroomBrown.class; //39
         list[RED_MUSHROOM] = BlockMushroomRed.class; //40
         list[GOLD_BLOCK] = BlockGold.class; //41
@@ -767,6 +767,17 @@ public class Blocks {
         list[WAXED_EXPOSED_COPPER_TRAPDOOR] = BlockWaxedExposedCopperTrapdoor.class; //1052
         list[WAXED_WEATHERED_COPPER_TRAPDOOR] = BlockWaxedWeatheredCopperTrapdoor.class; //1053
         list[WAXED_OXIDIZED_COPPER_TRAPDOOR] = BlockWaxedOxidizedCopperTrapdoor.class; //1054
+
+        list[BLUE_ORCHID] = BlockBlueOrchid.class; //1085
+        list[ALLIUM] = BlockAllium.class; //1086
+        list[AZURE_BLUET] = BlockAzureBluet.class; //1087
+        list[RED_TULIP] = BlockRedTulip.class; //1088
+        list[ORANGE_TULIP] = BlockOrangeTulip.class; //1089
+        list[WHITE_TULIP] = BlockWhiteTulip.class; //1090
+        list[PINK_TULIP] = BlockPinkTulip.class; //1091
+        list[OXEYE_DAISY] = BlockOxeyeDaisy.class; //1092
+        list[CORNFLOWER] = BlockCornflower.class; //1093
+        list[LILY_OF_THE_VALLEY] = BlockLilyOfTheValley.class; //1094
 
         list[WITHER_SKELETON_SKULL] = BlockSkullWitherSkeleton.class; //1220
         list[ZOMBIE_HEAD] = BlockHeadZombie.class; //1221

@@ -53,9 +53,8 @@ public interface BlockID {
     int WOOL = 35;
     int DANDELION = 37;
     int POPPY = 38;
-    int ROSE = 38;
-    int FLOWER = 38;
-    int RED_FLOWER = 38;
+    @Deprecated
+    int RED_FLOWER = POPPY;
     int BROWN_MUSHROOM = 39;
     int RED_MUSHROOM = 40;
     int GOLD_BLOCK = 41;
@@ -828,6 +827,17 @@ public interface BlockID {
     int WAXED_EXPOSED_COPPER_TRAPDOOR = 1052;
     int WAXED_WEATHERED_COPPER_TRAPDOOR = 1053;
     int WAXED_OXIDIZED_COPPER_TRAPDOOR = 1054;
+
+    int BLUE_ORCHID = 1085;
+    int ALLIUM = 1086;
+    int AZURE_BLUET = 1087;
+    int RED_TULIP = 1088;
+    int ORANGE_TULIP = 1089;
+    int WHITE_TULIP = 1090;
+    int PINK_TULIP = 1091;
+    int OXEYE_DAISY = 1092;
+    int CORNFLOWER = 1093;
+    int LILY_OF_THE_VALLEY = 1094;
 
     int WITHER_SKELETON_SKULL = 1220;
     int ZOMBIE_HEAD = 1221;

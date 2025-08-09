@@ -9,10 +9,6 @@
     "5": "minecraft:dragon_head",
     "6": "minecraft:piglin_head"
   },
-  "minecraft:tnt": {
-    "protocol": 729,
-    "0": "minecraft:tnt"
-  },
   "minecraft:sponge": {
     "protocol": 729,
     "0": "minecraft:sponge",
@@ -29,10 +25,6 @@
     "protocol": 712,
     "0": "minecraft:dirt",
     "1": "minecraft:coarse_dirt"
-  },
-  "minecraft:yellow_flower": {
-    "protocol": 712,
-    "0": "minecraft:dandelion"
   },
   "minecraft:sand": {
     "protocol": 712,
@@ -180,20 +172,6 @@
     "3": "minecraft:jungle_sapling",
     "4": "minecraft:acacia_sapling",
     "5": "minecraft:dark_oak_sapling"
-  },
-  "minecraft:red_flower": {
-    "protocol": 671,
-    "0": "minecraft:poppy",
-    "1": "minecraft:blue_orchid",
-    "2": "minecraft:allium",
-    "3": "minecraft:azure_bluet",
-    "4": "minecraft:red_tulip",
-    "5": "minecraft:orange_tulip",
-    "6": "minecraft:white_tulip",
-    "7": "minecraft:pink_tulip",
-    "8": "minecraft:oxeye_daisy",
-    "9": "minecraft:cornflower",
-    "10": "minecraft:lily_of_the_valley"
   },
   "minecraft:wood": {
     "protocol": 662,
