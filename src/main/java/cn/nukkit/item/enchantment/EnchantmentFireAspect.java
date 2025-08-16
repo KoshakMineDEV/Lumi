@@ -1,7 +1,6 @@
 package cn.nukkit.item.enchantment;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityCombustByEntityEvent;
 
@@ -11,8 +10,8 @@ import cn.nukkit.event.entity.EntityCombustByEntityEvent;
  */
 public class EnchantmentFireAspect extends Enchantment {
 
-    protected EnchantmentFireAspect() {
-        super(ID_FIRE_ASPECT, "fire", Rarity.RARE, EnchantmentType.SWORD);
+    public EnchantmentFireAspect() {
+        super(ID_FIRE_ASPECT, NAME_FIRE_ASPECT, "fire", EnchantmentRarity.RARE, EnchantmentType.SWORD);
     }
 
     @Override
@@ -32,14 +31,13 @@ public class EnchantmentFireAspect extends Enchantment {
 
     @Override
     public void doAttack(Entity attacker, Entity entity) {
-        if ((!entity.isPlayer || !((Player) entity).isCreative())) {
+        if (!entity.isPlayer || !((Player) entity).isCreative()) {
             int duration = Math.max(entity.fireTicks / 20, getLevel() << 2);
 
-            EntityCombustByEntityEvent ev = new EntityCombustByEntityEvent(attacker, entity, duration);
-            Server.getInstance().getPluginManager().callEvent(ev);
+            EntityCombustByEntityEvent event = new EntityCombustByEntityEvent(attacker, entity, duration);
 
-            if (!ev.isCancelled()) {
-                entity.setOnFire(ev.getDuration());
+            if (event.call()) {
+                entity.setOnFire(event.getDuration());
             }
         }
     }

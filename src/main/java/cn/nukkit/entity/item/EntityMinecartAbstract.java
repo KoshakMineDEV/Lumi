@@ -5,7 +5,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockRail;
 import cn.nukkit.block.BlockRailActivator;
 import cn.nukkit.block.BlockRailPowered;
-import cn.nukkit.blockentity.BlockEntityHopper;
+import cn.nukkit.blockentity.impl.BlockEntityHopper;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityControllable;
 import cn.nukkit.entity.EntityLiving;

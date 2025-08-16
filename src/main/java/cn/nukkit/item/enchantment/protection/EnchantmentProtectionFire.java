@@ -2,6 +2,7 @@ package cn.nukkit.item.enchantment.protection;
 
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 
 /**
  * @author MagicDroidX
@@ -10,7 +11,7 @@ import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 public class EnchantmentProtectionFire extends EnchantmentProtection {
 
     public EnchantmentProtectionFire() {
-        super(ID_PROTECTION_FIRE, "fire", Rarity.UNCOMMON, TYPE.FIRE);
+        super(ID_PROTECTION_FIRE, NAME_PROTECTION_FIRE, "fire", EnchantmentRarity.UNCOMMON, Type.FIRE);
     }
 
     @Override
@@ -31,11 +32,9 @@ public class EnchantmentProtectionFire extends EnchantmentProtection {
     @Override
     public float getProtectionFactor(EntityDamageEvent e) {
         DamageCause cause = e.getCause();
-
         if (level <= 0 || (cause != DamageCause.LAVA && cause != DamageCause.FIRE && cause != DamageCause.FIRE_TICK)) {
             return 0;
         }
-
         return (float) (getLevel() * getTypeModifier());
     }
 }

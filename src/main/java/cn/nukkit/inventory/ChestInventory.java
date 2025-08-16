@@ -4,7 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockTrappedChest;
-import cn.nukkit.blockentity.BlockEntityChest;
+import cn.nukkit.blockentity.impl.BlockEntityChest;
 import cn.nukkit.event.redstone.RedstoneUpdateEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.network.protocol.BlockEventPacket;

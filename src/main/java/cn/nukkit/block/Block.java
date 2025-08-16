@@ -36,6 +36,7 @@ import cn.nukkit.metadata.Metadatable;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.plugin.Plugin;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.BlockColor;
 import cn.nukkit.utils.OK;
 import cn.nukkit.utils.Utils;
@@ -613,14 +614,12 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         } else if (this.isAir()) {
             this.type = BlockTypes.AIR;
         } else {
-            var mapping = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
-            var entry = mapping.toRuntime(this.getItemId(), this.getDamage());
-            this.type = BlockTypes.getFromRuntime(entry.getRuntimeId());
+            this.type = BlockTypes.get(Registries.BLOCK_TO_ITEM.get(this.getId(), this.getDamage()));
         }
 
         // Throw an exception if for some reason the type cannot be determined.
         if (this.type == null) {
-            throw new IllegalStateException("Failed to initialize block type");
+            throw new IllegalStateException("Failed to initialize block type " + this.getName() + ": " + this.getId() + ":" + this.getDamage());
         }
 
         return this.type;

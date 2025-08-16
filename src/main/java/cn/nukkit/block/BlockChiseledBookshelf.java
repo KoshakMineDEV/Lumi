@@ -2,7 +2,7 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityChiseledBookshelf;
+import cn.nukkit.blockentity.impl.BlockEntityChiseledBookshelf;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.item.*;
 import cn.nukkit.math.BlockFace;

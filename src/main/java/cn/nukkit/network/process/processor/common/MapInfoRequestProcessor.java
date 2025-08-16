@@ -3,7 +3,7 @@ package cn.nukkit.network.process.processor.common;
 import cn.nukkit.Player;
 import cn.nukkit.PlayerHandle;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityItemFrame;
+import cn.nukkit.blockentity.impl.BlockEntityItemFrame;
 import cn.nukkit.event.player.PlayerMapInfoRequestEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemMap;

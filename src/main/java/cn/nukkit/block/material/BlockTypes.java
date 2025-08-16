@@ -1549,59 +1549,59 @@ public final class BlockTypes {
 
     public static final BlockType IRON_TRAPDOOR = register("minecraft:iron_trapdoor", 167);
 
-    public static final BlockType ACACIA_DOOR = register("minecraft:item.acacia_door", 196);
+    public static final BlockType ACACIA_DOOR = register("minecraft:acacia_door", 196);
 
-    public static final BlockType BED = register("minecraft:item.bed", 26);
+    public static final BlockType BED = register("minecraft:bed", 26);
 
-    public static final BlockType BEETROOT = register("minecraft:item.beetroot", 244);
+    public static final BlockType BEETROOT = register("minecraft:beetroot", 244);
 
-    public static final BlockType BIRCH_DOOR = register("minecraft:item.birch_door", 194);
+    public static final BlockType BIRCH_DOOR = register("minecraft:birch_door", 194);
 
-    public static final BlockType CAKE = register("minecraft:item.cake", 92);
+    public static final BlockType CAKE = register("minecraft:cake", 92);
 
-    public static final BlockType CAMERA = register("minecraft:item.camera", 242);
+    public static final BlockType CAMERA = register("minecraft:camera", 242);
 
-    public static final BlockType CAMPFIRE = register("minecraft:item.campfire", -209);
+    public static final BlockType CAMPFIRE = register("minecraft:campfire", -209);
 
-    public static final BlockType CAULDRON = register("minecraft:item.cauldron", 118);
+    public static final BlockType CAULDRON = register("minecraft:cauldron", 118);
 
-    public static final BlockType CHAIN = register("minecraft:item.chain", -286);
+    public static final BlockType CHAIN = register("minecraft:chain", -286);
 
-    public static final BlockType CRIMSON_DOOR = register("minecraft:item.crimson_door", -244);
+    public static final BlockType CRIMSON_DOOR = register("minecraft:crimson_door", -244);
 
-    public static final BlockType DARK_OAK_DOOR = register("minecraft:item.dark_oak_door", 197);
+    public static final BlockType DARK_OAK_DOOR = register("minecraft:dark_oak_door", 197);
 
-    public static final BlockType FLOWER_POT = register("minecraft:item.flower_pot", 140);
+    public static final BlockType FLOWER_POT = register("minecraft:flower_pot", 140);
 
-    public static final BlockType FRAME = register("minecraft:item.frame", 199);
+    public static final BlockType FRAME = register("minecraft:frame", 199);
 
-    public static final BlockType GLOW_FRAME = register("minecraft:item.glow_frame", -339);
+    public static final BlockType GLOW_FRAME = register("minecraft:glow_frame", -339);
 
-    public static final BlockType HOPPER = register("minecraft:item.hopper", 154);
+    public static final BlockType HOPPER = register("minecraft:hopper", 154);
 
-    public static final BlockType IRON_DOOR = register("minecraft:item.iron_door", 71);
+    public static final BlockType IRON_DOOR = register("minecraft:iron_door", 71);
 
-    public static final BlockType JUNGLE_DOOR = register("minecraft:item.jungle_door", 195);
+    public static final BlockType JUNGLE_DOOR = register("minecraft:jungle_door", 195);
 
-    public static final BlockType KELP = register("minecraft:item.kelp", -138);
+    public static final BlockType KELP = register("minecraft:kelp", -138);
 
-    public static final BlockType MANGROVE_DOOR = register("minecraft:item.mangrove_door", -493);
+    public static final BlockType MANGROVE_DOOR = register("minecraft:mangrove_door", -493);
 
-    public static final BlockType NETHER_SPROUTS = register("minecraft:item.nether_sprouts", -238);
+    public static final BlockType NETHER_SPROUTS = register("minecraft:nether_sprouts", -238);
 
-    public static final BlockType NETHER_WART = register("minecraft:item.nether_wart", 115);
+    public static final BlockType NETHER_WART = register("minecraft:nether_wart", 115);
 
-    public static final BlockType REEDS = register("minecraft:item.reeds", 83);
+    public static final BlockType REEDS = register("minecraft:reeds", 83);
 
-    public static final BlockType SOUL_CAMPFIRE = register("minecraft:item.soul_campfire", -290);
+    public static final BlockType SOUL_CAMPFIRE = register("minecraft:soul_campfire", -290);
 
-    public static final BlockType SPRUCE_DOOR = register("minecraft:item.spruce_door", 193);
+    public static final BlockType SPRUCE_DOOR = register("minecraft:spruce_door", 193);
 
-    public static final BlockType WARPED_DOOR = register("minecraft:item.warped_door", -245);
+    public static final BlockType WARPED_DOOR = register("minecraft:warped_door", -245);
 
-    public static final BlockType WHEAT = register("minecraft:item.wheat", 59);
+    public static final BlockType WHEAT = register("minecraft:wheat", 59);
 
-    public static final BlockType WOODEN_DOOR = register("minecraft:item.wooden_door", 64);
+    public static final BlockType WOODEN_DOOR = register("minecraft:wooden_door", 64);
 
     public static final BlockType JIGSAW = register("minecraft:jigsaw", -211);
 

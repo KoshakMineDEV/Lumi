@@ -3,7 +3,7 @@ package cn.nukkit.item.enchantment.mace;
 import cn.nukkit.AdventureSettings;
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 import cn.nukkit.level.particle.HugeExplodeParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
@@ -11,7 +11,7 @@ import cn.nukkit.network.protocol.LevelSoundEventPacket;
 public class EnchantmentMaceWindBurst extends EnchantmentMace {
 
     public EnchantmentMaceWindBurst() {
-        super(Enchantment.ID_WIND_BURST, "heavy_weapon.windburst", Rarity.RARE);
+        super(ID_WIND_BURST, NAME_WIND_BURST, "heavy_weapon.windburst", EnchantmentRarity.RARE);
     }
 
     @Override

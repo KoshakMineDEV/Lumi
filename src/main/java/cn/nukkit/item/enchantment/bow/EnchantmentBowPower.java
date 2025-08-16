@@ -1,6 +1,6 @@
 package cn.nukkit.item.enchantment.bow;
 
-import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 
 /**
  * @author MagicDroidX
@@ -9,7 +9,12 @@ import cn.nukkit.item.enchantment.Enchantment;
 public class EnchantmentBowPower extends EnchantmentBow {
 
     public EnchantmentBowPower() {
-        super(Enchantment.ID_BOW_POWER, "arrowDamage", Rarity.COMMON);
+        super(ID_BOW_POWER, NAME_BOW_POWER, "arrowDamage", EnchantmentRarity.COMMON);
+    }
+
+    @Override
+    public int getMaxLevel() {
+        return 5;
     }
 
     @Override
@@ -20,10 +25,5 @@ public class EnchantmentBowPower extends EnchantmentBow {
     @Override
     public int getMaxEnchantAbility(int level) {
         return this.getMinEnchantAbility(level) + 15;
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 5;
     }
 }

@@ -52,7 +52,7 @@ public class EnchantCommand extends VanillaCommand {
         switch (result.getKey()) {
             case "default" -> {
                 int enchant = list.getResult(1);
-                enchantment = Enchantment.getEnchantment(enchant);
+                enchantment = Enchantment.get(enchant);
                 if (enchantment.getOriginalName().equals("unknown")) {
                     log.addError("commands.enchant.notFound", String.valueOf(enchant)).output();
                     return 0;
@@ -60,7 +60,7 @@ public class EnchantCommand extends VanillaCommand {
             }
             case "byName" -> {
                 String str = list.getResult(1);
-                enchantment = Enchantment.getEnchantment(str);
+                enchantment = Enchantment.get(str);
                 if (enchantment == null) {
                     log.addError("commands.enchant.notFound", String.valueOf(str)).output();
                     return 0;

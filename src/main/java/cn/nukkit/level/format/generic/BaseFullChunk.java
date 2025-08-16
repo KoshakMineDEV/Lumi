@@ -3,7 +3,7 @@ package cn.nukkit.level.format.generic;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.PersistentDataContainerBlockEntity;
+import cn.nukkit.blockentity.impl.PersistentDataContainerBlockEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;

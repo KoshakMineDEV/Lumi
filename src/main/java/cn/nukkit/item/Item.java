@@ -6,7 +6,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.block.customblock.CustomBlock;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.inventory.Fuel;
 import cn.nukkit.item.RuntimeItemMapping.RuntimeEntry;
 import cn.nukkit.item.customitem.CustomItem;
 import cn.nukkit.item.customitem.CustomItemDefinition;
@@ -25,6 +24,7 @@ import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemCategory;
 import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemData;
 import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemGroup;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.*;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
@@ -385,7 +385,6 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
             list[SOUL_CAMPFIRE] = ItemCampfireSoul.class; //801
 
             list[GLOW_ITEM_FRAME] = ItemItemFrameGlow.class; //850
-
 
 
             for (int i = 0; i < 256; ++i) {
@@ -837,7 +836,8 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
             case v1_21_93 -> Item.creative819.add(item.clone(), category, group);
             case v1_21_100 -> Item.creative827.add(item.clone(), category, group);
             // TODO Multiversion
-            default -> throw new IllegalArgumentException("Tried to register creative items for unsupported protocol version: " + protocol);
+            default ->
+                    throw new IllegalArgumentException("Tried to register creative items for unsupported protocol version: " + protocol);
         }
     }
 
@@ -941,7 +941,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
     }
 
     public static OK<?> registerCustomItem(@NotNull Class<? extends CustomItem> clazz) {
-        return registerCustomItem(clazz,true);
+        return registerCustomItem(clazz, true);
     }
 
     public static OK<?> registerCustomItem(@NotNull Class<? extends CustomItem> clazz, boolean addCreativeItem) {
@@ -1020,7 +1020,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         return new OK<Void>(true);
     }
 
-    private static void registerCustomItem(CustomItem item, int protocol,  boolean addCreativeItem, int... creativeProtocols) {
+    private static void registerCustomItem(CustomItem item, int protocol, boolean addCreativeItem, int... creativeProtocols) {
         if (RuntimeItems.getMapping(protocol).registerCustomItem(item) && addCreativeItem) {
             for (int creativeProtocol : creativeProtocols) {
                 addCreativeItem(creativeProtocol, (Item) item, item.getDefinition().getCreativeCategory(), item.getDefinition().getCreativeGroup());
@@ -1412,14 +1412,89 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         return false;
     }
 
-    /**
-     * 通过附魔id来查找对应附魔的等级
-     * <p>
-     * Find the enchantment level by the enchantment id.
-     *
-     * @param id The enchantment ID from {@link Enchantment} constants.
-     * @return {@code 0} if the item don't have that enchantment or the current level of the given enchantment.
-     */
+    public boolean hasEnchantment(int id) {
+        return this.getEnchantmentLevel(id) > 0;
+    }
+
+    public boolean hasEnchantment(short id) {
+        return this.getEnchantment(id) != null;
+    }
+
+    public boolean hasCustomEnchantment(String id) {
+        return this.getCustomEnchantmentLevel(id) > 0;
+    }
+
+    public boolean hasCustomEnchantment(@NotNull Identifier id) {
+        return hasCustomEnchantment(id.toString());
+    }
+
+    public Enchantment getEnchantment(int id) {
+        return getEnchantment((short) (id & 0xffff));
+    }
+
+    public Enchantment getEnchantment(short id) {
+        if (!this.hasEnchantments()) {
+            return null;
+        }
+
+        for (CompoundTag entry : this.getNamedTag().getList("ench", CompoundTag.class).getAll()) {
+            if (entry.getShort("id") == id) {
+                Enchantment enchantment = Enchantment.get(entry.getShort("id"));
+                if (enchantment != null) {
+                    enchantment.setLevel(entry.getShort("lvl"), false);
+                    return enchantment;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Enchantment getEnchantment(String id) {
+        if (!this.hasEnchantments()) {
+            return null;
+        }
+
+        if (this.hasCustomEnchantment(id)) {
+            return this.getCustomEnchantment(id);
+        }
+
+        for (CompoundTag entry : this.getNamedTag().getList("ench", CompoundTag.class).getAll()) {
+            Enchantment byId = Enchantment.get(id);
+            if (entry.getShort("id") == byId.getId()) {
+                Enchantment enchantment = Enchantment.get(entry.getShort("id"));
+                if (enchantment != null) {
+                    enchantment.setLevel(entry.getShort("lvl"), false);
+                    return enchantment;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Enchantment getCustomEnchantment(String id) {
+        if (!this.hasEnchantments()) {
+            return null;
+        }
+
+        for (CompoundTag entry : this.getNamedTag().getList("custom_ench", CompoundTag.class).getAll()) {
+            if (entry.getString("id").equals(id)) {
+                Enchantment enchantment = Enchantment.get(entry.getString("id"));
+                if (enchantment != null) {
+                    enchantment.setLevel(entry.getShort("lvl"), false);
+                    return enchantment;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Enchantment getCustomEnchantment(@NotNull Identifier id) {
+        return getCustomEnchantment(id.toString());
+    }
+
     public int getEnchantmentLevel(int id) {
         if (!this.hasEnchantments()) {
             return 0;
@@ -1434,17 +1509,6 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         return 0;
     }
 
-    /**
-     * 检测该物品是否有该附魔
-     * <p>
-     * Detect if the item has the enchantment
-     *
-     * @param id 要查询的附魔标识符
-     */
-    public boolean hasCustomEnchantment(String id) {
-        return this.getCustomEnchantmentLevel(id) > 0;
-    }
-
     public int getCustomEnchantmentLevel(String id) {
         if (!this.hasEnchantments()) {
             return 0;
@@ -1457,143 +1521,8 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         return 0;
     }
 
-    public Enchantment getCustomEnchantment(String id) {
-        if (!this.hasEnchantments()) {
-            return null;
-        }
-
-        for (CompoundTag entry : this.getNamedTag().getList("custom_ench", CompoundTag.class).getAll()) {
-            if (entry.getString("id").equals(id)) {
-                Enchantment e = Enchantment.getEnchantment(entry.getString("id"));
-                if (e != null) {
-                    e.setLevel(entry.getShort("lvl"), false);
-                    return e;
-                }
-            }
-        }
-
-        return null;
-    }
-
     public int getCustomEnchantmentLevel(@NotNull Identifier id) {
         return getCustomEnchantmentLevel(id.toString());
-    }
-
-    public boolean hasCustomEnchantment(@NotNull Identifier id) {
-        return hasCustomEnchantment(id.toString());
-    }
-
-    public Enchantment getCustomEnchantment(@NotNull Identifier id) {
-        return getCustomEnchantment(id.toString());
-    }
-
-    public Enchantment getEnchantment(int id) {
-        return getEnchantment((short) (id & 0xffff));
-    }
-
-    public Enchantment getEnchantment(short id) {
-        if (!this.hasEnchantments()) {
-            return null;
-        }
-
-        for (CompoundTag entry : this.getNamedTag().getList("ench", CompoundTag.class).getAll()) {
-            if (entry.getShort("id") == id) {
-                Enchantment e = Enchantment.getEnchantment(entry.getShort("id"));
-                if (e != null) {
-                    e.setLevel(entry.getShort("lvl"), false);
-                    return e;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public void addEnchantment(Enchantment... enchantments) {
-        CompoundTag tag;
-        if (!this.hasCompoundTag()) {
-            tag = new CompoundTag();
-        } else {
-            tag = this.getNamedTag();
-        }
-
-        ListTag<CompoundTag> ench;
-        if (!tag.contains("ench")) {
-            ench = new ListTag<>();
-            tag.putList("ench", ench);
-        } else {
-            ench = tag.getList("ench", CompoundTag.class);
-        }
-        ListTag<CompoundTag> custom_ench;
-        if (!tag.contains("custom_ench")) {
-            custom_ench = new ListTag<>();
-            tag.putList("custom_ench", custom_ench);
-        } else {
-            custom_ench = tag.getList("custom_ench", CompoundTag.class);
-        }
-
-        for (Enchantment enchantment : enchantments) {
-            boolean found = false;
-            if (enchantment.getIdentifier() == null) {
-                for (int k = 0; k < ench.size(); k++) {
-                    CompoundTag entry = ench.get(k);
-                    if (entry.getShort("id") == enchantment.getId()) {
-                        ench.add(k, new CompoundTag()
-                                .putShort("id", enchantment.getId())
-                                .putShort("lvl", enchantment.getLevel())
-                        );
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    ench.add(new CompoundTag()
-                            .putShort("id", enchantment.getId())
-                            .putShort("lvl", enchantment.getLevel())
-                    );
-                }
-            } else {
-                for (int k = 0; k < custom_ench.size(); k++) {
-                    CompoundTag entry = custom_ench.get(k);
-                    if (entry.getString("id").equals(enchantment.getIdentifier().toString())) {
-                        custom_ench.add(k, new CompoundTag()
-                                .putString("id", enchantment.getIdentifier().toString())
-                                .putShort("lvl", enchantment.getLevel())
-                        );
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    custom_ench.add(new CompoundTag()
-                            .putString("id", enchantment.getIdentifier().toString())
-                            .putShort("lvl", enchantment.getLevel())
-                    );
-                }
-            }
-        }
-        if (!custom_ench.isEmpty()) {
-            var customName = getCustomEnchantmentDisplay(custom_ench);
-            if (tag.contains("display") && tag.get("display") instanceof CompoundTag) {
-                tag.getCompound("display").putString("Name", customName);
-            } else {
-                tag.putCompound("display", new CompoundTag()
-                        .putString("Name", customName)
-                );
-            }
-        }
-        this.setNamedTag(tag);
-    }
-
-    private String getCustomEnchantmentDisplay(ListTag<CompoundTag> customEnchantments) {
-        StringJoiner joiner = new StringJoiner("\n", String.valueOf(TextFormat.RESET) + TextFormat.AQUA + idConvertToName() + "\n", "");
-        for (var enchant : customEnchantments.getAll()) {
-            var enchantment = Enchantment.getEnchantment(
-                    enchant.getString("id")).setLevel(
-                    enchant.getShort("lvl"));
-            joiner.add(enchantment.getLore());
-        }
-        return joiner.toString();
     }
 
     public Enchantment[] getEnchantments() {
@@ -1602,32 +1531,110 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         }
         List<Enchantment> enchantments = new ArrayList<>();
 
-        ListTag<CompoundTag> ench = this.getNamedTag().getList("ench", CompoundTag.class);
-        for (CompoundTag entry : ench.getAll()) {
-            Enchantment e = Enchantment.getEnchantment(entry.getShort("id"));
+        ListTag<CompoundTag> enchants = this.getNamedTag().getList("ench", CompoundTag.class);
+        for (CompoundTag entry : enchants.getAll()) {
+            Enchantment e = Enchantment.get(entry.getShort("id"));
             if (e != null) {
                 e.setLevel(entry.getShort("lvl"), false);
                 enchantments.add(e);
             }
         }
-        //custom ench
-        ListTag<CompoundTag> custom_ench = this.getNamedTag().getList("custom_ench", CompoundTag.class);
-        for (CompoundTag entry : custom_ench.getAll()) {
-            Enchantment e = Enchantment.getEnchantment(entry.getString("id"));
+
+        ListTag<CompoundTag> customEnchants = this.getNamedTag().getList("custom_ench", CompoundTag.class);
+        for (CompoundTag entry : customEnchants.getAll()) {
+            Enchantment e = Enchantment.get(entry.getString("id"));
             if (e != null) {
                 e.setLevel(entry.getShort("lvl"), false);
                 enchantments.add(e);
             }
         }
+
         return enchantments.toArray(Enchantment.EMPTY_ARRAY);
     }
 
-    public boolean hasEnchantment(int id) {
-        return this.getEnchantmentLevel(id) > 0;
+    public void addEnchantment(Enchantment... enchantments) {
+        CompoundTag tag = !this.hasCompoundTag() ? new CompoundTag() : this.getNamedTag();
+
+        ListTag<CompoundTag> enchants;
+        if (!tag.contains("ench")) {
+            enchants = new ListTag<>();
+            tag.putList("ench", enchants);
+        } else {
+            enchants = tag.getList("ench", CompoundTag.class);
+        }
+
+        ListTag<CompoundTag> customEnchants;
+        if (!tag.contains("custom_ench")) {
+            customEnchants = new ListTag<>();
+            tag.putList("custom_ench", customEnchants);
+        } else {
+            customEnchants = tag.getList("custom_ench", CompoundTag.class);
+        }
+
+        for (Enchantment enchantment : enchantments) {
+            boolean found = false;
+            if (enchantment.getId() != Enchantment.CUSTOM_ENCHANTMENT_ID) {
+                for (int k = 0; k < enchants.size(); k++) {
+                    CompoundTag entry = enchants.get(k);
+                    if (entry.getShort("id") == enchantment.getId()) {
+                        enchants.add(k, new CompoundTag()
+                                .putShort("id", enchantment.getId())
+                                .putShort("lvl", enchantment.getLevel())
+                        );
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    enchants.add(new CompoundTag()
+                            .putShort("id", enchantment.getId())
+                            .putShort("lvl", enchantment.getLevel())
+                    );
+                }
+            } else {
+                for (int k = 0; k < customEnchants.size(); k++) {
+                    CompoundTag entry = customEnchants.get(k);
+                    if (entry.getString("id").equals(enchantment.getIdentifier().toString())) {
+                        customEnchants.add(k, new CompoundTag()
+                                .putString("id", enchantment.getIdentifier().toString())
+                                .putShort("lvl", enchantment.getLevel())
+                        );
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    customEnchants.add(new CompoundTag()
+                            .putString("id", enchantment.getIdentifier().toString())
+                            .putShort("lvl", enchantment.getLevel())
+                    );
+                }
+            }
+        }
+
+        if (!customEnchants.isEmpty()) {
+            var customName = getCustomEnchantmentDisplay(customEnchants);
+            if (tag.contains("display") && tag.get("display") instanceof CompoundTag) {
+                tag.getCompound("display").putString("Name", customName);
+            } else {
+                tag.putCompound("display", new CompoundTag()
+                        .putString("Name", customName)
+                );
+            }
+        }
+
+        this.setNamedTag(tag);
     }
 
-    public boolean hasEnchantment(short id) {
-        return this.getEnchantment(id) != null;
+    private String getCustomEnchantmentDisplay(ListTag<CompoundTag> customEnchantments) {
+        StringJoiner joiner = new StringJoiner("\n", String.valueOf(TextFormat.RESET) + TextFormat.AQUA + idConvertToName() + "\n", "");
+        for (var enchant : customEnchantments.getAll()) {
+            var enchantment = Enchantment.get(
+                    enchant.getString("id")).setLevel(
+                    enchant.getShort("lvl"));
+            joiner.add(TextFormat.GRAY + enchantment.getName() + " " + Enchantment.getLevelString(enchantment.getLevel()));
+        }
+        return joiner.toString();
     }
 
     public boolean hasCustomName() {
@@ -1639,22 +1646,6 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         if (tag.contains("display")) {
             Tag tag1 = tag.get("display");
             return tag1 instanceof CompoundTag && ((CompoundTag) tag1).contains("Name") && ((CompoundTag) tag1).get("Name") instanceof StringTag;
-        }
-
-        return false;
-    }
-
-    public boolean hasSavedCustomName() {
-        if (!this.hasCompoundTag()) {
-            return false;
-        }
-
-        CompoundTag tag = this.getNamedTag();
-        if (tag.contains("display")) {
-            Tag display = tag.get("display");
-            return display instanceof CompoundTag compound &&
-                    compound.contains("SavedName") &&
-                    compound.get("SavedName") instanceof StringTag;
         }
 
         return false;
@@ -1676,25 +1667,6 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         return "";
     }
 
-    public String getSavedCustomName() {
-        if (!this.hasCompoundTag()) {
-            return "";
-        }
-
-        CompoundTag tag = this.getNamedTag();
-        if (tag.contains("display")) {
-            Tag display = tag.get("display");
-            if (display instanceof CompoundTag compound &&
-                    compound.contains("SavedName") &&
-                    compound.get("SavedName") instanceof StringTag) {
-                return compound.getString("SavedName");
-            }
-        }
-
-        return "";
-    }
-
-
     public Item setCustomName(String name) {
         if (name == null || name.isEmpty()) {
             this.clearCustomName();
@@ -1713,12 +1685,10 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         }
         if (tag.contains("display") && tag.get("display") instanceof CompoundTag) {
             tag.getCompound("display")
-                    .putString("Name", name)
-                    .putString("SavedName", name);
+                    .putString("Name", name);
         } else {
             tag.putCompound("display", new CompoundTag("display")
                     .putString("Name", name)
-                    .putString("SavedName", name)
             );
         }
         this.setNamedTag(tag);
@@ -1911,12 +1881,12 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         } else {
             var mappings = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
             var entry = mappings.toRuntime(this.getId(), this.getDamage());
-            this.type = ItemTypes.getFromRuntime(entry.getRuntimeId());
+            this.type = ItemTypes.get(entry.getIdentifier());
         }
 
         // Throw an exception if for some reason the type cannot be determined.
         if (this.type == null) {
-            throw new IllegalStateException("Failed to initialize item type");
+            throw new IllegalStateException("Failed to initialize item type " + this.getName() + ": " + this.getId() + ":" + this.getDamage());
         }
 
         return this.type;
@@ -1966,14 +1936,8 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         return 64;
     }
 
-    final public Short getFuelTime() {
-        if (!Fuel.duration.containsKey(id)) {
-            return null;
-        }
-        if (this.id != BUCKET || this.meta == 10) {
-            return Fuel.duration.get(this.id);
-        }
-        return null;
+    final public Integer getFuelTime() {
+        return Registries.FUEL.get(getNamespaceId());
     }
 
     public boolean useOn(Entity entity) {
@@ -2120,7 +2084,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
      * Called when a player uses the item on air, for example throwing a projectile.
      * Returns whether the item was changed, for example count decrease or durability change.
      *
-     * @param player player
+     * @param player          player
      * @param directionVector direction
      * @return item changed
      */
@@ -2308,6 +2272,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
 
     /**
      * 设置物品锁定在玩家的物品栏的模式
+     *
      * @param mode lock mode
      */
     public void setItemLockMode(ItemLockMode mode) {

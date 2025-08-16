@@ -4,6 +4,9 @@ import cn.nukkit.AdventureSettings.Type;
 import cn.nukkit.block.*;
 import cn.nukkit.block.material.tags.BlockInternalTags;
 import cn.nukkit.blockentity.*;
+import cn.nukkit.blockentity.impl.BlockEntityCampfire;
+import cn.nukkit.blockentity.impl.BlockEntityItemFrame;
+import cn.nukkit.blockentity.impl.BlockEntitySign;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandDataVersions;
@@ -101,7 +104,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;

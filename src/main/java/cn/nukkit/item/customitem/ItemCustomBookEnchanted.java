@@ -48,11 +48,6 @@ public abstract class ItemCustomBookEnchanted extends ItemBookEnchanted implemen
     }
 
     public Enchantment getEnchantment() {
-        return Enchantment.getEnchantment(this.getNamespaceId());
-    }
-
-    @Override
-    public int getMaxStackSize() {
-        return 1;
+        return Enchantment.get(this.getNamespaceId());
     }
 }

@@ -1,11 +1,11 @@
 package cn.nukkit.item.enchantment.trident;
 
-import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 
 public class EnchantmentTridentRiptide extends EnchantmentTrident {
 
     public EnchantmentTridentRiptide() {
-        super(Enchantment.ID_TRIDENT_RIPTIDE, "tridentRiptide", Rarity.RARE);
+        super(ID_TRIDENT_RIPTIDE, NAME_TRIDENT_RIPTIDE, "tridentRiptide", EnchantmentRarity.RARE);
     }
 
     @Override

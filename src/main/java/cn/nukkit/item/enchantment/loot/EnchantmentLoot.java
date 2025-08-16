@@ -1,7 +1,9 @@
 package cn.nukkit.item.enchantment.loot;
 
 import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 import cn.nukkit.item.enchantment.EnchantmentType;
+import cn.nukkit.utils.Identifier;
 
 /**
  * @author MagicDroidX
@@ -9,8 +11,12 @@ import cn.nukkit.item.enchantment.EnchantmentType;
  */
 public abstract class EnchantmentLoot extends Enchantment {
 
-    protected EnchantmentLoot(int id, String name, Rarity rarity, EnchantmentType type) {
-        super(id, name, rarity, type);
+    protected EnchantmentLoot(int id, String identifier, String name, EnchantmentRarity rarity, EnchantmentType type) {
+        super(id, identifier, name, rarity, type);
+    }
+
+    protected EnchantmentLoot(int id, Identifier identifier, String name, EnchantmentRarity rarity, EnchantmentType type) {
+        super(id, identifier, name, rarity, type);
     }
 
     @Override
@@ -30,6 +36,6 @@ public abstract class EnchantmentLoot extends Enchantment {
 
     @Override
     public boolean checkCompatibility(Enchantment enchantment) {
-        return super.checkCompatibility(enchantment) && enchantment.id != Enchantment.ID_SILK_TOUCH;
+        return super.checkCompatibility(enchantment) && enchantment.getId() != Enchantment.ID_SILK_TOUCH;
     }
 }

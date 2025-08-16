@@ -1,6 +1,6 @@
 package cn.nukkit.item.enchantment.loot;
 
-import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 import cn.nukkit.item.enchantment.EnchantmentType;
 
 /**
@@ -10,6 +10,6 @@ import cn.nukkit.item.enchantment.EnchantmentType;
 public class EnchantmentLootWeapon extends EnchantmentLoot {
 
     public EnchantmentLootWeapon() {
-        super(Enchantment.ID_LOOTING, "lootBonus", Rarity.RARE, EnchantmentType.SWORD);
+        super(ID_LOOTING, NAME_LOOTING, "lootBonus", EnchantmentRarity.RARE, EnchantmentType.SWORD);
     }
 }

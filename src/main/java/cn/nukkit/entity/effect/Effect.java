@@ -2,6 +2,7 @@ package cn.nukkit.entity.effect;
 
 import cn.nukkit.entity.Entity;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.registry.Registries;
 
 import java.awt.Color;
 
@@ -28,7 +29,7 @@ public abstract class Effect implements Cloneable {
     }
 
     public static Effect get(EffectType type) {
-        return EffectRegistry.get(type);
+        return Registries.EFFECT.get(type);
     }
 
     public static Effect get(String id) {

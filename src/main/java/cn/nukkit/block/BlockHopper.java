@@ -2,8 +2,8 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityFurnace;
-import cn.nukkit.blockentity.BlockEntityHopper;
+import cn.nukkit.blockentity.impl.BlockEntityFurnace;
+import cn.nukkit.blockentity.impl.BlockEntityHopper;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.event.inventory.InventoryMoveItemEvent;

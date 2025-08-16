@@ -1,6 +1,6 @@
 package cn.nukkit.inventory;
 
-import cn.nukkit.blockentity.BlockEntitySmoker;
+import cn.nukkit.blockentity.impl.BlockEntitySmoker;
 
 public class SmokerInventory extends FurnaceInventory {
 

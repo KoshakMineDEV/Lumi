@@ -1,6 +1,6 @@
 package cn.nukkit.event.inventory;
 
-import cn.nukkit.blockentity.BlockEntityFurnace;
+import cn.nukkit.blockentity.impl.BlockEntityFurnace;
 import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.event.block.BlockEvent;
@@ -20,10 +20,10 @@ public class FurnaceBurnEvent extends BlockEvent implements Cancellable {
 
     private final BlockEntityFurnace furnace;
     private final Item fuel;
-    private short burnTime;
+    private int burnTime;
     private boolean burning = true;
 
-    public FurnaceBurnEvent(BlockEntityFurnace furnace, Item fuel, short burnTime) {
+    public FurnaceBurnEvent(BlockEntityFurnace furnace, Item fuel, int burnTime) {
         super(furnace.getBlock());
         this.fuel = fuel;
         this.burnTime = burnTime;
@@ -38,11 +38,11 @@ public class FurnaceBurnEvent extends BlockEvent implements Cancellable {
         return fuel;
     }
 
-    public short getBurnTime() {
+    public int getBurnTime() {
         return burnTime;
     }
 
-    public void setBurnTime(short burnTime) {
+    public void setBurnTime(int burnTime) {
         this.burnTime = burnTime;
     }
 

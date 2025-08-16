@@ -3,7 +3,7 @@ package cn.nukkit.block;
 import cn.nukkit.Player;
 import cn.nukkit.block.material.tags.BlockInternalTags;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityFlowerPot;
+import cn.nukkit.blockentity.impl.BlockEntityFlowerPot;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemFlowerPot;
 import cn.nukkit.level.Level;

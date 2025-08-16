@@ -2,8 +2,8 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityItemFrame;
-import cn.nukkit.blockentity.BlockEntityItemFrameGlow;
+import cn.nukkit.blockentity.impl.BlockEntityItemFrame;
+import cn.nukkit.blockentity.impl.BlockEntityItemFrameGlow;
 import cn.nukkit.item.Item;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.nbt.tag.CompoundTag;

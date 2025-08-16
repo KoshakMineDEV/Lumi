@@ -2,7 +2,7 @@ package cn.nukkit.level.generator.object.end;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityEndGateway;
+import cn.nukkit.blockentity.impl.BlockEntityEndGateway;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.object.BasicGenerator;

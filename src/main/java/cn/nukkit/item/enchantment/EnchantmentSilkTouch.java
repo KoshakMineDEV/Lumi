@@ -1,6 +1,7 @@
 package cn.nukkit.item.enchantment;
 
 import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.loot.EnchantmentLootDigging;
 
 /**
  * @author MagicDroidX
@@ -8,8 +9,8 @@ import cn.nukkit.item.Item;
  */
 public class EnchantmentSilkTouch extends Enchantment {
 
-    protected EnchantmentSilkTouch() {
-        super(ID_SILK_TOUCH, "untouching", Rarity.VERY_RARE, EnchantmentType.DIGGER);
+    public EnchantmentSilkTouch() {
+        super(ID_SILK_TOUCH, NAME_SILK_TOUCH, "untouching", EnchantmentRarity.VERY_RARE, EnchantmentType.DIGGER);
     }
 
     @Override
@@ -24,7 +25,7 @@ public class EnchantmentSilkTouch extends Enchantment {
 
     @Override
     public boolean checkCompatibility(Enchantment enchantment) {
-        return super.checkCompatibility(enchantment) && enchantment.id != ID_FORTUNE_DIGGING;
+        return super.checkCompatibility(enchantment) && !(enchantment instanceof EnchantmentLootDigging);
     }
 
     @Override
