@@ -1,5 +1,7 @@
 package cn.nukkit.blockentity;
 
+import cn.nukkit.blockentity.impl.BlockEntityChest;
+import cn.nukkit.blockentity.impl.BlockEntityFurnace;
 import cn.nukkit.item.Item;
 
 /**

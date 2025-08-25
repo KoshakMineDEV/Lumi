@@ -2,7 +2,7 @@ package cn.nukkit.entity.passive;
 
 import cn.nukkit.Difficulty;
 import cn.nukkit.Player;
-import cn.nukkit.blockentity.BlockEntityBeehive;
+import cn.nukkit.blockentity.impl.BlockEntityBeehive;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityArthropod;
 import cn.nukkit.entity.EntityCreature;

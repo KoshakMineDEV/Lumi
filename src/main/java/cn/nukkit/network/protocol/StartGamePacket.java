@@ -10,6 +10,7 @@ import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.types.ExperimentData;
 import cn.nukkit.network.protocol.types.NetworkPermissions;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Binary;
 import cn.nukkit.utils.Utils;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -113,7 +114,7 @@ public class StartGamePacket extends DataPacket {
     public boolean isServerAuthoritativeBlockBreaking;
     public long currentTick;
     public int enchantmentSeed;
-    public Collection<CustomBlockDefinition> blockDefinitions = Block.getCustomBlockDefinitionList();
+    public Collection<CustomBlockDefinition> blockDefinitions = Registries.BLOCK.getCustomBlockDefinitionList();
     public String multiplayerCorrelationId = "";
     public boolean isDisablingPersonas;
     public boolean isDisablingCustomSkins;

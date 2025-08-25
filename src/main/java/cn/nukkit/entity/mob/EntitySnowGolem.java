@@ -18,6 +18,7 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Utils;
 import org.apache.commons.math3.util.FastMath;
 
@@ -130,7 +131,7 @@ public class EntitySnowGolem extends EntityWalkingMob {
                     this.nowBiomeId != EnumBiome.JUNGLE_M.id && this.nowBiomeId != EnumBiome.JUNGLE_EDGE_M.id && this.nowBiomeId != EnumBiome.MESA_BRYCE.id &&
                     this.nowBiomeId != EnumBiome.MESA_PLATEAU_F_M.id && this.nowBiomeId != EnumBiome.MESA_PLATEAU_M.id &&
                     this.level.getBlockIdAt(this.chunk, this.getFloorX(), this.getFloorY(), this.getFloorZ()) == 0 &&
-                    !Block.transparent[this.level.getBlockIdAt(this.getFloorX(), this.getFloorY() - 1, this.getFloorZ())]) {
+                    !Registries.BLOCK.isTransparent(this.level.getBlockIdAt(this.getFloorX(), this.getFloorY() - 1, this.getFloorZ()))) {
                 this.level.setBlockAt(this.getFloorX(), this.getFloorY(), this.getFloorZ(), Block.SNOW, 0);
             }
         }

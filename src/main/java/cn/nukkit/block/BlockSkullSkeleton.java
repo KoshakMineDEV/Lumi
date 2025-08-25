@@ -1,7 +1,7 @@
 package cn.nukkit.block;
 
-import cn.nukkit.blockentity.BlockEntitySkull;
 import cn.nukkit.block.data.Faceable;
+import cn.nukkit.blockentity.impl.BlockEntitySkull;
 
 /**
  * @author Justin

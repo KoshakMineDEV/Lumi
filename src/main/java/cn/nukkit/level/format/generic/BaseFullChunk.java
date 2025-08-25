@@ -3,7 +3,7 @@ package cn.nukkit.level.format.generic;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.PersistentDataContainerBlockEntity;
+import cn.nukkit.blockentity.impl.PersistentDataContainerBlockEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
@@ -17,6 +17,7 @@ import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.NumberTag;
 import cn.nukkit.nbt.tag.Tag;
 import cn.nukkit.network.protocol.BatchPacket;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.collection.nb.Long2ObjectNonBlockingMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
@@ -300,7 +301,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         int max = getHighestBlockAt(x, z, false);
         int y;
         for (y = max; y >= 0; --y) {
-            if (Block.lightFilter[getBlockIdAt(x, y, z)] > 1 || Block.diffusesSkyLight[getBlockIdAt(x, y, z)]) {
+            if (Registries.BLOCK.getLightFilter(getBlockIdAt(x, y, z)) > 1 || Registries.BLOCK.isDiffusesSkyLight(getBlockIdAt(x, y, z))) {
                 break;
             }
         }
@@ -370,14 +371,14 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
                     // START of checks for the next block
                     int id = this.getBlockId(x, y, z);
 
-                    if (!Block.transparent[id]) { // if we encounter an opaque block, all the blocks under it will
+                    if (!Registries.BLOCK.isTransparent(id)) { // if we encounter an opaque block, all the blocks under it will
                                            // have a skylight value of 0 (the block itself has a value of 15, if it's a top-most block)
                         nextLight = 0;
-                    } else if (Block.diffusesSkyLight[id]) {
+                    } else if (Registries.BLOCK.isDiffusesSkyLight(id)) {
                         nextDecrease += 1; // skylight value decreases by one for each block under a block
                                            // that diffuses skylight. The block itself has a value of 15 (if it's a top-most block)
                     } else {
-                        nextDecrease -= Block.lightFilter[id]; // blocks under a light filtering block will have a skylight value
+                        nextDecrease -= Registries.BLOCK.getLightFilter(id); // blocks under a light filtering block will have a skylight value
                                                             // decreased by the lightFilter value of that block. The block itself
                                                             // has a value of 15 (if it's a top-most block)
                     }

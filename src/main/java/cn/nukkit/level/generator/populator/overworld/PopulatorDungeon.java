@@ -17,6 +17,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.plugin.InternalPlugin;
+import cn.nukkit.registry.Registries;
 
 public class PopulatorDungeon extends Populator {
     private static final int[] MOBS = {EntitySkeleton.NETWORK_ID, EntityZombie.NETWORK_ID, EntityZombie.NETWORK_ID, EntitySpider.NETWORK_ID};
@@ -50,7 +51,7 @@ public class PopulatorDungeon extends Populator {
                         final int tz = z + dz;
 
                         final int id = level.getBlockIdAt(tx, ty, tz);
-                        final boolean isSolid = Block.solid[id];
+                        final boolean isSolid = Registries.BLOCK.isSolid(id);
 
                         if ((dy == -1 || dy == 4) && !isSolid) {
                             continue chance;
@@ -76,9 +77,9 @@ public class PopulatorDungeon extends Populator {
                                 if (id != BlockID.CHEST) {
                                     level.setBlockAt(tx, ty, tz, BlockID.AIR);
                                 }
-                            } else if (ty >= 0 && !Block.solid[level.getBlockIdAt(tx, ty - 1, tz)]) {
+                            } else if (ty >= 0 && !Registries.BLOCK.isSolid(level.getBlockIdAt(tx, ty - 1, tz))) {
                                 level.setBlockAt(tx, ty, tz, BlockID.AIR);
-                            } else if (Block.solid[id] && id != BlockID.CHEST) {
+                            } else if (Registries.BLOCK.isSolid(id) && id != BlockID.CHEST) {
                                 if (dy == -1 && random.nextBoundedInt(4) != 0) {
                                     level.setBlockAt(tx, ty, tz, BlockID.MOSS_STONE);
                                 } else {
@@ -97,16 +98,16 @@ public class PopulatorDungeon extends Populator {
                         if (level.getBlockIdAt(tx, y, tz) == BlockID.AIR) {
                             int n = 0;
 
-                            if (Block.solid[level.getBlockIdAt(tx - 1, y, tz)]) {
+                            if (Registries.BLOCK.isSolid(level.getBlockIdAt(tx - 1, y, tz))) {
                                 ++n;
                             }
-                            if (Block.solid[level.getBlockIdAt(tx + 1, y, tz)]) {
+                            if (Registries.BLOCK.isSolid(level.getBlockIdAt(tx + 1, y, tz))) {
                                 ++n;
                             }
-                            if (Block.solid[level.getBlockIdAt(tx, y, tz - 1)]) {
+                            if (Registries.BLOCK.isSolid(level.getBlockIdAt(tx, y, tz - 1))) {
                                 ++n;
                             }
-                            if (Block.solid[level.getBlockIdAt(tx, y, tz + 1)]) {
+                            if (Registries.BLOCK.isSolid(level.getBlockIdAt(tx, y, tz + 1))) {
                                 ++n;
                             }
 

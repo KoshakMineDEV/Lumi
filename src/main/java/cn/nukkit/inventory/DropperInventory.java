@@ -1,6 +1,6 @@
 package cn.nukkit.inventory;
 
-import cn.nukkit.blockentity.BlockEntityDropper;
+import cn.nukkit.blockentity.impl.BlockEntityDropper;
 
 /**
  * Created by PetteriM1

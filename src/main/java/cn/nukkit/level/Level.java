@@ -68,6 +68,7 @@ import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.plugin.InternalPlugin;
 import cn.nukkit.plugin.Plugin;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.scheduler.BlockUpdateScheduler;
 import cn.nukkit.settings.WorldSettings;
 import cn.nukkit.utils.*;
@@ -2077,7 +2078,7 @@ public class Level implements ChunkManager, Metadatable {
             int z = Hash.hashBlockZ(node);
 
             int id = this.getBlockIdAt(x, y, z);
-            int lightFilter = id >= Block.MAX_BLOCK_ID ? 15 : Block.lightFilter[id];
+            int lightFilter = id >= Block.MAX_BLOCK_ID ? 15 : Registries.BLOCK.getLightFilter(id);
             int lightLevel = this.getBlockLightAt(x, y, z) - lightFilter;
 
             if (lightLevel >= 1) {
@@ -2140,7 +2141,7 @@ public class Level implements ChunkManager, Metadatable {
 
     @Override
     public void setBlockFullIdAt(int x, int y, int z, int layer, int fullId) {
-        this.setBlock(x, y, z, layer, Block.fullList[fullId], false, false);
+        this.setBlock(x, y, z, layer, Registries.BLOCK.get(fullId), false, false);
     }
 
     public boolean isAntiXrayEnabled() {

@@ -2,6 +2,7 @@ package cn.nukkit.inventory.transaction.action;
 
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
+import cn.nukkit.registry.Registries;
 
 /**
  * @author CreeperFace
@@ -30,8 +31,7 @@ public class CreativeInventoryAction extends InventoryAction {
      */
     @Override
     public boolean isValid(Player source) {
-        return source.isCreative() &&
-                (this.actionType == TYPE_DELETE_ITEM || Item.isCreativeItem(source.protocol, this.sourceItem));
+        return source.isCreative() && (this.actionType == TYPE_DELETE_ITEM || Registries.CREATIVE_ITEM.isCreativeItem(source.protocol, this.sourceItem));
     }
 
     /**

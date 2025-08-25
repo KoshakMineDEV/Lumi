@@ -3,6 +3,7 @@ package cn.nukkit.entity.effect;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.potion.PotionApplyEvent;
+import cn.nukkit.registry.Registries;
 
 import java.util.List;
 
@@ -150,10 +151,10 @@ public record PotionType(String name, String stringId, int id, int level, Potion
     }
 
     public static PotionType get(String stringId) {
-        return PotionRegistry.get(stringId);
+        return Registries.POTION.get(stringId);
     }
 
     public static PotionType get(int id) {
-        return PotionRegistry.get(id);
+        return Registries.POTION.get(id);
     }
 }

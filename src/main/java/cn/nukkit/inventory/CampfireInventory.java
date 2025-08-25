@@ -1,6 +1,6 @@
 package cn.nukkit.inventory;
 
-import cn.nukkit.blockentity.BlockEntityCampfire;
+import cn.nukkit.blockentity.impl.BlockEntityCampfire;
 import cn.nukkit.item.Item;
 
 public class CampfireInventory extends ContainerInventory {

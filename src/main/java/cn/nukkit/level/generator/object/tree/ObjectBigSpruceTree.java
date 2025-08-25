@@ -4,6 +4,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.registry.Registries;
 
 import java.util.ArrayList;
 
@@ -116,7 +117,7 @@ public class ObjectBigSpruceTree extends ObjectSpruceTree {
                         }
                     }
 
-                    if (!isTrunk && !Block.solid[level.getBlockIdAt(xx, yyy, zz)]) {
+                    if (!isTrunk && !Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yyy, zz))) {
                         level.setBlockAt(xx, yyy, zz, this.getLeafBlock(), this.getType());
                     }
                 }
@@ -152,7 +153,7 @@ public class ObjectBigSpruceTree extends ObjectSpruceTree {
                         continue;
                     }
 
-                    if (!Block.solid[level.getBlockIdAt(xx, yyy, zz)]) {
+                    if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yyy, zz))) {
                         level.setBlockAt(xx, yyy, zz, this.getLeafBlock(), this.getType());
                     }
                 }

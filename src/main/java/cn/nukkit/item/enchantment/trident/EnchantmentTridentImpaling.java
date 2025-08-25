@@ -1,12 +1,12 @@
 package cn.nukkit.item.enchantment.trident;
 
 import cn.nukkit.entity.Entity;
-import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 
 public class EnchantmentTridentImpaling extends EnchantmentTrident {
 
     public EnchantmentTridentImpaling() {
-        super(Enchantment.ID_TRIDENT_IMPALING, "tridentImpaling", Rarity.RARE);
+        super(ID_TRIDENT_IMPALING, NAME_TRIDENT_IMPALING, "tridentImpaling", EnchantmentRarity.RARE);
     }
 
     @Override
@@ -29,7 +29,6 @@ public class EnchantmentTridentImpaling extends EnchantmentTrident {
         if (entity.isInsideOfWater() || (entity.getLevel().isRaining() && entity.canSeeSky())) {
             return 2.5 * getLevel();
         }
-
         return 0;
     }
 }

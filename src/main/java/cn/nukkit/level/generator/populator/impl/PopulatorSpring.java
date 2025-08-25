@@ -8,6 +8,7 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.generator.populator.type.Populator;
 import cn.nukkit.math.NukkitRandom;
+import cn.nukkit.registry.Registries;
 
 public class PopulatorSpring extends Populator {
 
@@ -97,7 +98,7 @@ public class PopulatorSpring extends Populator {
 
             LevelProvider provider = chunk.getProvider();
             if (provider != null) {
-                Block state = Block.fullList[this.block << Block.DATA_BITS].clone();
+                Block state = Registries.BLOCK.get(this.block << Block.DATA_BITS).clone();
                 state.x = x;
                 state.y = y;
                 state.z = z;

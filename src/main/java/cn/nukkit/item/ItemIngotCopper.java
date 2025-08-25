@@ -1,19 +1,19 @@
 package cn.nukkit.item;
 
-import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.item.trim.ItemTrimMaterialType;
 
 /**
  * @author MagicDroidX
  * Nukkit Project
  */
-public class ItemIngotCopper extends StringItemBase {
+public class ItemIngotCopper extends StringItemBase implements ItemTrimMaterial {
 
     public ItemIngotCopper() {
-        super("minecraft:copper_ingot", "Copper Ingot");
+        super(COPPER_INGOT, "Copper Ingot");
     }
 
     @Override
-    public boolean isSupportedOn(int protocolId) {
-        return protocolId >= ProtocolInfo.v1_17_0;
+    public ItemTrimMaterialType getMaterial() {
+        return ItemTrimMaterialType.MATERIAL_COPPER;
     }
 }

@@ -11,6 +11,7 @@ import cn.nukkit.level.format.generic.BaseChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.*;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.level.util.BlockUpdateEntry;
 import cn.nukkit.level.ChunkException;
@@ -459,7 +460,7 @@ public class Chunk extends BaseChunk {
                 if (height < y) {
                     return 15;
                 } else if (height == y) {
-                    return Block.transparent[getBlockId(x, y, z)] ? 15 : 0;
+                    return Registries.BLOCK.isTransparent(getBlockId(x, y, z)) ? 15 : 0;
                 } else {
                     return section.getBlockSkyLight(x, y & 0x0f, z);
                 }

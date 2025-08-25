@@ -1,6 +1,6 @@
 package cn.nukkit.inventory;
 
-import cn.nukkit.blockentity.BlockEntityBlastFurnace;
+import cn.nukkit.blockentity.impl.BlockEntityBlastFurnace;
 
 public class BlastFurnaceInventory extends FurnaceInventory {
 

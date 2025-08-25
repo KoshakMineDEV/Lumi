@@ -6,7 +6,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockFire;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockWater;
-import cn.nukkit.blockentity.BlockEntityPistonArm;
+import cn.nukkit.blockentity.impl.BlockEntityPistonArm;
 import cn.nukkit.entity.custom.CustomEntity;
 import cn.nukkit.entity.custom.EntityDefinition;
 import cn.nukkit.entity.custom.EntityManager;
@@ -43,6 +43,7 @@ import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.EntityLink;
 import cn.nukkit.network.protocol.types.PropertySyncData;
 import cn.nukkit.plugin.Plugin;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.level.ChunkException;
 import cn.nukkit.utils.Identifier;
 import cn.nukkit.utils.MainLogger;
@@ -394,9 +395,6 @@ public abstract class Entity extends Location implements Metadatable {
     public static final int ENTITY_COORDINATES_MAX_VALUE = 2100000000;
 
     public static long entityCount = 1;
-
-    private static final Map<String, Class<? extends Entity>> knownEntities = new HashMap<>();
-    private static final Map<String, String> shortNames = new HashMap<>();
 
     private static final Map<Integer, String> entityRuntimeMappingOld = new HashMap<>();
     private static final Map<Integer, String> entityRuntimeMapping407 = new HashMap<>();
@@ -1132,8 +1130,8 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public static Entity createEntity(String name, FullChunk chunk, CompoundTag nbt, Object... args) {
-        if (knownEntities.containsKey(name)) {
-            return createEntity(knownEntities.get(name), chunk, nbt, args);
+        if (Registries.ENTITY.isRegistered(name)) {
+            return createEntity(Registries.ENTITY.get(name), chunk, nbt, args);
         }
         EntityDefinition entityDefinition = EntityManager.get().getDefinition(name);
         if (entityDefinition != null) {
@@ -1144,8 +1142,8 @@ public abstract class Entity extends Location implements Metadatable {
 
     public static Entity createEntity(int type, FullChunk chunk, CompoundTag nbt, Object... args) {
         String name = String.valueOf(type);
-        if (knownEntities.containsKey(name)) {
-            return createEntity(knownEntities.get(name), chunk, nbt, args);
+        if (Registries.ENTITY.isRegistered(name)) {
+            return createEntity(Registries.ENTITY.get(name), chunk, nbt, args);
         }
         EntityDefinition entityDefinition = EntityManager.get().getDefinition(type);
         if (entityDefinition != null) {
@@ -1188,28 +1186,6 @@ public abstract class Entity extends Location implements Metadatable {
         }
 
         return entity;
-    }
-
-    public static boolean registerEntity(String name, Class<? extends Entity> clazz) {
-        return registerEntity(name, clazz, false);
-    }
-
-    public static boolean registerEntity(String name, Class<? extends Entity> clazz, boolean force) {
-        if (clazz == null) {
-            return false;
-        }
-        try {
-            int networkId = clazz.getField("NETWORK_ID").getInt(null);
-            knownEntities.put(String.valueOf(networkId), clazz);
-        } catch (Exception e) {
-            if (!force) {
-                return false;
-            }
-        }
-
-        knownEntities.put(name, clazz);
-        shortNames.put(clazz.getSimpleName(), name);
-        return true;
     }
 
     public static Map<Integer, String> getEntityRuntimeMapping() {
@@ -1337,7 +1313,7 @@ public abstract class Entity extends Location implements Metadatable {
 
     public void saveNBT() {
         if (!this.isPlayer) {
-            this.namedTag.putString("id", this.getSaveId());
+            this.namedTag.putString("id", Registries.ENTITY.getSaveId(this));
             if (!this.getNameTag().isEmpty()) {
                 this.namedTag.putString("CustomName", this.getNameTag());
                 this.namedTag.putBoolean("CustomNameVisible", this.isNameTagVisible());
@@ -1399,16 +1375,8 @@ public abstract class Entity extends Location implements Metadatable {
         if (this.hasCustomName()) {
             return this.getNameTag();
         } else {
-            return this.getSaveId();
+            return Registries.ENTITY.getSaveId(this);
         }
-    }
-
-    public final String getSaveId() {
-        if(this instanceof CustomEntity) {
-            EntityDefinition entityDefinition = ((CustomEntity) this).getEntityDefinition();
-            return entityDefinition == null ? "" : entityDefinition.getIdentifier();
-        }
-        return shortNames.getOrDefault(this.getClass().getSimpleName(), "");
     }
 
     public void spawnTo(Player player) {
@@ -1748,13 +1716,13 @@ public abstract class Entity extends Location implements Metadatable {
         double diffY = y - j;
         double diffZ = z - k;
 
-        if (!Block.transparent[this.level.getBlockIdAt(i, j, k)]) {
-            boolean flag = Block.transparent[this.level.getBlockIdAt(i - 1, j, k)];
-            boolean flag1 = Block.transparent[this.level.getBlockIdAt(i + 1, j, k)];
-            boolean flag2 = Block.transparent[this.level.getBlockIdAt(i, j - 1, k)];
-            boolean flag3 = Block.transparent[this.level.getBlockIdAt(i, j + 1, k)];
-            boolean flag4 = Block.transparent[this.level.getBlockIdAt(i, j, k - 1)];
-            boolean flag5 = Block.transparent[this.level.getBlockIdAt(i, j, k + 1)];
+        if (!Registries.BLOCK.isTransparent(this.level.getBlockIdAt(i, j, k))) {
+            boolean flag = Registries.BLOCK.isTransparent(this.level.getBlockIdAt(i - 1, j, k));
+            boolean flag1 = Registries.BLOCK.isTransparent(this.level.getBlockIdAt(i + 1, j, k));
+            boolean flag2 = Registries.BLOCK.isTransparent(this.level.getBlockIdAt(i, j - 1, k));
+            boolean flag3 = Registries.BLOCK.isTransparent(this.level.getBlockIdAt(i, j + 1, k));
+            boolean flag4 = Registries.BLOCK.isTransparent(this.level.getBlockIdAt(i, j, k - 1));
+            boolean flag5 = Registries.BLOCK.isTransparent(this.level.getBlockIdAt(i, j, k + 1));
 
             int direction = -1;
             double limit = 9999;

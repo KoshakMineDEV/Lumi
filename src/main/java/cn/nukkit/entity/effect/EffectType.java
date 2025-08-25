@@ -1,5 +1,7 @@
 package cn.nukkit.entity.effect;
 
+import cn.nukkit.registry.Registries;
+
 /**
  * @author MEFRREEX
  */
@@ -66,10 +68,10 @@ public record EffectType(String stringId, Integer id) {
     public static final EffectType DARKNESS = new EffectType("darkness", 30);
 
     public static EffectType get(String stringId) {
-        return EffectRegistry.getType(stringId);
+        return Registries.EFFECT.getType(stringId);
     }
 
     public static EffectType get(int id) {
-        return EffectRegistry.getType(id);
+        return Registries.EFFECT.getType(id);
     }
 }

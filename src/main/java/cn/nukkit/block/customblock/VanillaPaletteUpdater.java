@@ -44,10 +44,8 @@ public class VanillaPaletteUpdater {
     }
 
     public static void updateAllProtocols() {
-        int minProtocol = Server.getInstance().getSettings().general().multiversion().minProtocol();
-        int maxProtocol = Server.getInstance().getSettings().general().multiversion().maxProtocol();
         for (int protocol : VanillaPaletteUpdater.getProtocolList()) {
-            if (minProtocol != 0 && protocol < minProtocol || maxProtocol != -1 && protocol > maxProtocol) {
+            if (!Server.getInstance().isVersionSupported(protocol)) {
                 continue;
             }
             if (!ProtocolInfo.SUPPORTED_PROTOCOLS.contains(protocol)) {

@@ -1,11 +1,12 @@
 package cn.nukkit.item.enchantment.crossbow;
 
 import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentRarity;
 
 public class EnchantmentCrossbowMultishot extends EnchantmentCrossbow {
 
     public EnchantmentCrossbowMultishot() {
-        super(Enchantment.ID_CROSSBOW_MULTISHOT, "crossbowMultishot", Rarity.RARE);
+        super(ID_CROSSBOW_MULTISHOT, NAME_CROSSBOW_MULTISHOT, "crossbowMultishot", EnchantmentRarity.RARE);
     }
 
     @Override
@@ -19,12 +20,7 @@ public class EnchantmentCrossbowMultishot extends EnchantmentCrossbow {
     }
 
     @Override
-    public int getMaxLevel() {
-        return 1;
-    }
-
-    @Override
     public boolean checkCompatibility(Enchantment enchantment) {
-        return super.checkCompatibility(enchantment) && enchantment.id != ID_CROSSBOW_PIERCING;
+        return super.checkCompatibility(enchantment) && enchantment.getId() != ID_CROSSBOW_PIERCING;
     }
 }

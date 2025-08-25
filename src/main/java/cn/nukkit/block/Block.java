@@ -1,18 +1,9 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
-import cn.nukkit.block.customblock.CustomBlockDefinition;
-import cn.nukkit.block.customblock.CustomBlockUtil;
-import cn.nukkit.block.customblock.CustomBlockUtil.CustomBlockState;
-import cn.nukkit.block.customblock.VanillaPaletteUpdater;
-import cn.nukkit.block.customblock.comparator.HashedPaletteComparator;
 import cn.nukkit.block.customblock.CustomBlock;
-import cn.nukkit.block.customblock.properties.BlockProperties;
-import cn.nukkit.block.customblock.properties.exception.InvalidBlockPropertyMetaException;
 import cn.nukkit.block.material.BlockType;
 import cn.nukkit.block.material.BlockTypes;
-import cn.nukkit.block.material.CustomBlockType;
 import cn.nukkit.block.material.tags.BlockTag;
 import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.blockentity.BlockEntity;
@@ -25,8 +16,6 @@ import cn.nukkit.item.customitem.ItemCustomTool;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.*;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.level.format.leveldb.LevelDBConstants;
-import cn.nukkit.level.format.leveldb.NukkitLegacyMapper;
 import cn.nukkit.level.persistence.PersistentDataContainer;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
@@ -34,26 +23,15 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.metadata.MetadataValue;
 import cn.nukkit.metadata.Metadatable;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.plugin.Plugin;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.block.data.BlockColor;
-import cn.nukkit.utils.OK;
-import cn.nukkit.utils.Utils;
-import it.unimi.dsi.fastutil.ints.*;
-import it.unimi.dsi.fastutil.objects.*;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 import static cn.nukkit.utils.Utils.dynamic;
 
@@ -71,26 +49,10 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     public static final int DATA_MASK = dynamic(DATA_SIZE - 1);
     public static final int LOWEST_CUSTOM_BLOCK_ID = 10000;
 
-    @SuppressWarnings("rawtypes")
-    public static Class[] list = null;
-    public static Block[] fullList = null;
-    public static int[] light = null;
-    public static int[] lightFilter = null;
-    public static boolean[] solid = null;
-    public static double[] hardness = null;
-    public static boolean[] transparent = null;
-    public static boolean[] diffusesSkyLight = null;
-    public static boolean[] hasMeta = null;
-
     public static final double DEFAULT_FRICTION_FACTOR = 0.6;
     public AxisAlignedBB boundingBox = null;
     public static final Block[] EMPTY_ARRAY = new Block[0];
     public int layer = 0;
-
-    private static final List<CustomBlockDefinition> CUSTOM_BLOCK_DEFINITIONS = new ArrayList<>();
-    public static final Int2ObjectMap<CustomBlock> ID_TO_CUSTOM_BLOCK = new Int2ObjectOpenHashMap<>();
-    public static final ConcurrentHashMap<String, Integer> CUSTOM_BLOCK_ID_MAP = new ConcurrentHashMap<>();
-    private static final Map<String, List<CustomBlockState>> LEGACY_2_CUSTOM_STATE = new HashMap<>();
 
     /**
      * A commonly used block face pattern
@@ -100,95 +62,6 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     private BlockType type;
 
     protected Block() {}
-
-    public static void init() {
-        final BlockUnknown BLOCK_UNKNOWN = new BlockUnknown(Block.MAX_BLOCK_ID, 0);
-
-        if (list == null) {
-            list = new Class[MAX_BLOCK_ID];
-            fullList = new Block[MAX_BLOCK_ID * (1 << DATA_BITS)];
-            light = new int[65536];
-            lightFilter = new int[65536];
-            solid = new boolean[65536];
-            hardness = new double[65536];
-            transparent = new boolean[65536];
-            diffusesSkyLight = new boolean[65536];
-            hasMeta = new boolean[65536];
-
-            Blocks.init();
-
-            IntStream idStream = IntStream.range(0, MAX_BLOCK_ID);
-            idStream.parallel().forEach(id -> {
-                Class<?> c = list[id];
-                if (c != null) {
-                    Block block;
-                    try {
-                        block = (Block) c.getDeclaredConstructor().newInstance();
-                        try {
-                            @SuppressWarnings("rawtypes")
-                            Constructor constructor = c.getDeclaredConstructor(int.class);
-                            constructor.setAccessible(true);
-                            for (int data = 0; data < (1 << DATA_BITS); ++data) {
-                                int fullId = (id << DATA_BITS) | data;
-                                Block b;
-                                try {
-                                    b = (Block) constructor.newInstance(data);
-                                    if (b.getDamage() != data) {
-                                        b = BLOCK_UNKNOWN;
-                                    }
-                                } catch (Exception e) {
-                                    Server.getInstance().getLogger().error("Error while registering " + c.getName(), e);
-                                    b = BLOCK_UNKNOWN;
-                                }
-                                fullList[fullId] = b;
-                            }
-                            hasMeta[id] = true;
-                        } catch (NoSuchMethodException ignore) {
-                            for (int data = 0; data < DATA_SIZE; ++data) {
-                                int fullId = (id << DATA_BITS) | data;
-                                fullList[fullId] = block;
-                            }
-                        }
-                    } catch (Exception e) {
-                        Server.getInstance().getLogger().error("Error while registering " + c.getName(), e);
-                        for (int data = 0; data < DATA_SIZE; ++data) {
-                            fullList[(id << DATA_BITS) | data] = BLOCK_UNKNOWN;
-                        }
-                        return;
-                    }
-
-                    solid[id] = block.isSolid();
-                    transparent[id] = block.isTransparent();
-                    diffusesSkyLight[id] = block.diffusesSkyLight();
-                    hardness[id] = block.getHardness();
-                    light[id] = block.getLightLevel();
-
-                    if (block.isSolid()) {
-                        if (block.isTransparent()) {
-                            if (block instanceof BlockLiquid || block instanceof BlockIce) {
-                                lightFilter[id] = 2;
-                            } else {
-                                lightFilter[id] = 1;
-                            }
-                        } else if (block instanceof BlockSlime) {
-                            lightFilter[id] = 1;
-                        } else if (id == CAULDRON_BLOCK) {
-                            lightFilter[id] = 3;
-                        } else {
-                            lightFilter[id] = 15;
-                        }
-                    } else {
-                        lightFilter[id] = 1;
-                    }
-                } else {
-                    lightFilter[id] = 1;
-                    for (int data = 0; data < DATA_SIZE; ++data) {
-                        fullList[(id << DATA_BITS) | data] = BLOCK_UNKNOWN;
-                    }
-                }
-            });
-        }
-    }
 
     public static Block get(int id) {
         return get(id, null);
@@ -200,7 +73,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         }
 
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return ID_TO_CUSTOM_BLOCK.get(id).toCustomBlock(meta != null ? meta : 0);
+            return Registries.BLOCK.getCustom(id).toCustomBlock(meta != null ? meta : 0);
         }
 
         int fullId = id << DATA_BITS;
@@ -208,26 +81,26 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
             int iMeta = meta;
             if (iMeta <= DATA_SIZE) {
                 fullId = fullId | meta;
-                if (fullId >= fullList.length || fullList[fullId] == null) {
+                if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                     log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, iMeta);
                     return new BlockUnknown(id, iMeta);
                 }
-                return fullList[fullId].clone();
+                return Registries.BLOCK.get(fullId).clone();
             } else {
-                if (fullId >= fullList.length || fullList[fullId] == null) {
+                if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                     log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, iMeta);
                     return new BlockUnknown(id, iMeta);
                 }
-                Block block = fullList[fullId].clone();
+                Block block = Registries.BLOCK.get(fullId).clone();
                 block.setDamage(iMeta);
                 return block;
             }
         } else {
-            if (fullId >= fullList.length || fullList[fullId] == null) {
+            if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, 0);
                 return new BlockUnknown(id, 0);
             }
-            return fullList[fullId].clone();
+            return Registries.BLOCK.get(fullId).clone();
         }
     }
 
@@ -241,26 +114,26 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         }
 
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return ID_TO_CUSTOM_BLOCK.get(id).toCustomBlock(meta);
+            return Registries.BLOCK.getCustom(id).toCustomBlock(meta);
         }
 
         Block block;
         int fullId = id << DATA_BITS;
         if (meta != null && meta > DATA_SIZE) {
-            if (fullId >= fullList.length || fullList[fullId] == null) {
+            if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
                 return new BlockUnknown(id, meta);
             }
-            block = fullList[fullId].clone();
+            block = Registries.BLOCK.get(fullId).clone();
             block.setDamage(meta);
         } else {
             meta = meta == null ? 0 : meta;
             fullId = fullId | meta;
-            if (fullId >= fullList.length || fullList[fullId] == null) {
+            if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
                 return new BlockUnknown(id, meta);
             }
-            block = fullList[fullId].clone();
+            block = Registries.BLOCK.get(fullId).clone();
         }
 
         if (pos != null) {
@@ -279,23 +152,23 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         }
 
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return ID_TO_CUSTOM_BLOCK.get(id).toCustomBlock(data);
+            return Registries.BLOCK.getCustom(id).toCustomBlock(data);
         }
 
         int fullId = id << DATA_BITS;
-        if (fullId >= fullList.length) {
+        if (fullId >= Registries.BLOCK.getFullListSize()) {
             log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, data);
             return new BlockUnknown(id, data);
         }
         if (data < DATA_SIZE) {
             fullId = fullId | data;
-            if (fullList[fullId] == null) {
+            if (Registries.BLOCK.get(fullId) == null) {
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, data);
                 return new BlockUnknown(id, data);
             }
-            return fullList[fullId].clone();
+            return Registries.BLOCK.get(fullId).clone();
         } else {
-            Block block = fullList[fullId].clone();
+            Block block = Registries.BLOCK.get(fullId).clone();
             block.setDamage(data);
             return block;
         }
@@ -309,15 +182,15 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         int id = fullId << DATA_BITS;
 
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return ID_TO_CUSTOM_BLOCK.get(id).toCustomBlock(fullId & DATA_BITS);
+            return Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_BITS);
         }
 
-        if (fullId >= fullList.length || fullList[fullId] == null) {
+        if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
             int meta = fullId & DATA_BITS;
             log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
             return new BlockUnknown(id, meta);
         }
-        Block block = fullList[fullId].clone();
+        Block block = Registries.BLOCK.get(fullId).clone();
         block.x = x;
         block.y = y;
         block.z = z;
@@ -332,14 +205,14 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
     public static Block get(int id, int meta, Level level, int x, int y, int z, int layer) {
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return ID_TO_CUSTOM_BLOCK.get(id).toCustomBlock(meta);
+            return Registries.BLOCK.getCustom(id).toCustomBlock(meta);
         }
 
         Block block;
         if (meta <= DATA_SIZE) {
-            block = fullList[id << DATA_BITS | meta].clone();
+            block = Registries.BLOCK.get(id << DATA_BITS | meta).clone();
         } else {
-            block = fullList[id << DATA_BITS].clone();
+            block = Registries.BLOCK.get(id << DATA_BITS).clone();
             block.setDamage(meta);
         }
         block.x = x;
@@ -352,30 +225,30 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
     public static int getBlockLight(int blockId) {
         if (blockId >= LOWEST_CUSTOM_BLOCK_ID) {
-            return light[0]; // TODO: just temporary
+            return Registries.BLOCK.getLight(0); // TODO: just temporary
         }
-        return light[blockId];
+        return Registries.BLOCK.getLight(blockId);
     }
 
     public static int getBlockLightFilter(int blockId) {
         if (blockId >= LOWEST_CUSTOM_BLOCK_ID) {
-            return lightFilter[0]; // TODO: just temporary
+            return Registries.BLOCK.getLightFilter(0); // TODO: just temporary
         }
-        return lightFilter[blockId];
+        return Registries.BLOCK.getLightFilter(blockId);
     }
 
     public static boolean isBlockSolidById(int blockId) {
         if (blockId >= LOWEST_CUSTOM_BLOCK_ID) {
-            return solid[1]; // TODO: just temporary
+            return Registries.BLOCK.isSolid(1); // TODO: just temporary
         }
-        return solid[blockId];
+        return Registries.BLOCK.isSolid(blockId);
     }
 
     public static boolean isBlockTransparentById(int blockId) {
         if (blockId >= LOWEST_CUSTOM_BLOCK_ID) {
-            return transparent[1]; // TODO: just temporary
+            return Registries.BLOCK.isTransparent(1); // TODO: just temporary
         }
-        return transparent[blockId];
+        return Registries.BLOCK.isTransparent(blockId);
     }
 
     public static Block fromFullId(int fullId) {
@@ -613,14 +486,12 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         } else if (this.isAir()) {
             this.type = BlockTypes.AIR;
         } else {
-            var mapping = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
-            var entry = mapping.toRuntime(this.getItemId(), this.getDamage());
-            this.type = BlockTypes.getFromRuntime(entry.getRuntimeId());
+            this.type = BlockTypes.get(Registries.BLOCK_TO_ITEM.get(this.getId(), this.getDamage()));
         }
 
         // Throw an exception if for some reason the type cannot be determined.
         if (this.type == null) {
-            throw new IllegalStateException("Failed to initialize block type");
+            throw new IllegalStateException("Failed to initialize block type " + this.getName() + ": " + this.getId() + ":" + this.getDamage());
         }
 
         return this.type;
@@ -713,7 +584,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
                     this.toItem()
             };
         }
-        if (this.getId() < 0 || this.getId() > list.length) {
+        if (this.getId() < 0 || this.getId() > Registries.BLOCK.getListSize()) {
             return Item.EMPTY_ARRAY;
         }
 
@@ -1529,183 +1400,6 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
     public boolean cloneTo(Position pos) {
         return cloneTo(pos, true);
-    }
-
-    private static int nextBlockId = LOWEST_CUSTOM_BLOCK_ID;
-
-    private final static SortedMap<String, CustomBlock> HASHED_SORTED_CUSTOM_BLOCK = new TreeMap<>(HashedPaletteComparator.INSTANCE);
-
-    /**
-     * 注册自定义方块
-     *
-     * @param blockClassList 传入自定义方块class List
-     */
-    public static OK<?> registerCustomBlock(@NotNull List<Class<? extends CustomBlock>> blockClassList) {
-        if (!Server.getInstance().getSettings().features().enableExperimentMode()) {
-            return new OK<>(false, "The server does not have the experiment mode feature enabled.Unable to register custom block!");
-        }
-        for (var clazz : blockClassList) {
-            CustomBlock block;
-            try {
-                var method = clazz.getDeclaredConstructor();
-                method.setAccessible(true);
-                block = method.newInstance();
-                if (!HASHED_SORTED_CUSTOM_BLOCK.containsKey(block.getIdentifier())) {
-                    HASHED_SORTED_CUSTOM_BLOCK.put(block.getIdentifier(), block);
-                }
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                return new OK<>(false, e);
-            } catch (NoSuchMethodException e) {
-                return new OK<>(false, "Cannot find the parameterless constructor for this custom block:" + clazz.getCanonicalName());
-            }
-        }
-        return new OK<Void>(true);
-    }
-
-    /**
-     * 注册自定义方块
-     *
-     * @param blockNamespaceClassMap 传入自定义方块classMap { key: NamespaceID, value: Class }
-     */
-    public static OK<?> registerCustomBlock(@NotNull Map<String, Class<? extends CustomBlock>> blockNamespaceClassMap) {
-        if (!Server.getInstance().getSettings().features().enableExperimentMode()) {
-            return new OK<>(false, "The server does not have the experiment mode feature enabled.Unable to register custom block!");
-        }
-        for (var entry : blockNamespaceClassMap.entrySet()) {
-            if (!HASHED_SORTED_CUSTOM_BLOCK.containsKey(entry.getKey())) {
-                try {
-                    var method = entry.getValue().getDeclaredConstructor();
-                    method.setAccessible(true);
-                    var block = method.newInstance();
-                    HASHED_SORTED_CUSTOM_BLOCK.put(entry.getKey(), block);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    return new OK<>(false, e);
-                } catch (NoSuchMethodException e) {
-                    return new OK<>(false, "Cannot find the parameterless constructor for this custom block:" + entry.getValue().getCanonicalName());
-                }
-            }
-        }
-        return new OK<Void>(true);
-    }
-
-    public static void initCustomBlocks() {
-        if (!HASHED_SORTED_CUSTOM_BLOCK.isEmpty()) {
-            VanillaPaletteUpdater.updateAllProtocols();
-
-            for (var entry : HASHED_SORTED_CUSTOM_BLOCK.entrySet()) {
-                final CustomBlock customBlock = entry.getValue();
-                final BlockProperties properties = customBlock.getBlockProperties();
-
-                final String identifier = customBlock.getIdentifier();
-                final int id = nextBlockId++;
-
-                CUSTOM_BLOCK_ID_MAP.put(entry.getKey(), id);//自定义方块标识符->自定义方块id
-                ID_TO_CUSTOM_BLOCK.put(id, customBlock);//自定义方块id->自定义方块
-                CUSTOM_BLOCK_DEFINITIONS.add(customBlock.getDefinition());//行为包数据
-
-                CustomBlockUtil.generateVariants(properties, properties.getNames().toArray(new String[0]))
-                        .forEach(states -> {
-                            int meta = 0;
-
-                            for (String name : states.keySet()) {
-                                meta = properties.setValue(meta, name, states.get(name));
-                            }
-
-                            final int itemId = 255 - id;
-                            for (RuntimeItemMapping mapping : RuntimeItems.VALUES) {
-                                mapping.registerCustomBlockItem(customBlock.getIdentifier(), itemId, meta);
-                                Item.addItemToCustomItems(customBlock.getIdentifier(), Item.get(itemId, meta));
-                            }
-
-                            CustomBlockState state;
-                            try {
-                                state = CustomBlockUtil.createBlockState(identifier, (id << Block.DATA_BITS) | meta, properties, customBlock);
-                            } catch (InvalidBlockPropertyMetaException e) {
-                                log.error(e);
-                                return; // Nukkit has more states than our block
-                            }
-
-                            Block.LEGACY_2_CUSTOM_STATE.computeIfAbsent(identifier, (key) -> new ArrayList<>()).add(state);
-                        });
-            }
-
-            final BlockPalette storagePalette = GlobalBlockPalette.getPaletteByProtocol(LevelDBConstants.PALETTE_VERSION);
-            final ObjectSet<BlockPalette> set = new ObjectArraySet<>();
-
-            for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
-                if (protocol < Server.getInstance().getSettings().general().multiversion().minProtocol()) {
-                    continue;
-                }
-
-                BlockPalette palette = GlobalBlockPalette.getPaletteByProtocol(protocol);
-                if (set.contains(palette)) {
-                    continue;
-                }
-                set.add(palette);
-
-                if (palette.getProtocol() == storagePalette.getProtocol()) {
-                    CustomBlockUtil.recreateBlockPalette(palette, new ObjectArrayList<>(NukkitLegacyMapper.loadBlockPalette()));
-                } else {
-                    Path path = CustomBlockUtil.getVanillaPalettePath(palette.getProtocol());
-                    if (!Files.exists(path)) {
-                        log.warn("No vanilla palette found for {}.", Utils.getVersionByProtocol(palette.getProtocol()));
-                        continue;
-                    }
-                    try {
-                        CustomBlockUtil.recreateBlockPalette(palette);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-
-            ID_TO_CUSTOM_BLOCK.forEach((id, block) -> {
-                light[id] = block.getLightLevel();
-                lightFilter[id] = block.getLightFilter();
-                solid[id] = ((Block) block).isSolid();
-                hardness[id] = block.getHardness();
-                transparent[id] = ((Block) block).isTransparent();
-                diffusesSkyLight[id] = ((Block) block).diffusesSkyLight();
-                hasMeta[id] = true;
-
-                // Registering custom block type
-                BlockTypes.register(new CustomBlockType(block));
-
-                if (block.shouldBeRegisteredInCreative()) {
-                    Item.addCreativeItem(ProtocolInfo.v1_20_0, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_20_10, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_20_30, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_20_40, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_20_50, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_20_60, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_20_70, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_20_80, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_0, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_20, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_30, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_40, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_50, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_60, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_70, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_80, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_90, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_93, block.toItem());
-                    Item.addCreativeItem(ProtocolInfo.v1_21_100, block.toItem());
-                }
-            });
-        }
-    }
-
-    public static List<CustomBlockDefinition> getCustomBlockDefinitionList() {
-        return new ArrayList<>(CUSTOM_BLOCK_DEFINITIONS);
-    }
-
-    public static HashMap<Integer, CustomBlock> getCustomBlockMap() {
-        return new HashMap<>(ID_TO_CUSTOM_BLOCK);
-    }
-
-    public static Map<String, List<CustomBlockState>> getLegacy2CustomState() {
-        return LEGACY_2_CUSTOM_STATE;
     }
 
     /**

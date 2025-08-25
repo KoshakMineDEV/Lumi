@@ -7,6 +7,7 @@ import cn.nukkit.level.generator.populator.helper.EnsureBelow;
 import cn.nukkit.level.generator.populator.helper.EnsureCover;
 import cn.nukkit.level.generator.populator.type.PopulatorSurfaceBlock;
 import cn.nukkit.math.NukkitRandom;
+import cn.nukkit.registry.Registries;
 
 /**
  * @author DaPorkchop_
@@ -26,7 +27,7 @@ public class PopulatorGroundFire extends PopulatorSurfaceBlock {
     @Override
     protected void placeBlock(int x, int y, int z, int id, FullChunk chunk, NukkitRandom random) {
         super.placeBlock(x, y, z, id, chunk, random);
-        chunk.setBlockLight(x, y, z, Block.light[FIRE]);
+        chunk.setBlockLight(x, y, z, Registries.BLOCK.getLight(Block.FIRE));
     }
 
     @Override

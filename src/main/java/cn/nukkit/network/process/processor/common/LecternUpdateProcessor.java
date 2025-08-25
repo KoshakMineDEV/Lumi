@@ -4,7 +4,7 @@ import cn.nukkit.PlayerHandle;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockLectern;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityLectern;
+import cn.nukkit.blockentity.impl.BlockEntityLectern;
 import cn.nukkit.event.block.LecternPageChangeEvent;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.network.process.DataPacketProcessor;

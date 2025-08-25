@@ -4,6 +4,9 @@ import cn.nukkit.AdventureSettings.Type;
 import cn.nukkit.block.*;
 import cn.nukkit.block.material.tags.BlockInternalTags;
 import cn.nukkit.blockentity.*;
+import cn.nukkit.blockentity.impl.BlockEntityCampfire;
+import cn.nukkit.blockentity.impl.BlockEntityItemFrame;
+import cn.nukkit.blockentity.impl.BlockEntitySign;
 import cn.nukkit.bossbar.BossBarColor;
 import cn.nukkit.bossbar.DummyBossBar;
 import cn.nukkit.command.Command;
@@ -77,6 +80,7 @@ import cn.nukkit.permission.PermissionAttachment;
 import cn.nukkit.permission.PermissionAttachmentInfo;
 import cn.nukkit.plugin.InternalPlugin;
 import cn.nukkit.plugin.Plugin;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.resourcepacks.ResourcePack;
 import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.scoreboard.displayer.IScoreboardViewer;
@@ -1608,7 +1612,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             if (this.protocol < ProtocolInfo.v1_16_0) {
                 InventoryContentPacket inventoryContentPacket = new InventoryContentPacket();
                 inventoryContentPacket.inventoryId = InventoryContentPacket.SPECIAL_CREATIVE;
-                inventoryContentPacket.slots = Item.getCreativeItems(this.protocol).toArray(Item.EMPTY_ARRAY);
+                inventoryContentPacket.slots = Registries.CREATIVE_ITEM.get(this.protocol).getItems().toArray(Item.EMPTY_ARRAY);
                 this.dataPacket(inventoryContentPacket);
             }
         }
@@ -2812,7 +2816,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 ItemComponentPacket itemComponentPacket = new ItemComponentPacket();
                 if (this.protocol >= ProtocolInfo.v1_21_60) {
                     Collection<ItemComponentPacket.ItemDefinition> vanillaItems = RuntimeItems.getMapping(this.protocol).getVanillaItemDefinitions();
-                    Set<Entry<String, CustomItemDefinition>> itemDefinitions = Item.getCustomItemDefinition().entrySet();
+                    Set<Entry<String, CustomItemDefinition>> itemDefinitions = Registries.ITEM.getCustomItemDefinition().entrySet();
                     List<ItemComponentPacket.ItemDefinition> entries = new ArrayList<>(vanillaItems.size() + itemDefinitions.size());
                     entries.addAll(vanillaItems);
                     if (this.server.getSettings().features().enableExperimentMode() && !itemDefinitions.isEmpty()) {
@@ -2833,8 +2837,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     }
                     itemComponentPacket.setEntries(entries);
                 } else {
-                    if (this.server.getSettings().features().enableExperimentMode() && !Item.getCustomItemDefinition().isEmpty()) {
-                        HashMap<String, CustomItemDefinition> itemDefinition = Item.getCustomItemDefinition();
+                    if (this.server.getSettings().features().enableExperimentMode() && !Registries.ITEM.getCustomItemDefinition().isEmpty()) {
+                        Map<String, CustomItemDefinition> itemDefinition = Registries.ITEM.getCustomItemDefinition();
                         List<ItemComponentPacket.ItemDefinition> entries = new ArrayList<>(itemDefinition.size());
                         int i = 0;
                         for (var entry : itemDefinition.entrySet()) {

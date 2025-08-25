@@ -6,6 +6,7 @@ import cn.nukkit.block.BlockID;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.UpdateBlockPacket;
+import cn.nukkit.registry.Registries;
 import it.unimi.dsi.fastutil.ints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -67,7 +68,7 @@ public final class AntiXraySystem {
                 try {
                     tmpV3Rid = new Vector3WithBlockId(x, y, z, level.getBlockIdAt(x, y, z, 0), level.getBlockIdAt(x, y, z, 1));
                     vRidList.add(tmpV3Rid);
-                    if (!Block.transparent[tmpV3Rid.getBlockIdLayer0()]) {
+                    if (!Registries.BLOCK.isTransparent(tmpV3Rid.getBlockIdLayer0())) {
                         continue;
                     }
                 } catch (Exception ignore) {

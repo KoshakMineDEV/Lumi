@@ -3,7 +3,7 @@ package cn.nukkit.block;
 import cn.nukkit.Difficulty;
 import cn.nukkit.Player;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityBeehive;
+import cn.nukkit.blockentity.impl.BlockEntityBeehive;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemID;
 import cn.nukkit.item.ItemTool;

@@ -18,6 +18,7 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Utils;
 
 import java.util.HashMap;
@@ -180,7 +181,7 @@ public class EntityEnderman extends EntityWalkingMob {
         if (chunk != null && chunk.isGenerated()) {
             for (int y = Math.min(this.level.getMaxBlockY(), (int) pos.y); y >= 0; y--) {
                 if (previousY1 > -1 && previousY2 > -1) {
-                    if (Block.solid[chunk.getBlockId(x, y, z)] && chunk.getBlockId(x, previousY1, z) == 0 && chunk.getBlockId(x, previousY2, z) == 0) {
+                    if (Registries.BLOCK.isSolid(chunk.getBlockId(x, y, z)) && chunk.getBlockId(x, previousY1, z) == 0 && chunk.getBlockId(x, previousY2, z) == 0) {
                         return new Location(pos.x + 0.5, previousY1 + 0.1, pos.z + 0.5, this.level);
                     }
                 }

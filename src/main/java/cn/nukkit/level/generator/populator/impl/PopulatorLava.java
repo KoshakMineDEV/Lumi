@@ -5,6 +5,7 @@ import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.generator.populator.type.Populator;
 import cn.nukkit.math.NukkitRandom;
+import cn.nukkit.registry.Registries;
 
 public class PopulatorLava extends Populator {
 
@@ -35,7 +36,7 @@ public class PopulatorLava extends Populator {
                 int y = getHighestWorkableBlock(chunk, x, z);
                 if (y != -1 && chunk.getBlockId(x, y, z) == Block.AIR) {
                     chunk.setBlock(x, y, z, Block.LAVA);
-                    chunk.setBlockLight(x, y, z, Block.light[Block.LAVA]);
+                    chunk.setBlockLight(x, y, z, Registries.BLOCK.getLight(Block.LAVA));
                     this.lavaSpread(bx + x, y, bz + z);
                 }
             }

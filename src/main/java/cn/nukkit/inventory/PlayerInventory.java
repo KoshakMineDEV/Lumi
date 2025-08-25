@@ -15,6 +15,7 @@ import cn.nukkit.item.ItemMap;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
 import cn.nukkit.network.protocol.types.inventory.ContainerType;
+import cn.nukkit.registry.Registries;
 
 import java.util.Collection;
 
@@ -516,7 +517,7 @@ public class PlayerInventory extends BaseInventory {
 
         CreativeContentPacket packet = new CreativeContentPacket();
         if (!player.isSpectator()) {
-            packet.creativeItems = Item.getCreativeItemsAndGroups(player.protocol);
+            packet.creativeItems = Registries.CREATIVE_ITEM.get(player.protocol);
         }
         player.dataPacket(packet);
     }

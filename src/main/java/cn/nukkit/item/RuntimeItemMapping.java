@@ -11,6 +11,7 @@ import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ItemComponentPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.Utils;
 import com.google.gson.JsonArray;
@@ -140,13 +141,13 @@ public class RuntimeItemMapping {
         this.generatePalette();
     }
 
-    Object2IntMap<String> getName2RuntimeId() {
+    public Object2IntMap<String> getName2RuntimeId() {
         return name2RuntimeId;
     }
 
     @NotNull
     public Item getItemByNamespaceId(@NotNull String namespaceId, int amount) {
-        Supplier<Item> constructor = Item.NAMESPACED_ID_ITEM.get(namespaceId.toLowerCase(Locale.ENGLISH));
+        Supplier<Item> constructor = Registries.ITEM.getSupplier(namespaceId.toLowerCase(Locale.ENGLISH));
         if (constructor != null) {
             try {
                 Item item = constructor.get();
@@ -241,7 +242,7 @@ public class RuntimeItemMapping {
         this.generatePalette();
     }
 
-    synchronized boolean registerCustomItem(CustomItem customItem) {
+    public synchronized boolean registerCustomItem(CustomItem customItem) {
         int runtimeId = CustomItemDefinition.getRuntimeId(customItem.getDefinition().identifier());
         String namespaceId = customItem.getDefinition().identifier();
         if (!Server.getInstance().getSettings().features().enableExperimentMode()) {
@@ -265,7 +266,7 @@ public class RuntimeItemMapping {
         return true;
     }
 
-    synchronized void deleteCustomItem(CustomItem customItem) {
+    public synchronized void deleteCustomItem(CustomItem customItem) {
         String namespaceId = customItem.getDefinition().identifier();
         if (!Server.getInstance().getSettings().features().enableExperimentMode() && !this.customItems.contains(namespaceId)) {
             return;
@@ -360,7 +361,7 @@ public class RuntimeItemMapping {
             if ("minecraft:raw_iron".equalsIgnoreCase(identifier)) {
                 int test = 1;
             }
-            if (networkId.isEmpty() || !Item.NAMESPACED_ID_ITEM.containsKey(identifier)) {
+            if (networkId.isEmpty() || !Registries.ITEM.isItemRegistered(identifier)) {
                 if (!ignoreUnknown) {
                     throw new IllegalStateException("Can not find legacyEntry for " + identifier);
                 }

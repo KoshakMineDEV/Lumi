@@ -11,6 +11,8 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.registry.ItemLegacyRegistry;
+import cn.nukkit.registry.Registries;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import io.netty.buffer.ByteBuf;
@@ -78,7 +80,7 @@ public class Utils {
     }
 
     public static boolean hasItemOrBlock(String id) {
-        return Item.NAMESPACED_ID_ITEM.containsKey(id.toLowerCase(Locale.ROOT));
+        return Registries.ITEM.isItemRegistered(id.toLowerCase(Locale.ROOT));
     }
 
     public static boolean hasItemOrBlock(int id) {
@@ -87,9 +89,9 @@ public class Utils {
             if (blockId > Block.LOWEST_CUSTOM_BLOCK_ID) {
                 return Block.get(blockId) != null;
             }
-            return blockId < Block.MAX_BLOCK_ID && Block.list[blockId] != null;
+            return blockId < Block.MAX_BLOCK_ID && Registries.BLOCK.getClass(blockId) != null;
         } else {
-            return id < Item.list.length && Item.list[id] != null;
+            return id < ItemLegacyRegistry.HIGHEST_LEGACY_ITEM_ID && Registries.ITEM_LEGACY.get(id) != null;
         }
     }
 

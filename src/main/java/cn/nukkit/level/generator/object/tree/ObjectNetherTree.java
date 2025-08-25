@@ -3,6 +3,7 @@ package cn.nukkit.level.generator.object.tree;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.math.NukkitRandom;
+import cn.nukkit.registry.Registries;
 
 public abstract class ObjectNetherTree extends ObjectTree {
     protected final int treeHeight;
@@ -42,7 +43,7 @@ public abstract class ObjectNetherTree extends ObjectTree {
                     if (xOff == mid && zOff == mid && random.nextBoundedInt(2) == 0) {
                         continue;
                     }
-                    if (!Block.solid[level.getBlockIdAt(xx, yy, zz)]) {
+                    if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yy, zz))) {
                         if (random.nextBoundedInt(20) == 0) {
                             level.setBlockAt(xx, yy, zz, Block.SHROOMLIGHT);
                         } else {
@@ -59,7 +60,7 @@ public abstract class ObjectNetherTree extends ObjectTree {
                     if (xOff == mid && zOff == mid && random.nextBoundedInt(2) == 0) {
                         continue;
                     }
-                    if (!Block.solid[level.getBlockIdAt(xx, yy, zz)]) {
+                    if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yy, zz))) {
                         if (random.nextBoundedInt(20) == 0) {
                             level.setBlockAt(xx, yy, zz, Block.SHROOMLIGHT);
                         } else {
@@ -77,10 +78,10 @@ public abstract class ObjectNetherTree extends ObjectTree {
 
             for (int xx = x - mid; xx <= x + mid; xx++) {
                 for (int zz = z - mid; zz <= z + mid; zz += mid * 2) {
-                    if (!Block.solid[level.getBlockIdAt(xx, yy, zz)]) {
+                    if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yy, zz))) {
                         if (random.nextBoundedInt(3) == 0) {
                             for (int i = 0; i < random.nextBoundedInt(5); i++) {
-                                if (!Block.solid[level.getBlockIdAt(xx, yy - i, zz)]) {
+                                if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yy - i, zz))) {
                                     level.setBlockAt(xx, yy - i, zz, getLeafBlock());
                                 }
                             }
@@ -91,10 +92,10 @@ public abstract class ObjectNetherTree extends ObjectTree {
 
             for (int zz = z - mid; zz <= z + mid; zz++) {
                 for (int xx = x - mid; xx <= x + mid; xx += mid * 2) {
-                    if (!Block.solid[level.getBlockIdAt(xx, yy, zz)]) {
+                    if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yy, zz))) {
                         if (random.nextBoundedInt(3) == 0) {
                             for (int i = 0; i < random.nextBoundedInt(4); i++) {
-                                if (!Block.solid[level.getBlockIdAt(xx, yy - i, zz)]) {
+                                if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xx, yy - i, zz))) {
                                     level.setBlockAt(xx, yy - i, zz, getLeafBlock());
                                 }
                             }
@@ -110,7 +111,7 @@ public abstract class ObjectNetherTree extends ObjectTree {
                 if (checkY(level, y1)) {
                     continue;
                 }
-                if (!Block.solid[level.getBlockIdAt(xCanopy, y1, zCanopy)]) {
+                if (!Registries.BLOCK.isSolid(level.getBlockIdAt(xCanopy, y1, zCanopy))) {
                     level.setBlockAt(xCanopy, y1, zCanopy, getLeafBlock());
                 }
             }

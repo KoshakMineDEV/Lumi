@@ -2,9 +2,8 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityDispenser;
+import cn.nukkit.blockentity.impl.BlockEntityDispenser;
 import cn.nukkit.dispenser.DispenseBehavior;
-import cn.nukkit.dispenser.DispenseBehaviorRegister;
 import cn.nukkit.inventory.ContainerInventory;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.item.Item;
@@ -14,6 +13,7 @@ import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.LevelEventPacket;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.block.data.Faceable;
 import org.jetbrains.annotations.NotNull;
 
@@ -215,7 +215,7 @@ public class BlockDispenser extends BlockSolidMeta implements Faceable, BlockEnt
         Item origin = original;
         original = original.clone();
 
-        DispenseBehavior behavior = DispenseBehaviorRegister.getBehavior(original.getNamespaceId());
+        DispenseBehavior behavior = Registries.DISPENSE_BEHAVIOR.get(original.getNamespaceId());
         Item result = behavior.dispense(this, facing, original);
 
         pk.evid = LevelEventPacket.EVENT_SOUND_CLICK;
@@ -237,7 +237,7 @@ public class BlockDispenser extends BlockSolidMeta implements Faceable, BlockEnt
                 if (result.getId() == Item.HONEY_BOTTLE || result.getId() == Item.GLASS_BOTTLE || (result.getId() == Item.BUCKET && result.getDamage() > 0)) {
                     Item[] invFull = inv.addItem(original.decrement(result.count));
                     for (Item drop : invFull) {
-                        DispenseBehaviorRegister.getBehavior("none").dispense(this, getBlockFace(), drop);
+                        Registries.DISPENSE_BEHAVIOR.getDefault().dispense(this, getBlockFace(), drop);
                     }
                 }
             }

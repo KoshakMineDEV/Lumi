@@ -13,6 +13,7 @@ import cn.nukkit.level.util.BitArrayVersion;
 import cn.nukkit.level.util.PalettedBlockStorage;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.NukkitRandom;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.BinaryStream;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
@@ -262,12 +263,12 @@ public class StateBlockStorage {
     }
 
     private boolean canBeObfuscated(int x, int y, int z) {
-        return !Block.transparent[get(x + 1, y, z) >> Block.DATA_BITS] &&
-                !Block.transparent[get(x - 1, y, z) >> Block.DATA_BITS] &&
-                !Block.transparent[get(x, y + 1, z) >> Block.DATA_BITS] &&
-                !Block.transparent[get(x, y - 1, z) >> Block.DATA_BITS] &&
-                !Block.transparent[get(x, y, z + 1) >> Block.DATA_BITS] &&
-                !Block.transparent[get(x, y, z - 1) >> Block.DATA_BITS];
+        return !Registries.BLOCK.isTransparent(get(x + 1, y, z) >> Block.DATA_BITS) &&
+                !Registries.BLOCK.isTransparent(get(x - 1, y, z) >> Block.DATA_BITS) &&
+                !Registries.BLOCK.isTransparent(get(x, y + 1, z) >> Block.DATA_BITS) &&
+                !Registries.BLOCK.isTransparent(get(x, y - 1, z) >> Block.DATA_BITS) &&
+                !Registries.BLOCK.isTransparent(get(x, y, z + 1) >> Block.DATA_BITS) &&
+                !Registries.BLOCK.isTransparent(get(x, y, z - 1) >> Block.DATA_BITS);
     }
 
     private void grow(BitArrayVersion version) {

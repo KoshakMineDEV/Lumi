@@ -7,6 +7,7 @@ import cn.nukkit.block.BlockMeta;
 import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.properties.BlockPropertiesHelper;
 import cn.nukkit.item.Item;
+import cn.nukkit.registry.Registries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,7 +71,7 @@ public interface CustomBlock extends BlockPropertiesHelper {
      * } }
      */
     default int getId() {
-        return Block.CUSTOM_BLOCK_ID_MAP.get(getIdentifier().toLowerCase(Locale.ENGLISH));
+        return Registries.BLOCK.getCustomId(getIdentifier().toLowerCase(Locale.ENGLISH));
     }
 
     /**

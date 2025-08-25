@@ -13,6 +13,7 @@ import cn.nukkit.level.format.leveldb.BlockStateMapping;
 import cn.nukkit.level.format.leveldb.LevelDBConstants;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.registry.Registries;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -184,7 +185,7 @@ public class CustomBlockUtil {
             legacyIds.add(entry.getIntKey());
         }
 
-        for(List<CustomBlockState> variants : Block.getLegacy2CustomState().values()) {
+        for(List<CustomBlockState> variants : Registries.BLOCK.getLegacy2CustomState().values()) {
             for (CustomBlockState definition : variants) {
                 NbtMap state = definition.getBlockState();
 
