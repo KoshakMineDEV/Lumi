@@ -866,7 +866,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(PALE_OAK_WOOD, BlockWoodPaleOak.class); //1260
         register(PALE_OAK_SAPLING, BlockPaleOakSapling.class); //1261
         register(PALE_OAK_LEAVES, BlockLeavesPaleOak.class); //1262
-
+        register(MUSHROOM_STEM, BlockMushroomStem.class); //1263
         register(PALE_MOSS_BLOCK, BlockPaleMoss.class); //1264
         register(PALE_MOSS_CARPET, BlockPaleMossCarpet.class); //1265
         register(PALE_HANGING_MOSS, BlockPaleHangingMoss.class); //1266

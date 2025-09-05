@@ -877,7 +877,7 @@ public interface BlockID {
     int PALE_OAK_WOOD = 1260;
     int PALE_OAK_SAPLING = 1261;
     int PALE_OAK_LEAVES = 1262;
-
+    int MUSHROOM_STEM = 1263;
     int PALE_MOSS_BLOCK = 1264;
     int PALE_MOSS_CARPET = 1265;
     int PALE_HANGING_MOSS = 1266;
