@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBoneMeal;
 import cn.nukkit.level.Level;
@@ -27,8 +28,7 @@ public abstract class BlockFlower extends BlockFlowable {
     @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
         Block down = this.down();
-        int id = down.getId();
-        if (id == Block.GRASS || id == Block.DIRT || id == Block.FARMLAND || id == Block.PODZOL || id == MYCELIUM) {
+        if (down.hasBlockTag(BlockTags.DIRT)) {
             this.getLevel().setBlock(block, this, true);
 
             return true;
@@ -39,7 +39,7 @@ public abstract class BlockFlower extends BlockFlowable {
     @Override
     public int onUpdate(int type) {
         if (type == Level.BLOCK_UPDATE_NORMAL) {
-            if (this.down().isTransparent()) {
+            if (!down().hasBlockTag(BlockTags.DIRT)) {
                 this.getLevel().useBreakOn(this, null, null, true);
 
                 return Level.BLOCK_UPDATE_NORMAL;

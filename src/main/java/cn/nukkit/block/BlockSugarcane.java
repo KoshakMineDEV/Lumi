@@ -2,6 +2,7 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBoneMeal;
@@ -131,11 +132,10 @@ public class BlockSugarcane extends BlockFlowable {
             return false;
         }
         Block down = this.down();
-        int id = down.getId();
-        if (id == SUGARCANE_BLOCK) {
+        if (down.getId() == SUGARCANE_BLOCK) {
             this.getLevel().setBlock(block, Block.get(SUGARCANE_BLOCK), true);
             return true;
-        } else if (id == GRASS || id == DIRT || id == SAND || id == PODZOL || id == MYCELIUM) {
+        } else if (down.hasBlockTag(BlockTags.DIRT)) {
             Block block0 = down.north();
             Block block1 = down.south();
             Block block2 = down.west();

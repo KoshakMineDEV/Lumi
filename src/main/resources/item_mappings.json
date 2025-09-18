@@ -94,12 +94,6 @@
     "2": "minecraft:cracked_stone_bricks",
     "3": "minecraft:chiseled_stone_bricks"
   },
-  "minecraft:anvil": {
-    "protocol": 712,
-    "0": "minecraft:anvil",
-    "4": "minecraft:chipped_anvil",
-    "8": "minecraft:damaged_anvil"
-  },
   "minecraft:stone_block_slab": {
     "protocol": 685,
     "0": "minecraft:smooth_stone_slab",

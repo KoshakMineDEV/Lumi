@@ -3,6 +3,8 @@ package cn.nukkit.blockentity.impl;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
+import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 
@@ -17,19 +19,9 @@ public class BlockEntityFlowerPot extends BlockEntitySpawnable {
 
     @Override
     protected void initBlockEntity() {
-        if (!namedTag.contains("item")) {
-            namedTag.putShort("item", 0);
+        if (!namedTag.contains("PlantBlock")) {
+            namedTag.putCompound("PlantBlock", new CompoundTag().putString("name", ItemNamespaceId.AIR));
         }
-
-        if (!namedTag.contains("data")) {
-            if (namedTag.contains("mData")) {
-                namedTag.putInt("data", namedTag.getInt("mData"));
-                namedTag.remove("mData");
-            } else {
-                namedTag.putInt("data", 0);
-            }
-        }
-
         super.initBlockEntity();
     }
 
@@ -41,11 +33,7 @@ public class BlockEntityFlowerPot extends BlockEntitySpawnable {
                 .putInt("y", (int) this.y)
                 .putInt("z", (int) this.z);
 
-        int item = namedTag.getShort("item");
-        if (item != Block.AIR) {
-            tag.putShort("item", item)
-                    .putInt("mData", this.namedTag.getInt("data"));
-        }
+        tag.putCompound("PlantBlock", namedTag.getCompound("PlantBlock"));
         return tag;
     }
 }

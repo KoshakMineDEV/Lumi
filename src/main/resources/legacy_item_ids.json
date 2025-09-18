@@ -1,4 +1,7 @@
 {
+  "minecraft:chipped_anvil": -959,
+  "minecraft:damaged_anvil": -960,
+  "minecraft:deprecated_anvil": -961,
   "minecraft:pale_hanging_moss": -1011,
   "minecraft:creaking_heart": -1012,
   "minecraft:resin_brick_slab": -1014,

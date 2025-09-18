@@ -3,6 +3,7 @@ package cn.nukkit.block;
 import cn.nukkit.Player;
 import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.customblock.properties.IntBlockProperty;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.block.properties.BlockPropertiesHelper;
 import cn.nukkit.block.properties.VanillaProperties;
 import cn.nukkit.item.Item;
@@ -70,17 +71,7 @@ public class BlockPinkPetals extends BlockFlowable implements Faceable, BlockPro
     }
 
     private static boolean isSupportValid(Block block) {
-        switch (block.getId()) {
-            case GRASS:
-            case DIRT:
-            case FARMLAND:
-            case PODZOL:
-            case DIRT_WITH_ROOTS:
-            case MOSS_BLOCK:
-                return true;
-            default:
-                return false;
-        }
+        return block.hasBlockTag(BlockTags.DIRT);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBoneMeal;
 import cn.nukkit.level.Level;
@@ -77,8 +78,7 @@ public class BlockSapling extends BlockFlowable {
 
     protected boolean isSupportInvalid() {
         Block down = this.down();
-        int id = down.getId();
-        return !(id == Block.GRASS || id == Block.DIRT || id == Block.FARMLAND || id == Block.PODZOL || id == MYCELIUM || id == MUD);
+        return !down.hasBlockTag(BlockTags.DIRT);
     }
 
     @Override

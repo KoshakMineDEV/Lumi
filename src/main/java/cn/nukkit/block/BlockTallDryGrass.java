@@ -2,6 +2,8 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemBlock;
+import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 
 public class BlockTallDryGrass extends BlockFlowable {
@@ -35,6 +37,27 @@ public class BlockTallDryGrass extends BlockFlowable {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int onUpdate(int type) {
+        if (type == Level.BLOCK_UPDATE_NORMAL) {
+            if (!isSupportValid()) {
+                this.getLevel().useBreakOn(this, null, null, true);
+                return Level.BLOCK_UPDATE_NORMAL;
+            }
+        }
+
+        return 0;
+    }
+
+    @Override
+    public Item[] getDrops(Item item) {
+        if(item.isShears()) {
+            return new Item[]{new ItemBlock(this)};
+        }
+
+        return Item.EMPTY_ARRAY;
     }
 
     private boolean isSupportValid() {

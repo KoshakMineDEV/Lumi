@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBoneMeal;
 import cn.nukkit.level.Level;
@@ -64,19 +65,7 @@ public class BlockAzalea extends BlockTransparent {
 
     @Override
     public boolean canPlaceOn(Block floor, Position pos) {
-        // Azaleas can be placed on grass blocks, dirt, coarse dirt, rooted dirt, podzol, moss blocks, farmland, mud, muddy mangrove roots and clay.
-        switch (floor.getId()) {
-            case GRASS:
-            case DIRT:
-            case ROOTED_DIRT:
-            case PODZOL:
-            case MOSS_BLOCK:
-            case FARMLAND:
-            case MUD:
-            case CLAY_BLOCK:
-                return true;
-        }
-        return false;
+        return floor.hasBlockTag(BlockTags.DIRT);
     }
 
     public void grow(boolean flowering) {

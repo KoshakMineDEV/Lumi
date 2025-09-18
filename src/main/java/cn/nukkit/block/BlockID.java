@@ -838,6 +838,10 @@ public interface BlockID {
     int CORNFLOWER = 1093;
     int LILY_OF_THE_VALLEY = 1094;
 
+    int CHIPPED_ANVIL = 1214;
+    int DAMAGED_ANVIL = 1215;
+    int DEPRECATED_ANVIL = 1216;
+
     int WITHER_SKELETON_SKULL = 1220;
     int ZOMBIE_HEAD = 1221;
     int PLAYER_HEAD = 1222;

@@ -16,35 +16,12 @@ import java.util.Collection;
  * Created by Pub4Game on 27.12.2015.
  */
 public class BlockAnvil extends BlockFallableMeta implements Faceable {
-
-    private static final int[] faces = {1, 2, 3, 0};
-
-    private static final String[] NAMES = new String[]{
-            "Anvil",
-            "Anvil",
-            "Anvil",
-            "Anvil",
-            "Slighty Damaged Anvil",
-            "Slighty Damaged Anvil",
-            "Slighty Damaged Anvil",
-            "Slighty Damaged Anvil",
-            "Very Damaged Anvil",
-            "Very Damaged Anvil",
-            "Very Damaged Anvil",
-            "Very Damaged Anvil"
-    };
-
     public BlockAnvil() {
         this(0);
     }
 
     public BlockAnvil(int meta) {
         super(meta);
-    }
-
-    @Override
-    public int getFullId() {
-        return (getId() << DATA_BITS) + getDamage();
     }
 
     @Override
@@ -83,19 +60,8 @@ public class BlockAnvil extends BlockFallableMeta implements Faceable {
     }
 
     @Override
-    public String getName() {
-        return NAMES[this.getDamage() > 11 ? 0 : this.getDamage()];
-    }
-
-    @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
-        int damage = this.getDamage();
-        this.setDamage(faces[player != null ? player.getDirection().getHorizontalIndex() : 0]);
-        if (damage >= 4 && damage <= 7) {
-            this.setDamage(this.getDamage() | 0x04);
-        } else if (damage >= 8 && damage <= 11) {
-            this.setDamage(this.getDamage() | 0x08);
-        }
+        this.setDamage(player != null ? player.getDirection().rotateYCCW().getHorizontalIndex() : 0);
         this.getLevel().setBlock(block, this, true);
         if (player == null) {
             this.getLevel().addSound(new AnvilFallSound(this));
@@ -119,14 +85,7 @@ public class BlockAnvil extends BlockFallableMeta implements Faceable {
 
     @Override
     public Item toItem() {
-        int damage = this.getDamage();
-        if (damage >= 4 && damage <= 7) {
-            return new ItemBlock(this, this.getDamage() & 0x04);
-        } else if (damage >= 8 && damage <= 11) {
-            return new ItemBlock(this, this.getDamage() & 0x08);
-        } else {
-            return new ItemBlock(this);
-        }
+        return new ItemBlock(Block.get(getId()));
     }
 
     @Override
@@ -150,13 +109,23 @@ public class BlockAnvil extends BlockFallableMeta implements Faceable {
     }
 
     @Override
+    public String getName() {
+        return "Anvil";
+    }
+
+    @Override
     public boolean canHarvestWithHand() {
         return false;
     }
 
     @Override
+    public void setBlockFace(BlockFace face) {
+        this.setDamage(face.getHorizontalIndex());
+    }
+
+    @Override
     public BlockFace getBlockFace() {
-        return BlockFace.fromHorizontalIndex(this.getDamage() & 0x3);
+        return BlockFace.fromHorizontalIndex(this.getDamage());
     }
 
     @Override

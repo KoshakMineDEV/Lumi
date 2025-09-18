@@ -6,6 +6,7 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.impl.BlockEntityFlowerPot;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemFlowerPot;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
@@ -109,59 +110,44 @@ public class BlockFlowerPot extends BlockFlowable implements BlockEntityHolder<B
         BlockEntity blockEntity = getLevel().getBlockEntity(this);
         if (!(blockEntity instanceof BlockEntityFlowerPot)) return false;
 
-        if (blockEntity.namedTag.getShort("item") != AIR || blockEntity.namedTag.getInt("mData") != AIR) {
-            if (!canPlaceIntoFlowerPot(item.getBlock())) {
-                int id = blockEntity.namedTag.getShort("item");
-                if (id == AIR) id = blockEntity.namedTag.getInt("mData");
-                for (Item drop : player.getInventory().addItem(Item.get(id, blockEntity.namedTag.getInt("data")))) {
-                    player.dropItem(drop);
-                }
+        String itemId = blockEntity.namedTag.getCompound("PlantBlock").getString("name");
+        if (itemId.equals(ItemNamespaceId.AIR)) {
+            if (canPlaceIntoFlowerPot(item.getBlock())) {
+                blockEntity.namedTag.getCompound("PlantBlock").putString("name", item.getNamespaceId());
 
-                blockEntity.namedTag.putShort("item", AIR);
-                blockEntity.namedTag.putInt("data", 0);
-                this.setDamage(0);
-                this.level.setBlock(this, this, true);
+                this.setDamage(1);
+                this.getLevel().setBlock(this, this, true);
                 ((BlockEntityFlowerPot) blockEntity).spawnToAll();
+
+                if (!player.isCreative()) {
+                    item.setCount(item.getCount() - 1);
+                    player.getInventory().setItemInHand(item.getCount() > 0 ? item : Item.get(Item.AIR));
+                }
                 return true;
             }
             return false;
-        }
-        blockEntity.namedTag.putShort("item", item.getId());
-        blockEntity.namedTag.putInt("data", item.getDamage());
+        } else {
+            for (Item drop : player.getInventory().addItem(Item.get(itemId))) {
+                player.dropItem(drop);
+            }
 
-        this.setDamage(1);
-        this.getLevel().setBlock(this, this, true);
-        ((BlockEntityFlowerPot) blockEntity).spawnToAll();
-
-        if (!player.isCreative()) {
-            item.setCount(item.getCount() - 1);
-            player.getInventory().setItemInHand(item.getCount() > 0 ? item : Item.get(Item.AIR));
+            blockEntity.namedTag.getCompound("PlantBlock").putString("name", ItemNamespaceId.AIR);
+            this.setDamage(0);
+            this.level.setBlock(this, this, true);
+            ((BlockEntityFlowerPot) blockEntity).spawnToAll();
+            return true;
         }
-        return true;
     }
 
     @Override
     public Item[] getDrops(Item item) {
-        boolean dropInside = false;
-        int insideID = 0;
-        int insideMeta = 0;
         BlockEntity blockEntity = getLevel().getBlockEntity(this);
-        if (blockEntity instanceof BlockEntityFlowerPot) {
-            dropInside = true;
-            insideID = blockEntity.namedTag.getShort("item");
-            insideMeta = blockEntity.namedTag.getInt("data");
+        String itemId = blockEntity.namedTag.getCompound("PlantBlock").getString("name");
+        if (!itemId.equals(ItemNamespaceId.AIR)) {
+            return new Item[]{Item.get(ItemNamespaceId.FLOWER_POT), Item.get(itemId)};
         }
-
-        if (dropInside) {
-            return new Item[]{
-                    new ItemFlowerPot(),
-                    Item.get(insideID, insideMeta, 1)
-            };
-        } else {
-            return new Item[]{
-                    new ItemFlowerPot()
-            };
-        }
+        
+        return new Item[]{Item.get(ItemNamespaceId.FLOWER_POT)};
     }
 
     @Override

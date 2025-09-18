@@ -3,11 +3,13 @@ package cn.nukkit.block;
 import cn.nukkit.Player;
 import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.customblock.properties.IntBlockProperty;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.block.properties.BlockPropertiesHelper;
 import cn.nukkit.block.properties.VanillaProperties;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.ItemBoneMeal;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.particle.BoneMealParticle;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.block.data.Faceable;
@@ -69,18 +71,20 @@ public class BlockWildflowers extends BlockFlowable implements Faceable, BlockPr
         return this.getLevel().setBlock(this, this);
     }
 
-    private static boolean isSupportValid(Block block) {
-        switch (block.getId()) {
-            case GRASS:
-            case DIRT:
-            case FARMLAND:
-            case PODZOL:
-            case DIRT_WITH_ROOTS:
-            case MOSS_BLOCK:
-                return true;
-            default:
-                return false;
+    @Override
+    public int onUpdate(int type) {
+        if (type == Level.BLOCK_UPDATE_NORMAL) {
+            if (!isSupportValid(down())) {
+                this.getLevel().useBreakOn(this, null, null, true);
+                return Level.BLOCK_UPDATE_NORMAL;
+            }
         }
+
+        return 0;
+    }
+
+    private static boolean isSupportValid(Block block) {
+        return block.hasBlockTag(BlockTags.DIRT);
     }
 
     @Override

@@ -1322,6 +1322,9 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
     protected static boolean canConnectToFullSolid(Block down) {
         if (down.isTransparent()) {
+            if(down instanceof BlockSlab slab) {
+                if(slab.hasTopBit()) return true;
+            }
             switch (down.getId()) {
                 case BEACON:
                 case ICE:

@@ -827,6 +827,10 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(CORNFLOWER, BlockCornflower.class); //1093
         register(LILY_OF_THE_VALLEY, BlockLilyOfTheValley.class); //1094
 
+        register(CHIPPED_ANVIL, BlockChippedAnvil.class); //1214
+        register(DAMAGED_ANVIL, BlockDamagedAnvil.class); //1215
+        register(DEPRECATED_ANVIL, BlockDeprecatedAnvil.class); //1216
+
         register(WITHER_SKELETON_SKULL, BlockSkullWitherSkeleton.class); //1220
         register(ZOMBIE_HEAD, BlockHeadZombie.class); //1221
         register(PLAYER_HEAD, BlockHeadPlayer.class); //1222

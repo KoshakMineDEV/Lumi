@@ -32,6 +32,11 @@ public class BlockMangroveRootsMuddy extends BlockMangroveRoots {
     }
 
     @Override
+    public boolean isTransparent() {
+        return false;
+    }
+
+    @Override
     public Item toItem() {
         return new ItemBlock(Block.get(this.getId(), 0), 0);
     }
