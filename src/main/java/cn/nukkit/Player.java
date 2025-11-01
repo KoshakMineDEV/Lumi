@@ -5391,22 +5391,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         this.dataPacket(packet);
     }
 
-    public void removeDebugShape(int... ids) {
-        List<ScriptDebugShape> scriptDebugShapes = new ArrayList<>();
-        for(int id : ids) {
-             scriptDebugShapes.add(new ScriptDebugShape(
-                     id, null,null, null,
-                     null, null, null,
-                     null, null, null,
-                     null, null, null, null
-             ));
-        }
-
-        ServerScriptDebugDrawerPacket packet = new ServerScriptDebugDrawerPacket();
-        packet.setShapes(scriptDebugShapes);
-        this.dataPacket(packet);
-    }
-
     @Override
     public void spawnToAll() {
         // 在1.20.0中同一tick连续执行despawnFromAll和spawnToAll会导致玩家移动不可见

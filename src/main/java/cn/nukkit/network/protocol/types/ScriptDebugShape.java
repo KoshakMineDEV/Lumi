@@ -21,8 +21,7 @@ public class ScriptDebugShape {
     Float totalTimeLeft;
     @Nullable
     Color color;
-    @Nullable
-    Integer dimensionID;
+    int dimensionID;
     @Nullable
     String text;
     @Nullable

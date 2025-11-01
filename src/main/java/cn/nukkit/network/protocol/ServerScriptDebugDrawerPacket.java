@@ -53,14 +53,14 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
         putUnsignedVarInt(shapes.size());
         
         for (ScriptDebugShape shape : shapes) {
-            putUnsignedVarLong(shape.getId());
+            this.putUnsignedVarLong(shape.getId());
             this.putOptionalNull(shape.getType(), this::writeScriptDebugShapeType);
             this.putOptionalNull(shape.getPosition(), this::putVector3f);
             this.putOptionalNull(shape.getScale(), this::putLFloat);
             this.putOptionalNull(shape.getRotation(), this::putVector3f);
             this.putOptionalNull(shape.getTotalTimeLeft(), this::putLFloat);
             this.putOptionalNull(shape.getColor(), this::putColor);
-            this.putOptionalNull(shape.getDimensionID(), this::putInt);
+            this.putVarInt(shape.getDimensionID());
             this.putOptionalNull(shape.getText(), this::putString);
             this.putOptionalNull(shape.getBoxBounds(), this::putVector3f);
             this.putOptionalNull(shape.getLineEndPosition(), this::putVector3f);
