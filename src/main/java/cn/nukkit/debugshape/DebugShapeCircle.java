@@ -1,5 +1,6 @@
 package cn.nukkit.debugshape;
 
+import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
@@ -29,8 +30,8 @@ public class DebugShapeCircle extends DebugShape {
      * @param scale    the scale of the circle, which is a multiplier for the size of the circle.
      * @param segments the segments of the circle, which determines how many segments the circle will be divided into.
      */
-    public DebugShapeCircle(Vector3f position, Color color, Float scale, Integer segments) {
-        super(position, color);
+    public DebugShapeCircle(Vector3f position, Color color, DimensionEnum dimension, Float scale, Integer segments) {
+        super(position, color, dimension.getDimensionData().getDimensionId());
         this.scale = scale;
         this.segments = segments;
     }
@@ -80,7 +81,7 @@ public class DebugShapeCircle extends DebugShape {
     public ScriptDebugShape toNetworkData() {
         return new ScriptDebugShape(
                 id, getType(), position, scale,
-                null, null, color,
+                null, null, color, dimensionID,
                 null, null, null,
                 null, null, segments
         );

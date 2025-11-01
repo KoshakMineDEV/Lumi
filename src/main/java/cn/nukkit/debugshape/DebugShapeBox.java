@@ -1,5 +1,6 @@
 package cn.nukkit.debugshape;
 
+import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
@@ -31,8 +32,8 @@ public class DebugShapeBox extends DebugShape {
      * @param scale     the scale of the box, which is a multiplier for the size of the box.
      * @param boxBounds the bounds of the box, which is a vector representing the size of the box in each dimension (x, y and z).
      */
-    public DebugShapeBox(Vector3f position, Color color, Float scale, Vector3f boxBounds) {
-        super(position, color);
+    public DebugShapeBox(Vector3f position, Color color, DimensionEnum dimension, Float scale, Vector3f boxBounds) {
+        super(position, color, dimension.getDimensionData().getDimensionId());
         this.scale = scale;
         this.boxBounds = boxBounds;
     }
@@ -82,7 +83,7 @@ public class DebugShapeBox extends DebugShape {
     public ScriptDebugShape toNetworkData() {
         return new ScriptDebugShape(
                 id, getType(), position, scale,
-                null, null, color,
+                null, null, color, dimensionID,
                 null, boxBounds, null,
                 null, null, null
         );

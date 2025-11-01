@@ -25,6 +25,10 @@ public abstract class DebugShape {
     @Getter
     protected final long id;
     /**
+     * The id of dimension where debug shape is located.
+     */
+    protected int dimensionID;
+    /**
      * The viewers of this debug shape.
      */
     @Getter
@@ -49,11 +53,12 @@ public abstract class DebugShape {
      * @param position The position of the shape.
      * @param color    the color of the shape.
      */
-    public DebugShape(Vector3f position, Color color) {
+    public DebugShape(Vector3f position, Color color, int dimensionID) {
         this.id = DEBUG_SHAPE_ID_COUNTER.getAndIncrement();
         this.viewers = new Long2ObjectOpenHashMap<>();
         this.position = position;
         this.color = color;
+        this.dimensionID = dimensionID;
     }
 
     /**
@@ -107,7 +112,7 @@ public abstract class DebugShape {
      */
     public ScriptDebugShape createRemovalNotice() {
         return new ScriptDebugShape(
-                this.id, null, null,
+                this.id, null,null, null,
                 null, null, null,
                 null, null, null,
                 null, null, null, null

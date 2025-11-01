@@ -22,6 +22,8 @@ public class ScriptDebugShape {
     @Nullable
     Color color;
     @Nullable
+    Integer dimensionID;
+    @Nullable
     String text;
     @Nullable
     Vector3f boxBounds;

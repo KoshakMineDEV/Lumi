@@ -1,5 +1,6 @@
 package cn.nukkit.debugshape;
 
+import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
@@ -22,8 +23,8 @@ public class DebugShapeText extends DebugShape {
      * @param color    The color of the text.
      * @param text     The text to display.
      */
-    public DebugShapeText(Vector3f position, Color color, String text) {
-        super(position, color);
+    public DebugShapeText(Vector3f position, Color color, DimensionEnum dimension, String text) {
+        super(position, color, dimension.getDimensionData().getDimensionId());
         this.text = text;
     }
 
@@ -45,7 +46,7 @@ public class DebugShapeText extends DebugShape {
     public ScriptDebugShape toNetworkData() {
         return new ScriptDebugShape(
                 id, getType(), position, null,
-                null, null, color,
+                null, null, color, dimensionID,
                 text, null, null,
                 null, null, null
         );

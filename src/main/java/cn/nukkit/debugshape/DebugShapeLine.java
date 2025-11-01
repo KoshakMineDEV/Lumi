@@ -1,5 +1,6 @@
 package cn.nukkit.debugshape;
 
+import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
@@ -22,8 +23,8 @@ public class DebugShapeLine extends DebugShape {
      * @param color       the color of the line.
      * @param endPosition the end position of the line.
      */
-    public DebugShapeLine(Vector3f position, Color color, Vector3f endPosition) {
-        super(position, color);
+    public DebugShapeLine(Vector3f position, Color color, DimensionEnum dimension, Vector3f endPosition) {
+        super(position, color, dimension.getDimensionData().getDimensionId());
         this.endPosition = endPosition;
     }
 
@@ -54,7 +55,7 @@ public class DebugShapeLine extends DebugShape {
     public ScriptDebugShape toNetworkData() {
         return new ScriptDebugShape(
                 id, getType(), position, null,
-                null, null, color,
+                null, null, color, dimensionID,
                 null, null, endPosition,
                 null, null, null
         );

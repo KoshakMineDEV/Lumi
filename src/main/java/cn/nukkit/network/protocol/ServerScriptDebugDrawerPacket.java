@@ -37,10 +37,10 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
                     getUnsignedVarLong(), getOptional(null, BinaryStream::getScriptDebugShapeType),
                     getOptional(null, BinaryStream::getVector3f), getOptional(null, BinaryStream::getLFloat),
                     getOptional(null, BinaryStream::getVector3f),  getOptional(null, BinaryStream::getLFloat),
-                    getOptional(null, BinaryStream::getColor), getOptional(null, BinaryStream::getString),
-                    getOptional(null, BinaryStream::getVector3f), getOptional(null, BinaryStream::getVector3f),
-                    getOptional(null, BinaryStream::getLFloat), getOptional(null, BinaryStream::getLFloat),
-                    getOptional(null, BinaryStream::getByte)
+                    getOptional(null, BinaryStream::getColor), getOptional(null, BinaryStream::getInt),
+                    getOptional(null, BinaryStream::getString), getOptional(null, BinaryStream::getVector3f),
+                    getOptional(null, BinaryStream::getVector3f), getOptional(null, BinaryStream::getLFloat),
+                    getOptional(null, BinaryStream::getLFloat), getOptional(null, BinaryStream::getByte)
             );
 
             shapes.add(shape);
@@ -60,6 +60,7 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
             this.putOptionalNull(shape.getRotation(), this::putVector3f);
             this.putOptionalNull(shape.getTotalTimeLeft(), this::putLFloat);
             this.putOptionalNull(shape.getColor(), this::putColor);
+            this.putOptionalNull(shape.getDimensionID(), this::putInt);
             this.putOptionalNull(shape.getText(), this::putString);
             this.putOptionalNull(shape.getBoxBounds(), this::putVector3f);
             this.putOptionalNull(shape.getLineEndPosition(), this::putVector3f);
