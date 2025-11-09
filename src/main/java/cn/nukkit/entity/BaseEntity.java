@@ -151,7 +151,7 @@ public abstract class BaseEntity extends EntityCreature implements EntityAgeable
     @Override
     public void setBaby(boolean baby) {
         this.baby = baby;
-        this.setDataFlag(DATA_FLAGS, DATA_FLAG_BABY, baby);
+        this.setDataFlag(DATA_FLAGS, DATA_FLAG_BABY, baby, true);
         if (baby) {
             this.setScale(0.5f);
             this.age = Utils.rand(-2400, -1800);
