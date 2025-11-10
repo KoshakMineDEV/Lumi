@@ -235,7 +235,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
     public Item get(String id) {
         Supplier<Item> supplier = getSupplier(id);
         if (supplier == null) {
-            return Item.AIR_ITEM.clone();
+            return Item.AIR_ITEM;
         }
         return supplier.get();
     }
