@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Data
-@EqualsAndHashCode(doNotUseGetters = true)
+@EqualsAndHashCode(callSuper = false, doNotUseGetters = true)
 @ToString(doNotUseGetters = true)
 public class ServerPostMovePositionPacket extends DataPacket {
 
