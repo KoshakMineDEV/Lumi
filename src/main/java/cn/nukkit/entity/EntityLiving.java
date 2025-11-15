@@ -115,7 +115,7 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
 
     @Override
     public boolean canBeAffected(EffectType type) {
-        return !(this instanceof EntitySmite) || type != EffectType.REGENERATION && type != EffectType.POISON;
+        return true;
     }
 
     @Override
