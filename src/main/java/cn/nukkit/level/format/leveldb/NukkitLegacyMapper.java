@@ -36,7 +36,7 @@ public class NukkitLegacyMapper implements LegacyStateMapper {
 
     public static List<NbtMap> loadBlockPalette() {
         List<NbtMap> nbtMaps;
-        try (InputStream stream = Server.class.getClassLoader().getResourceAsStream("leveldb_palette.nbt")) {
+        try (InputStream stream = Server.class.getClassLoader().getResourceAsStream("internal/leveldb_palette.nbt")) {
             nbtMaps = ((NbtMap) NbtUtils.createGZIPReader(Objects.requireNonNull(stream)).readTag()).getList("blocks", NbtType.COMPOUND);
         } catch (Exception e) {
             throw new AssertionError("Error loading block palette leveldb_palette.nbt", e);

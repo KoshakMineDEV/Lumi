@@ -55,7 +55,7 @@ public class LazyItemTag implements ItemTag {
 
     static {
         Map<String, Set<String>> parsed = Collections.emptyMap();
-        var stream = LazyItemTag.class.getClassLoader().getResourceAsStream("item_tags.json");
+        var stream = LazyItemTag.class.getClassLoader().getResourceAsStream("gamedata/tag/item_tags.json");
         if (stream != null) {
             try (var reader = new InputStreamReader(stream)) {
                 var type = new TypeToken<Map<String, Set<String>>>() {

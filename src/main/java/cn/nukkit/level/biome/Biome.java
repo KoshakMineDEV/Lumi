@@ -40,7 +40,7 @@ public abstract class Biome implements BlockID {
     private float heightVariation = 0.3f;
 
     static {
-        try (InputStream stream = Biome.class.getClassLoader().getResourceAsStream("biome_id_map.json")) {
+        try (InputStream stream = Biome.class.getClassLoader().getResourceAsStream("gamedata/biome/biome_id_map.json")) {
             JsonObject json = JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonObject();
             for (String identifier : json.keySet()) {
                 int biomeId = json.get(identifier).getAsInt();
@@ -51,7 +51,7 @@ public abstract class Biome implements BlockID {
         }
 
         //TODO Multiversion
-        try (InputStream stream = Biome.class.getClassLoader().getResourceAsStream("biome_definitions_786.dat")) {
+        try (InputStream stream = Biome.class.getClassLoader().getResourceAsStream("gamedata/biome/definitions/biome_definitions_786.dat")) {
             if (stream == null) {
                 throw new AssertionError("Unable to locate block biome_definitions_786");
             }

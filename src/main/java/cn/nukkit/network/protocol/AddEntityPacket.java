@@ -132,70 +132,50 @@ public class AddEntityPacket extends DataPacket {
         mapping.put(EntityZombieVillagerV2.NETWORK_ID, "minecraft:zombie_villager_v2");
         mapping.put(EntityFox.NETWORK_ID, "minecraft:fox");
         mapping.put(EntityBee.NETWORK_ID, "minecraft:bee");
+        mapping.put(EntityPiglin.NETWORK_ID, "minecraft:piglin");
+        mapping.put(EntityHoglin.NETWORK_ID, "minecraft:hoglin");
+        mapping.put(EntityStrider.NETWORK_ID, "minecraft:strider");
+        mapping.put(EntityZoglin.NETWORK_ID, "minecraft:zoglin");
+        mapping.put(EntityPiglinBrute.NETWORK_ID, "minecraft:piglin_brute");
+        mapping.put(EntityNPCEntity.NETWORK_ID, "minecraft:npc");
+        mapping.put(EntityGoat.NETWORK_ID, "minecraft:goat");
+        mapping.put(EntityGlowSquid.NETWORK_ID, "minecraft:glow_squid");
+        mapping.put(EntityAxolotl.NETWORK_ID, "minecraft:axolotl");
+        mapping.put(EntityAllay.NETWORK_ID, "minecraft:allay");
+        mapping.put(EntityWarden.NETWORK_ID, "minecraft:warden");
+        mapping.put(EntityFrog.NETWORK_ID, "minecraft:frog");
+        mapping.put(EntityTadpole.NETWORK_ID, "minecraft:tadpole");
+        mapping.put(EntityChestBoat.NETWORK_ID, "minecraft:chest_boat");
+        mapping.put(EntityCamel.NETWORK_ID, "minecraft:camel");
+        mapping.put(139, "minecraft:sniffer");
 
         // Correct new entities for older protocols
-        if (protocolId < ProtocolInfo.v1_16_0) {
-            mapping.put(EntityPiglin.NETWORK_ID, mapping.get(EntityZombiePigman.NETWORK_ID));
-            mapping.put(EntityHoglin.NETWORK_ID, mapping.get(EntityPig.NETWORK_ID));
-            mapping.put(EntityStrider.NETWORK_ID, mapping.get(EntityPig.NETWORK_ID));
-            mapping.put(EntityZoglin.NETWORK_ID, mapping.get(EntityPig.NETWORK_ID));
-            mapping.put(EntityPiglinBrute.NETWORK_ID, mapping.get(EntityZombiePigman.NETWORK_ID));
-            mapping.put(EntityNPCEntity.NETWORK_ID, mapping.get(EntityVillager.NETWORK_ID));
+
+        if(protocolId < ProtocolInfo.v1_21_80) {
+            mapping.put(142, mapping.get(EntityWolf.NETWORK_ID));
         } else {
-            mapping.put(EntityPiglin.NETWORK_ID, "minecraft:piglin");
-            mapping.put(EntityHoglin.NETWORK_ID, "minecraft:hoglin");
-            mapping.put(EntityStrider.NETWORK_ID, "minecraft:strider");
-            mapping.put(EntityZoglin.NETWORK_ID, "minecraft:zoglin");
-            mapping.put(EntityPiglinBrute.NETWORK_ID, "minecraft:piglin_brute");
-            mapping.put(EntityNPCEntity.NETWORK_ID, "minecraft:npc");
+            mapping.put(142, "minecraft:armadillo");
         }
 
-        if (protocolId < ProtocolInfo.v1_17_0 ) {
-            mapping.put(EntityGoat.NETWORK_ID, mapping.get(EntitySheep.NETWORK_ID));
-            mapping.put(EntityGlowSquid.NETWORK_ID, mapping.get(EntitySquid.NETWORK_ID));
-            mapping.put(EntityAxolotl.NETWORK_ID, mapping.get(EntityTropicalFish.NETWORK_ID));
+        if(protocolId < ProtocolInfo.v1_21_0) {
+            mapping.put(140, mapping.get(EntityBlaze.NETWORK_ID));
+            mapping.put(141, mapping.get(EntitySnowball.NETWORK_ID));
+            mapping.put(143, mapping.get(EntitySnowball.NETWORK_ID));
+            mapping.put(144, mapping.get(EntitySkeleton.NETWORK_ID));
+            mapping.put(145, mapping.get(EntityShulkerBullet.NETWORK_ID));
         } else {
-            mapping.put(EntityGoat.NETWORK_ID, "minecraft:goat");
-            mapping.put(EntityGlowSquid.NETWORK_ID, "minecraft:glow_squid");
-            mapping.put(EntityAxolotl.NETWORK_ID, "minecraft:axolotl");
+            mapping.put(140, "minecraft:breeze");
+            mapping.put(141, "minecraft:breeze_wind_charge_projectile");
+            mapping.put(143, "minecraft:wind_charge_projectile");
+            mapping.put(144, "minecraft:bogged");
+            mapping.put(145, "minecraft:ominous_item_spawner");
         }
 
-        if (protocolId < ProtocolInfo.v1_19_0) {
-            mapping.put(EntityAllay.NETWORK_ID, mapping.get(EntityParrot.NETWORK_ID));
-            mapping.put(EntityWarden.NETWORK_ID, mapping.get(EntityWither.NETWORK_ID));
-            mapping.put(EntityFrog.NETWORK_ID, mapping.get(EntityRabbit.NETWORK_ID));
-            mapping.put(EntityTadpole.NETWORK_ID, mapping.get(EntitySalmon.NETWORK_ID));
-            mapping.put(EntityChestBoat.NETWORK_ID, mapping.get(EntityBoat.NETWORK_ID));
+        if(protocolId < ProtocolInfo.v1_21_50) {
+            mapping.put(EntityCreaking.NETWORK_ID, mapping.get(EntityEnderman.NETWORK_ID));
         } else {
-            mapping.put(EntityAllay.NETWORK_ID, "minecraft:allay");
-            mapping.put(EntityWarden.NETWORK_ID, "minecraft:warden");
-            mapping.put(EntityFrog.NETWORK_ID, "minecraft:frog");
-            mapping.put(EntityTadpole.NETWORK_ID, "minecraft:tadpole");
-            mapping.put(EntityChestBoat.NETWORK_ID, "minecraft:chest_boat");
+            mapping.put(EntityCreaking.NETWORK_ID, "minecraft:creaking");
         }
-
-        if (protocolId < ProtocolInfo.v1_20_0_23) {
-            mapping.put(EntityCamel.NETWORK_ID, mapping.get(EntityHorse.NETWORK_ID));
-        } else {
-            mapping.put(EntityCamel.NETWORK_ID, "minecraft:camel");
-        }
-
-        //TODO 多版本
-        //1.20.0
-        mapping.put(139, "minecraft:sniffer");
-        //1.21.0
-        mapping.put(140, "minecraft:breeze");
-        //1.21.0
-        mapping.put(141, "minecraft:breeze_wind_charge_projectile");
-        //1.20.80
-        mapping.put(142, "minecraft:armadillo");
-        //1.21.0
-        mapping.put(143, "minecraft:wind_charge_projectile");
-        //1.21.0
-        mapping.put(144, "minecraft:bogged");
-        //1.21.60
-        mapping.put(145, "minecraft:ominous_item_spawner");
-        mapping.put(EntityCreaking.NETWORK_ID, "minecraft:creaking");
     }
 
     @Override

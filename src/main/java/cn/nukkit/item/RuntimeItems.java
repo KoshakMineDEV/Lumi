@@ -21,18 +21,6 @@ public class RuntimeItems {
 
     private static final Map<String, Integer> legacyString2LegacyInt = new HashMap<>();
 
-    private static RuntimeItemMapping mapping419;
-    private static RuntimeItemMapping mapping440;
-    private static RuntimeItemMapping mapping448;
-    private static RuntimeItemMapping mapping475;
-    private static RuntimeItemMapping mapping486;
-    private static RuntimeItemMapping mapping503;
-    private static RuntimeItemMapping mapping527;
-    private static RuntimeItemMapping mapping534;
-    private static RuntimeItemMapping mapping560;
-    private static RuntimeItemMapping mapping567;
-    private static RuntimeItemMapping mapping575;
-    private static RuntimeItemMapping mapping582;
     private static RuntimeItemMapping mapping589;
     private static RuntimeItemMapping mapping594;
     private static RuntimeItemMapping mapping618;
@@ -64,7 +52,7 @@ public class RuntimeItems {
         }
         initialized = true;
         log.debug("Loading runtime items...");
-        InputStream itemIdsStream = Server.class.getClassLoader().getResourceAsStream("legacy_item_ids.json");
+        InputStream itemIdsStream = Server.class.getClassLoader().getResourceAsStream("internal/legacy_item_ids.json");
         if (itemIdsStream == null) {
             throw new AssertionError("Unable to load legacy_item_ids.json");
         }
@@ -74,7 +62,7 @@ public class RuntimeItems {
             legacyString2LegacyInt.put(identifier, json.get(identifier).getAsInt());
         }
 
-        InputStream mappingStream = Server.class.getClassLoader().getResourceAsStream("item_mappings.json");
+        InputStream mappingStream = Server.class.getClassLoader().getResourceAsStream("internal/item_mappings.json");
         if (mappingStream == null) {
             throw new AssertionError("Unable to load item_mappings.json");
         }
@@ -99,18 +87,6 @@ public class RuntimeItems {
             }
         }
 
-        mapping419 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_16_100);
-        mapping440 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_17_0);
-        mapping448 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_17_10);
-        mapping475 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_18_0);
-        mapping486 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_18_10);
-        mapping503 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_18_30);
-        mapping527 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_19_0);
-        mapping534 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_19_10);
-        mapping560 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_19_50);
-        mapping567 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_19_60);
-        mapping575 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_19_70);
-        mapping582 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_19_80);
         mapping589 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_20_0);
         mapping594 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_20_10);
         mapping618 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_20_30);
@@ -133,18 +109,6 @@ public class RuntimeItems {
         mapping859 = new RuntimeItemMapping(mappingEntries, ProtocolInfo.v1_21_120);
 
         VALUES = new RuntimeItemMapping[]{
-                mapping419,
-                mapping440,
-                mapping448,
-                mapping475,
-                mapping486,
-                mapping503,
-                mapping527,
-                mapping534,
-                mapping560,
-                mapping567,
-                mapping575,
-                mapping582,
                 mapping589,
                 mapping594,
                 mapping618,
@@ -209,30 +173,9 @@ public class RuntimeItems {
             return mapping594;
         } else if (protocolId >= ProtocolInfo.v1_20_0_23) {
             return mapping589;
-        } else if (protocolId >= ProtocolInfo.v1_19_80) {
-            return mapping582;
-        } else if (protocolId >= ProtocolInfo.v1_19_70_24) {
-            return mapping575;
-        } else if (protocolId >= ProtocolInfo.v1_19_60) {
-            return mapping567;
-        } else if (protocolId >= ProtocolInfo.v1_19_50_20) {
-            return mapping560;
-        } else if (protocolId >= ProtocolInfo.v1_19_10) {
-            return mapping534;
-        } else if (protocolId >= ProtocolInfo.v1_19_0_29) {
-            return mapping527;
-        } else if (protocolId >= ProtocolInfo.v1_18_30) {
-            return mapping503;
-        } else if (protocolId >= ProtocolInfo.v1_18_10_26) {
-            return mapping486;
-        } else if (protocolId >= ProtocolInfo.v1_18_0) {
-            return mapping475;
-        } else if (protocolId >= ProtocolInfo.v1_17_10) {
-            return mapping448;
-        } else if (protocolId >= ProtocolInfo.v1_17_0) {
-            return mapping440;
         }
-        return mapping419;
+
+        throw new RuntimeException("Tried to get unsupported protocol item mapping: " + protocolId);
     }
 
     public static int getLegacyIdFromLegacyString(String identifier) {

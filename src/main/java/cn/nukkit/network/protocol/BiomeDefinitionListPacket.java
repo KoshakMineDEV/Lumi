@@ -28,20 +28,12 @@ public class BiomeDefinitionListPacket extends DataPacket {
 
     public static final byte NETWORK_ID = ProtocolInfo.BIOME_DEFINITION_LIST_PACKET;
 
-    private static final BatchPacket CACHED_PACKET_361;
-    private static final BatchPacket CACHED_PACKET_419;
-    private static final BatchPacket CACHED_PACKET_486;
-    private static final BatchPacket CACHED_PACKET_527;
     private static final BatchPacket CACHED_PACKET_544;
     private static final BatchPacket CACHED_PACKET_786;
     private static final BatchPacket CACHED_PACKET_800;
     private static final BatchPacket CACHED_PACKET_827;
     private static final BatchPacket CACHED_PACKET;
 
-    private static final byte[] TAG_361;
-    private static final byte[] TAG_419;
-    private static final byte[] TAG_486;
-    private static final byte[] TAG_527;
     private static final byte[] TAG_544;
     private static final byte[] TAG_786;
 
@@ -50,43 +42,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
 
     static {
         try {
-            TAG_361 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("biome_definitions_361.dat"));
-            BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.protocol = ProtocolInfo.v1_16_0;
-            pk.tryEncode();
-            CACHED_PACKET_361 = pk.compress(Deflater.BEST_COMPRESSION);
-        } catch (Exception e) {
-            throw new AssertionError("Error whilst loading biome definitions 361", e);
-        }
-        try {
-            TAG_419 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("biome_definitions_419.dat"));
-            BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.protocol = ProtocolInfo.v1_16_100;
-            pk.tryEncode();
-            CACHED_PACKET_419 = pk.compress(Deflater.BEST_COMPRESSION);
-        } catch (Exception e) {
-            throw new AssertionError("Error whilst loading biome definitions 419", e);
-        }
-        try {
-            TAG_486 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("biome_definitions_486.dat"));
-            BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.protocol = ProtocolInfo.v1_18_10;
-            pk.tryEncode();
-            CACHED_PACKET_486 = pk.compress(Deflater.BEST_COMPRESSION);
-        } catch (Exception e) {
-            throw new AssertionError("Error whilst loading biome definitions 486", e);
-        }
-        try {
-            TAG_527 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("biome_definitions_527.dat"));
-            BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.protocol = ProtocolInfo.v1_19_0;
-            pk.tryEncode();
-            CACHED_PACKET_527 = pk.compress(Deflater.BEST_COMPRESSION);
-        } catch (Exception e) {
-            throw new AssertionError("Error whilst loading biome definitions 527", e);
-        }
-        try {
-            TAG_544 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("biome_definitions_554.dat"));
+            TAG_544 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("gamedata/biome/definitions/biome_definitions_554.dat"));
             BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
             pk.protocol = ProtocolInfo.v1_19_20;
             pk.tryEncode();
@@ -95,7 +51,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
             throw new AssertionError("Error whilst loading biome definitions 554", e);
         }
         try {
-            TAG_786 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("biome_definitions_786.dat"));
+            TAG_786 = ByteStreams.toByteArray(Nukkit.class.getClassLoader().getResourceAsStream("gamedata/biome/definitions/biome_definitions_786.dat"));
             BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
             pk.protocol = ProtocolInfo.v1_21_70;
             pk.tryEncode();
@@ -105,7 +61,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
         }
         try {
             BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.biomeDefinitions800 = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_800.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
+            pk.biomeDefinitions800 = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("gamedata/biome/definitions/stripped_biome_definitions_800.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
             }.getType());
             pk.protocol = ProtocolInfo.v1_21_80;
             pk.tryEncode();
@@ -116,7 +72,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
 
         try {
             BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_827.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
+            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("gamedata/biome/definitions/stripped_biome_definitions_827.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
             }.getType());
             pk.protocol = ProtocolInfo.v1_21_100;
             pk.tryEncode();
@@ -127,7 +83,7 @@ public class BiomeDefinitionListPacket extends DataPacket {
 
         try {
             BiomeDefinitionListPacket pk = new BiomeDefinitionListPacket();
-            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("stripped_biome_definitions_844.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
+            pk.biomeDefinitions = new GsonBuilder().registerTypeAdapter(Color.class, new ColorTypeAdapter()).create().fromJson(Utils.loadJsonResource("gamedata/biome/definitions/stripped_biome_definitions_844.json"), new TypeToken<LinkedHashMap<String, BiomeDefinitionData>>() {
             }.getType());
             pk.protocol = ProtocolInfo.v1_21_111;
             pk.tryEncode();
@@ -146,16 +102,8 @@ public class BiomeDefinitionListPacket extends DataPacket {
             return CACHED_PACKET_800;
         } else if (protocol >= ProtocolInfo.v1_21_70_24) {
             return CACHED_PACKET_786;
-        } else if (protocol >= ProtocolInfo.v1_19_30_23) {
-            return CACHED_PACKET_544;
-        } else if (protocol >= ProtocolInfo.v1_19_0) {
-            return CACHED_PACKET_527;
-        } else if (protocol >= ProtocolInfo.v1_18_10) {
-            return CACHED_PACKET_486;
-        } else if (protocol >= ProtocolInfo.v1_16_100) {
-            return CACHED_PACKET_419;
         } else {
-            return CACHED_PACKET_361;
+            return CACHED_PACKET_544;
         }
     }
 
@@ -219,16 +167,8 @@ public class BiomeDefinitionListPacket extends DataPacket {
             }
         } else if (this.protocol >= ProtocolInfo.v1_21_70_24) {
             this.put(TAG_786);
-        } else if (this.protocol >= ProtocolInfo.v1_19_30_23) {
-            this.put(TAG_544);
-        } else if (this.protocol >= ProtocolInfo.v1_19_0) {
-            this.put(TAG_527);
-        } else if (this.protocol >= ProtocolInfo.v1_18_10) {
-            this.put(TAG_486);
-        } else if (this.protocol >= ProtocolInfo.v1_16_100) {
-            this.put(TAG_419);
         } else {
-            this.put(TAG_361);
+            this.put(TAG_544);
         }
     }
 

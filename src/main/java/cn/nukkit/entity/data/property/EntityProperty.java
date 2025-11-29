@@ -28,7 +28,7 @@ public abstract class EntityProperty {
     }
 
     public static void init() {
-        try (var stream = EntityProperty.class.getClassLoader().getResourceAsStream("entity_properties.nbt")) {
+        try (var stream = EntityProperty.class.getClassLoader().getResourceAsStream("gamedata/entity/entity_properties.nbt")) {
             CompoundTag root = NBTIO.readCompressed(stream);
             root.getTags().values().forEach(uncast -> {
                 if(uncast instanceof CompoundTag tag) {

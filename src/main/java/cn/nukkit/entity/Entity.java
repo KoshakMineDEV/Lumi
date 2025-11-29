@@ -396,25 +396,21 @@ public abstract class Entity extends Location implements Metadatable {
 
     public static long entityCount = 1;
 
-    private static final Map<Integer, String> entityRuntimeMappingOld = new HashMap<>();
-    private static final Map<Integer, String> entityRuntimeMapping407 = new HashMap<>();
-    private static final Map<Integer, String> entityRuntimeMapping440 = new HashMap<>();
-    private static final Map<Integer, String> entityRuntimeMapping527 = new HashMap<>();
     private static final Map<Integer, String> entityRuntimeMapping589 = new HashMap<>();
+    private static final Map<Integer, String> entityRuntimeMapping685 = new HashMap<>();
+    private static final Map<Integer, String> entityRuntimeMapping766 = new HashMap<>();
+    private static final Map<Integer, String> entityRuntimeMapping800 = new HashMap<>();
+
 
     private static final Map<Integer, CompoundTag> entityIdentifiersMap = new HashMap<>();
     private static final Map<Integer, byte[]> entityIdentifiersCache = new HashMap<>();
 
     static {
-        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping407, ProtocolInfo.v1_16_0);
-        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping440, ProtocolInfo.v1_17_0);
-        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping527, ProtocolInfo.v1_19_0);
-        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping589, ProtocolInfo.v1_20_0);
+        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping589, ProtocolInfo.v1_20_0); //1.20.0-1.20.80
+        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping685, ProtocolInfo.v1_21_0); //1.21.0-1.21.40
+        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping766, ProtocolInfo.v1_21_50); //1.21.50-1.21.70
+        AddEntityPacket.setupLegacyIdentifiers(entityRuntimeMapping800, ProtocolInfo.v1_21_80); //1.21.80-latest
 
-        initEntityIdentifiers(ProtocolInfo.v1_16_100, AvailableEntityIdentifiersPacket.NBT419);
-        initEntityIdentifiers(ProtocolInfo.v1_17_0, AvailableEntityIdentifiersPacket.NBT440);
-        initEntityIdentifiers(ProtocolInfo.v1_19_0, AvailableEntityIdentifiersPacket.NBT527);
-        initEntityIdentifiers(ProtocolInfo.v1_19_20, AvailableEntityIdentifiersPacket.NBT544);
         initEntityIdentifiers(ProtocolInfo.v1_19_80, AvailableEntityIdentifiersPacket.TAG);
     }
 
@@ -1197,16 +1193,14 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     protected static Map<Integer, String> getEntityRuntimeMappingInternal(int protocolId) {
-        if (protocolId >= ProtocolInfo.v1_20_0_23) {
-            return entityRuntimeMapping589;
-        } else if (protocolId >= ProtocolInfo.v1_19_0_29) {
-            return entityRuntimeMapping527;
-        } else if (protocolId >= ProtocolInfo.v1_17_0) {
-            return entityRuntimeMapping440;
-        } else if (protocolId >= ProtocolInfo.v1_16_0) {
-            return entityRuntimeMapping407;
+        if (protocolId >= ProtocolInfo.v1_21_80) {
+            return entityRuntimeMapping800;
+        } else if(protocolId >= ProtocolInfo.v1_21_50) {
+            return entityRuntimeMapping766;
+        } else if(protocolId >= ProtocolInfo.v1_21_0) {
+            return entityRuntimeMapping685;
         }
-        return entityRuntimeMappingOld;
+        return entityRuntimeMapping589;
     }
 
     private static void initEntityIdentifiers(int protocolId, byte[] bytes) {
@@ -1220,17 +1214,8 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     private static int correctEntityIdentifiersProtocol(int protocolId) {
-        if (protocolId >= ProtocolInfo.v1_19_80) {
-            return ProtocolInfo.v1_19_80;
-        } else if (protocolId >= ProtocolInfo.v1_19_20) {
-            return ProtocolInfo.v1_19_20;
-        } else if (protocolId >= ProtocolInfo.v1_19_0_29) {
-            return ProtocolInfo.v1_19_0;
-        } else if (protocolId >= ProtocolInfo.v1_17_0) {
-            return ProtocolInfo.v1_17_0;
-        } else {
-            return ProtocolInfo.v1_16_100;
-        }
+        //Currently empty because all protocols are using 1.19.80 identifier map
+        return ProtocolInfo.v1_19_80;
     }
 
     public static void registerEntityIdentifier(String identifier, int entityId, CompoundTag nbtEntry, int protocolId) {

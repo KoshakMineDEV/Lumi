@@ -27,7 +27,7 @@ public class BlockToItemRegistry implements IRegistry<String, String, String> {
     public void init() {
         if (isLoad.getAndSet(true)) return;
 
-        try (InputStream stream = BlockToItemRegistry.class.getClassLoader().getResourceAsStream("block_id_to_item_id_map.json")) {
+        try (InputStream stream = BlockToItemRegistry.class.getClassLoader().getResourceAsStream("internal/block_id_to_item_id_map.json")) {
             if (stream == null) {
                 throw new RuntimeException("Failed to load block_id_to_item_id_map.json");
             }
@@ -39,7 +39,7 @@ public class BlockToItemRegistry implements IRegistry<String, String, String> {
             throw new RuntimeException("Failed to load block_id_to_item_id_map.json");
         }
 
-        try (InputStream stream = BlockToItemRegistry.class.getClassLoader().getResourceAsStream("legacy_item_ids.json")) {
+        try (InputStream stream = BlockToItemRegistry.class.getClassLoader().getResourceAsStream("internal/legacy_item_ids.json")) {
             if (stream == null) {
                 throw new RuntimeException("Failed to load runtime_item_states.json");
             }
@@ -51,7 +51,7 @@ public class BlockToItemRegistry implements IRegistry<String, String, String> {
             throw new RuntimeException("Failed to load runtime_item_states.json");
         }
 
-        try (InputStream stream = BlockToItemRegistry.class.getClassLoader().getResourceAsStream("item_mappings.json")) {
+        try (InputStream stream = BlockToItemRegistry.class.getClassLoader().getResourceAsStream("internal/item_mappings.json")) {
             if (stream == null) {
                 throw new RuntimeException("Failed to load item_mappings.json");
             }
@@ -73,7 +73,7 @@ public class BlockToItemRegistry implements IRegistry<String, String, String> {
             throw new RuntimeException("Failed to load item_mappings.json");
         }
 
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("extra_block_mappings.json")) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("internal/extra_block_mappings.json")) {
             if (inputStream == null) {
                 throw new RuntimeException("Failed to load extra_block_mappings.json");
             }

@@ -56,7 +56,7 @@ public class LazyBlockTag implements BlockTag {
 
     static {
         Map<String, Set<String>> parsed = Collections.emptyMap();
-        var stream = LazyBlockTag.class.getClassLoader().getResourceAsStream("block_tags.json");
+        var stream = LazyBlockTag.class.getClassLoader().getResourceAsStream("gamedata/tag/block_tags.json");
         if (stream != null) {
             try (var reader = new InputStreamReader(stream)) {
                 var type = new TypeToken<Map<String, Set<String>>>() {}.getType();

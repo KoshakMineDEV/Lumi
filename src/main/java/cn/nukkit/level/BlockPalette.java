@@ -49,7 +49,7 @@ public class BlockPalette {
 
     private ListTag<CompoundTag> paletteFor(int protocol) {
         ListTag<CompoundTag> tag;
-        try (InputStream stream = Server.class.getClassLoader().getResourceAsStream("runtime_block_states_" + protocol + ".dat")) {
+        try (InputStream stream = Server.class.getClassLoader().getResourceAsStream("gamedata/block/runtime/runtime_block_states_" + protocol + ".dat")) {
             if (stream == null) {
                 throw new AssertionError("Unable to locate block state nbt " + protocol);
             }
@@ -98,10 +98,11 @@ public class BlockPalette {
     }
 
     /**
-     * 加载扩展数据，用于在不修改runtime_block_states.dat文件的情况下额外增加一些内容
+     * Allows to add extra blockstate mapping to runtime_block_states.dat
      */
+    //TODO: remove completely or rework for translating blocks from newer versions to older ones
     private void loadBlockStatesExtras() {
-        try (InputStream resourceAsStream = Server.class.getClassLoader().getResourceAsStream("RuntimeBlockStatesExtras/" + protocol + ".json")) {
+        try (InputStream resourceAsStream = Server.class.getClassLoader().getResourceAsStream("gamedata/block/extra/states" + protocol + ".json")) {
             if (resourceAsStream == null) {
                 return;
             }

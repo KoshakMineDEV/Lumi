@@ -57,7 +57,7 @@ public class RuntimeItemMapping {
 
     public RuntimeItemMapping(Map<String, MappingEntry> mappings, int protocolId) {
         this.protocolId = protocolId;
-        String itemStatesFile = "runtime_item_states_" + protocolId + ".json";
+        String itemStatesFile = "gamedata/item/runtime/runtime_item_states_" + protocolId + ".json";
         InputStream stream = Server.class.getClassLoader().getResourceAsStream(itemStatesFile);
         if (stream == null) {
             throw new AssertionError("Unable to load " + itemStatesFile);
@@ -66,7 +66,7 @@ public class RuntimeItemMapping {
 
         CompoundTag itemComponents = null;
         if (protocolId >= ProtocolInfo.v1_21_60) {
-            try (InputStream inputStream = RuntimeItemMapping.class.getClassLoader().getResourceAsStream("ItemComponents/item_components_" + protocolId + ".nbt")) {
+            try (InputStream inputStream = RuntimeItemMapping.class.getClassLoader().getResourceAsStream("gamedata/item/component/item_components_" + protocolId + ".nbt")) {
                 itemComponents = NBTIO.read(new BufferedInputStream(new GZIPInputStream(inputStream)), ByteOrder.BIG_ENDIAN, false);
             } catch (Exception e) {
                 throw new AssertionError("Error while loading item_components_" + protocolId + ".nbt", e);

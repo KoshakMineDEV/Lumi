@@ -63,7 +63,7 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
                 return;
             }
             try (InputStream stream = CreativeItemRegistry.class.getClassLoader()
-                    .getResourceAsStream("gamedata/creative_items/creative_items_" + protocol + ".json")) {
+                    .getResourceAsStream("gamedata/item/creative/creative_items_" + protocol + ".json")) {
                 if (stream == null) {
                     return;
                 }
@@ -75,7 +75,7 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
                 this.initOldItems(root, protocol);
 
             } catch (Exception e) {
-                throw new RuntimeException("Failed to load gamedata/creative_items/creative_items_" + protocol + ".json", e);
+                throw new RuntimeException("Failed to load gamedata/item/creative/creative_items_" + protocol + ".json", e);
             }
         });
     }

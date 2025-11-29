@@ -335,22 +335,18 @@ public class StartGamePacket extends DataPacket {
         }
         this.putLLong(this.currentTick);
         this.putVarInt(this.enchantmentSeed);
-        if (protocol >= ProtocolInfo.v1_16_100) {
-            if (this.blockDefinitions != null && !this.blockDefinitions.isEmpty()) {
-                this.putUnsignedVarInt(this.blockDefinitions.size());
-                for (CustomBlockDefinition definition : this.blockDefinitions) {
-                    this.putString(definition.identifier());
-                    try {
-                        this.put(NBTIO.write(definition.nbt(), ByteOrder.LITTLE_ENDIAN, true));
-                    } catch (Exception e) {
-                        log.error("Error while encoding NBT data of CustomBlockDefinition", e);
-                    }
+        if (this.blockDefinitions != null && !this.blockDefinitions.isEmpty()) {
+            this.putUnsignedVarInt(this.blockDefinitions.size());
+            for (CustomBlockDefinition definition : this.blockDefinitions) {
+                this.putString(definition.identifier());
+                try {
+                    this.put(NBTIO.write(definition.nbt(), ByteOrder.LITTLE_ENDIAN, true));
+                } catch (Exception e) {
+                    log.error("Error while encoding NBT data of CustomBlockDefinition", e);
                 }
-            } else {
-                this.putUnsignedVarInt(0); // No custom blocks
             }
         } else {
-            this.put(GlobalBlockPalette.getCompiledTable(this.protocol));
+            this.putUnsignedVarInt(0); // No custom blocks
         }
         if (protocol < ProtocolInfo.v1_21_60) {
             this.put(RuntimeItems.getMapping(protocol).getItemPalette());

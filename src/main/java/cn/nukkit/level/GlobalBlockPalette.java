@@ -21,23 +21,6 @@ import java.util.zip.GZIPInputStream;
 public class GlobalBlockPalette {
     private static boolean initialized;
 
-    private static final AtomicInteger runtimeIdAllocator407 = new AtomicInteger(0);
-    private static final Int2IntMap legacyToRuntimeId407 = new Int2IntOpenHashMap();
-
-    private static BlockPalette blockPalette419;
-    private static BlockPalette blockPalette428;
-    private static BlockPalette blockPalette440;
-    private static BlockPalette blockPalette448;
-    private static BlockPalette blockPalette465;
-    private static BlockPalette blockPalette471;
-    private static BlockPalette blockPalette486;
-    private static BlockPalette blockPalette503;
-    private static BlockPalette blockPalette527;
-    private static BlockPalette blockPalette544;
-    private static BlockPalette blockPalette560;
-    private static BlockPalette blockPalette567;
-    private static BlockPalette blockPalette575;
-    private static BlockPalette blockPalette582;
     private static BlockPalette blockPalette589;
     private static BlockPalette blockPalette594;
     private static BlockPalette blockPalette618;
@@ -58,11 +41,7 @@ public class GlobalBlockPalette {
     private static BlockPalette blockPalette827;
     private static BlockPalette blockPalette844;
 
-    private static byte[] compiledTable407;
-
     static {
-        legacyToRuntimeId407.defaultReturnValue(-1);
-
         getPaletteByProtocol(ProtocolInfo.CURRENT_PROTOCOL); // cache current block palette
     }
 
@@ -71,31 +50,6 @@ public class GlobalBlockPalette {
             throw new IllegalStateException("BlockPalette was already generated!");
         }
         initialized = true;
-        log.debug("Loading block palette...");
-        // 407
-        ListTag<CompoundTag> tag407;
-        try (InputStream stream407 = Server.class.getClassLoader().getResourceAsStream("runtime_block_states_407.dat")) {
-            if (stream407 == null) {
-                throw new AssertionError("Unable to locate block state nbt 407");
-            }
-            //noinspection unchecked
-            tag407 = (ListTag<CompoundTag>) NBTIO.readTag(new BufferedInputStream(new GZIPInputStream(stream407)), ByteOrder.BIG_ENDIAN, false);
-        } catch (IOException e) {
-            throw new AssertionError("Unable to load block palette 407", e);
-        }
-        for (CompoundTag state : tag407.getAll()) {
-            int id = state.getInt("id");
-            int data = state.getShort("data");
-            int runtimeId = runtimeIdAllocator407.getAndIncrement();
-            int legacyId = id << 6 | data;
-            legacyToRuntimeId407.put(legacyId, runtimeId);
-            state.remove("data");
-        }
-        try {
-            compiledTable407 = NBTIO.write(tag407, ByteOrder.LITTLE_ENDIAN, true);
-        } catch (IOException e) {
-            throw new AssertionError("Unable to write block palette 407", e);
-        }
     }
 
     public static BlockPalette getPaletteByProtocol(int protocol) {
@@ -199,118 +153,13 @@ public class GlobalBlockPalette {
                 blockPalette589 = new BlockPalette(ProtocolInfo.v1_20_0);
             }
             return blockPalette589;
-        } else if (protocol >= ProtocolInfo.v1_19_80) {
-            if (blockPalette582 == null) {
-                blockPalette582 = new BlockPalette(ProtocolInfo.v1_19_80);
-            }
-            return blockPalette582;
-        } else if (protocol >= ProtocolInfo.v1_19_70_24) {
-            if (blockPalette575 == null) {
-                blockPalette575 = new BlockPalette(ProtocolInfo.v1_19_70);
-            }
-            return blockPalette575;
-        } else if (protocol >= ProtocolInfo.v1_19_60) {
-            if (blockPalette567 == null) {
-                blockPalette567 = new BlockPalette(ProtocolInfo.v1_19_60);
-            }
-            return blockPalette567;
-        } else if (protocol >= ProtocolInfo.v1_19_50_20) {
-            if (blockPalette560 == null) {
-                blockPalette560 = new BlockPalette(ProtocolInfo.v1_19_50);
-            }
-            return blockPalette560;
-        } else if (protocol >= ProtocolInfo.v1_19_20) {
-            if (blockPalette544 == null) {
-                blockPalette544 = new BlockPalette(ProtocolInfo.v1_19_20);
-            }
-            return blockPalette544;
-        } else if (protocol >= ProtocolInfo.v1_19_0_29) {
-            if (blockPalette527 == null) {
-                blockPalette527 = new BlockPalette(ProtocolInfo.v1_19_0);
-            }
-            return blockPalette527;
-        } else if (protocol >= ProtocolInfo.v1_18_30) {
-            if (blockPalette503 == null) {
-                blockPalette503 = new BlockPalette(ProtocolInfo.v1_18_30);
-            }
-            return blockPalette503;
-        } else if (protocol >= ProtocolInfo.v1_18_10_26) {
-            if (blockPalette486 == null) {
-                blockPalette486 = new BlockPalette(ProtocolInfo.v1_18_10);
-            }
-            return blockPalette486;
-        } else if (protocol >= ProtocolInfo.v1_17_40) {
-            if (blockPalette471 == null) {
-                blockPalette471 = new BlockPalette(ProtocolInfo.v1_17_40);
-            }
-            return blockPalette471;
-        } else if (protocol >= ProtocolInfo.v1_17_30) {
-            if (blockPalette465 == null) {
-                blockPalette465 = new BlockPalette(ProtocolInfo.v1_17_30);
-            }
-            return blockPalette465;
-        } else if (protocol >= ProtocolInfo.v1_17_10) {
-            if (blockPalette448 == null) {
-                blockPalette448 = new BlockPalette(ProtocolInfo.v1_17_10);
-            }
-            return blockPalette448;
-        } else if (protocol >= ProtocolInfo.v1_17_0) {
-            if (blockPalette440 == null) {
-                blockPalette440 = new BlockPalette(ProtocolInfo.v1_17_0);
-            }
-            return blockPalette440;
-        } else if (protocol >= ProtocolInfo.v1_16_210) {
-            if (blockPalette428 == null) {
-                blockPalette428 = new BlockPalette(ProtocolInfo.v1_16_210);
-            }
-            return blockPalette428;
-        } else if (protocol >= ProtocolInfo.v1_16_100) {
-            if (blockPalette419 == null) {
-                blockPalette419 = new BlockPalette(ProtocolInfo.v1_16_100);
-            }
-            return blockPalette419;
         }
 
         throw new IllegalArgumentException("Tried to get BlockPalette for unsupported protocol version: " + protocol);
     }
 
     public static int getOrCreateRuntimeId(int protocol, int id, int meta) {
-        if (protocol >= ProtocolInfo.v1_16_100) {
-            return getPaletteByProtocol(protocol).getRuntimeId(id, meta);
-        }
-
-        if (protocol < 407) throw new IllegalArgumentException("Tried to get block runtime id for unsupported protocol version: " + protocol);
-        int legacyId = id << 6 | meta;
-        int runtimeId;
-        switch (protocol) {
-            case 407:
-            case 408:
-            case 409:
-            case 410:
-            case 411:
-                runtimeId = legacyToRuntimeId407.get(legacyId);
-                if (runtimeId == -1) {
-                    runtimeId = legacyToRuntimeId407.get(id << 6);
-                    if (runtimeId == -1) runtimeId = legacyToRuntimeId407.get(BlockID.INFO_UPDATE << 6);
-                }
-                return runtimeId;
-            default:
-                throw new IllegalArgumentException("Tried to get legacyToRuntimeIdMap for unsupported protocol version: " + protocol);
-        }
-    }
-
-    public static byte[] getCompiledTable(int protocol) {
-        switch (protocol) {
-            // Versions before this doesn't send compiled table in StartGamePacket
-            case 407:
-            case 408:
-            case 409:
-            case 410:
-            case 411:
-                return compiledTable407;
-            default: // Unused since 1.16.100 (419)
-                throw new IllegalArgumentException("Tried to get compiled block runtime id table for unsupported protocol version: " + protocol);
-        }
+        return getPaletteByProtocol(protocol).getRuntimeId(id, meta);
     }
 
     public static int getOrCreateRuntimeId(int protocol, int legacyId) throws NoSuchElementException {
