@@ -408,10 +408,6 @@
     "12": "minecraft:axolotl_bucket",
     "13": "minecraft:tadpole_bucket"
   },
-  "minecraft:coal": {
-    "0": "minecraft:coal",
-    "1": "minecraft:charcoal"
-  },
   "minecraft:spawn_egg": {
     "0": "",
     "10": "minecraft:chicken_spawn_egg",

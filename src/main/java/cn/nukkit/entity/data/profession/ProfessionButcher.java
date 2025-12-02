@@ -2,6 +2,7 @@ package cn.nukkit.entity.data.profession;
 
 import cn.nukkit.block.BlockID;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.Tag;
 import cn.nukkit.utils.RecipeBuildUtils;
@@ -40,7 +41,7 @@ public class ProfessionButcher extends Profession {
                         .setTier(1)
                         .setTraderExp(1)
                         .build())
-                .add(RecipeBuildUtils.of(Item.get(Item.COAL, 0, 15), Item.get(Item.EMERALD))
+                .add(RecipeBuildUtils.of(Item.get(ItemNamespaceId.COAL, 0, 15), Item.get(Item.EMERALD))
                         .setMaxUses(16)
                         .setRewardExp((byte) 1)
                         .setTier(2)

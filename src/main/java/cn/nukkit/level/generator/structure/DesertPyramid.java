@@ -3,7 +3,6 @@ package cn.nukkit.level.generator.structure;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.level.ChunkManager;
-import cn.nukkit.level.generator.loot.DesertPyramidChest;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -177,19 +176,15 @@ public class DesertPyramid extends ScatteredStructurePiece {
 
         builder.setBlock(new BlockVector3(10, 3, 12), BlockID.CHEST, 2); // S
         final ListTag<CompoundTag> chestS = new ListTag<>("Items");
-        DesertPyramidChest.get().create(chestS, random);
         builder.setTile(new BlockVector3(10, 3, 12), BlockEntity.CHEST, new CompoundTag().putList(chestS));
         builder.setBlock(new BlockVector3(8, 3, 10), BlockID.CHEST, 5); // W
         final ListTag<CompoundTag> chestW = new ListTag<>("Items");
-        DesertPyramidChest.get().create(chestW, random);
         builder.setTile(new BlockVector3(8, 3, 10), BlockEntity.CHEST, new CompoundTag().putList(chestW));
         builder.setBlock(new BlockVector3(10, 3, 8), BlockID.CHEST, 3); // N
         final ListTag<CompoundTag> chestN = new ListTag<>("Items");
-        DesertPyramidChest.get().create(chestN, random);
         builder.setTile(new BlockVector3(10, 3, 8), BlockEntity.CHEST, new CompoundTag().putList(chestN));
         builder.setBlock(new BlockVector3(12, 3, 10), BlockID.CHEST, 4); // E
         final ListTag<CompoundTag> chestE = new ListTag<>("Items");
-        DesertPyramidChest.get().create(chestE, random);
         builder.setTile(new BlockVector3(12, 3, 10), BlockEntity.CHEST, new CompoundTag().putList(chestE));
     }
 }

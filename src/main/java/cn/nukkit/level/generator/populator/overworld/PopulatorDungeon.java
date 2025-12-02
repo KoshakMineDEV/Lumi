@@ -1,7 +1,6 @@
 package cn.nukkit.level.generator.populator.overworld;
 
 import cn.nukkit.Server;
-import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.mob.EntitySkeleton;
@@ -9,7 +8,6 @@ import cn.nukkit.entity.mob.EntitySpider;
 import cn.nukkit.entity.mob.EntityZombie;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.level.generator.loot.DungeonChest;
 import cn.nukkit.level.generator.populator.type.Populator;
 import cn.nukkit.level.generator.task.BlockActorSpawnTask;
 import cn.nukkit.math.NukkitRandom;
@@ -115,7 +113,6 @@ public class PopulatorDungeon extends Populator {
                                 level.setBlockAt(tx, y, tz, BlockID.CHEST, 2);
                                 final CompoundTag chest = BlockEntity.getDefaultCompound(new Vector3(tx, y, tz), BlockEntity.CHEST);
                                 final ListTag<CompoundTag> items = new ListTag<>("Items");
-                                DungeonChest.get().create(items, random);
                                 chest.putList(items);
                                 Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new BlockActorSpawnTask(chunk.getProvider().getLevel(), chest));
                                 break;

@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.data.IntEntityData;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
@@ -58,7 +59,7 @@ public class EntityParrot extends EntityFlyingAnimal {
 
     @Override
     public Item[] getDrops() {
-        return new Item[]{Item.get(Item.FEATHER, 0, Utils.rand(1, 2))};
+        return new Item[]{Item.get(ItemNamespaceId.FEATHER, 0, Utils.rand(1, 2))};
     }
 
     @Override

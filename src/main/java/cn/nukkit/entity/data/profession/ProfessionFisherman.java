@@ -2,6 +2,7 @@ package cn.nukkit.entity.data.profession;
 
 import cn.nukkit.block.BlockID;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.Tag;
@@ -25,13 +26,13 @@ public class ProfessionFisherman extends Profession {
         rodEnchantment.setLevel(random.nextInt(3) + 1);
         rod.addEnchantment(rodEnchantment);
 
-        recipes.add(RecipeBuildUtils.of(Item.get(Item.STRING, 0, 20), Item.get(Item.EMERALD))
+        recipes.add(RecipeBuildUtils.of(Item.get(ItemNamespaceId.STRING, 0, 20), Item.get(Item.EMERALD))
                         .setMaxUses(16)
                         .setRewardExp((byte) 1)
                         .setTier(1)
                         .setTraderExp(2)
                         .build())
-                .add(RecipeBuildUtils.of(Item.get(Item.COAL, 0, 10), Item.get(Item.EMERALD))
+                .add(RecipeBuildUtils.of(Item.get(ItemNamespaceId.COAL, 0, 10), Item.get(Item.EMERALD))
                         .setMaxUses(16)
                         .setRewardExp((byte) 1)
                         .setTier(1)

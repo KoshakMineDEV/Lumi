@@ -10,6 +10,7 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityEffectUpdateEvent;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.ItemSwordStone;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -88,10 +89,10 @@ public class EntityWitherSkeleton extends EntityWalkingMob implements EntitySmit
     public Item[] getDrops() {
         List<Item> drops = new ArrayList<>();
 
-        drops.add(Item.get(Item.BONE, 0, Utils.rand(0, 2)));
+        drops.add(Item.get(ItemNamespaceId.BONE, 0, Utils.rand(0, 2)));
 
         if (Utils.rand(1, 3) == 1) {
-            drops.add(Item.get(Item.COAL, 0, 1));
+            drops.add(Item.get(ItemNamespaceId.COAL, 0, 1));
         }
 
         if (Utils.rand(1, 40) == 1) {

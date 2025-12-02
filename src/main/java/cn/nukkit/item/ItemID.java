@@ -14,7 +14,6 @@ public interface ItemID {
     int APPLE = 260;
     int BOW = 261;
     int ARROW = 262;
-    int COAL = 263;
     int DIAMOND = 264;
     int IRON_INGOT = 265;
     int GOLD_INGOT = 266;
@@ -33,7 +32,6 @@ public interface ItemID {
     int DIAMOND_AXE = 279;
     int STICK = 280;
     int STICKS = 280;
-    int BOWL = 281;
     int MUSHROOM_STEW = 282;
     int GOLD_SWORD = 283;
     int GOLDEN_SWORD = 283;
@@ -43,8 +41,6 @@ public interface ItemID {
     int GOLDEN_PICKAXE = 285;
     int GOLD_AXE = 286;
     int GOLDEN_AXE = 286;
-    int STRING = 287;
-    int FEATHER = 288;
     int GUNPOWDER = 289;
     int WOODEN_HOE = 290;
     int STONE_HOE = 291;
@@ -120,8 +116,6 @@ public interface ItemID {
     int GLOWSTONE_DUST = 348;
     int RAW_FISH = 349;
     int COOKED_FISH = 350;
-    int BONE = 352;
-    int SUGAR = 353;
     int CAKE = 354;
     int BED = 355;
     int REPEATER = 356;

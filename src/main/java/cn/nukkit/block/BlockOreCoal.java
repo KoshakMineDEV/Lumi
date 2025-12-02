@@ -2,6 +2,7 @@ package cn.nukkit.block;
 
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemCoal;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.utils.Utils;
@@ -61,7 +62,7 @@ public class BlockOreCoal extends BlockSolid {
             }
 
             return new Item[]{
-                    new ItemCoal(0, count)
+                    Item.get(ItemNamespaceId.COAL, 0, count)
             };
         } else {
             return Item.EMPTY_ARRAY;

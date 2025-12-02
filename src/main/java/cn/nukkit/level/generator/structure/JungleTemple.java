@@ -3,7 +3,6 @@ package cn.nukkit.level.generator.structure;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.level.ChunkManager;
-import cn.nukkit.level.generator.loot.JungleTempleChest;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -177,11 +176,9 @@ public class JungleTemple extends ScatteredStructurePiece {
         builder.setBlock(new BlockVector3(10, 2, 10), BlockID.UNPOWERED_REPEATER, 4); // N
         builder.setBlock(new BlockVector3(8, 1, 3), BlockID.CHEST, 4); // E
         final ListTag<CompoundTag> chestE = new ListTag<>("Items");
-        JungleTempleChest.get().create(chestE, random);
         builder.setTile(new BlockVector3(8, 1, 3), BlockEntity.CHEST, new CompoundTag().putList(chestE));
         builder.setBlock(new BlockVector3(9, 1, 10), BlockID.CHEST, 2); // S
         final ListTag<CompoundTag> chestS = new ListTag<>("Items");
-        JungleTempleChest.get().create(chestS, random);
         builder.setTile(new BlockVector3(9, 1, 10), BlockEntity.CHEST, new CompoundTag().putList(chestS));
 
         // 2nd floor inside

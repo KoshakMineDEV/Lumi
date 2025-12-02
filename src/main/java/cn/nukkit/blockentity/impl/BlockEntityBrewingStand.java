@@ -14,6 +14,7 @@ import cn.nukkit.inventory.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.ItemID;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -32,7 +33,7 @@ import java.util.List;
 public class BlockEntityBrewingStand extends BlockEntitySpawnable implements InventoryHolder, BlockEntityContainer, BlockEntityNameable {
 
     public static final int MAX_BREW_TIME = 400;
-    public static final List<Integer> ingredients = new ArrayList<>(Arrays.asList(Item.NETHER_WART, Item.GHAST_TEAR, Item.GLOWSTONE_DUST, Item.REDSTONE_DUST, Item.GUNPOWDER, Item.MAGMA_CREAM, Item.BLAZE_POWDER, Item.GOLDEN_CARROT, Item.SPIDER_EYE, Item.FERMENTED_SPIDER_EYE, Item.GLISTERING_MELON, Item.SUGAR, Item.RABBIT_FOOT, Item.PUFFERFISH, Item.TURTLE_SHELL, Item.PHANTOM_MEMBRANE, Item.DRAGON_BREATH));
+    public static final List<String> ingredients = new ArrayList<>(Arrays.asList(ItemNamespaceId.NETHER_WART, ItemNamespaceId.GHAST_TEAR, ItemNamespaceId.GLOWSTONE_DUST, ItemNamespaceId.REDSTONE, ItemNamespaceId.GUNPOWDER, ItemNamespaceId.MAGMA_CREAM, ItemNamespaceId.BLAZE_POWDER, ItemNamespaceId.GOLDEN_CARROT, ItemNamespaceId.SPIDER_EYE, ItemNamespaceId.FERMENTED_SPIDER_EYE, ItemNamespaceId.GLISTERING_MELON_SLICE, ItemNamespaceId.SUGAR, ItemNamespaceId.RABBIT_FOOT, ItemNamespaceId.PUFFERFISH, ItemNamespaceId.TURTLE_SCUTE, ItemNamespaceId.PHANTOM_MEMBRANE, ItemNamespaceId.DRAGON_BREATH));
     public int brewTime;
     public int fuelTotal;
     public int fuelAmount;
@@ -170,7 +171,7 @@ public class BlockEntityBrewingStand extends BlockEntitySpawnable implements Inv
     }
 
     protected boolean checkIngredient(Item ingredient) {
-        return ingredients.contains(ingredient.getId());
+        return ingredients.contains(ingredient.getNamespaceId());
     }
 
     @Override

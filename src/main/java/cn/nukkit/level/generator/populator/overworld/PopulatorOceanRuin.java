@@ -8,8 +8,6 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.block.BlockTypes;
-import cn.nukkit.level.generator.loot.RuinBigChest;
-import cn.nukkit.level.generator.loot.RuinSmallChest;
 import cn.nukkit.level.generator.populator.type.Populator;
 import cn.nukkit.level.generator.task.BlockActorSpawnTask;
 import cn.nukkit.level.generator.task.CallbackableChunkGenerationTask;
@@ -112,7 +110,6 @@ public class PopulatorOceanRuin extends Populator {
                 final CompoundTag tag = BlockEntity.getDefaultCompound(pos.asVector3(), BlockEntity.CHEST);
 
                 final ListTag<CompoundTag> items = new ListTag<>("Items");
-                RuinSmallChest.get().create(items, random);
                 tag.putList(items);
 
                 chunk.setBlock(pos.x & 0xf, pos.y, pos.z & 0xf, BlockID.CHEST, 2);
@@ -128,7 +125,6 @@ public class PopulatorOceanRuin extends Populator {
                 final CompoundTag tag = BlockEntity.getDefaultCompound(pos.asVector3(), BlockEntity.CHEST);
 
                 final ListTag<CompoundTag> items = new ListTag<>("Items");
-                RuinBigChest.get().create(items, random);
                 tag.putList(items);
 
                 chunk.setBlock(pos.x & 0xf, pos.y, pos.z & 0xf, BlockID.CHEST, 2);

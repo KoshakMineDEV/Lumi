@@ -1,6 +1,7 @@
 package cn.nukkit.entity.passive;
 
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
@@ -48,7 +49,7 @@ public class EntityCat extends EntityWalkingAnimal {
         if (!this.isBaby()) {
             int c = Utils.rand(0, 2);
             if (c > 0) {
-                return new Item[]{Item.get(Item.STRING, 0, c)};
+                return new Item[]{Item.get(ItemNamespaceId.STRING, 0, c)};
             }
         }
 

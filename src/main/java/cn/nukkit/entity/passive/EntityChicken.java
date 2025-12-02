@@ -146,7 +146,7 @@ public class EntityChicken extends EntityWalkingAnimal implements EntityClimateV
         List<Item> drops = new ArrayList<>();
 
         if (!this.isBaby()) {
-            drops.add(Item.get(Item.FEATHER, 0, Utils.rand(0, 2)));
+            drops.add(Item.get(ItemNamespaceId.FEATHER, 0, Utils.rand(0, 2)));
             drops.add(Item.get(this.isOnFire() ? Item.COOKED_CHICKEN : Item.RAW_CHICKEN, 0, 1));
         }
 

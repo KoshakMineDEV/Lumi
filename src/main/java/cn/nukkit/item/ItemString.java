@@ -2,22 +2,9 @@ package cn.nukkit.item;
 
 import cn.nukkit.block.Block;
 
-/**
- * @author MagicDroidX
- * Nukkit Project
- */
-public class ItemString extends Item {
-
+public class ItemString extends StringItemBase {
     public ItemString() {
-        this(0, 1);
-    }
-
-    public ItemString(Integer meta) {
-        this(meta, 1);
-    }
-
-    public ItemString(Integer meta, int count) {
-        super(STRING, meta, count, "String");
+        super(ItemNamespaceId.STRING, "String");
         this.block = Block.get(TRIPWIRE);
     }
 }

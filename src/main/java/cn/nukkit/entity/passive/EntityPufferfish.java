@@ -9,6 +9,7 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityEffectUpdateEvent;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
@@ -52,7 +53,7 @@ public class EntityPufferfish extends EntityFish {
 
     @Override
     public Item[] getDrops() {
-        return new Item[]{Item.get(Item.PUFFERFISH, 0, 1), Item.get(Item.BONE, 0, Utils.rand(0, 2))};
+        return new Item[]{Item.get(Item.PUFFERFISH, 0, 1), Item.get(ItemNamespaceId.BONE, 0, Utils.rand(0, 2))};
     }
 
     @Override

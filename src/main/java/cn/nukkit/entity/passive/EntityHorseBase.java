@@ -7,6 +7,7 @@ import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityRideable;
 import cn.nukkit.entity.data.Vector3fEntityData;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.ItemBreakParticle;
 import cn.nukkit.math.Vector3;
@@ -127,7 +128,7 @@ public class EntityHorseBase extends EntityWalkingAnimal implements EntityRideab
                 item.getId() == Item.APPLE ||
                 item.getId() == Item.HAY_BALE ||
                 item.getId() == Item.GOLDEN_APPLE ||
-                item.getId() == Item.SUGAR ||
+                item.getNamespaceId().equals(ItemNamespaceId.SUGAR) ||
                 item.getId() == Item.BREAD ||
                 item.getId() == Item.GOLDEN_CARROT;
     }

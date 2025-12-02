@@ -9,6 +9,7 @@ import cn.nukkit.entity.effect.PotionType;
 import cn.nukkit.entity.item.EntityPotionSplash;
 import cn.nukkit.event.entity.ProjectileLaunchEvent;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
@@ -134,7 +135,7 @@ public class EntityWitch extends EntityWalkingMob {
                     drops.add(Item.get(Item.SPIDER_EYE, 0, Utils.rand(0, 2)));
                     break;
                 case 6:
-                    drops.add(Item.get(Item.SUGAR, 0, Utils.rand(0, 2)));
+                    drops.add(Item.get(ItemNamespaceId.SUGAR, 0, Utils.rand(0, 2)));
                     break;
             }
         }

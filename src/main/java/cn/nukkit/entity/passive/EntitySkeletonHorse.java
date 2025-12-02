@@ -3,6 +3,7 @@ package cn.nukkit.entity.passive;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntitySmite;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
@@ -67,7 +68,7 @@ public class EntitySkeletonHorse extends EntityHorseBase implements EntitySmite 
 
         if (!this.isBaby()) {
             drops.add(Item.get(Item.LEATHER, 0, Utils.rand(0, 2)));
-            drops.add(Item.get(Item.BONE, 0, Utils.rand(0, 1)));
+            drops.add(Item.get(ItemNamespaceId.BONE, 0, Utils.rand(0, 1)));
         }
 
         if (this.isSaddled()) {

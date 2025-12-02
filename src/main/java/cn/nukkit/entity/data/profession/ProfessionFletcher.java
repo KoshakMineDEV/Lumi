@@ -2,6 +2,7 @@ package cn.nukkit.entity.data.profession;
 
 import cn.nukkit.block.BlockID;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.Tag;
@@ -62,7 +63,7 @@ public class ProfessionFletcher extends Profession {
                         .setTier(2)
                         .setTraderExp(10)
                         .build())
-                .add(RecipeBuildUtils.of(Item.get(Item.STRING, 0, 14), Item.get(Item.EMERALD))
+                .add(RecipeBuildUtils.of(Item.get(ItemNamespaceId.STRING, 0, 14), Item.get(Item.EMERALD))
                         .setMaxUses(16)
                         .setRewardExp((byte) 1)
                         .setTier(3)
@@ -74,7 +75,7 @@ public class ProfessionFletcher extends Profession {
                         .setTier(3)
                         .setTraderExp(10)
                         .build())
-                .add(RecipeBuildUtils.of(Item.get(Item.FEATHER, 0, 24), Item.get(Item.EMERALD))
+                .add(RecipeBuildUtils.of(Item.get(ItemNamespaceId.FEATHER, 0, 24), Item.get(Item.EMERALD))
                         .setMaxUses(16)
                         .setRewardExp((byte) 1)
                         .setTier(4)

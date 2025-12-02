@@ -9,7 +9,6 @@ import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.block.LiquidUpdater;
 import cn.nukkit.level.generator.block.state.BlockState;
 import cn.nukkit.level.generator.block.state.WeirdoDirection;
-import cn.nukkit.level.generator.loot.NetherBridgeChest;
 import cn.nukkit.level.generator.math.BoundingBox;
 import cn.nukkit.level.generator.task.BlockActorSpawnTask;
 import cn.nukkit.math.BlockFace;
@@ -992,7 +991,6 @@ public final class NetherBridgePieces {
                     if (chunk != null) {
                         final CompoundTag nbt = BlockEntity.getDefaultCompound(vec.asVector3(), BlockEntity.CHEST);
                         final ListTag<CompoundTag> itemList = new ListTag<>("Items");
-                        NetherBridgeChest.get().create(itemList, random);
                         nbt.putList(itemList);
                         Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new BlockActorSpawnTask(chunk.getProvider().getLevel(), nbt));
                     }
@@ -1063,7 +1061,6 @@ public final class NetherBridgePieces {
 					if (chunk != null) {
 						final CompoundTag nbt = BlockEntity.getDefaultCompound(vec.asVector3(), BlockEntity.CHEST);
 						final ListTag<CompoundTag> itemList = new ListTag<>("Items");
-						NetherBridgeChest.get().create(itemList, random);
 						nbt.putList(itemList);
 						Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new BlockActorSpawnTask(chunk.getProvider().getLevel(), nbt));
 					}

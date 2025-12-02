@@ -3,6 +3,7 @@ package cn.nukkit.item.randomitem;
 import cn.nukkit.entity.effect.PotionType;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemDyeBlack;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.enchantment.Enchantment;
 
 import static cn.nukkit.item.randomitem.RandomItem.*;
@@ -28,15 +29,15 @@ public final class Fishing {
     public static final Selector TREASURE_NAME_TAG = putSelector(new ConstantItemSelector(Item.NAME_TAG, TREASURES), 0.1667F);
     public static final Selector TREASURE_SADDLE = putSelector(new ConstantItemSelector(Item.SADDLE, TREASURES), 0.1667F);
     public static final Selector TREASURE_NAUTILUS_SHELL = putSelector(new ConstantItemSelector(Item.NAUTILUS_SHELL, TREASURES), 0.1667F);
-    public static final Selector JUNK_BOWL = putSelector(new ConstantItemSelector(Item.BOWL, JUNKS), 0.12F);
+    public static final Selector JUNK_BOWL = putSelector(new ConstantItemSelector(ItemNamespaceId.BOWL, JUNKS), 0.12F);
     public static final Selector JUNK_FISHING_ROD = putSelector(new ConstantItemSelector(Item.FISHING_ROD, JUNKS, true), 0.024F);
     public static final Selector JUNK_LEATHER = putSelector(new ConstantItemSelector(Item.LEATHER, JUNKS, true), 0.12F);
     public static final Selector JUNK_LEATHER_BOOTS = putSelector(new ConstantItemSelector(Item.LEATHER_BOOTS, JUNKS, true), 0.12F);
     public static final Selector JUNK_ROTTEN_FLESH = putSelector(new ConstantItemSelector(Item.ROTTEN_FLESH, JUNKS), 0.12F);
     public static final Selector JUNK_STICK = putSelector(new ConstantItemSelector(Item.STICK, JUNKS), 0.06F);
-    public static final Selector JUNK_STRING_ITEM = putSelector(new ConstantItemSelector(Item.STRING, JUNKS), 0.06F);
+    public static final Selector JUNK_STRING_ITEM = putSelector(new ConstantItemSelector(ItemNamespaceId.STRING, JUNKS), 0.06F);
     public static final Selector JUNK_WATTER_BOTTLE = putSelector(new ConstantItemSelector(Item.POTION, PotionType.WATER.id(), JUNKS), 0.12F);
-    public static final Selector JUNK_BONE = putSelector(new ConstantItemSelector(Item.BONE, JUNKS), 0.12F);
+    public static final Selector JUNK_BONE = putSelector(new ConstantItemSelector(ItemNamespaceId.BONE, JUNKS), 0.12F);
     public static final Selector JUNK_INK_SAC = putSelector(new ConstantItemSelector(new ItemDyeBlack(), 10, JUNKS), 0.012F);
     public static final Selector JUNK_TRIPWIRE_HOOK = putSelector(new ConstantItemSelector(Item.TRIPWIRE_HOOK, JUNKS), 0.12F);
 

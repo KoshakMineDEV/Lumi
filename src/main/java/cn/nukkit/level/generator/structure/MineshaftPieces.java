@@ -13,7 +13,6 @@ import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.block.state.BlockState;
 import cn.nukkit.level.generator.block.state.RailDirection;
 import cn.nukkit.level.generator.block.state.TorchFacingDirection;
-import cn.nukkit.level.generator.loot.MineshaftChest;
 import cn.nukkit.level.generator.math.BoundingBox;
 import cn.nukkit.level.generator.populator.overworld.PopulatorMineshaft;
 import cn.nukkit.level.generator.task.ActorSpawnTask;
@@ -348,7 +347,6 @@ public final class MineshaftPieces {
                         .putString("id", "MinecartChest");
 
                     final ListTag<CompoundTag> itemList = new ListTag<>("Items");
-                    MineshaftChest.get().create(itemList, random);
                     nbt.putList(itemList);
 
                     Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new ActorSpawnTask(chunk.getProvider().getLevel(), nbt));

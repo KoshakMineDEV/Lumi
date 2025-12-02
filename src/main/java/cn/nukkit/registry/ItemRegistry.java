@@ -41,15 +41,19 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(BLUE_DYE, ItemDyeBlue::new);
         register(BLUE_EGG, ItemBlueEgg::new);
         register(BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, ItemSmithingTemplateArmorTrimBolt::new);
+        register(BONE, ItemBone::new);
         register(BONE_MEAL, ItemBoneMeal::new);
+        register(BOWL, ItemBowl::new);
         register(BREEZE_ROD, ItemBreezeRod::new);
         register(BREWER_POTTERY_SHERD, ItemBrewerPotterySherd::new);
         register(BROWN_DYE, ItemDyeBrown::new);
         register(BROWN_EGG, ItemBrownEgg::new);
         register(BRUSH, ItemBrush::new);
         register(BURN_POTTERY_SHERD, ItemBurnPotterySherd::new);
+        register(CHARCOAL, ItemCharcoal::new);
         register(CHERRY_DOOR, ItemDoorCherry::new);
         register(CHERRY_SIGN, ItemCherrySign::new);
+        register(COAL, ItemCoal::new);
         register(COAST_ARMOR_TRIM_SMITHING_TEMPLATE, ItemCoastArmorTrimSmithingTemplate::new);
         register(COCOA_BEANS, ItemCocoaBeans::new);
         register(COPPER_AXE, ItemAxeCopper::new);
@@ -72,6 +76,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(ECHO_SHARD, ItemEchoShard::new);
         register(EXPLORER_POTTERY_SHERD, ItemExplorerPotterySherd::new);
         register(EYE_ARMOR_TRIM_SMITHING_TEMPLATE, ItemEyeArmorTrimSmithingTemplate::new);
+        register(FEATHER, ItemFeather::new);
         register(FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, ItemSmithingTemplateArmorTrimFlow::new);
         register(FLOW_BANNER_PATTERN, ItemBannerPatternFlow::new);
         register(FLOW_POTTERY_SHERD, ItemFlowPotterySherd::new);
@@ -132,6 +137,8 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, ItemSnoutArmorTrimSmithingTemplate::new);
         register(SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, ItemSpireArmorTrimSmithingTemplate::new);
         register(SPRUCE_SIGN, ItemSpruceSign::new);
+        register(STRING, ItemString::new);
+        register(SUGAR, ItemSugar::new);
         register(TIDE_ARMOR_TRIM_SMITHING_TEMPLATE, ItemTideArmorTrimSmithingTemplate::new);
         register(TORCHFLOWER_SEEDS, ItemTorchflowerSeeds::new);
         register(TRIAL_KEY, ItemTrialKey::new);
@@ -181,7 +188,8 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
                     throw new UnsupportedOperationException(e);
                 }
             };
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new RegisterException(e);
         }
 

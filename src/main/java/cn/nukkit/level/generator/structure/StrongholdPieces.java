@@ -7,9 +7,6 @@ import cn.nukkit.entity.mob.EntitySilverfish;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.block.state.*;
-import cn.nukkit.level.generator.loot.StrongholdCorridorChest;
-import cn.nukkit.level.generator.loot.StrongholdCrossingChest;
-import cn.nukkit.level.generator.loot.StrongholdLibraryChest;
 import cn.nukkit.level.generator.math.BoundingBox;
 import cn.nukkit.level.generator.task.BlockActorSpawnTask;
 import cn.nukkit.math.BlockFace;
@@ -573,7 +570,6 @@ public final class StrongholdPieces {
                     if (chunk != null) {
                         final CompoundTag nbt = BlockEntity.getDefaultCompound(vec.asVector3(), BlockEntity.CHEST);
                         final ListTag<CompoundTag> itemList = new ListTag<>("Items");
-                        StrongholdCorridorChest.get().create(itemList, random);
                         nbt.putList(itemList);
                         Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new BlockActorSpawnTask(chunk.getProvider().getLevel(), nbt));
                     }
@@ -855,7 +851,6 @@ public final class StrongholdPieces {
                         if (chunk != null) {
                             final CompoundTag nbt = BlockEntity.getDefaultCompound(vec.asVector3(), BlockEntity.CHEST);
                             final ListTag<CompoundTag> itemList = new ListTag<>("Items");
-                            StrongholdCrossingChest.get().create(itemList, random);
                             nbt.putList(itemList);
                             Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new BlockActorSpawnTask(chunk.getProvider().getLevel(), nbt));
                         }
@@ -1054,7 +1049,6 @@ public final class StrongholdPieces {
 				if (chunk != null) {
 					final CompoundTag nbt = BlockEntity.getDefaultCompound(vec.asVector3(), BlockEntity.CHEST);
 					final ListTag<CompoundTag> itemList = new ListTag<>("Items");
-					StrongholdLibraryChest.get().create(itemList, random);
 					nbt.putList(itemList);
 					Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new BlockActorSpawnTask(chunk.getProvider().getLevel(), nbt));
 				}
@@ -1070,7 +1064,6 @@ public final class StrongholdPieces {
 					if (chunk != null) {
 						final CompoundTag nbt = BlockEntity.getDefaultCompound(vec.asVector3(), BlockEntity.CHEST);
 						final ListTag<CompoundTag> itemList = new ListTag<>("Items");
-						StrongholdLibraryChest.get().create(itemList, random);
 						nbt.putList(itemList);
 						Server.getInstance().getScheduler().scheduleTask(InternalPlugin.INSTANCE, new BlockActorSpawnTask(chunk.getProvider().getLevel(), nbt));
 					}

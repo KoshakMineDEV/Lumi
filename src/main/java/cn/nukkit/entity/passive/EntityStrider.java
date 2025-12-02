@@ -8,6 +8,7 @@ import cn.nukkit.entity.EntityRideable;
 import cn.nukkit.entity.data.FloatEntityData;
 import cn.nukkit.entity.data.Vector3fEntityData;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.math.Vector3f;
@@ -202,7 +203,7 @@ public class EntityStrider extends EntityWalkingAnimal implements EntityRideable
         List<Item> drops = new ArrayList<>();
 
         if (!this.isBaby()) {
-            drops.add(Item.get(Item.STRING, 0, Utils.rand(2, 5)));
+            drops.add(Item.get(ItemNamespaceId.STRING, 0, Utils.rand(2, 5)));
         }
 
         if (this.isSaddled()) {

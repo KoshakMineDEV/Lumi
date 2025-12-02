@@ -7,9 +7,6 @@ import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.Generator;
-import cn.nukkit.level.generator.loot.ShipwreckMapChest;
-import cn.nukkit.level.generator.loot.ShipwreckSupplyChest;
-import cn.nukkit.level.generator.loot.ShipwreckTreasureChest;
 import cn.nukkit.level.generator.populator.CallbackableTemplateStructurePopulator;
 import cn.nukkit.level.generator.populator.type.Populator;
 import cn.nukkit.level.generator.task.CallbackableChunkGenerationTask;
@@ -127,21 +124,18 @@ public class PopulatorShipwreck extends Populator implements CallbackableTemplat
                 switch (nbt.getString("metadata")) {
                     case "supplyChest":
                         ListTag<CompoundTag> itemList = new ListTag<>("Items");
-                        ShipwreckSupplyChest.get().create(itemList, random);
 
                         Server.getInstance().getScheduler().scheduleDelayedTask(InternalPlugin.INSTANCE, new LootSpawnTask(chunk.getProvider().getLevel(),
                             new BlockVector3(nbt.getInt("x"), nbt.getInt("y") - 1, nbt.getInt("z")), itemList), 2);
                         break;
                     case "mapChest":
                         itemList = new ListTag<>("Items");
-                        ShipwreckMapChest.get().create(itemList, random);
 
                         Server.getInstance().getScheduler().scheduleDelayedTask(InternalPlugin.INSTANCE, new LootSpawnTask(chunk.getProvider().getLevel(),
                             new BlockVector3(nbt.getInt("x"), nbt.getInt("y") - 1, nbt.getInt("z")), itemList), 2);
                         break;
                     case "treasureChest":
                         itemList = new ListTag<>("Items");
-                        ShipwreckTreasureChest.get().create(itemList, random);
 
                         Server.getInstance().getScheduler().scheduleDelayedTask(InternalPlugin.INSTANCE, new LootSpawnTask(chunk.getProvider().getLevel(),
                             new BlockVector3(nbt.getInt("x"), nbt.getInt("y") - 1, nbt.getInt("z")), itemList), 2);

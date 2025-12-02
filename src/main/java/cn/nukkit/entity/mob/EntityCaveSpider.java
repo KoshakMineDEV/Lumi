@@ -10,6 +10,7 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityEffectUpdateEvent;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
@@ -85,7 +86,7 @@ public class EntityCaveSpider extends EntityWalkingMob implements EntityArthropo
     public Item[] getDrops() {
         List<Item> drops = new ArrayList<>();
 
-        drops.add(Item.get(Item.STRING, 0, Utils.rand(0, 2)));
+        drops.add(Item.get(ItemNamespaceId.STRING, 0, Utils.rand(0, 2)));
         drops.add(Item.get(Item.SPIDER_EYE, 0, (Utils.rand(0, 2) == 0 ? 1 : 0)));
 
         return drops.toArray(Item.EMPTY_ARRAY);

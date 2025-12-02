@@ -35,7 +35,6 @@ public class ItemLegacyRegistry implements IRegistry<Integer, Class<?>, Class<?>
         register(APPLE, ItemApple.class); //260
         register(BOW, ItemBow.class); //261
         register(ARROW, ItemArrow.class); //262
-        register(COAL, ItemCoal.class); //263
         register(DIAMOND, ItemDiamond.class); //264
         register(IRON_INGOT, ItemIngotIron.class); //265
         register(GOLD_INGOT, ItemIngotGold.class); //266
@@ -53,14 +52,11 @@ public class ItemLegacyRegistry implements IRegistry<Integer, Class<?>, Class<?>
         register(DIAMOND_PICKAXE, ItemPickaxeDiamond.class); //278
         register(DIAMOND_AXE, ItemAxeDiamond.class); //279
         register(STICK, ItemStick.class); //280
-        register(BOWL, ItemBowl.class); //281
         register(MUSHROOM_STEW, ItemMushroomStew.class); //282
         register(GOLD_SWORD, ItemSwordGold.class); //283
         register(GOLD_SHOVEL, ItemShovelGold.class); //284
         register(GOLD_PICKAXE, ItemPickaxeGold.class); //285
         register(GOLD_AXE, ItemAxeGold.class); //286
-        register(STRING, ItemString.class); //287
-        register(FEATHER, ItemFeather.class); //288
         register(GUNPOWDER, ItemGunpowder.class); //289
         register(WOODEN_HOE, ItemHoeWood.class); //290
         register(STONE_HOE, ItemHoeStone.class); //291
@@ -119,8 +115,6 @@ public class ItemLegacyRegistry implements IRegistry<Integer, Class<?>, Class<?>
         register(GLOWSTONE_DUST, ItemGlowstoneDust.class); //348
         register(RAW_FISH, ItemFish.class); //349
         register(COOKED_FISH, ItemFishCooked.class); //350
-        register(BONE, ItemBone.class); //352
-        register(SUGAR, ItemSugar.class); //353
         register(CAKE, ItemCake.class); //354
         register(BED, ItemBed.class); //355
         register(REPEATER, ItemRedstoneRepeater.class); //356

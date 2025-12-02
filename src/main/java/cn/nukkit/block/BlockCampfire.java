@@ -72,7 +72,7 @@ public class BlockCampfire extends BlockTransparentMeta implements Faceable, Blo
 
     @Override
     public Item[] getDrops(final Item item) {
-        return new Item[]{new ItemCoal(0, 1 + ThreadLocalRandom.current().nextInt(1))};
+        return new Item[]{Item.get(ItemNamespaceId.CHARCOAL,0, 1 + ThreadLocalRandom.current().nextInt(1))};
     }
 
     @Override
