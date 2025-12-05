@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@EqualsAndHashCode(doNotUseGetters = true)
+@EqualsAndHashCode(callSuper = false, doNotUseGetters = true)
 @ToString(doNotUseGetters = true)
 public class ToggleCrafterSlotRequestPacket extends DataPacket {
 

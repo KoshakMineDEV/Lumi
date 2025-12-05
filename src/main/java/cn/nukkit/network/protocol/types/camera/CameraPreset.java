@@ -4,6 +4,7 @@ import cn.nukkit.math.Vector2f;
 import cn.nukkit.math.Vector3f;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.cloudburstmc.protocol.common.NamedDefinition;
@@ -47,6 +48,7 @@ public final class CameraPreset implements NamedDefinition {
     private Float maxYawLimit;
     @Nullable
     private CameraAudioListener listener;
+    @Default
     private OptionalBoolean playEffect = OptionalBoolean.empty();
     /**
      * @since v729
@@ -55,6 +57,7 @@ public final class CameraPreset implements NamedDefinition {
     /**
      * @since v729
      */
+    @Default
     private OptionalBoolean snapToTarget = OptionalBoolean.empty();
     /**
      * @since v729
@@ -71,11 +74,13 @@ public final class CameraPreset implements NamedDefinition {
     /**
      * @since v748
      */
+    @Default
     private OptionalBoolean continueTargeting = OptionalBoolean.empty();
     /**
      * @since v748
      * @deprecated v818
      */
+    @Default
     private OptionalBoolean alignTargetAndCameraForward = OptionalBoolean.empty();
     /**
      * @since v766
