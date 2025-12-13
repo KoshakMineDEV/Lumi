@@ -9,7 +9,6 @@ import cn.nukkit.network.process.processor.common.FilterTextProcessor;
 import cn.nukkit.network.process.processor.common.RequestAbilityProcessor;
 import cn.nukkit.network.process.processor.common.RequestNetworkSettingsProcessor;
 import cn.nukkit.network.protocol.DataPacket;
-import cn.nukkit.network.protocol.ProtocolInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -188,7 +187,19 @@ public final class DataPacketManager {
                 TextProcessor.INSTANCE,
                 RequestAbilityProcessor.INSTANCE,
                 RequestNetworkSettingsProcessor.INSTANCE,
-                FilterTextProcessor.INSTANCE
+                FilterTextProcessor.INSTANCE,
+                LoginProcessor.INSTANCE,
+                ResourcePackClientResponseProcessor.INSTANCE,
+                MovePlayerProcessor.INSTANCE,
+                PlayerAuthInputProcessor.INSTANCE,
+                PlayerActionProcessor.INSTANCE,
+                InteractProcessor.INSTANCE,
+                BlockPickRequestProcessor.INSTANCE,
+                AnimateProcessor.INSTANCE,
+                EntityEventProcessor.INSTANCE,
+                ContainerCloseProcessor.INSTANCE,
+                BlockEntityDataProcessor.INSTANCE,
+                SettingsCommandProcessor.INSTANCE
         );
     }
 }
