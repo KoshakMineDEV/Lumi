@@ -129,22 +129,26 @@ public abstract class ItemTool extends Item implements ItemDurable {
 
     @Override
     public int getEnchantAbility() {
-        switch (this.getTier()) {
-            case TIER_STONE:
+        int tier = this.getTier();
+        switch (tier) {
+            case TIER_STONE -> {
                 return 5;
-            case TIER_WOODEN:
+            }
+            case TIER_WOODEN, TIER_NETHERITE -> {
                 return 15;
-            case TIER_DIAMOND:
+            }
+            case TIER_DIAMOND -> {
                 return 10;
-            case TIER_GOLD:
+            }
+            case TIER_GOLD -> {
                 return 22;
-            case TIER_IRON:
+            }
+            case TIER_IRON -> {
                 return 14;
-            //TODO
-            case TIER_NETHERITE:
-                return 10;
-            default:
+            }
+            default -> {
                 return 0;
+            }
         }
     }
 

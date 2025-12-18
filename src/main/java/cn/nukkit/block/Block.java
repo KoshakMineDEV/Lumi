@@ -636,6 +636,8 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
                 return 4.0;
             case ItemTool.TIER_IRON:
                 return 6.0;
+            case ItemTool.TIER_COPPER:
+                return 5.0;
             case ItemTool.TIER_DIAMOND:
                 return 8.0;
             case ItemTool.TIER_NETHERITE:
