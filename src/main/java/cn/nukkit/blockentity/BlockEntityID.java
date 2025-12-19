@@ -42,6 +42,7 @@ public interface BlockEntityID {
     String CHISELED_BOOKSHELF = "ChiseledBookshelf";
     String HANGING_SIGN = "HangingSign";
     String SCULK_SENSOR = "SculkSensor";
+    String COMMAND_BLOCK = "CommandBlock";
 
     // Not a vanilla block entity
     String PERSISTENT_CONTAINER = "PersistentContainer";

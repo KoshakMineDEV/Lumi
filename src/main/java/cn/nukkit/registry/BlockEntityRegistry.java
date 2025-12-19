@@ -57,6 +57,7 @@ public class BlockEntityRegistry implements IRegistry<String, Class<? extends Bl
         register(BlockEntityID.CHISELED_BOOKSHELF, BlockEntityChiseledBookshelf.class);
         register(BlockEntityID.HANGING_SIGN, BlockEntityHangingSign.class);
         register(BlockEntityID.SCULK_SENSOR, BlockEntitySculkSensor.class);
+        register(BlockEntityID.COMMAND_BLOCK, BlockEntityCommandBlock.class);
 
         // Persistent container, not on vanilla
         register(BlockEntityID.PERSISTENT_CONTAINER, PersistentDataContainerBlockEntity.class);
