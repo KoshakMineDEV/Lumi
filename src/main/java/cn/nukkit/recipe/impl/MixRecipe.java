@@ -33,7 +33,7 @@ public abstract class MixRecipe implements Recipe {
 
     public boolean fastCheck(Item... items  ) {
         if(items.length == 2) {
-            if(items[1] instanceof ItemPotion && items[1].equals(input)) {
+            if(items[1].equals(input)) {
                 return items[0].equals(getIngredient());
             }
         }

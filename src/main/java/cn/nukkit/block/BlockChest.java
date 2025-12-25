@@ -123,10 +123,10 @@ public class BlockChest extends BlockTransparentMeta implements Faceable, BlockE
         if (!(this.getLevel().getBlockEntity(this) instanceof BlockEntityChest blockEntity)) {
             return false;
         }
-
+        BlockFace thisFace = BlockFace.Plane.HORIZONTAL.faces[getDamage()];
         for (BlockFace side : BlockFace.Plane.HORIZONTAL) {
             Block c = this.getSide(side);
-            if (c instanceof BlockChest && !(c instanceof BlockCopperChestBase) && c.getDamage() == this.getDamage()) {
+            if (c instanceof BlockChest && !(c instanceof BlockCopperChestBase) && thisFace.getAxis() != side.getAxis()) {
                 BlockEntity entity = this.getLevel().getBlockEntity(c);
                 if (entity instanceof BlockEntityChest && !((BlockEntityChest) entity).isPaired()) {
                     chest = (BlockEntityChest) entity;
