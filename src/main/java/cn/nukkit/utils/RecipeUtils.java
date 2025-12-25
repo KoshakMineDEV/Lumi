@@ -3,9 +3,16 @@ package cn.nukkit.utils;
 import cn.nukkit.item.Item;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.recipe.CraftingRecipe;
+import cn.nukkit.recipe.RecipeType;
+import cn.nukkit.recipe.descriptor.DefaultDescriptor;
+import cn.nukkit.recipe.descriptor.ItemDescriptor;
+import cn.nukkit.recipe.descriptor.ItemTagDescriptor;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 public class RecipeUtils {
@@ -31,15 +38,47 @@ public class RecipeUtils {
         return (RecipeUtils.getItemHash(item) << 6) | (item.getCount() & 0x3f);
     }
 
-
-    public static int getPotionHash(Item ingredient, Item potion) {
-        int ingredientHash = ((ingredient.getId() & 0x3FF) << 6) | (ingredient.getDamage() & 0x3F);
-        int potionHash = ((potion.getId() & 0x3FF) << 6) | (potion.getDamage() & 0x3F);
-        return ingredientHash << 16 | potionHash;
+    public static String computeBrewingRecipeId(Item input, Item ingredient, Item output) {
+        return computeRecipeIdWithItem(List.of(output), List.of(input, ingredient), RecipeType.BREWING);
     }
 
-    public static int getContainerHash(int ingredientId, int containerId) {
-        //return (ingredientId << 9) | containerId;
-        return (ingredientId << 15) | containerId;
+    public static String computeContainerRecipeId(Item input, Item ingredient, Item output) {
+        return computeRecipeIdWithItem(List.of(output), List.of(input, ingredient), RecipeType.CONTAINER);
     }
+
+    private static String computeRecipeIdWithItem(Collection<Item> results, Collection<Item> inputs, RecipeType type) {
+        List<Item> inputs1 = new ArrayList<>(inputs);
+        return computeRecipeId(results, inputs1.stream().map(DefaultDescriptor::new).toList(), type);
+    }
+
+    private static String computeRecipeId(Collection<Item> results, Collection<? extends ItemDescriptor> inputs, RecipeType type) {
+        StringBuilder builder = new StringBuilder();
+        Optional<Item> first = results.stream().findFirst();
+        first.ifPresent(item -> builder.append(new Identifier(item.getNamespaceId()).getPath())
+                .append('_')
+                .append(item.getCount())
+                .append('_')
+                .append(item.getDamage())
+                .append("_from_"));
+        int limit = 5;
+        for (var des : inputs) {
+            if ((limit--) == 0) {
+                break;
+            }
+            if (des instanceof ItemTagDescriptor tag) {
+                builder.append("tag_").append(tag.getItemTag()).append("_and_");
+            } else if (des instanceof DefaultDescriptor def) {
+                Item item = def.getItem();
+                builder.append(new Identifier(item.getNamespaceId()).getPath())
+                        .append('_')
+                        .append(item.getCount())
+                        .append('_')
+                        .append(item.getDamage())
+                        .append("_and_");
+            }
+        }
+        String r = builder.toString();
+        return r.substring(0, r.lastIndexOf("_and_")) + "_" + type.name().toLowerCase(Locale.ENGLISH);
+    }
+
 }

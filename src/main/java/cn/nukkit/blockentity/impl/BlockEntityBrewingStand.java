@@ -281,9 +281,9 @@ public class BlockEntityBrewingStand extends BlockEntitySpawnable implements Inv
                 continue;
             }
 
-            MixRecipe recipe = Registries.RECIPE.matchBrewingRecipe(ingredient, potion);
+            MixRecipe recipe = Registries.RECIPE.findBrewingRecipe(ingredient, potion);
             if (recipe == null) {
-                recipe = Registries.RECIPE.matchContainerRecipe(ingredient, potion);
+                recipe = Registries.RECIPE.findContainerRecipe(ingredient, potion);
             }
             if (recipe == null) {
                 continue;

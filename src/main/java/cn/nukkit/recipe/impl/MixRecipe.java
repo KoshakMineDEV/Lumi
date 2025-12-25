@@ -1,6 +1,7 @@
 package cn.nukkit.recipe.impl;
 
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemPotion;
 import cn.nukkit.recipe.Recipe;
 import lombok.ToString;
 
@@ -28,6 +29,15 @@ public abstract class MixRecipe implements Recipe {
     @Override
     public Item getResult() {
         return output.clone();
+    }
+
+    public boolean fastCheck(Item... items  ) {
+        if(items.length == 2) {
+            if(items[1] instanceof ItemPotion) {
+                return items[0].equals(getIngredient());
+            }
+        }
+        return false;
     }
 
     @Override
