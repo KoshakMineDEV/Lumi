@@ -200,7 +200,8 @@ public final class DataPacketManager {
                 ContainerCloseProcessor.INSTANCE,
                 BlockEntityDataProcessor.INSTANCE,
                 SettingsCommandProcessor.INSTANCE,
-                InventoryTransactionProcessor.INSTANCE
+                InventoryTransactionProcessor.INSTANCE,
+                CommandBlockUpdateProcessor.INSTANCE
         );
     }
 }
