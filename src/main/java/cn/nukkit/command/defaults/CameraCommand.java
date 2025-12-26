@@ -145,12 +145,21 @@ public class CameraCommand extends VanillaCommand {
         if (!this.testPermission(sender)) {
             return true;
         }
+
+        if (args.length == 0) {
+            sender.sendMessage(new TranslationContainer("nukkit.camera.unknownPlayer"));
+            return false;
+        }
+
         CameraInstructionPacket pk = new CameraInstructionPacket();
+
         Player player = Server.getInstance().getPlayer(args[0]);
+
         if (player == null) {
             sender.sendMessage(new TranslationContainer("nukkit.camera.unknownPlayer"));
             return false;
         }
+
         switch (args[1]) {
             case "clear" -> {
                 pk.setClear(OptionalBoolean.of(true));
