@@ -1,7 +1,6 @@
 package cn.nukkit.utils;
 
 import cn.nukkit.item.Item;
-import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.recipe.RecipeType;
 import cn.nukkit.recipe.descriptor.DefaultDescriptor;
 import cn.nukkit.recipe.descriptor.ItemDescriptor;
@@ -12,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
 
 public class RecipeUtils {
 
@@ -23,28 +21,6 @@ public class RecipeUtils {
     public static String getItemHash(Item item, int meta) {
         String hash = "" + (item.getId() == Item.STRING_IDENTIFIED_ITEM ? item.getNamespaceId() : item.getId());
         return hash + meta;
-    }
-
-    public static UUID getMultiItemHash(Collection<Item> items) {
-        BinaryStream stream = new BinaryStream(items.size() * 5);
-        for (Item item : items) {
-            stream.putVarInt(getLegacyFullItemHash(item)); //putVarInt 5 byte
-        }
-        return UUID.nameUUIDFromBytes(stream.getBuffer());
-    }
-
-    private static int getLegacyFullItemHash(Item item) {
-        //return 31 * getItemHash(item) + item.getCount();
-        return (RecipeUtils.getLegacyItemHash(item) << 6) | (item.getCount() & 0x3f);
-    }
-
-    private static int getLegacyItemHash(Item item) {
-        return getLegacyItemHash(item, item.getDamage());
-    }
-
-    private static int getLegacyItemHash(Item item, int meta) {
-        int id = item.getId() == Item.STRING_IDENTIFIED_ITEM ? item.getNetworkId(ProtocolInfo.CURRENT_PROTOCOL) : item.getId();
-        return (id << 12) | (meta & 0xfff);
     }
 
     public static String computeBrewingRecipeId(Item input, Item ingredient, Item output) {

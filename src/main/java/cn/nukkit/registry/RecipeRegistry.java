@@ -228,33 +228,22 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
 
     @Nullable
     public SmithingRecipe matchSmithingRecipe(List<Item> inputList) {
-        UUID inputHash = RecipeUtils.getMultiItemHash(inputList);
-
-        Map<UUID, SmithingRecipe> recipeMap = Registries.RECIPE.getSMITHING();
-
-        if (recipeMap != null) {
-            SmithingRecipe recipe = recipeMap.get(inputHash);
-
-            ArrayList<Item> list = new ArrayList<>();
-            for (Item item : inputList) {
-                Item clone = item.clone();
-                clone.setCount(1);
-                if ((item.isTool() || item.isArmor()) && item.getDamage() > 0) {
-                    clone.setDamage(0);
-                }
-                list.add(clone);
+        ArrayList<Item> list = new ArrayList<>();
+        for (Item item : inputList) {
+            Item clone = item.clone();
+            clone.setCount(1);
+            if ((item.isTool() || item.isArmor()) && item.getDamage() > 0) {
+                clone.setDamage(0);
             }
+            list.add(clone);
+        }
 
-            if (recipe != null && recipe.matchItems(list)) {
-                return recipe;
-            }
-
-            for (SmithingRecipe smithingRecipe : recipeMap.values()) {
-                if (smithingRecipe.matchItems(list)) {
-                    return smithingRecipe;
-                }
+        for (SmithingRecipe smithingRecipe : SMITHING.values()) {
+            if (smithingRecipe.matchItems(list)) {
+                return smithingRecipe;
             }
         }
+
         return null;
     }
 
