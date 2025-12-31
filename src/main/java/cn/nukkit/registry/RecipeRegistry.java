@@ -13,7 +13,6 @@ import cn.nukkit.recipe.impl.*;
 import cn.nukkit.recipe.impl.special.*;
 import cn.nukkit.recipe.parser.RecipeParser;
 import cn.nukkit.utils.RecipeUtils;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -23,9 +22,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.Deflater;
@@ -36,15 +33,15 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
 
     private final Int2ObjectOpenHashMap<BatchPacket> PACKETS = new Int2ObjectOpenHashMap<>();
 
-    private final Map<Integer, List<ShapedRecipe>> SHAPED = new HashMap<>();
-    private final Map<Integer, List<ShapelessRecipe>> SHAPELESS = new HashMap<>();
-    private final Map<Integer, FurnaceRecipe> FURNACE = new HashMap<>();
-    private final Map<Integer, BlastFurnaceRecipe> BLAST_FURNACE = new HashMap<>();
+    private final Map<String, List<ShapedRecipe>> SHAPED = new HashMap<>();
+    private final Map<String, List<ShapelessRecipe>> SHAPELESS = new HashMap<>();
+    private final Map<String, FurnaceRecipe> FURNACE = new HashMap<>();
+    private final Map<String, BlastFurnaceRecipe> BLAST_FURNACE = new HashMap<>();
 
     private final Map<UUID, MultiRecipe> MULTI = new HashMap<>();
     private final Map<String, BrewingRecipe> BREWING = new HashMap<>();
     private final Map<String, ContainerRecipe> CONTAINER = new HashMap<>();
-    private final Map<Integer, CampfireRecipe> CAMPFIRE = new Int2ObjectOpenHashMap<>();
+    private final Map<String, CampfireRecipe> CAMPFIRE = new HashMap<>();
     private final Map<UUID, SmithingRecipe> SMITHING = new Object2ObjectOpenHashMap<>();
     private final Object2DoubleOpenHashMap<Recipe> FURNACE_XP = new Object2DoubleOpenHashMap<>();
     private final Collection<Recipe> RECIPES = new ArrayDeque<>();
@@ -144,13 +141,13 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
     }
 
     public void registerShapedRecipe(ShapedRecipe recipe) {
-        int resultHash = RecipeUtils.getItemHash(recipe.getResult());
+        String resultHash = RecipeUtils.getItemHash(recipe.getResult());
         SHAPED.computeIfAbsent(resultHash, (key) -> new ArrayList<>()).add(recipe);
         RECIPES.add(recipe);
     }
 
     public void registerShapelessRecipe(ShapelessRecipe recipe) {
-        int resultHash = RecipeUtils.getItemHash(recipe.getResult());
+        String resultHash = RecipeUtils.getItemHash(recipe.getResult());
         SHAPELESS.computeIfAbsent(resultHash, (key) -> new ArrayList<>()).add(recipe);
         RECIPES.add(recipe);
     }
@@ -201,7 +198,7 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
     }
 
     public CraftingRecipe matchRecipe(List<Item> inputList, Item primaryOutput, List<Item> extraOutputList) {
-        int outputHash = RecipeUtils.getItemHash(primaryOutput);
+        String outputHash = RecipeUtils.getItemHash(primaryOutput);
         if (SHAPED.containsKey(outputHash)) {
             List<ShapedRecipe> recipes = SHAPED.get(outputHash);
 
