@@ -190,23 +190,15 @@ public class CraftingDataPacket extends DataPacket {
         this.putUnsignedVarInt(1);
 
         if (protocol >= 388) {
-            this.putUnsignedVarInt(0);
-            /*for (BrewingRecipe recipe : brewingEntries) {
-                if (protocol >= 407) {
-                    this.putVarInt(recipe.getInput().getNetworkId(protocol));
-                }
+            this.putUnsignedVarInt(this.brewingEntries.size());
+            for (BrewingRecipe recipe : brewingEntries) {
+                this.putVarInt(recipe.getInput().getNetworkId(protocol));
                 this.putVarInt(recipe.getInput().getDamage());
-                try {
-                    this.putVarInt(recipe.getIngredient().getNetworkId(protocol));
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
-                if (protocol >= 407) {
-                    this.putVarInt(recipe.getIngredient().getDamage());
-                    this.putVarInt(recipe.getResult().getNetworkId(protocol));
-                }
+                this.putVarInt(recipe.getIngredient().getNetworkId(protocol));
+                this.putVarInt(recipe.getIngredient().getDamage());
+                this.putVarInt(recipe.getResult().getNetworkId(protocol));
                 this.putVarInt(recipe.getResult().getDamage());
-            }*/
+            }
 
             this.putUnsignedVarInt(this.containerEntries.size());
             for (ContainerRecipe recipe : containerEntries) {

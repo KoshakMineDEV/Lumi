@@ -5,7 +5,7 @@ import cn.nukkit.network.protocol.ProtocolInfo;
 /**
  * @author Glorydark
  */
-public class ItemHelmetCopper extends StringItemBase {
+public class ItemHelmetCopper extends StringItemArmorBase {
 
     public ItemHelmetCopper() {
         super(COPPER_HELMET, "Copper Helmet");

@@ -4,11 +4,11 @@ import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class StringItemProjectileBase extends ItemProjectile implements StringItem {
+public abstract class StringItemArmorBase extends ItemArmor implements StringItem {
 
     private final String namespaceId;
 
-    public StringItemProjectileBase(@NotNull String namespaceId, @Nullable String name) {
+    public StringItemArmorBase(@NotNull String namespaceId, @Nullable String name) {
         super(STRING_IDENTIFIED_ITEM, 0, 1, StringItem.checkNotEmpty(name));
         Preconditions.checkNotNull(namespaceId, "id can't be null");
         Preconditions.checkArgument(namespaceId.contains(":"), "The ID must be a namespaced ID, like minecraft:stone");
@@ -24,5 +24,15 @@ public abstract class StringItemProjectileBase extends ItemProjectile implements
     @Override
     public String getNamespaceId(int protocolId) {
         return this.getNamespaceId();
+    }
+
+    @Override
+    public final int getId() {
+        return StringItem.super.getId();
+    }
+
+    @Override
+    public StringItemArmorBase clone() {
+        return (StringItemArmorBase) super.clone();
     }
 }
