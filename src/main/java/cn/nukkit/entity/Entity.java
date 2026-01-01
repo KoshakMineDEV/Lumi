@@ -1388,15 +1388,6 @@ public abstract class Entity extends Location implements Metadatable {
 
                 player.dataPacket(pkk);
             }
-
-            if (this instanceof EntityBoss) {
-                BossEventPacket pkBoss = new BossEventPacket();
-                pkBoss.bossEid = this.id;
-                pkBoss.type = BossEventPacket.TYPE_SHOW;
-                pkBoss.title = this.getName();
-                pkBoss.healthPercent = player.protocol >= 361 ? this.health / 100 : this.health;
-                player.dataPacket(pkBoss);
-            }
         }
     }
 
