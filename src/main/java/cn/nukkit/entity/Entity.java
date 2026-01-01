@@ -516,6 +516,7 @@ public abstract class Entity extends Location implements Metadatable {
 
     public boolean noClip = false;
 
+    @Deprecated
     public final boolean isPlayer;
 
     private volatile boolean init;
