@@ -16,12 +16,11 @@ import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.BlockVector3;
+import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.process.DataPacketProcessor;
 import cn.nukkit.network.protocol.*;
-import cn.nukkit.network.protocol.types.AuthInputAction;
-import cn.nukkit.network.protocol.types.PlayerActionType;
-import cn.nukkit.network.protocol.types.PlayerBlockActionData;
+import cn.nukkit.network.protocol.types.*;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInputPacket> {
@@ -117,22 +116,23 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
             }
         } else if (handle.getRiding() instanceof EntityBoat boat) {
             if (protocol >= ProtocolInfo.v1_21_130) {
-                if (boat.isControlling(player)) {
-                    if (handle.getTemporalVector()
-                            .setComponents(
-                                    packet.getPosition().getX(),
-                                    packet.getPosition().getY(),
-                                    packet.getPosition().getZ())
-                            .distanceSquared(boat) < 100) {
-
-                        boat.onPlayerInput(
-                                player,
-                                packet.getMotion().getX(),
-                                packet.getMotion().getY()
-                        );
-                        ignoreCoordinateMove = true;
+                double moveVecX = packet.getMotion().getX();
+                double moveVecY = packet.getMotion().getY();
+                moveVecX = NukkitMath.clamp(moveVecX, -1, 1);
+                moveVecY = NukkitMath.clamp(moveVecY, -1, 1);
+                boolean isMobileAndClassicMovement = packet.getInputMode() == InputMode.TOUCH && packet.getInteractionModel() == AuthInteractionModel.CLASSIC;
+                if (isMobileAndClassicMovement) {
+                    // Press both left and right to move forward and press 1 to turn the boat.
+                    boolean left = packet.getInputData().contains(AuthInputAction.PADDLE_LEFT), right = packet.getInputData().contains(AuthInputAction.PADDLE_RIGHT);
+                    if (left && right) {
+                        boat.onPlayerInput(handle.player, 0, 1);
+                    } else {
+                        boat.onPlayerInput(handle.player, left? 1: right? -1: 0, 0);
                     }
+                } else {
+                    boat.onPlayerInput(handle.player, moveVecX, moveVecY);
                 }
+                ignoreCoordinateMove = true;
             } else {
                 if (packet.getInputData()
                         .contains(AuthInputAction.IN_CLIENT_PREDICTED_IN_VEHICLE)) {
