@@ -447,7 +447,7 @@ public class LevelDBProvider implements LevelProvider {
             loadBlockTickingQueue(tickingData, false);
         }
 
-        byte[] randomTickingData = this.db.get(PENDING_RANDOM_TICKS.getKey(chunkX, chunkZ, this.level.getDimension()));
+        byte[] randomTickingData = this.db.get(RANDOM_TICKS.getKey(chunkX, chunkZ, this.level.getDimension()));
         if (randomTickingData != null && randomTickingData.length != 0) {
             loadBlockTickingQueue(randomTickingData, true);
         }
@@ -581,7 +581,7 @@ public class LevelDBProvider implements LevelProvider {
             writeBatch.delete(pendingScheduledTicksKey);
         }
 
-       /* byte[] pendingRandomTicksKey = PENDING_RANDOM_TICKS.getKey(chunkX, chunkZ);
+       /* byte[] pendingRandomTicksKey = RANDOM_TICKS.getKey(chunkX, chunkZ);
         if (randomBlockUpdateEntries != null && !randomBlockUpdateEntries.isEmpty()) {
             CompoundTag ticks = saveBlockTickingQueue(randomBlockUpdateEntries, currentTick);
             if (ticks != null) {

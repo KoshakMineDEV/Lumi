@@ -2,12 +2,10 @@ package cn.nukkit.level.format.leveldb;
 
 public enum LevelDBKey {
     DATA_3D('+'),
+    VERSION(','),
     DATA_2D('-'),
     DATA_2D_LEGACY('.'),
-    /**
-     * Block data for a 16×16×16 chunk section
-     */
-    CHUNK_SECTION_PREFIX('/'),
+    SUB_CHUNK_PREFIX('/'),
     LEGACY_TERRAIN('0'),
     BLOCK_ENTITIES('1'),
     ENTITIES('2'),
@@ -15,17 +13,21 @@ public enum LevelDBKey {
     BLOCK_EXTRA_DATA('4'),
     BIOME_STATE('5'),
     STATE_FINALIZATION('6'),
-
+    CONVERSION_DATA('7'),
     BORDER_BLOCKS('8'),
     HARDCODED_SPAWNERS('9'),
-
-    PENDING_RANDOM_TICKS(':'),
-
+    RANDOM_TICKS(':'),
+    CHECKSUMS(';'),
+    GENERATION_SEED('<'),
+    META_DATA_HASH('='),
+    BLENDING_BIOME_HEIGHT('>'),
+    METADATA_HASH('?'),
+    BLENDING_DATA('@'),
+    ACTOR_DIGEST_VERSION('A'),
     FLAGS('f'),
-
     VERSION_OLD('v'),
-    VERSION(',')
-    ;
+    NUKKIT_BLOCK_LIGHT((char) 1000),
+    NUKKIT_SKY_LIGHT((char) 1001);
 
     private final byte encoded;
 
