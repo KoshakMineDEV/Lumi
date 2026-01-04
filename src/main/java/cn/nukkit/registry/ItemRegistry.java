@@ -153,6 +153,12 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(YELLOW_DYE, ItemDyeYellow::new);
         register(PALE_OAK_DOOR, ItemDoorPaleOak::new);
         register(PALE_OAK_SIGN, ItemPaleOakSign::new);
+        register(WOODEN_SPEAR, ItemWoodenSpear::new);
+        register(STONE_SPEAR, ItemStoneSpear::new);
+        register(IRON_SPEAR, ItemIronSpear::new);
+        register(GOLDEN_SPEAR, ItemGoldenSpear::new);
+        register(DIAMOND_SPEAR, ItemDiamondSpear::new);
+        register(NETHERITE_SPEAR, ItemNetheriteSpear::new);
     }
 
     @Override
