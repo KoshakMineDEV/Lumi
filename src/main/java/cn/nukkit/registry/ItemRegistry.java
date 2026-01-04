@@ -153,6 +153,33 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(YELLOW_DYE, ItemDyeYellow::new);
         register(PALE_OAK_DOOR, ItemDoorPaleOak::new);
         register(PALE_OAK_SIGN, ItemPaleOakSign::new);
+        register(WOODEN_SPEAR, ItemWoodenSpear::new);
+        register(STONE_SPEAR, ItemStoneSpear::new);
+        register(IRON_SPEAR, ItemIronSpear::new);
+        register(GOLDEN_SPEAR, ItemGoldenSpear::new);
+        register(DIAMOND_SPEAR, ItemDiamondSpear::new);
+        register(NETHERITE_SPEAR, ItemNetheriteSpear::new);
+        register(IRON_NAUTILUS_ARMOR, ItemIronNautilusArmor::new);
+        register(COPPER_NAUTILUS_ARMOR, ItemCopperNautilusArmor::new);
+        register(GOLDEN_NAUTILUS_ARMOR, ItemGoldenNautilusArmor::new);
+        register(DIAMOND_NAUTILUS_ARMOR, ItemDiamondNautilusArmor::new);
+        register(NETHERITE_NAUTILUS_ARMOR, ItemNetheriteNautilusArmor::new);
+        register(BUNDLE, ItemBundle::new);
+        register(BLACK_BUNDLE, ItemBlackBundle::new);
+        register(BLUE_BUNDLE, ItemBlueBundle::new);
+        register(BROWN_BUNDLE, ItemBrownBundle::new);
+        register(GRAY_BUNDLE, ItemGrayBundle::new);
+        register(GREEN_BUNDLE, ItemGreenBundle::new);
+        register(LIGHT_BLUE_BUNDLE, ItemLightBlueBundle::new);
+        register(LIGHT_GRAY_BUNDLE, ItemLightGrayBundle::new);
+        register(LIME_BUNDLE, ItemLimeBundle::new);
+        register(MAGENTA_BUNDLE, ItemMagentaBundle::new);
+        register(ORANGE_BUNDLE, ItemOrangeBundle::new);
+        register(PURPLE_BUNDLE, ItemPurpleBundle::new);
+        register(RED_BUNDLE, ItemRedBundle::new);
+        register(WHITE_BUNDLE, ItemWhiteBundle::new);
+        register(YELLOW_BUNDLE, ItemYellowBundle::new);
+        register(NETHERITE_HORSE_ARMOR, ItemHorseArmorNetherite::new);
     }
 
     @Override
