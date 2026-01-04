@@ -62,8 +62,8 @@ public class LevelDBChunkSection implements ChunkSection {
         this.level = level;
     }
 
-    public LevelDBChunkSection(Level level, int y, @Nullable StateBlockStorage[] storages) {
-        this(level, null, y, storages, null, null, null, false, false);
+    public LevelDBChunkSection(Level level, int y, @Nullable StateBlockStorage[] storages, byte[] blockLight) {
+        this(level, null, y, storages, blockLight, null, null, false, false);
     }
 
     public LevelDBChunkSection(Level level, LevelDBChunk parent, int y, @Nullable StateBlockStorage[] storages, byte[] blockLight, byte[] skyLight, byte[] compressedLight, boolean hasBlockLight, boolean hasSkyLight) {

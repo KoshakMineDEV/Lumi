@@ -1,5 +1,6 @@
 package cn.nukkit.network.process.processor.common;
 
+import cn.nukkit.Player;
 import cn.nukkit.PlayerHandle;
 import cn.nukkit.Server;
 import cn.nukkit.entity.item.EntityBoat;
@@ -55,7 +56,13 @@ public class AnimateProcessor extends DataPacketProcessor<AnimatePacket> {
         packet.action = action;
         packet.swingSource = SwingSource.EVENT;
 
-        Server.broadcastPacket(handle.player.getViewers().values(), packet);
+        for (Player player : handle.player.getViewers().values()) {
+            if (player.protocol >= ProtocolInfo.v1_21_130 && handle.player.protocol < ProtocolInfo.v1_21_130) {
+                // todo: when players of lower version rides on it, their row actions leads to unknown error for players of higher version
+            } else {
+                player.dataPacket(packet);
+            }
+        }
     }
 
     @Override

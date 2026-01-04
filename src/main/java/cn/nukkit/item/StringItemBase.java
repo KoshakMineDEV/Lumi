@@ -1,10 +1,8 @@
 package cn.nukkit.item;
 
-import cn.nukkit.network.protocol.ProtocolInfo;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class StringItemBase extends Item implements StringItem {
 

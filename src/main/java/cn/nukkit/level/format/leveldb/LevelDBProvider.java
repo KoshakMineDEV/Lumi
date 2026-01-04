@@ -447,7 +447,7 @@ public class LevelDBProvider implements LevelProvider {
             loadBlockTickingQueue(tickingData, false);
         }
 
-        byte[] randomTickingData = this.db.get(PENDING_RANDOM_TICKS.getKey(chunkX, chunkZ, this.level.getDimension()));
+        byte[] randomTickingData = this.db.get(RANDOM_TICKS.getKey(chunkX, chunkZ, this.level.getDimension()));
         if (randomTickingData != null && randomTickingData.length != 0) {
             loadBlockTickingQueue(randomTickingData, true);
         }
@@ -581,7 +581,7 @@ public class LevelDBProvider implements LevelProvider {
             writeBatch.delete(pendingScheduledTicksKey);
         }
 
-       /* byte[] pendingRandomTicksKey = PENDING_RANDOM_TICKS.getKey(chunkX, chunkZ);
+       /* byte[] pendingRandomTicksKey = RANDOM_TICKS.getKey(chunkX, chunkZ);
         if (randomBlockUpdateEntries != null && !randomBlockUpdateEntries.isEmpty()) {
             CompoundTag ticks = saveBlockTickingQueue(randomBlockUpdateEntries, currentTick);
             if (ticks != null) {
@@ -741,9 +741,18 @@ public class LevelDBProvider implements LevelProvider {
             this.executor.shutdown();
 
             try {
-                this.executor.awaitTermination(1, TimeUnit.DAYS);
+                if (!this.executor.awaitTermination(10, TimeUnit.MINUTES)) {
+                    log.warn("LevelDB executor did not terminate in time, forcing shutdown for: {}", this.getName());
+                    java.util.List<Runnable> droppedTasks = this.executor.shutdownNow();
+                    if (!droppedTasks.isEmpty()) {
+                        log.warn("Dropped {} pending tasks during forced shutdown", droppedTasks.size());
+                    }
+                    if (!this.executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                        log.error("LevelDB executor did not terminate even after forced shutdown for: {}", this.getName());
+                    }
+                }
             } catch (InterruptedException e) {
-                Server.getInstance().getLogger().error("Stopping LevelDB Executor interrupted", e);
+                this.executor.shutdownNow();
             }
 
             try {

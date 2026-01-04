@@ -415,7 +415,7 @@ public enum BlockFace {
             VERTICAL.faces = new BlockFace[]{UP, DOWN};
         }
 
-        private BlockFace[] faces;
+        public BlockFace[] faces;
 
         public BlockFace random(NukkitRandom rand) {
             return faces[rand.nextBoundedInt(faces.length)];
