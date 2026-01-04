@@ -27,6 +27,7 @@ public abstract class ItemTool extends Item implements ItemDurable {
     public static final int TYPE_SHEARS = 5;
     public static final int TYPE_HOE = 6;
     public static final int TYPE_BRUSH = 7;
+    public static final int TYPE_SPEAR = 8;
 
     public static final int DURABILITY_WOODEN = 60;
     public static final int DURABILITY_GOLD = 33;
@@ -81,7 +82,8 @@ public abstract class ItemTool extends Item implements ItemDurable {
                 block.getToolType() == ItemTool.TYPE_AXE && this.isAxe() ||
                 block.getToolType() == ItemTool.TYPE_HOE && this.isHoe() ||
                 block.getToolType() == ItemTool.TYPE_SWORD && this.isSword() ||
-                block.getToolType() == ItemTool.TYPE_SHEARS && this.isShears()
+                block.getToolType() == ItemTool.TYPE_SHEARS && this.isShears() ||
+                block.getToolType() == ItemTool.TYPE_SPEAR && this.isSpear()
         ) {
             this.meta++;
         } else if (!this.isShears() && block.calculateBreakTime(this) > 0) {
