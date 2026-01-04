@@ -159,6 +159,11 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(GOLDEN_SPEAR, ItemGoldenSpear::new);
         register(DIAMOND_SPEAR, ItemDiamondSpear::new);
         register(NETHERITE_SPEAR, ItemNetheriteSpear::new);
+        register(IRON_NAUTILUS_ARMOR, ItemIronNautilusArmor::new);
+        register(COPPER_NAUTILUS_ARMOR, ItemCopperNautilusArmor::new);
+        register(GOLDEN_NAUTILUS_ARMOR, ItemGoldenNautilusArmor::new);
+        register(DIAMOND_NAUTILUS_ARMOR, ItemDiamondNautilusArmor::new);
+        register(NETHERITE_NAUTILUS_ARMOR, ItemNetheriteNautilusArmor::new);
     }
 
     @Override
