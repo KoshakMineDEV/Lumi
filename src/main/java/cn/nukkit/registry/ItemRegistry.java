@@ -164,6 +164,21 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(GOLDEN_NAUTILUS_ARMOR, ItemGoldenNautilusArmor::new);
         register(DIAMOND_NAUTILUS_ARMOR, ItemDiamondNautilusArmor::new);
         register(NETHERITE_NAUTILUS_ARMOR, ItemNetheriteNautilusArmor::new);
+        register(BUNDLE, ItemBundle::new);
+        register(BLACK_BUNDLE, ItemBlackBundle::new);
+        register(BLUE_BUNDLE, ItemBlueBundle::new);
+        register(BROWN_BUNDLE, ItemBrownBundle::new);
+        register(GRAY_BUNDLE, ItemGrayBundle::new);
+        register(GREEN_BUNDLE, ItemGreenBundle::new);
+        register(LIGHT_BLUE_BUNDLE, ItemLightBlueBundle::new);
+        register(LIGHT_GRAY_BUNDLE, ItemLightGrayBundle::new);
+        register(LIME_BUNDLE, ItemLimeBundle::new);
+        register(MAGENTA_BUNDLE, ItemMagentaBundle::new);
+        register(ORANGE_BUNDLE, ItemOrangeBundle::new);
+        register(PURPLE_BUNDLE, ItemPurpleBundle::new);
+        register(RED_BUNDLE, ItemRedBundle::new);
+        register(WHITE_BUNDLE, ItemWhiteBundle::new);
+        register(YELLOW_BUNDLE, ItemYellowBundle::new);
     }
 
     @Override
