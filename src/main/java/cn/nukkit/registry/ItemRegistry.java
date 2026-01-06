@@ -181,6 +181,22 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(YELLOW_BUNDLE, ItemYellowBundle::new);
         register(NETHERITE_HORSE_ARMOR, ItemHorseArmorNetherite::new);
         register(WOLF_ARMOR, ItemWolfArmor::new);
+        register(WHITE_HARNESS, ItemWhiteHarness::new);
+        register(ORANGE_HARNESS, ItemOrangeHarness::new);
+        register(MAGENTA_HARNESS, ItemMagentaHarness::new);
+        register(LIGHT_BLUE_HARNESS, ItemLightBlueHarness::new);
+        register(YELLOW_HARNESS, ItemYellowHarness::new);
+        register(LIME_HARNESS, ItemLimeHarness::new);
+        register(PINK_HARNESS, ItemPinkHarness::new);
+        register(GRAY_HARNESS, ItemGrayHarness::new);
+        register(LIGHT_GRAY_HARNESS, ItemLightGrayHarness::new);
+        register(CYAN_HARNESS, ItemCyanHarness::new);
+        register(PURPLE_HARNESS, ItemPurpleHarness::new);
+        register(BLUE_HARNESS, ItemBlueHarness::new);
+        register(BROWN_HARNESS, ItemBrownHarness::new);
+        register(GREEN_HARNESS, ItemGreenHarness::new);
+        register(RED_HARNESS, ItemRedHarness::new);
+        register(BLACK_HARNESS, ItemBlackHarness::new);
     }
 
     @Override
