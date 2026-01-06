@@ -186,7 +186,9 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
             this.namedTag.putString(TAG_LAST_OUTPUT, this.lastOutput);
         }
         if (this.lastOutputParams != null) {
-            this.namedTag.putList(TAG_LAST_OUTPUT_PARAMS, this.lastOutputParams);
+            // TODO: fix last output params
+            // param (example: 13000 in time set night) transforms into "null"
+            this.namedTag.putList(TAG_LAST_OUTPUT_PARAMS, new ListTag<>());
         }
         this.namedTag.putInt(TAG_LP_COMMAND_MODE, this.lastOutputCommandMode);
         this.namedTag.putBoolean(TAG_LP_CONDIONAL_MODE, this.lastOutputCondionalMode);
@@ -224,7 +226,9 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
             nbt.putString(TAG_LAST_OUTPUT, this.lastOutput);
         }
         if (this.lastOutputParams != null) {
-            nbt.putList(TAG_LAST_OUTPUT_PARAMS, this.lastOutputParams);
+            // TODO: fix last output params
+            // param (example: 13000 in time set night) transforms into "null"
+            nbt.putList(TAG_LAST_OUTPUT_PARAMS, new ListTag<>());
         }
         if (this.hasName()) {
             nbt.putString(TAG_CUSTOM_NAME, this.getName());
@@ -612,6 +616,8 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
         if (this.isTrackingOutput()) {
             this.lastOutput = message.getText();
             if (message instanceof TranslationContainer translationContainer) {
+                // temp-fix for last output params
+                this.lastOutput = Server.getInstance().getLanguage().translateString(message.getText(), translationContainer.getParameters());
                 ListTag<StringTag> newParams = new ListTag<>();
                 for (String param : translationContainer.getParameters()) {
                     newParams.add(new StringTag(param));
