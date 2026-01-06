@@ -13,7 +13,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class BlockCommandBlock extends BlockSolid implements BlockEntityHolder<BlockEntityCommandBlock> {
+public class BlockCommandBlock extends BlockSolidMeta implements BlockEntityHolder<BlockEntityCommandBlock> {
+
+    public BlockCommandBlock() {
+        super(0);
+    }
+
+    public BlockCommandBlock(int meta) {
+        super(meta);
+    }
 
     @Override
     public int getId() {
