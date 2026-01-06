@@ -180,6 +180,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(WHITE_BUNDLE, ItemWhiteBundle::new);
         register(YELLOW_BUNDLE, ItemYellowBundle::new);
         register(NETHERITE_HORSE_ARMOR, ItemHorseArmorNetherite::new);
+        register(WOLF_ARMOR, ItemWolfArmor::new);
     }
 
     @Override

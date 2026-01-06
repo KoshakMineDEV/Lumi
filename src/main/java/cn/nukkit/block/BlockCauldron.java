@@ -324,7 +324,9 @@ public class BlockCauldron extends BlockSolidMeta implements BlockEntityHolder<B
     }
 
     private boolean isLeatherArmor(Item item) {
-        return item.hasItemTag(ItemTags.LEATHER_TIER) || item.getNamespaceId().equals(ItemNamespaceId.LEATHER_HORSE_ARMOR);
+        return item.hasItemTag(ItemTags.LEATHER_TIER)
+                || item.getNamespaceId().equals(ItemNamespaceId.LEATHER_HORSE_ARMOR)
+                || item.getNamespaceId().equals(ItemNamespaceId.WOLF_ARMOR);
     }
 
     public boolean onLavaActivate(@NotNull Item item, Player player) {
