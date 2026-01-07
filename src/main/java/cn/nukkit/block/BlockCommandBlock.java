@@ -2,6 +2,10 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.customblock.properties.BlockProperties;
+import cn.nukkit.block.customblock.properties.BooleanBlockProperty;
+import cn.nukkit.block.customblock.properties.IntBlockProperty;
+import cn.nukkit.block.properties.BlockPropertiesHelper;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.impl.BlockEntityCommandBlock;
 import cn.nukkit.item.Item;
@@ -13,7 +17,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class BlockCommandBlock extends BlockSolidMeta implements BlockEntityHolder<BlockEntityCommandBlock> {
+public class BlockCommandBlock extends BlockSolidMeta implements BlockEntityHolder<BlockEntityCommandBlock>, BlockPropertiesHelper {
+
+    private static final BooleanBlockProperty CONDITIONAL_BIT = new BooleanBlockProperty("conditional_bit", false);
+    private static final IntBlockProperty FACING_DIRECTION = new IntBlockProperty("facing_direction", false, 5);
+
+    private static final BlockProperties PROPERTIES = new BlockProperties(CONDITIONAL_BIT, FACING_DIRECTION);
 
     public BlockCommandBlock() {
         super(0);
@@ -26,6 +35,11 @@ public class BlockCommandBlock extends BlockSolidMeta implements BlockEntityHold
     @Override
     public int getId() {
         return COMMAND_BLOCK;
+    }
+
+    @Override
+    public BlockProperties getBlockProperties() {
+        return PROPERTIES;
     }
 
     @NotNull
@@ -81,23 +95,20 @@ public class BlockCommandBlock extends BlockSolidMeta implements BlockEntityHold
         }
 
         if (player != null) {
-            double deltaX = player.x - this.x;
-            double deltaZ = player.z - this.z;
-
-            if (Math.abs(deltaX) < 2 && Math.abs(deltaZ) < 2) {
+            if (Math.abs(player.getFloorX() - this.x) < 2 && Math.abs(player.getFloorZ() - this.z) < 2) {
                 double y = player.y + player.getEyeHeight();
                 if (y - this.y > 2) {
-                    this.setDamage(BlockFace.UP.getIndex());
+                    this.setFacingDirection(BlockFace.UP);
                 } else if (this.y - y > 0) {
-                    this.setDamage(BlockFace.DOWN.getIndex());
+                    this.setFacingDirection(BlockFace.DOWN);
                 } else {
-                    this.setDamage(player.getDirection().getOpposite().getHorizontalIndex() + 2);
+                    this.setFacingDirection(player.getHorizontalFacing().getOpposite());
                 }
             } else {
-                this.setDamage(player.getDirection().getOpposite().getHorizontalIndex() + 2);
+                this.setFacingDirection(player.getHorizontalFacing().getOpposite());
             }
         } else {
-            this.setDamage(BlockFace.DOWN.getIndex());
+            this.setFacingDirection(BlockFace.DOWN);
         }
 
         boolean blockSuccess = this.getLevel().setBlock(this, this, true, true);
@@ -182,4 +193,21 @@ public class BlockCommandBlock extends BlockSolidMeta implements BlockEntityHold
         }
         return 0;
     }
+
+    public void setConditionalBit(boolean value) {
+        this.setPropertyValue(CONDITIONAL_BIT, value);
+    }
+
+    public boolean getConditionalBit() {
+        return this.getPropertyValue(CONDITIONAL_BIT);
+    }
+
+    public void setFacingDirection(BlockFace face) {
+        this.setPropertyValue(FACING_DIRECTION, face.getIndex());
+    }
+
+    public BlockFace getFacingDirection() {
+        return BlockFace.values()[this.getPropertyValue(FACING_DIRECTION)];
+    }
+
 }

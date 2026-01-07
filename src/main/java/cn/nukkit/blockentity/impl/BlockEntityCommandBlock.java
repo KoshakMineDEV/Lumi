@@ -3,6 +3,7 @@ package cn.nukkit.blockentity.impl;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockCommandBlock;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
@@ -79,13 +80,7 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
         if (this.namedTag.contains(TAG_CONDITIONAL_MODE)) {
             this.conditionalMode = this.namedTag.getBoolean(TAG_CONDITIONAL_MODE);
         } else {
-            Block block = this.getLevelBlock();
-            if (block != null) {
-                int damage = block.getDamage();
-                this.conditionalMode = (damage & 0x08) != 0;
-            } else {
-                this.conditionalMode = false;
-            }
+            this.conditionalMode = false;
         }
 
         if (this.namedTag.contains(TAG_AUTO)) {
@@ -294,9 +289,8 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
             return false;
         }
 
-        Block block = this.getLevelBlock();
-        int facing = block.getDamage() & 0x07;
-        BlockFace facingDirection = BlockFace.fromIndex(facing);
+        BlockCommandBlock block = (BlockCommandBlock) this.getLevelBlock();
+        BlockFace facingDirection = block.getFacingDirection();
         Block behind = block.getSide(facingDirection.getOpposite());
         
         if (this.isConditional() && (behind.getId() == BlockID.COMMAND_BLOCK || behind.getId() == BlockID.REPEATING_COMMAND_BLOCK || behind.getId() == BlockID.CHAIN_COMMAND_BLOCK)) {
@@ -403,16 +397,11 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
     public void setConditional(boolean conditionalMode) {
         this.conditionalMode = conditionalMode;
         this.setConditionMet();
-        
-        Block block = this.getLevelBlock();
+
+        BlockCommandBlock block = (BlockCommandBlock) this.getLevelBlock();
         if (block != null) {
-            int damage = block.getDamage();
-            int facingBits = damage & 0x07;
-            int conditionalBit = conditionalMode ? 0x08 : 0;
-            int newDamage = facingBits | conditionalBit;
-            
-            if (damage != newDamage) {
-                block.setDamage(newDamage);
+            if (block.getConditionalBit() != conditionalMode) {
+                block.setConditionalBit(conditionalMode);
                 this.level.setBlock(block, block, false, true);
             }
         }
@@ -426,9 +415,8 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
     @Override
     public boolean setConditionMet() {
         if (this.isConditional()) {
-            Block block = this.getLevelBlock();
-            int facing = block.getDamage() & 0x07;
-            BlockFace facingDirection = BlockFace.fromIndex(facing);
+            BlockCommandBlock block = (BlockCommandBlock) this.getLevelBlock();
+            BlockFace facingDirection = block.getFacingDirection();
             Block behind = block.getSide(facingDirection.getOpposite());
             
             if (behind.getId() == BlockID.COMMAND_BLOCK || behind.getId() == BlockID.REPEATING_COMMAND_BLOCK || behind.getId() == BlockID.CHAIN_COMMAND_BLOCK) {
