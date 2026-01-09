@@ -21,37 +21,36 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RecipeParser {
     private static DefaultDescriptor parseItem(JsonObject item) {
-        if(item.has("type") && item.get("type").getAsString().equals("complex_alias")) {
-            throw new ComplexAliasException();
-        }
-
         final Item result;
-        if(item.has("id")) {
+        if (item.has("id")) {
             result = Registries.ITEM.get(item.get("id").getAsString());
-        } else {
+        } else if (item.has("itemId")) {
             result = Registries.ITEM.get(item.get("itemId").getAsString());
+        } else {
+            result = Registries.ITEM.get(item.get("name").getAsString());
+            if (result.isNull()) throw new ComplexAliasException();
         }
 
-        if(item.has("count")) {
+        if (item.has("count")) {
             result.setCount(item.get("count").getAsInt());
         }
 
         int damage = result.getDamage();
-        if(item.has("damage")) {
+        if (item.has("damage")) {
             damage = item.get("damage").getAsInt();
         }
 
-        if(item.has("auxValue")) {
+        if (item.has("auxValue")) {
             damage = item.get("auxValue").getAsInt();
         }
 
-        if(damage != 32767 && result.getDamage() == 0) result.setDamage(damage);
+        if (damage != 32767 && result.getDamage() == 0) result.setDamage(damage);
 
         return new DefaultDescriptor(result);
     }
 
     private static ItemDescriptor parseInput(JsonObject input) {
-        if(input.has("itemTag")) {
+        if (input.has("itemTag")) {
             String id = input.get("itemTag").getAsString();
             return new ItemTagDescriptor(ItemTags.getTag(id), id);
         }
@@ -66,7 +65,7 @@ public class RecipeParser {
                 throw new RuntimeException("Output is empty");
             }
 
-            for(int i = 1; i < array.size(); ++i) {
+            for (int i = 1; i < array.size(); ++i) {
                 extra.add(parseItem(array.get(i).getAsJsonObject()));
             }
 
@@ -87,13 +86,14 @@ public class RecipeParser {
                 final int type = recipe.get("type").getAsInt();
 
                 switch (type) {
-                    case 4, 9 -> {}
+                    case 4, 9 -> {
+                    }
 
                     case 3 -> {
                         final String block = recipe.get("block").getAsString();
                         final Item input = parseItem(recipe.get("input").getAsJsonObject()).getItem();
                         double xp = 0;
-                        if(furnaceXp.has(input.getNamespaceId() + ":" + input.getDamage())) {
+                        if (furnaceXp.has(input.getNamespaceId() + ":" + input.getDamage())) {
                             xp = furnaceXp.get(input.getNamespaceId() + ":" + input.getDamage()).getAsDouble();
                         }
                         switch (block) {
@@ -133,15 +133,15 @@ public class RecipeParser {
                             case "crafting_table", "deprecated" -> {
                                 final String[] shape = new String[recipe.get("height").getAsInt()];
                                 final JsonArray shapeJson = recipe.get("shape").getAsJsonArray();
-                                for(int i = 0; i < shape.length; i++) {
+                                for (int i = 0; i < shape.length; i++) {
                                     shape[i] = shapeJson.get(i).getAsString();
                                 }
 
                                 final Map<Character, ItemDescriptor> items = new HashMap<>();
-                                final JsonObject input =  recipe.get("input").getAsJsonObject();
+                                final JsonObject input = recipe.get("input").getAsJsonObject();
 
                                 input.entrySet().forEach(entry -> {
-                                   items.put(entry.getKey().charAt(0), parseInput(entry.getValue().getAsJsonObject()));
+                                    items.put(entry.getKey().charAt(0), parseInput(entry.getValue().getAsJsonObject()));
                                 });
 
                                 final List<DefaultDescriptor> extra = new ArrayList<>();
@@ -208,7 +208,7 @@ public class RecipeParser {
                     default -> log.warn("Unknown recipe type: {}", type);
                 }
             } catch (Exception e) {
-                if(!(e instanceof ComplexAliasException)) {
+                if (!(e instanceof ComplexAliasException)) {
                     log.error("Failed to load recipe {}, exception {}", recipe.get("id").toString(), e);
                 }
             }
