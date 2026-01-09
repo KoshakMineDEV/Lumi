@@ -2,6 +2,7 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.math.BlockFace;
 
@@ -73,7 +74,7 @@ public class BlockLightningRod extends BlockTransparentMeta {
     public Item[] getDrops(Item item) {
         if (item.isPickaxe() && item.getTier() >= ItemTool.TIER_STONE) {
             return new Item[]{
-                    toItem()
+                    Item.get(ItemNamespaceId.LIGHTNING_ROD, 0)
             };
         } else {
             return Item.EMPTY_ARRAY;
