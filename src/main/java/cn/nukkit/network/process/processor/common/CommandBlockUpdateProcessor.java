@@ -1,10 +1,14 @@
 package cn.nukkit.network.process.processor.common;
 
 import cn.nukkit.PlayerHandle;
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockCommandBlock;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.ICommandBlock;
 import cn.nukkit.blockentity.impl.BlockEntityCommandBlock;
 import cn.nukkit.level.Level;
+import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.process.DataPacketProcessor;
 import cn.nukkit.network.protocol.CommandBlockUpdatePacket;
@@ -26,17 +30,17 @@ public class CommandBlockUpdateProcessor extends DataPacketProcessor<CommandBloc
         if (pk.isBlock) {
             BlockEntity blockEntity = player.level.getBlockEntity(new Vector3(pk.x, pk.y, pk.z));
             if (blockEntity instanceof BlockEntityCommandBlock commandBlock) {
-                cn.nukkit.block.Block cmdBlock = commandBlock.getLevelBlock();
+                BlockCommandBlock cmdBlock = (BlockCommandBlock) commandBlock.getLevelBlock();
 
                 int targetBlockId = switch (pk.commandBlockMode) {
-                    case ICommandBlock.MODE_REPEATING -> cn.nukkit.block.BlockID.REPEATING_COMMAND_BLOCK;
-                    case ICommandBlock.MODE_CHAIN -> cn.nukkit.block.BlockID.CHAIN_COMMAND_BLOCK;
-                    default -> cn.nukkit.block.BlockID.COMMAND_BLOCK;
+                    case ICommandBlock.MODE_REPEATING -> BlockID.REPEATING_COMMAND_BLOCK;
+                    case ICommandBlock.MODE_CHAIN -> BlockID.CHAIN_COMMAND_BLOCK;
+                    default -> BlockID.COMMAND_BLOCK;
                 };
 
                 if (cmdBlock.getId() != targetBlockId) {
                     int damage = cmdBlock.getDamage();
-                    cn.nukkit.block.Block newBlock = cn.nukkit.block.Block.get(targetBlockId, damage);
+                    BlockCommandBlock newBlock = (BlockCommandBlock) Block.get(targetBlockId, damage);
                     newBlock.x = cmdBlock.x;
                     newBlock.y = cmdBlock.y;
                     newBlock.z = cmdBlock.z;
@@ -48,20 +52,12 @@ public class CommandBlockUpdateProcessor extends DataPacketProcessor<CommandBloc
                     }
                 }
 
-                boolean conditional = pk.isConditional;
-                int damage = cmdBlock.getDamage();
-                int facingBits = damage & 0x07;
-                int conditionalBit = conditional ? 0x08 : 0;
-                int newDamage = facingBits | conditionalBit;
-
-                if (damage != newDamage) {
-                    cmdBlock.setDamage(newDamage);
-                }
+                cmdBlock.setConditionalBit(pk.isConditional);
 
                 commandBlock.setCommand(pk.command);
                 commandBlock.setName(pk.name);
                 commandBlock.setTrackOutput(pk.shouldTrackOutput);
-                commandBlock.setConditional(conditional);
+                commandBlock.setConditional(pk.isConditional);
                 commandBlock.setTickDelay(pk.tickDelay);
                 commandBlock.setExecutingOnFirstTick(pk.executingOnFirstTick);
 
@@ -75,7 +71,7 @@ public class CommandBlockUpdateProcessor extends DataPacketProcessor<CommandBloc
                 }
 
                 for (int side = 0; side <= 5; side++) {
-                    cn.nukkit.block.Block sideBlock = commandBlock.getLevelBlock().getSide(cn.nukkit.math.BlockFace.fromIndex(side));
+                    Block sideBlock = commandBlock.getLevelBlock().getSide(BlockFace.fromIndex(side));
                     sideBlock.onUpdate(Level.BLOCK_UPDATE_REDSTONE);
                 }
             }

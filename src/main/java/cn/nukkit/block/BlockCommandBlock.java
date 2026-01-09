@@ -9,6 +9,7 @@ import cn.nukkit.block.properties.BlockPropertiesHelper;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.impl.BlockEntityCommandBlock;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -146,7 +147,7 @@ public class BlockCommandBlock extends BlockSolidMeta implements BlockEntityHold
     @Override
     public boolean onActivate(Item item, Player player) {
         if (player != null) {
-            if (!Server.getInstance().getSettings().features().enableCommandBlocks()) {
+            if (!this.getLevel().getGameRules().getBoolean(GameRule.COMMAND_BLOCKS_ENABLED)) {
                 return false;
             }
 

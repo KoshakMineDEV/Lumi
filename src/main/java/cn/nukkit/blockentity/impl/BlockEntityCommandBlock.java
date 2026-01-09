@@ -18,6 +18,7 @@ import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.lang.CommandOutputContainer;
 import cn.nukkit.math.BlockFace;
@@ -86,7 +87,7 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
         if (this.namedTag.contains(TAG_AUTO)) {
             this.auto = this.namedTag.getBoolean(TAG_AUTO);
         } else {
-            this.auto = true;
+            this.auto = false;
         }
 
         if (this.namedTag.contains(TAG_COMMAND)) {
@@ -285,7 +286,7 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
 
     @Override
     public boolean execute(int chain) {
-        if (!(this.getServer().getSettings().features().enableCommandBlocks() && this.level.getGameRules().getBoolean(GameRule.COMMAND_BLOCKS_ENABLED))) {
+        if (!this.level.getGameRules().getBoolean(GameRule.COMMAND_BLOCKS_ENABLED)) {
             return false;
         }
 
@@ -658,9 +659,8 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
         }
     }
 
-    @NotNull
     @Override
-    public Location getLocation() {
+    public @NotNull Location getLocation() {
         return new Location(this.x, this.y, this.z, 0, 0, this.level);
     }
 
@@ -668,5 +668,10 @@ public class BlockEntityCommandBlock extends BlockEntitySpawnable implements ICo
         for (var message : container.getMessages()) {
             this.sendMessage(new TranslationContainer(message.getMessageId(), message.getParameters()));
         }
+    }
+
+    @Override
+    public @NotNull Position getPosition() {
+        return new Position(x, y, z, getLevel());
     }
 }
