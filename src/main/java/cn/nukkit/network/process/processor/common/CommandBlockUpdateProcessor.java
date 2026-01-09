@@ -1,0 +1,90 @@
+package cn.nukkit.network.process.processor.common;
+
+import cn.nukkit.PlayerHandle;
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockCommandBlock;
+import cn.nukkit.block.BlockID;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.ICommandBlock;
+import cn.nukkit.blockentity.impl.BlockEntityCommandBlock;
+import cn.nukkit.level.Level;
+import cn.nukkit.math.BlockFace;
+import cn.nukkit.math.Vector3;
+import cn.nukkit.network.process.DataPacketProcessor;
+import cn.nukkit.network.protocol.CommandBlockUpdatePacket;
+import cn.nukkit.network.protocol.DataPacket;
+import cn.nukkit.network.protocol.ProtocolInfo;
+import org.jetbrains.annotations.NotNull;
+
+public class CommandBlockUpdateProcessor extends DataPacketProcessor<CommandBlockUpdatePacket> {
+
+    public static final CommandBlockUpdateProcessor INSTANCE = new CommandBlockUpdateProcessor();
+
+    @Override
+    public void handle(@NotNull PlayerHandle playerHandle, @NotNull CommandBlockUpdatePacket pk) {
+        var player = playerHandle.player;
+        if (!player.isOp() || !player.isCreative()) {
+            return;
+        }
+
+        if (pk.isBlock) {
+            BlockEntity blockEntity = player.level.getBlockEntity(new Vector3(pk.x, pk.y, pk.z));
+            if (blockEntity instanceof BlockEntityCommandBlock commandBlock) {
+                BlockCommandBlock cmdBlock = (BlockCommandBlock) commandBlock.getLevelBlock();
+
+                int targetBlockId = switch (pk.commandBlockMode) {
+                    case ICommandBlock.MODE_REPEATING -> BlockID.REPEATING_COMMAND_BLOCK;
+                    case ICommandBlock.MODE_CHAIN -> BlockID.CHAIN_COMMAND_BLOCK;
+                    default -> BlockID.COMMAND_BLOCK;
+                };
+
+                if (cmdBlock.getId() != targetBlockId) {
+                    int damage = cmdBlock.getDamage();
+                    BlockCommandBlock newBlock = (BlockCommandBlock) Block.get(targetBlockId, damage);
+                    newBlock.x = cmdBlock.x;
+                    newBlock.y = cmdBlock.y;
+                    newBlock.z = cmdBlock.z;
+                    newBlock.level = cmdBlock.level;
+                    cmdBlock = newBlock;
+
+                    if (pk.commandBlockMode == ICommandBlock.MODE_REPEATING) {
+                        commandBlock.scheduleUpdate();
+                    }
+                }
+
+                cmdBlock.setConditionalBit(pk.isConditional);
+
+                commandBlock.setCommand(pk.command);
+                commandBlock.setName(pk.name);
+                commandBlock.setTrackOutput(pk.shouldTrackOutput);
+                commandBlock.setConditional(pk.isConditional);
+                commandBlock.setTickDelay(pk.tickDelay);
+                commandBlock.setExecutingOnFirstTick(pk.executingOnFirstTick);
+
+                boolean isRedstoneMode = pk.isRedstoneMode;
+                commandBlock.setAuto(!isRedstoneMode);
+
+                player.level.setBlock(commandBlock, cmdBlock, true, true);
+
+                if (!isRedstoneMode && pk.commandBlockMode == ICommandBlock.MODE_NORMAL) {
+                    commandBlock.trigger();
+                }
+
+                for (int side = 0; side <= 5; side++) {
+                    Block sideBlock = commandBlock.getLevelBlock().getSide(BlockFace.fromIndex(side));
+                    sideBlock.onUpdate(Level.BLOCK_UPDATE_REDSTONE);
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getPacketId() {
+        return ProtocolInfo.toNewProtocolID(ProtocolInfo.COMMAND_BLOCK_UPDATE_PACKET);
+    }
+
+    @Override
+    public Class<? extends DataPacket> getPacketClass() {
+        return CommandBlockUpdatePacket.class;
+    }
+}
