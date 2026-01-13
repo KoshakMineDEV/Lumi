@@ -2604,42 +2604,31 @@ public abstract class Entity extends Location implements Metadatable {
 
     public List<Block> getBlocksAround() {
         if (this.blocksAround == null) {
-            AxisAlignedBB bb = this.boundingBox;
-            int minX = NukkitMath.floorDouble(bb.getMinX());
-            int minY = NukkitMath.floorDouble(bb.getMinY());
-            int minZ = NukkitMath.floorDouble(bb.getMinZ());
-            int maxX = NukkitMath.ceilDouble(bb.getMaxX());
-            int maxY = NukkitMath.ceilDouble(bb.getMaxY());
-            int maxZ = NukkitMath.ceilDouble(bb.getMaxZ());
+            int minX = NukkitMath.floorDouble(this.boundingBox.getMinX());
+            int minY = NukkitMath.floorDouble(this.boundingBox.getMinY());
+            int minZ = NukkitMath.floorDouble(this.boundingBox.getMinZ());
+            int maxX = NukkitMath.ceilDouble(this.boundingBox.getMaxX());
+            int maxY = NukkitMath.ceilDouble(this.boundingBox.getMaxY());
+            int maxZ = NukkitMath.ceilDouble(this.boundingBox.getMaxZ());
 
-            if (!this.level.isYInRange(minY) && !this.level.isYInRange(maxY)) {
-                return Collections.emptyList();
-            }
-
-            minY = Math.max(minY, this.level.getMinBlockY());
-            maxY = Math.min(maxY, this.level.getMaxBlockY());
-
-            int sizeX = maxX - minX + 1;
-            int sizeY = maxY - minY + 1;
-            int sizeZ = maxZ - minZ + 1;
-
-            if (sizeX <= 0 || sizeY <= 0 || sizeZ <= 0) {
-                return Collections.emptyList();
-            }
-
-            this.blocksAround = new ObjectArrayList<>(sizeX * sizeY * sizeZ);
+            this.blocksAround = new ArrayList<>();
 
             try {
-                for (int x = minX; x <= maxX; x++) {
-                    for (int z = minZ; z <= maxZ; z++) {
-                        for (int y = minY; y <= maxY; y++) {
-                            Block block = this.level.getBlock(x, y, z, false);
-                            this.blocksAround.add(block);
+                if (this.level.isYInRange(minY) || this.level.isYInRange(maxY)) {
+                    minY = Math.max(minY, this.level.getMinBlockY());
+                    maxY = Math.min(maxY, this.level.getMaxBlockY());
+                    for (int z = minZ; z <= maxZ; ++z) {
+                        for (int x = minX; x <= maxX; ++x) {
+                            for (int y = minY; y <= maxY; ++y) {
+                                Block block = this.level.getBlock(x, y, z, false);
+                                this.blocksAround.add(block);
+                            }
                         }
                     }
                 }
             } catch (NullPointerException e) {
-                return Collections.emptyList();
+                // 异步传送导致空指针 忽略结果
+                return new ArrayList<>();
             }
         }
 
@@ -2648,70 +2637,17 @@ public abstract class Entity extends Location implements Metadatable {
 
     public List<Block> getCollisionBlocks() {
         if (this.collisionBlocks == null) {
-            this.collisionBlocks = new ObjectArrayList<>();
+            this.collisionBlocks = new ArrayList<>();
 
-            double speed = this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ;
-            double expand = Math.max(0.5, Math.sqrt(speed) * 1.5);
-
-            AxisAlignedBB expandedBB = this.boundingBox.grow(expand, expand, expand);
-            List<Block> blocks = getBlocksInBoundingBox(expandedBB);
-
-            for (Block block : blocks) {
-                if (block.getId() == Block.NETHER_PORTAL) {
-                    AxisAlignedBB portalBB = new SimpleAxisAlignedBB(
-                            block.x, block.y, block.z,
-                            block.x + 1, block.y + 1, block.z + 1
-                    );
-
-                    double motionAbsX = Math.abs(this.motionX), motionAbsY = Math.abs(this.motionY), motionAbsZ = Math.abs(this.motionZ);
-                    AxisAlignedBB trajectoryBB = this.boundingBox.grow(motionAbsX + 0.3, motionAbsY + 0.3, motionAbsZ + 0.3);
-
-                    if (trajectoryBB.intersectsWith(portalBB)) {
-                        this.collisionBlocks.add(block);
-                    }
-                } else if (block.collidesWithBB(this.boundingBox, true)) {
-                    this.collisionBlocks.add(block);
+            List<Block> bl = this.getBlocksAround();
+            for (Block b : bl) {
+                if (b.collidesWithBB(this.boundingBox, true)) {
+                    this.collisionBlocks.add(b);
                 }
             }
         }
 
         return this.collisionBlocks;
-    }
-
-    private List<Block> getBlocksInBoundingBox(AxisAlignedBB bb) {
-        int minX = NukkitMath.floorDouble(bb.getMinX());
-        int minY = NukkitMath.floorDouble(bb.getMinY());
-        int minZ = NukkitMath.floorDouble(bb.getMinZ());
-        int maxX = NukkitMath.ceilDouble(bb.getMaxX());
-        int maxY = NukkitMath.ceilDouble(bb.getMaxY());
-        int maxZ = NukkitMath.ceilDouble(bb.getMaxZ());
-
-        if (!this.level.isYInRange(minY) && !this.level.isYInRange(maxY)) {
-            return Collections.emptyList();
-        }
-
-        minY = Math.max(minY, this.level.getMinBlockY());
-        maxY = Math.min(maxY, this.level.getMaxBlockY());
-
-        int sizeX = maxX - minX + 1;
-        int sizeY = maxY - minY + 1;
-        int sizeZ = maxZ - minZ + 1;
-
-        if (sizeX <= 0 || sizeY <= 0 || sizeZ <= 0) {
-            return Collections.emptyList();
-        }
-
-        List<Block> blocks = new ObjectArrayList<>(sizeX * sizeY * sizeZ);
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    Block block = this.level.getBlock(x, y, z, false);
-                    blocks.add(block);
-                }
-            }
-        }
-        return blocks;
     }
 
     /**
@@ -2739,7 +2675,7 @@ public abstract class Entity extends Location implements Metadatable {
             }
 
             if (block.getId() == Block.POWDER_SNOW) {
-                portal = true;
+                powderSnow = true;
                 continue;
             }
 
