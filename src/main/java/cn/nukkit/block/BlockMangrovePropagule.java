@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.ItemBoneMeal;
@@ -147,13 +148,17 @@ public class BlockMangrovePropagule extends BlockSapling {
     }
 
     public boolean grow() {
-        new ObjectMangroveTree().generate(this.getLevel(), new NukkitRandom(), this);
-        this.level.setBlock(this, Block.get(BlockID.AIR));
-        Block down = this.down();
-        if (down.getId() == BlockID.DIRT_WITH_ROOTS) {
-            this.level.setBlock(down, Block.get(BlockID.DIRT));
+        BlockGrowEvent event = new BlockGrowEvent(this, Block.get(Block.MANGROVE_LOG));
+        if(event.call()) {
+            new ObjectMangroveTree().generate(this.getLevel(), new NukkitRandom(), this);
+            this.level.setBlock(this, Block.get(BlockID.AIR));
+            Block down = this.down();
+            if (down.getId() == BlockID.DIRT_WITH_ROOTS) {
+                this.level.setBlock(down, Block.get(BlockID.DIRT));
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override

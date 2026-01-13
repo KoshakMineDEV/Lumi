@@ -2,6 +2,7 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.material.tags.BlockTags;
+import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBoneMeal;
 import cn.nukkit.level.Level;
@@ -69,9 +70,12 @@ public class BlockAzalea extends BlockTransparent {
     }
 
     public void grow(boolean flowering) {
-        ObjectAzaleaTree generator = new ObjectAzaleaTree();
-        generator.grow(this.getLevel(), new NukkitRandom(), this, flowering);
-        this.level.setBlock(this, Block.get(OAK_LOG));
+        final BlockGrowEvent event = new BlockGrowEvent(this, Block.get(OAK_LOG));
+        if(event.call()) {
+            ObjectAzaleaTree generator = new ObjectAzaleaTree();
+            generator.grow(this.getLevel(), new NukkitRandom(), this, flowering);
+            this.level.setBlock(this, Block.get(OAK_LOG));
+        }
     }
 
     @Override

@@ -268,6 +268,9 @@ public class BlockVine extends BlockTransparentMeta {
         int blockY = this.getFloorY();
         int blockZ = this.getFloorZ();
 
+        final BlockGrowEvent event = new BlockGrowEvent(this, this);
+        if(!event.call()) return false;
+
         int count = 0;
         for (int x = blockX - 4; x <= blockX + 4; x++) {
             for (int z = blockZ - 4; z <= blockZ + 4; z++) {

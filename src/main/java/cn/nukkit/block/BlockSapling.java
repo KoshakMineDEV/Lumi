@@ -2,6 +2,7 @@ package cn.nukkit.block;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.material.tags.BlockTags;
+import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBoneMeal;
 import cn.nukkit.level.Level;
@@ -97,7 +98,6 @@ public class BlockSapling extends BlockFlowable {
             if (ThreadLocalRandom.current().nextFloat() >= 0.45) {
                 return true;
             }
-
             return this.grow();
         }
         this.getLevel().loadChunk((int) this.x >> 4, (int) this.z >> 4);
