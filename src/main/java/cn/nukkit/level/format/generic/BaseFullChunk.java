@@ -54,7 +54,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     protected byte[] blockLight;
 
-    protected byte[] heightMap;
+    protected short[] heightMap;
 
     protected List<CompoundTag> NBTtiles;
 
@@ -279,12 +279,14 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     @Override
     public int getHeightMap(int x, int z) {
-        return this.heightMap[(z << 4) | x] & 0xFF;
+        return this.heightMap[(z << 4) | x] + this.getProvider().getMinBlockY();
     }
 
     @Override
     public void setHeightMap(int x, int z, int value) {
-        this.heightMap[(z << 4) | x] = (byte) value;
+        //Bedrock Edition 3d-data saves the height map start from index of 0, so need to subtract the world minimum height here, see for details:
+        //https://github.com/bedrock-dev/bedrock-level/blob/main/src/include/data_3d.h#L115
+        this.heightMap[(z << 4) | x] = (short) (value - this.getProvider().getMinBlockY());
     }
 
     @Override
@@ -397,7 +399,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     public int getHighestBlockAt(int x, int z, boolean cache) {
         if (cache) {
             int h = this.getHeightMap(x, z);
-            if (h != this.getProvider().getMinBlockY() && h != this.getProvider().getMaxBlockY()) {
+            if (h >= this.getProvider().getMinBlockY() && h < this.getProvider().getMaxBlockY()) { //maxY is default value
                 return h;
             }
         }
@@ -589,7 +591,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     }
 
     @Override
-    public byte[] getHeightMapArray() {
+    public short[] getHeightMapArray() {
         return this.heightMap;
     }
 
