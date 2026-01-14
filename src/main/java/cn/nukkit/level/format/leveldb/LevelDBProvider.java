@@ -34,7 +34,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import lombok.extern.log4j.Log4j2;
 import net.daporkchop.ldbjni.DBProvider;
-import net.daporkchop.ldbjni.LevelDB;
 import net.daporkchop.lib.natives.FeatureBuilder;
 import org.cloudburstmc.nbt.*;
 import org.iq80.leveldb.*;
@@ -232,7 +231,7 @@ public class LevelDBProvider implements LevelProvider {
                 .compressionType(CompressionType.ZLIB_RAW)
                 .cacheSize(1024L * 1024L * Server.getInstance().getSettings().world().leveldbCacheMb())
                 .blockSize(64 * 1024);
-        return Server.getInstance().getSettings().world().useNativeLeveldb() ? LevelDB.PROVIDER.open(dir, options) : JAVA_LDB_PROVIDER.open(dir, options);
+        return JAVA_LDB_PROVIDER.open(dir, options);
     }
 
     public static void updateLevelData(CompoundTag levelData) {
@@ -1168,9 +1167,5 @@ public class LevelDBProvider implements LevelProvider {
         private boolean canRun() {
             return !closed && level != null && level.getPlayers().isEmpty();
         }
-    }
-
-    static {
-        log.info("native LevelDB provider: {}", Server.getInstance().getSettings().world().useNativeLeveldb() && LevelDB.PROVIDER.isNative());
     }
 }

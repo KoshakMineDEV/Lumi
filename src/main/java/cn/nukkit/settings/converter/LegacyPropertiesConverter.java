@@ -112,7 +112,6 @@ public class LegacyPropertiesConverter {
         world.lightUpdates(this.getPropertyBoolean("light-updates", world.lightUpdates()));
         world.clearChunkTickList(this.getPropertyBoolean("clear-chunk-tick-list", world.clearChunkTickList()));
         world.leveldbCacheMb(this.getPropertyInt("leveldb-cache-mb", world.leveldbCacheMb()));
-        world.useNativeLeveldb(this.getPropertyBoolean("use-native-leveldb", world.useNativeLeveldb()));
 
         // Multi-nether worlds
         String multiNetherWorlds = this.getPropertyString("multi-nether-worlds", "");

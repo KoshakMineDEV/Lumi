@@ -90,9 +90,6 @@ public class WorldSettings extends OkaeriConfig {
     @CustomKey("leveldb-cache-mb")
     private int leveldbCacheMb = 80;
 
-    @CustomKey("use-native-leveldb")
-    private boolean useNativeLeveldb = false;
-
     @Setter(value = AccessLevel.NONE)
     @CustomKey("entity")
     @Comment("World entities settings")
