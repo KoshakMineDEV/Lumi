@@ -88,7 +88,7 @@ public abstract class BlockEntitySpawnableContainer extends BlockEntitySpawnable
     public void setItem(int index, Item item) {
         int i = this.getSlotIndex(index);
 
-        CompoundTag d = NBTIO.putItemHelper(item, index);
+        CompoundTag d = NBTIO.putItemHelper(item, index, true);
 
         // If item is air or count less than 0, remove the item from the "Items" list
         if (item.getId() == Item.AIR || item.getCount() <= 0) {

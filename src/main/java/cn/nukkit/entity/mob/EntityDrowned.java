@@ -208,7 +208,7 @@ public class EntityDrowned extends EntityWalkingMob implements EntitySmite {
 
         this.namedTag.putBoolean("HandItemSet", true); // Can be air but don't try to set a new tool next time
         if (tool != null) {
-            this.namedTag.put("Item", NBTIO.putItemHelper(tool));
+            this.namedTag.put("Item", NBTIO.putItemHelper(tool, true));
         }
     }
 

@@ -128,7 +128,7 @@ public class ItemFirework extends Item {
     public EntityFirework spawnFirework(Level level, Vector3 pos, @Nullable Vector3 motion) {
         boolean projectile = motion != null;
         CompoundTag nbt = Entity.getDefaultNBT(pos, motion, projectile ? (float) motion.yRotFromDirection() : 0, projectile ? (float) motion.xRotFromDirection() : 0)
-                .putCompound("FireworkItem", NBTIO.putItemHelper(this));
+                .putCompound("FireworkItem", NBTIO.putItemHelper(this, true));
 
         EntityFirework entity = new EntityFirework(level.getChunk(pos.getChunkX(), pos.getChunkZ()), nbt, projectile);
         entity.spawnToAll();

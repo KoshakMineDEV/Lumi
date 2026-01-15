@@ -250,7 +250,7 @@ public class ItemCrossbow extends ItemBow {
         this.setNamedTag(this.getOrCreateNamedTag()
                 .putBoolean("Charged", true)
                 .putInt("launchCount", launchCount)
-                .putCompound("chargedItem", NBTIO.putItemHelper(item))
+                .putCompound("chargedItem", NBTIO.putItemHelper(item, true))
         );
     }
 

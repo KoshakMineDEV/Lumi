@@ -258,7 +258,7 @@ public class EntityFishingHook extends EntitySlenderProjectile {
                 if (!event.isCancelled()) {
                     EntityItem itemEntity = new EntityItem(
                             this.level.getChunk((int) this.x >> 4, (int) this.z >> 4, true),
-                            Entity.getDefaultNBT(pos, event.getMotion(), ThreadLocalRandom.current().nextFloat() * 360, 0).putShort("Health", 5).putCompound("Item", NBTIO.putItemHelper(event.getLoot())).putShort("PickupDelay", 1));
+                            Entity.getDefaultNBT(pos, event.getMotion(), ThreadLocalRandom.current().nextFloat() * 360, 0).putShort("Health", 5).putCompound("Item", NBTIO.putItemHelper(event.getLoot(), true)).putShort("PickupDelay", 1));
 
                     itemEntity.setOwner(player.getName());
                     itemEntity.spawnToAll();

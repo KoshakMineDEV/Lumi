@@ -91,7 +91,7 @@ public class BlockEntityJukebox extends BlockEntitySpawnable {
     @Override
     public void saveNBT() {
         super.saveNBT();
-        this.namedTag.putCompound("RecordItem", NBTIO.putItemHelper(this.recordItem));
+        this.namedTag.putCompound("RecordItem", NBTIO.putItemHelper(this.recordItem, true));
     }
 
     @Override

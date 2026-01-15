@@ -143,7 +143,7 @@ public class EntityThrownTrident extends EntitySlenderProjectile {
     public void saveNBT() {
         super.saveNBT();
 
-        this.namedTag.put(TAG_TRIDENT, NBTIO.putItemHelper(this.trident));
+        this.namedTag.put(TAG_TRIDENT, NBTIO.putItemHelper(this.trident, true));
         this.namedTag.putByte(TAG_PICKUP, this.pickupMode);
         this.namedTag.putList(new ListTag<DoubleTag>("CollisionPos")
                 .add(new DoubleTag("0", this.collisionPos.x))

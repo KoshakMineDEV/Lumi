@@ -51,7 +51,7 @@ public class BlockEntityDecoratedPot extends BlockEntitySpawnable {
     @Override
     public void saveNBT() {
         super.saveNBT();
-        this.namedTag.put("item", NBTIO.putItemHelper(this.item));
+        this.namedTag.put("item", NBTIO.putItemHelper(this.item, true));
     }
 
     @Override
@@ -62,7 +62,7 @@ public class BlockEntityDecoratedPot extends BlockEntitySpawnable {
                 .putInt("x", (int) this.x)
                 .putInt("y", (int) this.y)
                 .putInt("z", (int) this.z)
-                .putCompound("item", NBTIO.putItemHelper(this.item))
+                .putCompound("item", NBTIO.putItemHelper(this.item, true))
                 .putList("sherds", namedTag.getList("sherds"));
     }
 

@@ -31,9 +31,9 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import lombok.extern.log4j.Log4j2;
 import net.daporkchop.ldbjni.DBProvider;
-import net.daporkchop.ldbjni.LevelDB;
 import net.daporkchop.lib.natives.FeatureBuilder;
 import org.cloudburstmc.nbt.*;
 import org.iq80.leveldb.*;
@@ -72,6 +72,7 @@ public class LevelDBProvider implements LevelProvider {
     protected CompoundTag levelData;
     private Vector3 spawn;
     private Long cachedSeed;
+    private int lastGcPosition = 0;
 
     protected volatile boolean closed;
     protected final Lock gcLock;
@@ -230,7 +231,7 @@ public class LevelDBProvider implements LevelProvider {
                 .compressionType(CompressionType.ZLIB_RAW)
                 .cacheSize(1024L * 1024L * Server.getInstance().getSettings().world().leveldbCacheMb())
                 .blockSize(64 * 1024);
-        return Server.getInstance().getSettings().world().useNativeLeveldb() ? LevelDB.PROVIDER.open(dir, options) : JAVA_LDB_PROVIDER.open(dir, options);
+        return JAVA_LDB_PROVIDER.open(dir, options);
     }
 
     public static void updateLevelData(CompoundTag levelData) {
@@ -901,7 +902,41 @@ public class LevelDBProvider implements LevelProvider {
 
     @Override
     public void doGarbageCollection() {
-        //leveldb不需要回收regions
+        //Do nothing. LevelDB don't need third-party garbage collection
+    }
+
+    @Override
+    public void doGarbageCollection(long time) {
+        long start = System.currentTimeMillis();
+        int maxIterations = this.chunks.size();
+        if (this.lastGcPosition > maxIterations) {
+            this.lastGcPosition = 0;
+        }
+
+        ObjectIterator<BaseFullChunk> iterator = chunks.values().iterator();
+        if (this.lastGcPosition != 0) {
+            iterator.skip(lastGcPosition);
+        }
+
+        int iterations;
+        for (iterations = 0; iterations < maxIterations; iterations++) {
+            if (!iterator.hasNext()) {
+                iterator = this.chunks.values().iterator();
+            }
+
+            if (!iterator.hasNext()) {
+                break;
+            }
+
+            BaseFullChunk chunk = iterator.next();
+            if (chunk instanceof LevelDBChunk && chunk.isGenerated() && chunk.isPopulated()) {
+                chunk.compress();
+                if (System.currentTimeMillis() - start >= time) {
+                    break;
+                }
+            }
+        }
+        this.lastGcPosition += iterations;
     }
 
     public CompoundTag getLevelData() {
@@ -1132,9 +1167,5 @@ public class LevelDBProvider implements LevelProvider {
         private boolean canRun() {
             return !closed && level != null && level.getPlayers().isEmpty();
         }
-    }
-
-    static {
-        log.info("native LevelDB provider: {}", Server.getInstance().getSettings().world().useNativeLeveldb() && LevelDB.PROVIDER.isNative());
     }
 }

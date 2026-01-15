@@ -99,13 +99,13 @@ public abstract class EntityHumanType extends EntityCreature implements Inventor
             int slotCount = 45;
             for (int slot = 9; slot < slotCount; ++slot) {
                 Item item = this.inventory.getItem(slot - 9);
-                inventoryTag.add(NBTIO.putItemHelper(item, slot));
+                inventoryTag.add(NBTIO.putItemHelper(item, slot, true));
             }
 
             for (int slot = 100; slot < 104; ++slot) {
                 Item item = this.inventory.getItem(this.inventory.getSize() + slot - 100);
                 if (item != null && item.getId() != Item.AIR) {
-                    inventoryTag.add(NBTIO.putItemHelper(item, slot));
+                    inventoryTag.add(NBTIO.putItemHelper(item, slot, true));
                 }
             }
         }
@@ -117,7 +117,7 @@ public abstract class EntityHumanType extends EntityCreature implements Inventor
                     inventoryTag = new ListTag<>("Inventory");
                     this.namedTag.putList(inventoryTag);
                 }
-                inventoryTag.add(NBTIO.putItemHelper(item, -106));
+                inventoryTag.add(NBTIO.putItemHelper(item, -106, true));
             }
         }
 
@@ -126,7 +126,7 @@ public abstract class EntityHumanType extends EntityCreature implements Inventor
             for (int slot = 0; slot < 27; ++slot) {
                 Item item = this.enderChestInventory.getItem(slot);
                 if (item != null && item.getId() != Item.AIR) {
-                    this.namedTag.getList("EnderItems", CompoundTag.class).add(NBTIO.putItemHelper(item, slot));
+                    this.namedTag.getList("EnderItems", CompoundTag.class).add(NBTIO.putItemHelper(item, slot, true));
                 }
             }
         }
