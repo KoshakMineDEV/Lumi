@@ -1,5 +1,6 @@
 package cn.nukkit.block;
 
+import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
@@ -52,20 +53,25 @@ public class BlockPaleOakSapling extends BlockSapling {
 
     @Override
     public boolean grow() {
-        for (int x = 0; x >= -1; --x) {
-            for (int z = 0; z >= -1; --z) {
-                if (this.findSaplings(x, z, 0)) {
-                    Block air = Block.get(BlockID.AIR);
-                    this.level.setBlock(this.add(x, 0, z), air, true, false);
-                    this.level.setBlock(this.add(x + 1, 0, z), air, true, false);
-                    this.level.setBlock(this.add(x, 0, z + 1), air, true, false);
-                    this.level.setBlock(this.add(x + 1, 0, z + 1), air, true, false);
-                    new ObjectPaleOakTree().generate(this.getLevel(), new NukkitRandom(), this.add(x, 0, z));
+        BlockGrowEvent event = new BlockGrowEvent(this, Block.get(BlockID.PALE_OAK_LOG));
+        if(event.call()) {
+            for (int x = 0; x >= -1; --x) {
+                for (int z = 0; z >= -1; --z) {
+                    if (this.findSaplings(x, z, 0)) {
+                        Block air = Block.get(BlockID.AIR);
+                        this.level.setBlock(this.add(x, 0, z), air, true, false);
+                        this.level.setBlock(this.add(x + 1, 0, z), air, true, false);
+                        this.level.setBlock(this.add(x, 0, z + 1), air, true, false);
+                        this.level.setBlock(this.add(x + 1, 0, z + 1), air, true, false);
+                        new ObjectPaleOakTree().generate(this.getLevel(), new NukkitRandom(), this.add(x, 0, z));
+                    }
                 }
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     private boolean findSaplings(int x, int z, int type) {

@@ -1,9 +1,11 @@
 package cn.nukkit.block;
 
+import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.generator.object.tree.ObjectCherryTree;
+import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 
@@ -52,12 +54,16 @@ public class BlockCherrySapling extends BlockSapling {
 
     @Override
     public boolean grow() {
-        new ObjectCherryTree().generate(this.getLevel(), new NukkitRandom(), this);
-        Vector3 vector3 = new Vector3(this.x, this.y - 1, this.z);
-        if (this.level.getBlock(vector3).getId() == BlockID.DIRT_WITH_ROOTS) {
-            this.level.setBlock(vector3, Block.get(BlockID.DIRT));
+        BlockGrowEvent event = new BlockGrowEvent(this, Block.get(BlockID.CHERRY_LOG, BlockLog.faces[BlockFace.DOWN.getIndex()]));
+        if(event.call()) {
+            new ObjectCherryTree().generate(this.getLevel(), new NukkitRandom(), this);
+            Vector3 vector3 = new Vector3(this.x, this.y - 1, this.z);
+            if (this.level.getBlock(vector3).getId() == BlockID.DIRT_WITH_ROOTS) {
+                this.level.setBlock(vector3, Block.get(BlockID.DIRT));
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
