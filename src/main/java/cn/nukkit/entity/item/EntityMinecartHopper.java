@@ -118,7 +118,7 @@ public class EntityMinecartHopper extends EntityMinecartAbstract implements Inve
                 Item item = this.inventory.getItem(slot);
                 if (item != null && item.getId() != Item.AIR) {
                     this.namedTag.getList("Items", CompoundTag.class)
-                            .add(NBTIO.putItemHelper(item, slot));
+                            .add(NBTIO.putItemHelper(item, slot, true));
                 }
             }
         }

@@ -204,7 +204,7 @@ public class BlockEntityFurnace extends BlockEntitySpawnable implements Inventor
     public void setItem(int index, Item item) {
         int i = this.getSlotIndex(index);
 
-        CompoundTag d = NBTIO.putItemHelper(item, index);
+        CompoundTag d = NBTIO.putItemHelper(item, index, true);
 
         if (item.getId() == Item.AIR || item.getCount() <= 0) {
             if (i >= 0) {

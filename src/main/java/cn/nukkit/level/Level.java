@@ -2300,7 +2300,7 @@ public class Level implements ChunkManager, Metadatable {
                 }
             }
 
-            CompoundTag itemTag = NBTIO.putItemHelper(item);
+            CompoundTag itemTag = NBTIO.putItemHelper(item, true);
             itemTag.setName("Item");
 
             EntityItem itemEntity = new EntityItem(
@@ -2348,7 +2348,7 @@ public class Level implements ChunkManager, Metadatable {
                 }
             }
 
-            CompoundTag itemTag = NBTIO.putItemHelper(item);
+            CompoundTag itemTag = NBTIO.putItemHelper(item, true);
             itemTag.setName("Item");
 
             itemEntity = new EntityItem(

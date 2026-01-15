@@ -31,7 +31,7 @@ public class BlockEntityItemFrame extends BlockEntitySpawnable {
     @Override
     protected void initBlockEntity() {
         if (!namedTag.contains("Item")) {
-            namedTag.putCompound("Item", NBTIO.putItemHelper(item_ = new ItemBlock(Block.get(BlockID.AIR))));
+            namedTag.putCompound("Item", NBTIO.putItemHelper(item_ = new ItemBlock(Block.get(BlockID.AIR)), true));
         }
 
         if (!namedTag.contains("ItemRotation")) {
@@ -76,7 +76,7 @@ public class BlockEntityItemFrame extends BlockEntitySpawnable {
 
     public void setItem(Item item, boolean setChanged) {
         item_ = null;
-        this.namedTag.putCompound("Item", NBTIO.putItemHelper(item));
+        this.namedTag.putCompound("Item", NBTIO.putItemHelper(item, true));
         if (setChanged) {
             this.setDirty();
         }
@@ -117,7 +117,7 @@ public class BlockEntityItemFrame extends BlockEntitySpawnable {
 
         Item item = this.getItem();
         if (!item.isNull()) {
-            CompoundTag itemTag = NBTIO.putItemHelper(item, null, protocol);
+            CompoundTag itemTag = NBTIO.putItemHelper(item, null, protocol, true);
             if (!itemTag.contains("Name")) {
                 itemTag.remove("id");
                 String namespaceId;

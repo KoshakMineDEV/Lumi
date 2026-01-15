@@ -246,7 +246,7 @@ public class EntityZombie extends EntityWalkingMob implements EntitySmite {
 
     private void saveTool() {
         if (tool != null) {
-            this.namedTag.put("Item", NBTIO.putItemHelper(tool));
+            this.namedTag.put("Item", NBTIO.putItemHelper(tool, true));
         }
     }
 
@@ -254,7 +254,7 @@ public class EntityZombie extends EntityWalkingMob implements EntitySmite {
         if (this.armor != null && this.armor.length == 4) {
             ListTag<CompoundTag> listTag = new ListTag<>("Armor");
             for (int slot = 0; slot < 4; ++slot) {
-                listTag.add(NBTIO.putItemHelper(this.armor[slot], slot));
+                listTag.add(NBTIO.putItemHelper(this.armor[slot], slot, true));
             }
             this.namedTag.putList(listTag);
         }

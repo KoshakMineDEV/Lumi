@@ -133,7 +133,7 @@ public class BlockEntityCampfire extends BlockEntitySpawnable implements Invento
                 namedTag.putInt("ItemTime" + i, 0);
                 namedTag.remove("KeepItem" + i);
             } else {
-                namedTag.putCompound("Item" + i, NBTIO.putItemHelper(item));
+                namedTag.putCompound("Item" + i, NBTIO.putItemHelper(item, true));
                 namedTag.putInt("ItemTime" + i, burnTime[i - 1]);
                 namedTag.putBoolean("KeepItem" + i, keepItem[i - 1]);
             }
@@ -181,7 +181,7 @@ public class BlockEntityCampfire extends BlockEntitySpawnable implements Invento
             if (item == null || item.getId() == BlockID.AIR || item.getCount() <= 0) {
                 c.remove("Item" + i);
             } else {
-                c.putCompound("Item" + i, NBTIO.putItemHelper(item));
+                c.putCompound("Item" + i, NBTIO.putItemHelper(item, true));
             }
         }
 
@@ -209,7 +209,7 @@ public class BlockEntityCampfire extends BlockEntitySpawnable implements Invento
             return;
         }
 
-        CompoundTag nbt = NBTIO.putItemHelper(item);
+        CompoundTag nbt = NBTIO.putItemHelper(item, true);
         this.namedTag.putCompound("Item" + (index + 1), nbt);
     }
 

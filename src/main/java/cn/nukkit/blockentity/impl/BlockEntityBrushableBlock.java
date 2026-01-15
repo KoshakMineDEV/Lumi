@@ -93,7 +93,7 @@ public class BlockEntityBrushableBlock extends BlockEntitySpawnable implements B
                 .putInt("x", (int) this.x)
                 .putInt("y", (int) this.y)
                 .putInt("z", (int) this.z)
-                .putCompound("item", NBTIO.putItemHelper(this.item))
+                .putCompound("item", NBTIO.putItemHelper(this.item, true))
                 .putList("type", namedTag.getList(getBlock().toItem().getNamespaceId()))
                 .putInt("brush_count", brushCount / 2)
                 .putByte("brush_direction", brushDirection)

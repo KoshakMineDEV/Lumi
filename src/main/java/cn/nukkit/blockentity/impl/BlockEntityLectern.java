@@ -48,7 +48,7 @@ public class BlockEntityLectern extends BlockEntitySpawnable {
 
         Item book = getBook();
         if (book.getId() != Item.AIR) {
-            c.putCompound("book", NBTIO.putItemHelper(book));
+            c.putCompound("book", NBTIO.putItemHelper(book, true));
             c.putBoolean("hasBook", true);
             c.putInt("page", getRawPage());
             c.putInt("totalPages", totalPages);
@@ -78,7 +78,7 @@ public class BlockEntityLectern extends BlockEntitySpawnable {
 
     public void setBook(Item item) {
         if (item != null && (item.getId() == Item.WRITTEN_BOOK || item.getId() == Item.BOOK_AND_QUILL)) {
-            this.namedTag.putCompound("book", NBTIO.putItemHelper(item));
+            this.namedTag.putCompound("book", NBTIO.putItemHelper(item, true));
             this.namedTag.putInt("page", 0);
         } else {
             this.namedTag.remove("book");
