@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
@@ -122,8 +123,7 @@ public class BlockBambooSapling extends BlockFlowable {
     }
 
     private boolean isSupportInvalid() {
-        int downId = down().getId();
-        return downId != DIRT && downId != GRASS && downId != SAND && downId != GRAVEL && downId != PODZOL && downId != MUD && downId != MUDDY_MANGROVE_ROOTS;
+        return !down().hasBlockTag(BlockTags.DIRT);
     }
 
     @Override

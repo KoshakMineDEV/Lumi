@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.material.tags.BlockTags;
 import cn.nukkit.event.block.BlockGrowEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
@@ -212,7 +213,7 @@ public class BlockBamboo extends BlockTransparentMeta {
 
     private boolean isSupportInvalid() {
         int downId = this.down().getId();
-        return downId != BAMBOO && downId != DIRT && downId != GRASS && downId != SAND && downId != GRAVEL && downId != PODZOL && downId != BAMBOO_SAPLING && downId != MUD && downId != MUDDY_MANGROVE_ROOTS;
+        return downId != BAMBOO && downId != BAMBOO_SAPLING && !down().hasBlockTag(BlockTags.DIRT);
     }
 
     @Override
