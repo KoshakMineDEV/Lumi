@@ -212,7 +212,7 @@ public class BlockBamboo extends BlockTransparentMeta {
 
     private boolean isSupportInvalid() {
         int downId = this.down().getId();
-        return downId != BAMBOO && downId != DIRT && downId != GRASS && downId != SAND && downId != GRAVEL && downId != PODZOL && downId != BAMBOO_SAPLING;
+        return downId != BAMBOO && downId != DIRT && downId != GRASS && downId != SAND && downId != GRAVEL && downId != PODZOL && downId != BAMBOO_SAPLING && downId != MUD && downId != MUDDY_MANGROVE_ROOTS;
     }
 
     @Override

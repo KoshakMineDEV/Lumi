@@ -123,7 +123,7 @@ public class BlockBambooSapling extends BlockFlowable {
 
     private boolean isSupportInvalid() {
         int downId = down().getId();
-        return downId != DIRT && downId != GRASS && downId != SAND && downId != GRAVEL && downId != PODZOL;
+        return downId != DIRT && downId != GRASS && downId != SAND && downId != GRAVEL && downId != PODZOL && downId != MUD && downId != MUDDY_MANGROVE_ROOTS;
     }
 
     @Override
