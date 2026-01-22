@@ -190,12 +190,15 @@ public class RecipeParser {
                                     inputs.add(parseInput(item.getAsJsonObject()));
                                 });
 
-                                Registries.RECIPE.registerShapelessRecipe(new ShapelessRecipe(
-                                        recipe.get("id").getAsString(),
-                                        recipe.get("priority").getAsInt(),
-                                        parseOutput(recipe.get("output"), List.of()).getItem(),
-                                        inputs
-                                ));
+                                String id = recipe.get("id").getAsString();
+                                if(!id.startsWith("paper_sulphur")) {
+                                    Registries.RECIPE.registerShapelessRecipe(new ShapelessRecipe(
+                                            id,
+                                            recipe.get("priority").getAsInt(),
+                                            parseOutput(recipe.get("output"), List.of()).getItem(),
+                                            inputs
+                                    ));
+                                }
                             }
 
                             case "stonecutter", "cartography_table" -> {
