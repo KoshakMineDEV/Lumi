@@ -1,0 +1,14 @@
+{
+  "minecraft:copper_sword": "minecraft:iron_sword",
+  "minecraft:copper_axe": "minecraft:iron_axe",
+  "minecraft:copper_pickaxe": "minecraft:iron_pickaxe",
+  "minecraft:copper_shovel": "minecraft:iron_shovel",
+  "minecraft:copper_hoe": "minecraft:iron_hoe",
+  "minecraft:copper_nugget": "minecraft:iron_nugget",
+  "minecraft:copper_helmet": "minecraft:iron_helmet",
+  "minecraft:copper_chestplate": "minecraft:iron_chestplate",
+  "minecraft:copper_leggings": "minecraft:iron_leggings",
+  "minecraft:copper_boots": "minecraft:iron_boots",
+  "minecraft:copper_horse_armor": "minecraft:iron_horse_armor",
+  "minecraft:copper_lantern": "minecraft:lantern"
+}

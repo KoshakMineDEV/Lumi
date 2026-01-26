@@ -1,0 +1,18 @@
+{
+  "minecraft:lime_harness": "minecraft:lime_dye",
+  "minecraft:orange_harness": "minecraft:orange_dye",
+  "minecraft:gray_harness": "minecraft:gray_dye",
+  "minecraft:cyan_harness": "minecraft:cyan_dye",
+  "minecraft:black_harness": "minecraft:black_dye",
+  "minecraft:white_harness": "minecraft:white_dye",
+  "minecraft:purple_harness": "minecraft:purple_dye",
+  "minecraft:blue_harness": "minecraft:blue_dye",
+  "minecraft:light_blue_harness": "minecraft:light_blue_dye",
+  "minecraft:yellow_harness": "minecraft:yellow_dye",
+  "minecraft:pink_harness": "minecraft:pink_dye",
+  "minecraft:red_harness": "minecraft:red_dye",
+  "minecraft:light_gray_harness": "minecraft:light_gray_dye",
+  "minecraft:brown_harness": "minecraft:brown_dye",
+  "minecraft:green_harness": "minecraft:green_dye",
+  "minecraft:magenta_harness": "minecraft:magenta_dye"
+}
