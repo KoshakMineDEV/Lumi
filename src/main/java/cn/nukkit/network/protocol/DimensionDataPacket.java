@@ -1,6 +1,7 @@
 package cn.nukkit.network.protocol;
 
 import cn.nukkit.level.DimensionData;
+import cn.nukkit.network.protocol.types.DimensionDefinition;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.ToString;
 
@@ -11,7 +12,7 @@ public class DimensionDataPacket extends DataPacket {
 
     public static final byte NETWORK_ID = ProtocolInfo.DIMENSION_DATA_PACKET;
 
-    private final List<DimensionData> definitions = new ObjectArrayList<>();
+    public List<DimensionDefinition> definitions = new ObjectArrayList<>();
 
     @Override
     public byte pid() {
@@ -20,10 +21,18 @@ public class DimensionDataPacket extends DataPacket {
 
     @Override
     public void decode() {
+        this.decodeUnsupported();
     }
 
     @Override
     public void encode() {
-
+        this.reset();
+        this.putUnsignedVarInt(definitions.size());
+        for (DimensionDefinition definition : definitions) {
+            this.putString(definition.getId());
+            this.putVarInt(definition.getMaximumHeight());
+            this.putVarInt(definition.getMinimumHeight());
+            this.putVarInt(definition.getGeneratorType());
+        }
     }
 }
