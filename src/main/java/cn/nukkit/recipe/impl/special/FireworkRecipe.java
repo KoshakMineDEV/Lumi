@@ -23,7 +23,6 @@ public class FireworkRecipe extends MultiRecipe {
             boolean hasPaper = false;
             int powder = 0;
             for (ItemDescriptor input : inputs) {
-                System.out.println(input);
                 if(input instanceof DefaultDescriptor descriptor) {
                     Item item = descriptor.getItem();
                     if (item instanceof ItemGunpowder) {
