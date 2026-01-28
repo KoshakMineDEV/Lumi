@@ -3131,7 +3131,7 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void setHeightMap(int x, int z, int value) {
-        this.getChunk(x >> 4, z >> 4, true).setHeightMap(x & 0x0f, z & 0x0f, value & 0x0f);
+        this.getChunk(x >> 4, z >> 4, true).setHeightMap(x & 0x0f, z & 0x0f, value);
     }
 
     public int getBiomeColor(int x, int z) {
@@ -4488,11 +4488,11 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public boolean canBlockSeeSky(Vector3 pos) {
-        return this.getHighestBlockAt(pos.getFloorX(), pos.getFloorZ()) < pos.getY();
+        return pos.getFloorY() >= this.getHighestBlockAt(pos.getFloorX(), pos.getFloorZ());
     }
 
     public boolean canBlockSeeSky(Block block) {
-        return this.getHighestBlockAt((int) block.getX(), (int) block.getZ()) < block.getY();
+        return (int) block.getY() >= this.getHighestBlockAt((int) block.getX(), (int) block.getZ());
     }
 
     public int getStrongPower(Vector3 pos, BlockFace direction) {

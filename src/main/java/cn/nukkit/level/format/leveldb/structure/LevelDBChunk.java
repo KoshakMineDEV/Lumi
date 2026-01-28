@@ -169,6 +169,25 @@ public class LevelDBChunk extends BaseChunk {
     }
 
     @Override
+    public boolean isLightPopulated() {
+        return this.state == ChunkState.FINISHED;
+    }
+
+    @Override
+    public void setLightPopulated(boolean value) {
+        if (this.isLightPopulated() == value) {
+            return;
+        }
+        this.setChanged();
+
+        if (value) {
+            this.setState(ChunkState.FINISHED);
+        } else if (this.state == ChunkState.FINISHED) {
+            this.setState(ChunkState.POPULATED);
+        }
+    }
+
+    @Override
     public void setBiomeIdArray(byte[] biomeIdArray) {
         super.setBiomeIdArray(biomeIdArray);
         if (this.has3dBiomes()) {
@@ -629,6 +648,14 @@ public class LevelDBChunk extends BaseChunk {
             throw new IllegalArgumentException("Invalid index: " + x + ", " + z );
         }
         return index;
+    }
+
+    @Override
+    protected void setInternalSection(float fY, ChunkSection section) {
+        super.setInternalSection(fY, section);
+        if (section instanceof LevelDBChunkSection) {
+            ((LevelDBChunkSection) section).setParent(this);
+        }
     }
 
     public Lock writeLock() {

@@ -92,4 +92,9 @@ public class BlockChorusPlant extends BlockTransparent {
     public int getToolType() {
         return ItemTool.TYPE_AXE;
     }
+
+    @Override
+    public boolean diffusesSkyLight() {
+        return true;
+    }
 }
