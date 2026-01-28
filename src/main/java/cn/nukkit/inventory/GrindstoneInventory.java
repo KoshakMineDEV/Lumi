@@ -28,17 +28,24 @@ public class GrindstoneInventory extends FakeBlockUIComponent {
 
     public Item getResult() {
         Item eq = getEquipment();
+        Item iq = getIngredient();
+
+        if(eq == null || eq.isNull()) {
+            eq = iq.clone();
+            iq = Item.get(Item.AIR);
+        }
+
         if (!(eq instanceof ItemDurable)) {
             if (eq.getId() == Item.ENCHANTED_BOOK) {
                 return Item.get(Item.BOOK);
             }
             return Item.get(Item.AIR);
         }
+
         CompoundTag tag = eq.getNamedTag();
         if (tag == null) tag = new CompoundTag();
         eq.setNamedTag(tag.remove("ench").putInt("RepairCost", 0));
-        Item iq = getIngredient();
-        if (eq.getId() == iq.getId()) {
+        if (eq.getNamespaceId().equals(iq.getNamespaceId())) {
             // Output durability is the sum of the durabilities of the two input items
             // plus 5% of the maximum durability of the output item (rounded down)
             // capped so it does not exceed the maximum durability of the output item
