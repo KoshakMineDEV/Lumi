@@ -132,4 +132,9 @@ public class BlockBeacon extends BlockTransparent implements BlockEntityHolder<B
     public boolean alwaysDropsOnExplosion() {
         return true;
     }
+
+    @Override
+    public boolean diffusesSkyLight() {
+        return true;
+    }
 }

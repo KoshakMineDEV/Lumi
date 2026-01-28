@@ -231,4 +231,8 @@ public class BlockBubbleColumn extends BlockTransparentMeta {
         }
     }
 
+    @Override
+    public boolean diffusesSkyLight() {
+        return true;
+    }
 }

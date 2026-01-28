@@ -82,7 +82,7 @@ public class WorldSettings extends OkaeriConfig {
     private int worldAutoCompactionTicks = 36000;
 
     @CustomKey("light-updates")
-    private boolean lightUpdates = false;
+    private boolean lightUpdates = true;
 
     @CustomKey("clear-chunk-tick-list")
     private boolean clearChunkTickList = true;

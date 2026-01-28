@@ -1,0 +1,15 @@
+{
+  "minecraft:wooden_spear": "minecraft:wooden_sword",
+  "minecraft:stone_spear": "minecraft:stone_sword",
+  "minecraft:copper_spear": "minecraft:copper_sword",
+  "minecraft:iron_spear": "minecraft:iron_sword",
+  "minecraft:golden_spear": "minecraft:golden_sword",
+  "minecraft:diamond_spear": "minecraft:diamond_sword",
+  "minecraft:netherite_spear": "minecraft:netherite_sword",
+  "minecraft:netherite_horse_armor": "minecraft:diamond_horse_armor",
+  "minecraft:copper_nautilus_armor": "minecraft:copper_horse_armor",
+  "minecraft:iron_nautilus_armor": "minecraft:iron_horse_armor",
+  "minecraft:golden_nautilus_armor": "minecraft:golden_horse_armor",
+  "minecraft:diamond_nautilus_armor": "minecraft:diamond_horse_armor",
+  "minecraft:netherite_nautilus_armor": "minecraft:diamond_horse_armor"
+}

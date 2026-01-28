@@ -7,6 +7,7 @@ import cn.nukkit.event.block.BlockRedstoneEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemID;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
@@ -125,7 +126,7 @@ public class BlockLectern extends BlockTransparentMeta implements Faceable, Bloc
         if (t instanceof BlockEntityLectern) {
             lectern = (BlockEntityLectern) t;
         } else {
-            lectern = (BlockEntityLectern) BlockEntity.createBlockEntity(BlockEntity.LECTERN, this.getChunk(), BlockEntity.getDefaultCompound(this, BlockEntity.LECTERN));;
+            lectern = (BlockEntityLectern) BlockEntity.createBlockEntity(BlockEntity.LECTERN, this.getChunk(), BlockEntity.getDefaultCompound(this, BlockEntity.LECTERN));
         }
         Item currentBook = lectern.getBook();
         if (!currentBook.isNull()) {
@@ -220,5 +221,10 @@ public class BlockLectern extends BlockTransparentMeta implements Faceable, Bloc
         if (blockEntity instanceof BlockEntityLectern lectern) {
             lectern.dropBook(player);
         }
+    }
+
+    @Override
+    public Item toItem() {
+        return Item.get(ItemNamespaceId.LECTERN);
     }
 }

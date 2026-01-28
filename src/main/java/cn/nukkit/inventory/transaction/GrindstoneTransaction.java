@@ -64,7 +64,7 @@ public class GrindstoneTransaction extends InventoryTransaction {
 
         GrindstoneInventory grindstoneInventory = (GrindstoneInventory) inventory;
 
-        if (this.outputItem == null || this.outputItem.isNull() || this.equipmentItem == null || this.equipmentItem.isNull()) {
+        if (this.outputItem == null || this.outputItem.isNull() && (this.equipmentItem == null || this.equipmentItem.isNull())) {
             return false;
         }
 
@@ -75,10 +75,11 @@ public class GrindstoneTransaction extends InventoryTransaction {
             }
         }
 
+        Item equipmentOptional = equipmentItem != null ? equipmentItem : Item.get(Item.AIR);
         Item ingredientOptional = ingredientItem != null ? ingredientItem : Item.get(Item.AIR);
 
         return ingredientOptional.equals(grindstoneInventory.getIngredient(), true, true)
-                && equipmentItem.equals(grindstoneInventory.getEquipment(), true, true)
+                && equipmentOptional.equals(grindstoneInventory.getEquipment(), true, true)
                 && outputItem.equals(grindstoneInventory.getResult(), true, true);
     }
 

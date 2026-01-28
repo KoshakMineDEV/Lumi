@@ -90,4 +90,9 @@ public class BlockMobSpawner extends BlockSolid implements BlockEntityHolder<Blo
         return 3;
     }
 
+    @Override
+    public boolean diffusesSkyLight() {
+        return true;
+    }
+
 }

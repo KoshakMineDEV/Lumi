@@ -14,6 +14,6 @@ public class ItemHorseArmorCopper extends StringItemBase {
 
     @Override
     public boolean isSupportedOn(int protocolId) {
-        return protocolId >= ProtocolInfo.v1_21_110_26;
+        return protocolId >= ProtocolInfo.v1_21_111;
     }
 }

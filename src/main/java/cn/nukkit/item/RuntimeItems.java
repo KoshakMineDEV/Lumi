@@ -2,6 +2,8 @@ package cn.nukkit.item;
 
 import cn.nukkit.Server;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Data;
@@ -12,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +23,8 @@ import java.util.Map;
 public class RuntimeItems {
 
     private static final Map<String, Integer> legacyString2LegacyInt = new HashMap<>();
+    private final Map<Integer, Map<String, String>> downgradeMappings = new HashMap<>();
+    private final Gson gson = new Gson();
 
     private static RuntimeItemMapping mapping589;
     private static RuntimeItemMapping mapping594;
@@ -133,7 +138,38 @@ public class RuntimeItems {
                 mapping859,
                 mapping898
         };
+
+        for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
+            String resource = "internal/downgrade/" + protocol + ".json";
+            try (InputStream is = Server.class.getClassLoader().getResourceAsStream(resource)) {
+                if (is != null) {
+                    Type type = new TypeToken<Map<String, String>>(){}.getType();
+                    Map<String, String> mappings = gson.fromJson(new InputStreamReader(is), type);
+                    if (mappings != null) {
+                        downgradeMappings.put(protocol, mappings);
+                    }
+                }
+            } catch (Exception e) {
+                //Do nothing because not all protocols should have mappings
+            }
+        }
     }
+
+    public static String downgradeIdentifier(String identifier, int targetProtocol) {
+        String currentId = identifier;
+
+        for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS.reversed()) {
+            if (protocol >= targetProtocol) {
+                Map<String, String> mapping = downgradeMappings.get(protocol);
+                if (mapping != null && mapping.containsKey(currentId)) {
+                    currentId = mapping.get(currentId);
+                }
+            }
+        }
+
+        return currentId.equals(identifier) ? null : currentId;
+    }
+
 
     public static RuntimeItemMapping getMapping(int protocolId) {
         if (protocolId >= ProtocolInfo.v1_21_130) {

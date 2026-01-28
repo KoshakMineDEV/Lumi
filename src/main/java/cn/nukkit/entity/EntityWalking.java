@@ -24,6 +24,8 @@ public abstract class EntityWalking extends BaseEntity {
     private int pathIndex = 0;
     private int repathTicks = 0;
 
+    private static final double FLOW_MULTIPLIER = 0.1;
+
     public EntityWalking(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
     }
@@ -265,11 +267,25 @@ public abstract class EntityWalking extends BaseEntity {
                         double z = this.followTarget.z - this.z;
                         double diff = Math.abs(x) + Math.abs(z);
                         if (diff == 0 || !inWater && (this.stayTime > 0 || this.distance(this.followTarget) <= (this.getWidth() / 2 + 0.05))) {
-                            this.motionX = 0;
-                            this.motionZ = 0;
+                            if (!this.isInsideOfWater()) {
+                                this.motionX = 0;
+                                this.motionZ = 0;
+                            }
                         } else {
-                            this.motionX = this.getSpeed() * moveMultiplier * 0.15 * (x / diff);
-                            this.motionZ = this.getSpeed() * moveMultiplier * 0.15 * (z / diff);
+                            if (levelBlock.getId() == BlockID.WATER) {
+                                BlockWater blockWater = (BlockWater) levelBlock;
+                                Vector3 flowVector = blockWater.getFlowVector();
+                                motionX = flowVector.getX() * FLOW_MULTIPLIER;
+                                motionZ = flowVector.getZ() * FLOW_MULTIPLIER;
+                            } else if (Block.isWater(levelBlock.getId())) {
+                                this.motionX = this.getSpeed() * moveMultiplier * 0.05 * (x / diff);
+                                this.motionZ = this.getSpeed() * moveMultiplier * 0.05 * (z / diff);
+                                double y = this.followTarget.y - this.y;
+                                this.motionY = this.getSpeed() * moveMultiplier * 0.05 * (y / (diff + Math.abs(y)));
+                            } else {
+                                this.motionX = this.getSpeed() * moveMultiplier * 0.1 * (x / diff);
+                                this.motionZ = this.getSpeed() * moveMultiplier * 0.1 * (z / diff);
+                            }
                         }
                         this.setBothYaw(FastMath.toDegrees(-FastMath.atan2(x / diff, z / diff)));
                     }
@@ -284,11 +300,23 @@ public abstract class EntityWalking extends BaseEntity {
                     double diff = Math.abs(x) + Math.abs(z);
                     boolean distance = false;
                     if (diff == 0 || !inWater && (this.stayTime > 0 || (this.distance(this.target) <= (this.getWidth() / 2 + 0.05) * nearbyDistanceMultiplier()))) {
-                        this.motionX = 0;
-                        this.motionZ = 0;
+                        if (!this.isInsideOfWater()) {
+                            this.motionX = 0;
+                            this.motionZ = 0;
+                        }
                     } else {
-                        this.motionX = this.getSpeed() * moveMultiplier * 0.15 * (x / diff);
-                        this.motionZ = this.getSpeed() * moveMultiplier * 0.15 * (z / diff);
+                        if (levelBlock.getId() == BlockID.WATER) {
+                            BlockWater blockWater = (BlockWater) levelBlock;
+                            Vector3 flowVector = blockWater.getFlowVector();
+                            motionX = flowVector.getX() * FLOW_MULTIPLIER;
+                            motionZ = flowVector.getZ() * FLOW_MULTIPLIER;
+                        } else if (Block.isWater(levelBlock.getId())) {
+                            this.motionX = this.getSpeed() * moveMultiplier * 0.05 * (x / diff);
+                            this.motionZ = this.getSpeed() * moveMultiplier * 0.05 * (z / diff);
+                        } else {
+                            this.motionX = this.getSpeed() * moveMultiplier * 0.15 * (x / diff);
+                            this.motionZ = this.getSpeed() * moveMultiplier * 0.15 * (z / diff);
+                        }
                     }
                     if (!distance && (this.passengers.isEmpty() || this instanceof EntityLlama || this instanceof EntityPig) && (this.stayTime <= 0 || Utils.rand()) && diff != 0) {
                         this.setBothYaw(FastMath.toDegrees(-FastMath.atan2(x / diff, z / diff)));

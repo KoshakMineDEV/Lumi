@@ -58,4 +58,9 @@ public class BlockHoneyBlock extends BlockSolid {
             }
         }
     }
+
+    @Override
+    public boolean diffusesSkyLight() {
+        return true;
+    }
 }

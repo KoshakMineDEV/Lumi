@@ -578,7 +578,7 @@ public class BinaryStream {
                     stream.readLong();
                 }
 
-                if (id == Item.INFO_UPDATE && compoundTag != null && compoundTag.contains(MV_ORIGIN_ID) && compoundTag.contains(MV_ORIGIN_META)) {
+                if (compoundTag != null && compoundTag.contains(MV_ORIGIN_ID) && compoundTag.contains(MV_ORIGIN_META)) {
                     int originID = compoundTag.getInt(MV_ORIGIN_ID);
                     int originMeta = compoundTag.getInt(MV_ORIGIN_META);
                     Item item;
@@ -670,7 +670,16 @@ public class BinaryStream {
 
         if (!item.isSupportedOn(protocolId) || isErrorItem) {
             Item originItem = item;
-            item = Item.get(Item.INFO_UPDATE, 0, originItem.getCount());
+            String downgradedIdentifier = RuntimeItems.downgradeIdentifier(item.getIdentifier(), protocolId);
+            if(downgradedIdentifier != null) {
+                String[] parts = downgradedIdentifier.split("-");
+                String identifier = parts[0];
+                int damage = parts.length > 1 ? Integer.parseInt(parts[1]) : originItem.getDamage();
+                item = Item.get(identifier, damage, originItem.getCount());
+            } else {
+                item = Item.get(Item.INFO_UPDATE, 0, originItem.getCount());
+            }
+
             CompoundTag compoundTag = originItem.getNamedTag();
             if (compoundTag != null) {
                 item.setNamedTag(new CompoundTag().putCompound(MV_ORIGIN_NBT, compoundTag));

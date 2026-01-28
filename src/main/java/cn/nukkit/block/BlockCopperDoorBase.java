@@ -5,6 +5,8 @@ import cn.nukkit.block.properties.enums.OxidizationLevel;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.level.Sound;
+import cn.nukkit.math.BlockFace;
+import cn.nukkit.math.Vector3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,16 +40,13 @@ public abstract class BlockCopperDoorBase extends BlockDoor implements Oxidizabl
         return ItemTool.TIER_STONE;
     }
 
+
     @Override
-    public boolean onActivate(@NotNull Item item, Player player) {
-       if (player != null) {
-           if (player.isSneaking()) {
-               if (Waxable.super.onActivate(item, player) || Oxidizable.super.onActivate(item, player)) {
-                   return true;
-               }
-           }
-       }
-        return super.onActivate(item, player);
+    public void onPlayerRightClick(@NotNull Player player, Item item, BlockFace face, Vector3 clickPoint) {
+        if (player.isSneaking()) {
+            Waxable.super.onActivate(item, player);
+            Oxidizable.super.onActivate(item, player);
+        }
     }
 
     @Override
@@ -70,7 +69,19 @@ public abstract class BlockCopperDoorBase extends BlockDoor implements Oxidizabl
         if (getOxidizationLevel().equals(oxidizationLevel)) {
             return true;
         }
-        return getValidLevel().setBlock(this, Block.get(getCopperId(isWaxed(), oxidizationLevel)));
+
+        int newId = getCopperId(isWaxed(), oxidizationLevel);
+        Block other;
+        if (isTop()) {
+            other = this.down();
+        } else {
+            other = this.up();
+        }
+        boolean success = getValidLevel().setBlock(this, Block.get(newId, getDamage()));
+        if (success && other instanceof BlockCopperDoorBase) {
+            getValidLevel().setBlock(other, Block.get(newId, other.getDamage()));
+        }
+        return success;
     }
 
     @Override
@@ -78,7 +89,19 @@ public abstract class BlockCopperDoorBase extends BlockDoor implements Oxidizabl
         if (isWaxed() == waxed) {
             return true;
         }
-        return getValidLevel().setBlock(this, Block.get(getCopperId(waxed, getOxidizationLevel())));
+
+        int newId = getCopperId(waxed, getOxidizationLevel());
+        Block other;
+        if (isTop()) {
+            other = this.down();
+        } else {
+            other = this.up();
+        }
+        boolean success = getValidLevel().setBlock(this, Block.get(newId, getDamage()));
+        if (success && other instanceof BlockCopperDoorBase) {
+            getValidLevel().setBlock(other, Block.get(newId, other.getDamage()));
+        }
+        return success;
     }
 
     @Override
