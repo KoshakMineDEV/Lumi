@@ -57,11 +57,12 @@ public class AnimateProcessor extends DataPacketProcessor<AnimatePacket> {
         packet.swingSource = SwingSource.EVENT;
 
         for (Player player : handle.player.getViewers().values()) {
-            if (player.protocol >= ProtocolInfo.v1_21_130 && handle.player.protocol < ProtocolInfo.v1_21_130) {
-                // todo: when players of lower version rides on it, their row actions leads to unknown error for players of higher version
-            } else {
-                player.dataPacket(packet);
+            // Skip row actions from lower version players to higher version viewers (causes unknown error)
+            if (player.protocol >= ProtocolInfo.v1_21_130 && handle.player.protocol < ProtocolInfo.v1_21_130
+                    && (action == AnimatePacket.Action.ROW_RIGHT || action == AnimatePacket.Action.ROW_LEFT)) {
+                continue;
             }
+            player.dataPacket(packet);
         }
     }
 
