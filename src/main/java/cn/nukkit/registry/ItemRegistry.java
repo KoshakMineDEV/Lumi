@@ -169,6 +169,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(BLACK_BUNDLE, ItemBlackBundle::new);
         register(BLUE_BUNDLE, ItemBlueBundle::new);
         register(BROWN_BUNDLE, ItemBrownBundle::new);
+        register(CYAN_BUNDLE, ItemCyanBundle::new);
         register(GRAY_BUNDLE, ItemGrayBundle::new);
         register(GREEN_BUNDLE, ItemGreenBundle::new);
         register(LIGHT_BLUE_BUNDLE, ItemLightBlueBundle::new);
@@ -176,6 +177,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(LIME_BUNDLE, ItemLimeBundle::new);
         register(MAGENTA_BUNDLE, ItemMagentaBundle::new);
         register(ORANGE_BUNDLE, ItemOrangeBundle::new);
+        register(PINK_BUNDLE, ItemPinkBundle::new);
         register(PURPLE_BUNDLE, ItemPurpleBundle::new);
         register(RED_BUNDLE, ItemRedBundle::new);
         register(WHITE_BUNDLE, ItemWhiteBundle::new);
