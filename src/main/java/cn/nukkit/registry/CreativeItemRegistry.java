@@ -205,7 +205,14 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
 
     @Override
     public CreativeItems get(Integer protocol) {
-        return CREATIVE_ITEMS.get(protocol);
+        CreativeItems items = CREATIVE_ITEMS.get(protocol);
+        if (items != null) return items;
+
+        return CREATIVE_ITEMS.keySet().stream()
+                .filter(p -> p < protocol)
+                .max(Comparator.naturalOrder())
+                .map(CREATIVE_ITEMS::get)
+                .orElse(null);
     }
 
     public Map<Integer,CreativeItems> getCreativeItems() {
