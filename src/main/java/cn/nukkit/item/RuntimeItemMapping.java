@@ -145,7 +145,7 @@ public class RuntimeItemMapping {
         Supplier<Item> constructor = Registries.ITEM.getSupplier(namespaceId.toLowerCase(Locale.ENGLISH));
         if (constructor != null) {
             try {
-                Item item = constructor.get();
+                Item item = constructor.get().clone();
                 item.setCount(amount);
                 return item;
             } catch (Exception e) {

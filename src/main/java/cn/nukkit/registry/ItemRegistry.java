@@ -263,8 +263,8 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
     }
 
     public void addToCustom(String namespace, Item item) {
-        CUSTOM_ITEMS.put(namespace, () -> item);
-        register(namespace, () -> item);
+        CUSTOM_ITEMS.put(namespace, item::clone);
+        register(namespace, item::clone);
     }
 
     public void deleteCustom(String namespaceId) {

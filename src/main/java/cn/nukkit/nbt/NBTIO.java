@@ -93,11 +93,11 @@ public class NBTIO {
                 item.setCount(count);
             }
         } else {
-            item = Item.get(tag.getString("Name"));
-            if (item.getDamage() == 0) {
-                item.setDamage(damage);
-            }
-            item.setCount(count);
+            item = Item.get(tag.getString("Name"), damage, count);
+        }
+
+        if(item.isNull()) {
+            item.setCount(0);
         }
 
         if (item.count > item.getMaxStackSize()) {

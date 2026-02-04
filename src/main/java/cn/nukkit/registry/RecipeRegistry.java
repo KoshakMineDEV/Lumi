@@ -322,7 +322,9 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
 
             pk.tryEncode();
 
-            PACKETS.put(protocol, pk.compress(Deflater.BEST_COMPRESSION));
+            synchronized (PACKETS) {
+                PACKETS.put(protocol, pk.compress(Deflater.BEST_COMPRESSION));
+            }
         });
     }
 }

@@ -213,7 +213,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
             Supplier<Item> constructor = Registries.ITEM.getSupplier(namespacedId);
             if (constructor != null) {
                 try {
-                    Item item = constructor.get();
+                    Item item = constructor.get().clone();
                     if (meta.isPresent()) {
                         int metaValue = meta.getAsInt();
                         if (metaValue != 0) {
@@ -221,7 +221,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
                         }
                     }
                     // Avoid the upcoming changes to the original item object
-                    return item.clone();
+                    return item;
                 } catch (Exception e) {
                     log.warn("Could not create a new instance of {} using the namespaced id {}", constructor, namespacedId, e);
                 }

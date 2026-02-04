@@ -284,7 +284,7 @@ public class ItemLegacyRegistry implements IRegistry<Integer, Class<?>, Class<?>
                 }
                 Item item = Item.get(id, damage);
                 if (item.getId() != 0 && !Registries.ITEM.isItemRegistered(entity.getKey())) {
-                    Registries.ITEM.register(entity.getKey(), () -> item);
+                    Registries.ITEM.register(entity.getKey(), item::clone);
                 }
             } catch (Exception ignored) {
 
