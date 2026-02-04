@@ -547,7 +547,7 @@
   "minecraft:barrier": -161,
   "minecraft:bubble_column": -160,
   "minecraft:turtle_egg": -159,
-  "minecraft:air": -158,
+  "minecraft:air": 0,
   "minecraft:conduit": -157,
   "minecraft:sea_pickle": -156,
   "minecraft:carved_pumpkin": -155,

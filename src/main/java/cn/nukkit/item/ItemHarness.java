@@ -12,6 +12,6 @@ public class ItemHarness extends StringItemBase {
 
     @Override
     public boolean isSupportedOn(int protocolId) {
-        return protocolId >= ProtocolInfo.v1_21_80;
+        return protocolId >= ProtocolInfo.v1_21_90;
     }
 }

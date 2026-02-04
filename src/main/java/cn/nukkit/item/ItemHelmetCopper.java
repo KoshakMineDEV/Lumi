@@ -13,7 +13,7 @@ public class ItemHelmetCopper extends StringItemArmorBase {
 
     @Override
     public boolean isSupportedOn(int protocolId) {
-        return protocolId >= ProtocolInfo.v1_21_100;
+        return protocolId >= ProtocolInfo.v1_21_111;
     }
 
     @Override

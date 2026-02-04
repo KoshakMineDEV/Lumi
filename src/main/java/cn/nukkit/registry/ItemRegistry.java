@@ -155,6 +155,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(PALE_OAK_SIGN, ItemPaleOakSign::new);
         register(WOODEN_SPEAR, ItemWoodenSpear::new);
         register(STONE_SPEAR, ItemStoneSpear::new);
+        register(COPPER_SPEAR, ItemCopperSpear::new);
         register(IRON_SPEAR, ItemIronSpear::new);
         register(GOLDEN_SPEAR, ItemGoldenSpear::new);
         register(DIAMOND_SPEAR, ItemDiamondSpear::new);
@@ -168,6 +169,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(BLACK_BUNDLE, ItemBlackBundle::new);
         register(BLUE_BUNDLE, ItemBlueBundle::new);
         register(BROWN_BUNDLE, ItemBrownBundle::new);
+        register(CYAN_BUNDLE, ItemCyanBundle::new);
         register(GRAY_BUNDLE, ItemGrayBundle::new);
         register(GREEN_BUNDLE, ItemGreenBundle::new);
         register(LIGHT_BLUE_BUNDLE, ItemLightBlueBundle::new);
@@ -175,6 +177,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(LIME_BUNDLE, ItemLimeBundle::new);
         register(MAGENTA_BUNDLE, ItemMagentaBundle::new);
         register(ORANGE_BUNDLE, ItemOrangeBundle::new);
+        register(PINK_BUNDLE, ItemPinkBundle::new);
         register(PURPLE_BUNDLE, ItemPurpleBundle::new);
         register(RED_BUNDLE, ItemRedBundle::new);
         register(WHITE_BUNDLE, ItemWhiteBundle::new);
@@ -262,8 +265,8 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
     }
 
     public void addToCustom(String namespace, Item item) {
-        CUSTOM_ITEMS.put(namespace, () -> item);
-        register(namespace, () -> item);
+        CUSTOM_ITEMS.put(namespace, item::clone);
+        register(namespace, item::clone);
     }
 
     public void deleteCustom(String namespaceId) {
@@ -289,7 +292,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         if (supplier == null) {
             return Item.AIR_ITEM.clone();
         }
-        return supplier.get().clone();
+        return supplier.get();
     }
 
     public Supplier<Item> getSupplier(String id) {

@@ -12,6 +12,7 @@ import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
+import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.block.data.BlockColor;
@@ -50,6 +51,13 @@ public class BlockLava extends BlockLiquid {
 
     @Override
     public void onEntityCollide(Entity entity) {
+        //Shrink entity BB to prevent diagonal block collision with lava
+        AxisAlignedBB lavaBB = this.getCollisionBoundingBox();
+        AxisAlignedBB entityBB = entity.getBoundingBox().shrink(0.01, 0, 0.01);
+        if (!entityBB.intersectsWith(lavaBB)) {
+            return;
+        }
+
         entity.highestPosition -= (entity.highestPosition - entity.y) * 0.5;
 
         EntityCombustByBlockEvent ev = new EntityCombustByBlockEvent(this, entity, 8);
@@ -199,5 +207,10 @@ public class BlockLava extends BlockLiquid {
         if (!(entity instanceof EntityPrimedTNT)) {
             super.addVelocityToEntity(entity, vector);
         }
+    }
+
+    @Override
+    public boolean diffusesSkyLight() {
+        return true;
     }
 }

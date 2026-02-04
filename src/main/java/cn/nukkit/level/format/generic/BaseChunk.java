@@ -7,6 +7,7 @@ import cn.nukkit.level.format.Chunk;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.ChunkException;
+import cn.nukkit.registry.Registries;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -263,6 +264,73 @@ public abstract class BaseChunk extends BaseFullChunk implements Chunk {
     }
 
     @Override
+    public void populateBlockLight() {
+        int minY = this.getProvider().getMinBlockY();
+        int maxY = this.getProvider().getMaxBlockY();
+        int sectionOffset = this.getSectionOffset();
+
+        for (int sectionY = 0; sectionY < this.sections.length; sectionY++) {
+            ChunkSection section = this.sections[sectionY];
+            if (section == null || section instanceof EmptyChunkSection) {
+                continue;
+            }
+
+            if (!section.maybeHasLightSource()) {
+                continue;
+            }
+
+            int baseY = (sectionY - sectionOffset) << 4;
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int y = 0; y < 16; y++) {
+                        int worldY = baseY + y;
+                        if (worldY < minY || worldY > maxY) {
+                            continue;
+                        }
+                        int blockId = section.getBlockId(x, y, z);
+                        int lightLevel = Registries.BLOCK.getLight(blockId);
+                        if (lightLevel > 0) {
+                            section.setBlockLight(x, y, z, lightLevel);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    int currentLight = this.getBlockLight(x, y, z);
+                    if (currentLight > 1) {
+                        // Propagate to neighbors within chunk
+                        propagateBlockLightToNeighbor(x - 1, y, z, currentLight, minY, maxY);
+                        propagateBlockLightToNeighbor(x + 1, y, z, currentLight, minY, maxY);
+                        propagateBlockLightToNeighbor(x, y - 1, z, currentLight, minY, maxY);
+                        propagateBlockLightToNeighbor(x, y + 1, z, currentLight, minY, maxY);
+                        propagateBlockLightToNeighbor(x, y, z - 1, currentLight, minY, maxY);
+                        propagateBlockLightToNeighbor(x, y, z + 1, currentLight, minY, maxY);
+                    }
+                }
+            }
+        }
+    }
+
+    private void propagateBlockLightToNeighbor(int x, int y, int z, int sourceLight, int minY, int maxY) {
+        // Check bounds (only within chunk)
+        if (x < 0 || x >= 16 || z < 0 || z >= 16 || y < minY || y > maxY) {
+            return;
+        }
+
+        int blockId = this.getBlockId(x, y, z);
+        int lightFilter = Registries.BLOCK.getLightFilter(blockId);
+        int newLight = sourceLight - Math.max(1, lightFilter);
+
+        if (newLight > 0 && newLight > this.getBlockLight(x, y, z)) {
+            this.setBlockLight(x, y, z, newLight);
+        }
+    }
+
+    @Override
     public boolean isSectionEmpty(float fY) {
         return this.sections[this.getSectionOffset() + (int) fY] instanceof EmptyChunkSection;
     }
@@ -290,7 +358,7 @@ public abstract class BaseChunk extends BaseFullChunk implements Chunk {
         return true;
     }
 
-    private void setInternalSection(float fY, ChunkSection section) {
+    protected void setInternalSection(float fY, ChunkSection section) {
         this.sections[this.getSectionOffset() + (int) fY] = section;
         setChanged();
     }

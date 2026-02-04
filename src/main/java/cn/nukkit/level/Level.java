@@ -160,7 +160,9 @@ public class Level implements ChunkManager, Metadatable {
         RANDOM_TICK_BLOCKS.add(Block.ICE_FROSTED);
         RANDOM_TICK_BLOCKS.add(Block.VINE);
         RANDOM_TICK_BLOCKS.add(Block.WATER);
+        RANDOM_TICK_BLOCKS.add(Block.STILL_WATER);
         RANDOM_TICK_BLOCKS.add(Block.CAULDRON_BLOCK);
+        RANDOM_TICK_BLOCKS.add(Block.CHORUS_FLOWER);
 
         RANDOM_TICK_BLOCKS.add(Block.BAMBOO);
         RANDOM_TICK_BLOCKS.add(Block.BAMBOO_SAPLING);
@@ -1879,28 +1881,38 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public int calculateSkylightSubtracted(float tickDiff) {
-        float light = 1 - (MathHelper.cos(this.calculateCelestialAngle(getTime(), tickDiff) * (6.2831855f)) * 2 + 0.5f);
-        light = light < 0 ? 0 : light > 1 ? 1 : light;
-        light = 1 - light;
-        light = (float) ((double) light * ((raining ? 1 : 0) - 0.3125));
-        light = (float) ((double) light * ((isThundering() ? 1 : 0) - 0.3125));
-        light = 1 - light;
-        return (int) (light * 11f);
+        float d = 1.0F - (this.getRainStrength(tickDiff) * 5.0F) / 16.0F;
+        float e = 1.0F - (this.getThunderStrength(tickDiff) * 5.0F) / 16.0F;
+        float f = 0.5F + 2.0F * MathHelper.clamp(MathHelper.cos(this.getCelestialAngle(tickDiff) * 6.2831855F), -0.25F, 0.25F);
+        return (int) ((1.0F - f * d * e) * 11.0F);
+    }
+
+    public float getRainStrength(float tickDiff) {
+        return isRaining() ? 1 : 0; // TODO: real implementation
+    }
+
+    public float getThunderStrength(float tickDiff) {
+        return isThundering() ? 1 : 0; // TODO: real implementation
+    }
+
+    public float getCelestialAngle(float tickDiff) {
+        return calculateCelestialAngle(getTime(), tickDiff);
     }
 
     public float calculateCelestialAngle(int time, float tickDiff) {
-        float angle = ((float) time + tickDiff) / 24000f - 0.25f;
+        int i = (int) (time % 24000L);
+        float angle = ((float) i + tickDiff) / 24000.0F - 0.25F;
 
-        if (angle < 0) {
+        if (angle < 0.0F) {
             ++angle;
         }
 
-        if (angle > 1) {
+        if (angle > 1.0F) {
             --angle;
         }
 
-        float i = 1 - (float) ((Math.cos((double) angle * Math.PI) + 1) / 2d);
-        angle = angle + (i - angle) / 3;
+        float f1 = 1.0F - (float) ((Math.cos((double) angle * Math.PI) + 1.0D) / 2.0D);
+        angle = angle + (f1 - angle) / 3.0F;
         return angle;
     }
 
@@ -3130,7 +3142,7 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void setHeightMap(int x, int z, int value) {
-        this.getChunk(x >> 4, z >> 4, true).setHeightMap(x & 0x0f, z & 0x0f, value & 0x0f);
+        this.getChunk(x >> 4, z >> 4, true).setHeightMap(x & 0x0f, z & 0x0f, value);
     }
 
     public int getBiomeColor(int x, int z) {
@@ -4487,11 +4499,11 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public boolean canBlockSeeSky(Vector3 pos) {
-        return this.getHighestBlockAt(pos.getFloorX(), pos.getFloorZ()) < pos.getY();
+        return pos.getFloorY() >= this.getHighestBlockAt(pos.getFloorX(), pos.getFloorZ());
     }
 
     public boolean canBlockSeeSky(Block block) {
-        return this.getHighestBlockAt((int) block.getX(), (int) block.getZ()) < block.getY();
+        return (int) block.getY() >= this.getHighestBlockAt((int) block.getX(), (int) block.getZ());
     }
 
     public int getStrongPower(Vector3 pos, BlockFace direction) {

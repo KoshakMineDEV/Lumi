@@ -114,7 +114,10 @@ public class ChunkSerializerV3 implements ChunkSerializer {
 
                 byte[] blockLight = db.get(LevelDBKey.NUKKIT_BLOCK_LIGHT.getKey(chunkX, chunkZ, ySection, chunkBuilder.getLevel().getDimension()));
 
-                sections[ySection + dimensionInfo.getSectionOffset()] = new LevelDBChunkSection(chunkBuilder.getLevel(), ySection, stateBlockStorageArray, blockLight);
+                // Overworld (dimensionId=0) has sky light, Nether/End do not
+                boolean hasSkyLight = dimensionInfo.getDimensionId() == 0;
+
+                sections[ySection + dimensionInfo.getSectionOffset()] = new LevelDBChunkSection(chunkBuilder.getLevel(), ySection, stateBlockStorageArray, blockLight, hasSkyLight);
             }
         }
         chunkBuilder.sections(sections);

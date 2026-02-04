@@ -24,17 +24,18 @@ public class FireworkRecipe extends MultiRecipe {
             int powder = 0;
             for (ItemDescriptor input : inputs) {
                 if(input instanceof DefaultDescriptor descriptor) {
-                    if (descriptor.getItem() instanceof ItemGunpowder) {
-                        powder += 1;
-                    } else if (descriptor.getItem() instanceof ItemPaper) {
+                    Item item = descriptor.getItem();
+                    if (item instanceof ItemGunpowder) {
+                        powder += item.getCount();
+                    } else if (item instanceof ItemPaper) {
                         hasPaper = true;
                     }
                 }
             }
-            if (!hasPaper) {
+            if(powder != outputItem.getNamedTag().getCompound("Fireworks").getByte("Flight")) {
                 return false;
             }
-            if (powder != outputItem.getCount()) {
+            if (!hasPaper) {
                 return false;
             }
             return true;

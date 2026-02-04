@@ -56,18 +56,18 @@ public class LevelDBChunkSection implements ChunkSection {
     }
 
     public LevelDBChunkSection(Level level, LevelDBChunk parent, int y) {
-        this.parent = new WeakReference<>(parent);
+        this.setParent(parent);
         this.y = y;
         this.storages = new StateBlockStorage[]{ new StateBlockStorage(), new StateBlockStorage() };
         this.level = level;
     }
 
-    public LevelDBChunkSection(Level level, int y, @Nullable StateBlockStorage[] storages, byte[] blockLight) {
-        this(level, null, y, storages, blockLight, null, null, false, false);
+    public LevelDBChunkSection(Level level, int y, @Nullable StateBlockStorage[] storages, byte[] blockLight, boolean hasSkyLight) {
+        this(level, null, y, storages, blockLight, null, null, false, hasSkyLight);
     }
 
     public LevelDBChunkSection(Level level, LevelDBChunk parent, int y, @Nullable StateBlockStorage[] storages, byte[] blockLight, byte[] skyLight, byte[] compressedLight, boolean hasBlockLight, boolean hasSkyLight) {
-        this.parent = new WeakReference<>(parent);
+        this.setParent(parent);
         this.y = y;
         this.level = level;
 
@@ -118,6 +118,11 @@ public class LevelDBChunkSection implements ChunkSection {
 
     public void setParent(LevelDBChunk parent) {
         this.parent = new WeakReference<>(parent);
+
+        // Set hasSkyLight based on dimension (Overworld = 0 has sky light)
+        if (parent != null && parent.getProvider() != null) {
+            this.hasSkyLight = parent.getProvider().getLevel().getDimensionData().getDimensionId() == 0;
+        }
     }
 
     @Override
@@ -796,5 +801,21 @@ public class LevelDBChunkSection implements ChunkSection {
     @Override
     public void setDirty() {
         this.dirty = true;
+    }
+
+    @Override
+    public boolean maybeHasLightSource() {
+        try {
+            this.readLock.lock();
+
+            for (StateBlockStorage storage : this.storages) {
+                if (storage != null && storage.maybeHasLightSource()) {
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            this.readLock.unlock();
+        }
     }
 }
