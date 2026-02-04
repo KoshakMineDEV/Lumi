@@ -290,7 +290,7 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         if (supplier == null) {
             return Item.AIR_ITEM.clone();
         }
-        return supplier.get().clone();
+        return supplier.get();
     }
 
     public Supplier<Item> getSupplier(String id) {
