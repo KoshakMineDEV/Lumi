@@ -87,6 +87,32 @@ public class CraftingDataPacket extends DataPacket {
         for (Recipe recipe : entries) {
             this.putVarInt(recipe.getType().getNetworkType());
             switch (recipe.getType()) {
+                case STONECUTTER:
+                    StonecutterRecipe stonecutterRecipe = (StonecutterRecipe) recipe;
+                    this.putString(stonecutterRecipe.getRecipeId());
+                    Collection<ItemDescriptor> ingredientsStoneCutter = stonecutterRecipe.getIngredientList();
+
+                    this.putUnsignedVarInt(ingredientsStoneCutter.size());
+                    for (ItemDescriptor ingredient : ingredientsStoneCutter) {
+                        ingredient.putRecipe(this, protocol);
+                    }
+                    this.putUnsignedVarInt(1); // Results length
+                    this.putSlot(protocol, stonecutterRecipe.getResult(), true);
+                    this.putUUID(stonecutterRecipe.getId());
+
+                    if (protocol >= 354) {
+                        this.putString(CRAFTING_TAG_STONECUTTER);
+                        if (protocol >= 361) {
+                            this.putVarInt(stonecutterRecipe.getPriority());
+                            if (protocol >= 407) {
+                                if (protocol >= ProtocolInfo.v1_21_0) {
+                                    this.writeRequirement(stonecutterRecipe);
+                                }
+                                this.putUnsignedVarInt(stonecutterRecipe.getNetworkId());
+                            }
+                        }
+                    }
+                    break;
                 case SHAPELESS:
                     ShapelessRecipe shapeless = (ShapelessRecipe) recipe;
                     this.putString(shapeless.getRecipeId());

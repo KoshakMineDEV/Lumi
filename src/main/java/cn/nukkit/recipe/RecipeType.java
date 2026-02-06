@@ -17,6 +17,7 @@ public enum RecipeType {
      * @since v582
      */
     SMITHING_TRIM(9),
+    STONECUTTER(0),
     REPAIR(-1),
     CAMPFIRE(2),
     CAMPFIRE_DATA(3),
