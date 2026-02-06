@@ -279,7 +279,7 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
         return recipe;
     }
 
-    public StonecutterRecipe matchStoneCutterRecipe(Item input, List<Item> outputs) {
+    public StonecutterRecipe matchStonecutterRecipe(Item input, List<Item> outputs) {
         StonecutterRecipe recipe = this.STONECUTTER.get(RecipeUtils.getItemHash(input));
 
         if(recipe != null) {

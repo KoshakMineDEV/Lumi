@@ -2,7 +2,6 @@ package cn.nukkit.inventory.transaction;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.block.BlockShulkerBox;
 import cn.nukkit.event.inventory.CraftItemEvent;
 import cn.nukkit.inventory.*;
 import cn.nukkit.inventory.transaction.action.CraftingTakeResultAction;
@@ -137,7 +136,7 @@ public class CraftingTransaction extends InventoryTransaction {
 
             if (inventory instanceof StonecutterInventory stonecutterInventory) {
                 addInventory(stonecutterInventory);
-                StonecutterRecipe stonecutterRecipe = Registries.RECIPE.matchStoneCutterRecipe(stonecutterInventory.getInput(), this.secondaryOutputs);
+                StonecutterRecipe stonecutterRecipe = Registries.RECIPE.matchStonecutterRecipe(stonecutterInventory.getInput(), this.secondaryOutputs);
                 if(stonecutterRecipe != null) {
                     setTransactionRecipe(stonecutterRecipe);
                 }
