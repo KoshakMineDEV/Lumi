@@ -7,6 +7,7 @@ import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.network.protocol.CraftingDataPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.recipe.CraftingRecipe;
+import cn.nukkit.recipe.descriptor.DefaultDescriptor;
 import cn.nukkit.recipe.descriptor.ItemDescriptor;
 import cn.nukkit.recipe.Recipe;
 import cn.nukkit.recipe.impl.*;
@@ -43,6 +44,7 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
     private final Map<String, ContainerRecipe> CONTAINER = new HashMap<>();
     private final Map<String, CampfireRecipe> CAMPFIRE = new HashMap<>();
     private final Map<UUID, SmithingRecipe> SMITHING = new Object2ObjectOpenHashMap<>();
+    private final Map<String, StonecutterRecipe> STONECUTTER = new HashMap<>();
     private final Object2DoubleOpenHashMap<Recipe> FURNACE_XP = new Object2DoubleOpenHashMap<>();
     private final Collection<Recipe> RECIPES = new ArrayDeque<>();
 
@@ -150,6 +152,16 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
         String resultHash = RecipeUtils.getItemHash(recipe.getResult());
         SHAPELESS.computeIfAbsent(resultHash, (key) -> new ArrayList<>()).add(recipe);
         RECIPES.add(recipe);
+    }
+
+    public void addStonecutterRecipe(String id, String uuid, int priority, Item input, Item output) {
+        registerShapelessRecipe(new StonecutterRecipe(id, priority, output, List.of(new DefaultDescriptor(input))));
+        StonecutterRecipe recipe = STONECUTTER.computeIfAbsent(RecipeUtils.getItemHash(input), (key) -> {
+            StonecutterRecipe stonecutterRecipe = new StonecutterRecipe(id, priority, output, new ArrayList<>());
+            stonecutterRecipe.setId(UUID.fromString(uuid));
+            return stonecutterRecipe;
+        });
+        recipe.addResult(new DefaultDescriptor(output));
     }
 
     public void registerSmithingRecipe(SmithingRecipe recipe) {
@@ -264,6 +276,29 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
     public CampfireRecipe matchCampfireRecipe(Item input) {
         CampfireRecipe recipe = this.CAMPFIRE.get(RecipeUtils.getItemHash(input));
         if (recipe == null) recipe = this.CAMPFIRE.get(RecipeUtils.getItemHash(input, 0));
+        return recipe;
+    }
+
+    public StonecutterRecipe matchStonecutterRecipe(Item input, List<Item> outputs) {
+        StonecutterRecipe recipe = this.STONECUTTER.get(RecipeUtils.getItemHash(input));
+
+        if(recipe != null) {
+            boolean found = false;
+
+            for(Item item : outputs) {
+                for(ItemDescriptor descriptor : recipe.getIngredientList()) {
+                    if(descriptor instanceof DefaultDescriptor defaultDescriptor && defaultDescriptor.getItem().getNamespaceId().equals(item.getNamespaceId())) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!found) {
+                return null;
+            }
+        }
+
         return recipe;
     }
 
