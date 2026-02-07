@@ -113,13 +113,11 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
             id = 255 - id;
         }
 
-        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return Registries.BLOCK.getCustom(id).toCustomBlock(meta);
-        }
-
         Block block;
         int fullId = id << DATA_BITS;
-        if (meta != null && meta > DATA_SIZE) {
+        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
+            block = Registries.BLOCK.getCustom(id).toCustomBlock(meta);
+        } else if (meta != null && meta > DATA_SIZE) {
             if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
                 return new BlockUnknown(id, meta);
@@ -181,21 +179,23 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     public static Block get(int fullId, Level level, int x, int y, int z, int layer) {
         int id = fullId << DATA_BITS;
 
+        Block block;
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_BITS);
+            block = Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_BITS);
+        } else {
+            block = Registries.BLOCK.get(fullId).clone();
+            if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
+                int meta = fullId & DATA_BITS;
+                log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
+                return new BlockUnknown(id, meta);
+            }
         }
 
-        if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
-            int meta = fullId & DATA_BITS;
-            log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
-            return new BlockUnknown(id, meta);
-        }
-        Block block = Registries.BLOCK.get(fullId).clone();
         block.x = x;
         block.y = y;
         block.z = z;
         block.level = level;
-        //block.layer = layer;
+        block.layer = layer;
         return block;
     }
 
@@ -204,12 +204,10 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     }
 
     public static Block get(int id, int meta, Level level, int x, int y, int z, int layer) {
-        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return Registries.BLOCK.getCustom(id).toCustomBlock(meta);
-        }
-
         Block block;
-        if (meta <= DATA_SIZE) {
+        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
+            block = Registries.BLOCK.getCustom(id).toCustomBlock(meta);
+        }else if (meta <= DATA_SIZE) {
             block = Registries.BLOCK.get(id << DATA_BITS | meta).clone();
         } else {
             block = Registries.BLOCK.get(id << DATA_BITS).clone();
