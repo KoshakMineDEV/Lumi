@@ -127,7 +127,7 @@ public class RecipeParser {
                                 });
 
                                 for (Item output : outputs) {
-                                    Registries.RECIPE.addStonecutterRecipe(id, recipe.get("uuid").getAsString(), recipe.get("priority").getAsInt(), input, output);
+                                    Registries.RECIPE.addStonecutterRecipe(new StonecutterRecipe(id, recipe.get("priority").getAsInt(), output, List.of(new DefaultDescriptor(input))));
                                 }
                             }
 
@@ -229,7 +229,7 @@ public class RecipeParser {
 
                                 for (Item input : inputs) {
                                     for (Item output : outputs) {
-                                        Registries.RECIPE.addStonecutterRecipe(id, recipe.get("uuid").getAsString(), recipe.get("priority").getAsInt(), input, output);
+                                        Registries.RECIPE.addStonecutterRecipe(new StonecutterRecipe(id, recipe.get("priority").getAsInt(), output, List.of(new DefaultDescriptor(input))));
                                     }
                                 }
                             }
