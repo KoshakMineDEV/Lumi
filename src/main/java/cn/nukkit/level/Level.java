@@ -1489,7 +1489,7 @@ public class Level implements ChunkManager, Metadatable {
                                     int y = n >> 16 & 0xF;
 
                                     int blockId = section.getBlockId(x, y, z);
-                                    if (blockId >= 0 && blockId <= Block.MAX_BLOCK_ID && RANDOM_TICK_BLOCKS.contains(blockId)) {
+                                    if (blockId >= 0 && RANDOM_TICK_BLOCKS.contains(blockId)) {
                                         Block block = Block.get(blockId, section.getBlockData(x, y, z), this, chunkX * 16 + x, (Y << 4) + y, chunkZ * 16 + z);
                                         block.onUpdate(BLOCK_UPDATE_RANDOM);
                                     }
@@ -1508,7 +1508,7 @@ public class Level implements ChunkManager, Metadatable {
                                 int[] state = chunk.getBlockState(x, y + (Y << 4), z);
                                 int blockId = state[0];
                                 blockTest |= blockId != 0 && state[1] != 0;
-                                if (blockId <= Block.MAX_BLOCK_ID && RANDOM_TICK_BLOCKS.contains(blockId)) {
+                                if (blockId >= 0 && RANDOM_TICK_BLOCKS.contains(blockId)) {
                                     Block block = Block.get(blockId, state[1], this, x, y + (Y << 4), z);
                                     block.onUpdate(BLOCK_UPDATE_RANDOM);
                                 }
