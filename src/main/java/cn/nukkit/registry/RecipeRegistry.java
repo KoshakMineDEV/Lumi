@@ -154,14 +154,14 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
         RECIPES.add(recipe);
     }
 
-    public void addStonecutterRecipe(String id, String uuid, int priority, Item input, Item output) {
-        registerShapelessRecipe(new StonecutterRecipe(id, priority, output, List.of(new DefaultDescriptor(input))));
-        StonecutterRecipe recipe = STONECUTTER.computeIfAbsent(RecipeUtils.getItemHash(input), (key) -> {
-            StonecutterRecipe stonecutterRecipe = new StonecutterRecipe(id, priority, output, new ArrayList<>());
-            stonecutterRecipe.setId(UUID.fromString(uuid));
-            return stonecutterRecipe;
-        });
-        recipe.addResult(new DefaultDescriptor(output));
+    public void addStonecutterRecipe(StonecutterRecipe recipe) {
+        registerShapelessRecipe(recipe);
+
+        for(ItemDescriptor descriptor : recipe.getIngredientList()) {
+            if(descriptor instanceof DefaultDescriptor defaultDescriptor) {
+                STONECUTTER.computeIfAbsent(RecipeUtils.getItemHash(defaultDescriptor.getItem()), (key) -> new StonecutterRecipe(recipe.getResult(), new ArrayList<>(recipe.getIngredientList()))).addResult(new DefaultDescriptor(recipe.getResult()));
+            }
+        }
     }
 
     public void registerSmithingRecipe(SmithingRecipe recipe) {
