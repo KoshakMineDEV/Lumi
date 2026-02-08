@@ -104,7 +104,7 @@ public class PalettedBlockStorage {
         } else {
             int expectedWordSize = version.getWordsForSize(SIZE);
             int[] words = new int[expectedWordSize];
-            int i2 = 0;
+
             for (int i = 0; i < expectedWordSize; ++i) {
                 words[i] = byteBuf.readIntLE();
             }
