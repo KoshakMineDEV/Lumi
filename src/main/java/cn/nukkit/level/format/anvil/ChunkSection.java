@@ -1,6 +1,7 @@
 package cn.nukkit.level.format.anvil;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.ChunkException;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
@@ -599,7 +600,7 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
     }
 
     @Override
-    public void writeTo(int protocolId, BinaryStream stream, boolean antiXray) {
+    public void writeTo(int protocolId, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
         synchronized (storage) {
             stream.putByte((byte) STREAM_STORAGE_VERSION);
             stream.putByte((byte) storage.size());

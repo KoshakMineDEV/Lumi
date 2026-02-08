@@ -3,7 +3,7 @@ package cn.nukkit.level.format.leveldb.structure;
 import cn.nukkit.Nukkit;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
-import cn.nukkit.level.GlobalBlockPalette;
+import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
@@ -220,7 +220,7 @@ public class StateBlockStorage {
         this.set(elementIndex(pos.x, pos.y, pos.z), BlockStateMapping.get().getBlockStateFromFullId(value));
     }
 
-    public void writeTo(Level level, int protocol, BinaryStream stream, boolean antiXray) {
+    public void writeTo(Level level, int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
         PalettedBlockStorage palettedBlockStorage = PalettedBlockStorage.createFromBlockPalette(protocol);
 
         if(antiXray) {
@@ -250,12 +250,12 @@ public class StateBlockStorage {
                         }
                     }
                 }
-                palettedBlockStorage.setBlock(i, GlobalBlockPalette.getOrCreateRuntimeId(protocol, id, meta));
+                palettedBlockStorage.setBlock(i, blockPalette.getRuntimeId(id, meta));
             }
         } else {
             for (int i = 0; i < SECTION_SIZE; i++) {
                 final int fullId = get(i);
-                palettedBlockStorage.setBlock(i, GlobalBlockPalette.getOrCreateRuntimeId(protocol, fullId >> Block.DATA_BITS, fullId & Block.DATA_MASK));
+                palettedBlockStorage.setBlock(i, blockPalette.getRuntimeId(fullId >> Block.DATA_BITS, fullId & Block.DATA_MASK));
             }
         }
 

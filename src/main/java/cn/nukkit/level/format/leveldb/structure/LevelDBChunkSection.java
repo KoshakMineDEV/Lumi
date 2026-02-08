@@ -3,6 +3,7 @@ package cn.nukkit.level.format.leveldb.structure;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.block.properties.BlockPropertiesHelper;
+import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
@@ -682,7 +683,7 @@ public class LevelDBChunkSection implements ChunkSection {
     }
 
     @Override
-    public void writeTo(int protocol, BinaryStream stream, boolean antiXray) {
+    public void writeTo(int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
         try {
             this.readLock.lock();
 
@@ -692,7 +693,7 @@ public class LevelDBChunkSection implements ChunkSection {
             stream.putByte((byte) layers);
 
             for (int i = 0; i < layers; i++) {
-                this.storages[i].writeTo(level, protocol, stream, antiXray);
+                this.storages[i].writeTo(level, protocol, stream, antiXray, blockPalette);
             }
         } finally {
             this.readLock.unlock();

@@ -1,6 +1,8 @@
 package cn.nukkit.level.format;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.level.BlockPalette;
+import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.BinaryStream;
 
@@ -109,11 +111,11 @@ public interface ChunkSection {
 
     @Deprecated
     default void writeTo(int protocol, BinaryStream stream) {
-        writeTo(protocol, stream, false);
+        writeTo(protocol, stream, false, GlobalBlockPalette.getPaletteByProtocol(protocol));
     }
 
     // for >= 1.13 chunk format
-    void writeTo(int protocol, BinaryStream stream, boolean antiXray);
+    void writeTo(int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette);
 
     ChunkSection copy();
 

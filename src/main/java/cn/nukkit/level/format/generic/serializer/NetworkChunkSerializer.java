@@ -2,7 +2,9 @@ package cn.nukkit.level.format.generic.serializer;
 
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
+import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.DimensionData;
+import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.biome.Biome;
 import cn.nukkit.level.format.ChunkSection;
@@ -64,7 +66,7 @@ public class NetworkChunkSerializer {
             NetworkChunkData networkChunkData = new NetworkChunkData(protocolId, subChunkCount, antiXray, dimensionData);
 
 
-            serializeChunk(stream, chunk, sections, networkChunkData);
+            serializeChunk(stream, chunk, sections, networkChunkData, GlobalBlockPalette.getPaletteByProtocol(protocolId));
 
             // Border blocks
             stream.putByte((byte) 0);
@@ -74,7 +76,7 @@ public class NetworkChunkSerializer {
         }
     }
 
-    private static void serializeChunk(BinaryStream stream, BaseChunk chunk, ChunkSection[] sections, NetworkChunkData chunkData) {
+    private static void serializeChunk(BinaryStream stream, BaseChunk chunk, ChunkSection[] sections, NetworkChunkData chunkData, BlockPalette blockPalette) {
         DimensionData dimensionData = chunkData.getDimensionData();
         int maxDimensionSections = dimensionData.getHeight() >> 4;
         int subChunkCount = Math.min(maxDimensionSections, chunkData.getChunkSections());
@@ -90,7 +92,7 @@ public class NetworkChunkSerializer {
         }
 
         for (int i = 0; i < subChunkCount; i++) {
-            sections[i].writeTo(chunkData.getProtocol(), stream, chunkData.isAntiXray());
+            sections[i].writeTo(chunkData.getProtocol(), stream, chunkData.isAntiXray(), blockPalette);
         }
 
         stream.put(biomePalettes);

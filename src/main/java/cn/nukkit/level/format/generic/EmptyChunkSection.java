@@ -1,6 +1,7 @@
 package cn.nukkit.level.format.generic;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.BinaryStream;
@@ -228,7 +229,7 @@ public class EmptyChunkSection implements ChunkSection {
     }
 
     @Override
-    public void writeTo(int protocol, BinaryStream stream, boolean antiXray) {
+    public void writeTo(int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
         stream.put(this.getBytes(protocol));
     }
 
