@@ -28,8 +28,6 @@ import java.util.function.Consumer;
 
 public class NetworkChunkSerializer {
 
-    private static final byte[] PAD_256 = new byte[256];
-
     private static final int EXTENDED_NEGATIVE_SUB_CHUNKS = 4;
 
     private static final byte[] negativeSubChunks;

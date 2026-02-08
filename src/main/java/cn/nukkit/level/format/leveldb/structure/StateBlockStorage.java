@@ -35,6 +35,7 @@ import static cn.nukkit.level.format.leveldb.LevelDBConstants.SUB_CHUNK_SIZE;
 public class StateBlockStorage {
 
     private static final int SECTION_SIZE = 16 * 16 * 16;
+    private static final BlockStateSnapshot AIR = BlockStateMapping.get().getState(0, 0);
 
     private List<BlockStateSnapshot> palette;
     private BitArray bitArray;
@@ -50,7 +51,7 @@ public class StateBlockStorage {
     public StateBlockStorage(BitArrayVersion version) {
         this.bitArray = version.createPalette();
         this.palette = new ObjectArrayList<>(16);
-        this.palette.add(BlockStateMapping.get().getState(0, 0));
+        this.palette.add(AIR);
 
         this.blockIds = null;
         this.blockData = null;
