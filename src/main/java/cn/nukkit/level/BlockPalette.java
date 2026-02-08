@@ -8,8 +8,6 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.Utils;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -20,10 +18,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 @Log4j2
@@ -34,8 +30,7 @@ public class BlockPalette {
     private final Int2IntMap runtimeIdToLegacy = new Int2IntOpenHashMap();
     private final Int2IntMap stateHashToLegacy = new Int2IntOpenHashMap();
 
-    private final Cache<Integer, Integer> legacyToRuntimeIdCache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
-
+    private final int infoUpdate;
     private volatile boolean locked;
 
     public BlockPalette(int protocol) {
@@ -45,6 +40,8 @@ public class BlockPalette {
 
         loadBlockStates(paletteFor(protocol));
         loadBlockStatesExtras();
+
+        this.infoUpdate = legacyToRuntimeId.get(BlockID.INFO_UPDATE << Block.DATA_BITS);
     }
 
     private ListTag<CompoundTag> paletteFor(int protocol) {
@@ -177,14 +174,9 @@ public class BlockPalette {
         if (runtimeId == -1) {
             runtimeId = legacyToRuntimeId.get(id << Block.DATA_BITS);
             if (runtimeId == -1) {
-                Integer cache = legacyToRuntimeIdCache.getIfPresent(legacyId);
-                if (cache == null) {
-                    Server.getInstance().getLogger().debug("(" + protocol + ") Missing block runtime id mappings for " + id + ':' + meta);
-                    runtimeId = legacyToRuntimeId.get(BlockID.INFO_UPDATE << Block.DATA_BITS);
-                    legacyToRuntimeIdCache.put(legacyId, runtimeId);
-                } else {
-                    runtimeId = cache;
-                }
+                Server.getInstance().getLogger().debug("(" + protocol + ") Missing block runtime id mappings for " + id + ':' + meta);
+                runtimeId = infoUpdate;
+                legacyToRuntimeId.put(legacyId, runtimeId);
             }
         }
         return runtimeId;
