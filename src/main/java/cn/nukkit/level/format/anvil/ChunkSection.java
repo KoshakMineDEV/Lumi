@@ -587,19 +587,6 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
     }
 
     @Override
-    public byte[] getBytes(int protocolId) {
-        //TODO: properly mv support
-        synchronized (storage) {
-            byte[] ids = storage.getFirst().getBlockIds();
-            byte[] data = storage.getFirst().getBlockData();
-            byte[] merged = new byte[ids.length + data.length];
-            System.arraycopy(ids, 0, merged, 0, ids.length);
-            System.arraycopy(data, 0, merged, ids.length, data.length);
-            return merged;
-        }
-    }
-
-    @Override
     public void writeTo(int protocolId, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
         synchronized (storage) {
             stream.putByte((byte) STREAM_STORAGE_VERSION);

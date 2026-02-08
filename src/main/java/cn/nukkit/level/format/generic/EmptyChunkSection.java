@@ -14,7 +14,7 @@ import java.util.Arrays;
  * Nukkit Project
  */
 public class EmptyChunkSection implements ChunkSection {
-
+    private static final byte[] EMPTY_SECTION = new byte[6145];
     public static final EmptyChunkSection[] EMPTY = new EmptyChunkSection[16];
 
     public static final byte[] EMPTY_ID_ARRAY = new byte[4096];
@@ -224,13 +224,8 @@ public class EmptyChunkSection implements ChunkSection {
     }
 
     @Override
-    public byte[] getBytes(int protocolId) {
-        return new byte[6145];
-    }
-
-    @Override
     public void writeTo(int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
-        stream.put(this.getBytes(protocol));
+        stream.skip(EMPTY_SECTION.length);
     }
 
     @Override

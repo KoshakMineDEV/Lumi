@@ -101,20 +101,11 @@ public interface ChunkSection {
     boolean isEmpty();
 
     boolean hasLayer(int layer);
-
-    // for < 1.13 chunk format
-    byte[] getBytes(int protocolId);
     
     int getMaximumLayer();
 
     CompoundTag toNBT();
-
-    @Deprecated
-    default void writeTo(int protocol, BinaryStream stream) {
-        writeTo(protocol, stream, false, GlobalBlockPalette.getPaletteByProtocol(protocol));
-    }
-
-    // for >= 1.13 chunk format
+    
     void writeTo(int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette);
 
     ChunkSection copy();
