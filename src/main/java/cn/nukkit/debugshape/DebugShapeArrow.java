@@ -134,7 +134,7 @@ public class DebugShapeArrow extends DebugShape {
         return new ScriptDebugShape(
                 id, getType(), position, null,
                 null, null, color,
-                dimensionId, null, null, null,
+                null, dimensionId, null, null, null,
                 arrowHeadLength, arrowHeadRadius, arrowHeadSegments
         );
     }

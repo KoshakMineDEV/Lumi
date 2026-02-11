@@ -533,6 +533,13 @@ public class Network {
                 .registerPacket(ProtocolInfo.SET_MOVEMENT_AUTHORITY_PACKET, SetMovementAuthorityPacket.class, SetMovementAuthorityPacket::new)
                 .registerPacket(ProtocolInfo.CAMERA_AIM_ASSIST_PRESETS_PACKET, CameraAimAssistPresetsPacket.class, CameraAimAssistPresetsPacket::new)
                 .registerPacket(ProtocolInfo.SERVER_SCRIPT_DEBUG_DRAWER_PACKET, ServerScriptDebugDrawerPacket.class, ServerScriptDebugDrawerPacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_DATA_DRIVEN_UI_SHOW_SCREEN_PACKET, ClientboundDataDrivenUIShowScreenPacket.class, ClientboundDataDrivenUIShowScreenPacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_DATA_DRIVEN_UI_CLOSE_ALL_SCREENS_PACKET, ClientboundDataDrivenUICloseAllScreensPacket.class, ClientboundDataDrivenUICloseAllScreensPacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_DATA_DRIVEN_UI_RELOAD_PACKET, ClientboundDataDrivenUIReloadPacket.class, ClientboundDataDrivenUIReloadPacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_TEXTURE_SHIFT_PACKET, ClientboundTextureShiftPacket.class, ClientboundTextureShiftPacket::new)
+                .registerPacket(ProtocolInfo.VOXEL_SHAPES_PACKET, VoxelShapesPacket.class, VoxelShapesPacket::new)
+                .registerPacket(ProtocolInfo.CAMERA_SPLINE_PACKET, CameraSplinePacket.class, CameraSplinePacket::new)
+                .registerPacket(ProtocolInfo.CAMERA_AIM_ASSIST_ACTOR_PRIORITY_PACKET, CameraAimAssistActorPriorityPacket.class, CameraSplinePacket::new)
                 .build();
 
         this.packetPoolCurrent = this.packetPool.toBuilder()
