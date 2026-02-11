@@ -183,12 +183,12 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
             block = Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_BITS);
         } else {
-            block = Registries.BLOCK.get(fullId).clone();
             if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                 int meta = fullId & DATA_BITS;
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
                 return new BlockUnknown(id, meta);
             }
+            block = Registries.BLOCK.get(fullId).clone();
         }
 
         block.x = x;
@@ -207,12 +207,13 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         Block block;
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
             block = Registries.BLOCK.getCustom(id).toCustomBlock(meta);
-        }else if (meta <= DATA_SIZE) {
+        } else if (meta <= DATA_SIZE) {
             block = Registries.BLOCK.get(id << DATA_BITS | meta).clone();
         } else {
             block = Registries.BLOCK.get(id << DATA_BITS).clone();
             block.setDamage(meta);
         }
+
         block.x = x;
         block.y = y;
         block.z = z;
