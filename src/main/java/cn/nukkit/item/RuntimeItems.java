@@ -177,7 +177,7 @@ public class RuntimeItems {
     public static RuntimeItemMapping getMapping(int protocolId) {
         if (protocolId >= ProtocolInfo.v1_26_0) {
             return mapping924;
-        }else if (protocolId >= ProtocolInfo.v1_21_130) {
+        } else if (protocolId >= ProtocolInfo.v1_21_130) {
             return mapping898;
         } else if (protocolId >= ProtocolInfo.v1_21_120) {
             return mapping859;
