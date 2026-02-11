@@ -41,7 +41,7 @@ public class Nukkit {
     public static final String NUKKIT = "Lumi";
     public final static Properties GIT_INFO = getGitInfo();
     public final static String VERSION = getVersion();
-    public final static String API_VERSION = dynamic("1.4.0");
+    public final static String API_VERSION = dynamic("1.5.0");
     public final static String CODENAME = Utils.dynamic("Lumi");
     public final static String PATH = System.getProperty("user.dir") + '/';
     public final static String DATA_PATH = System.getProperty("user.dir") + '/';
