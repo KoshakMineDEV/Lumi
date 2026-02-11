@@ -53,10 +53,6 @@ public class TextPacket extends DataPacket {
                 case TYPE_WHISPER:
                 case TYPE_ANNOUNCEMENT:
                     this.source = this.getString();
-                    if (protocol > 201 && protocol <= 282) {
-                        this.getString();
-                        this.getVarInt();
-                    }
                 case TYPE_RAW:
                 case TYPE_TIP:
                 case TYPE_SYSTEM:
@@ -79,23 +75,29 @@ public class TextPacket extends DataPacket {
         } else {
             switch (this.getByte()) {
                 case 0: // MessageOnly
-                    for (int i = 0; i < 6; i++) {
-                        this.getString();
+                    if(protocol < ProtocolInfo.v1_26_0) {
+                        for (int i = 0; i < 6; i++) {
+                            this.getString();
+                        }
                     }
                     this.type = (byte) getByte();
                     this.message = this.getString();
                     break;
                 case 1: // AuthorAndMessage
-                    for (int i = 0; i < 3; i++) {
-                        this.getString();
+                    if(protocol < ProtocolInfo.v1_26_0) {
+                        for (int i = 0; i < 3; i++) {
+                            this.getString();
+                        }
                     }
                     this.type = (byte) getByte();
                     this.source = this.getString();
                     this.message = this.getString();
                     break;
                 case 2: // MessageAndParams
-                    for (int i = 0; i < 3; i++) {
-                        this.getString();
+                    if(protocol < ProtocolInfo.v1_26_0) {
+                        for (int i = 0; i < 3; i++) {
+                            this.getString();
+                        }
                     }
                     this.type = (byte) getByte();
                     this.message = this.getString();
@@ -113,12 +115,10 @@ public class TextPacket extends DataPacket {
             }
         }
 
-        if (protocol >= 223) {
-            this.xboxUserId = this.getString();
-            this.platformChatId = this.getString();
-            if (protocol >= ProtocolInfo.v1_21_0) {
-                this.filteredMessage = this.getString();
-            }
+        this.xboxUserId = this.getString();
+        this.platformChatId = this.getString();
+        if (protocol >= ProtocolInfo.v1_21_0) {
+            this.filteredMessage = this.getString();
         }
     }
 
@@ -138,10 +138,6 @@ public class TextPacket extends DataPacket {
                 case TYPE_WHISPER:
                 case TYPE_ANNOUNCEMENT:
                     this.putString(this.source);
-                    if (protocol > 201 && protocol <= 282) {
-                        this.putString("");
-                        this.putVarInt(0);
-                    }
                 case TYPE_RAW:
                 case TYPE_TIP:
                 case TYPE_SYSTEM:
@@ -169,12 +165,14 @@ public class TextPacket extends DataPacket {
                 case TYPE_OBJECT_WHISPER:
                 case TYPE_OBJECT_ANNOUNCEMENT:
                     this.putByte((byte) 0); // MessageOnly
-                    this.putString("raw");
-                    this.putString("tip");
-                    this.putString("systemMessage");
-                    this.putString("textObjectWhisper");
-                    this.putString("textObjectAnnouncement");
-                    this.putString("textObject");
+                    if(protocol < ProtocolInfo.v1_26_0) {
+                        this.putString("raw");
+                        this.putString("tip");
+                        this.putString("systemMessage");
+                        this.putString("textObjectWhisper");
+                        this.putString("textObjectAnnouncement");
+                        this.putString("textObject");
+                    }
                     this.putByte(this.type);
                     if (this.message.isEmpty()) {
                         this.message = " ";
@@ -186,9 +184,11 @@ public class TextPacket extends DataPacket {
                 case TYPE_WHISPER:
                 case TYPE_ANNOUNCEMENT:
                     this.putByte((byte) 1); // AuthorAndMessage
-                    this.putString("chat");
-                    this.putString("whisper");
-                    this.putString("announcement");
+                    if(protocol < ProtocolInfo.v1_26_0) {
+                        this.putString("chat");
+                        this.putString("whisper");
+                        this.putString("announcement");
+                    }
                     this.putByte(this.type);
                     this.putString(this.source);
                     this.putString(this.message);
@@ -198,9 +198,11 @@ public class TextPacket extends DataPacket {
                 case TYPE_POPUP:
                 case TYPE_JUKEBOX_POPUP:
                     this.putByte((byte) 2); // MessageAndParams
-                    this.putString("translate");
-                    this.putString("popup");
-                    this.putString("jukeboxPopup");
+                    if(protocol < ProtocolInfo.v1_26_0) {
+                        this.putString("translate");
+                        this.putString("popup");
+                        this.putString("jukeboxPopup");
+                    }
                     this.putByte(this.type);
                     this.putString(this.message);
                     this.putUnsignedVarInt(this.parameters.length);
@@ -210,17 +212,15 @@ public class TextPacket extends DataPacket {
             }
         }
 
-        if (this.protocol >= 223) {
-            this.putString(this.xboxUserId);
-            this.putString(this.platformChatId);
+        this.putString(this.xboxUserId);
+        this.putString(this.platformChatId);
 
-            if (protocol >= ProtocolInfo.v1_21_0) {
-                if (protocol >= ProtocolInfo.v1_21_130) {
-                    this.putBoolean(!this.filteredMessage.isEmpty());
-                }
-                if (protocol < ProtocolInfo.v1_21_130 || !this.filteredMessage.isEmpty()) {
-                    this.putString(this.filteredMessage);
-                }
+        if (protocol >= ProtocolInfo.v1_21_0) {
+            if (protocol >= ProtocolInfo.v1_21_130) {
+                this.putBoolean(!this.filteredMessage.isEmpty());
+            }
+            if (protocol < ProtocolInfo.v1_21_130 || !this.filteredMessage.isEmpty()) {
+                this.putString(this.filteredMessage);
             }
         }
     }

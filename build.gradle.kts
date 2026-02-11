@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.koshakmine"
-version = "1.4.0-SNAPSHOT"
+version = "1.5.0-SNAPSHOT"
 application.mainClass.set("cn.nukkit.Nukkit")
 
 java {

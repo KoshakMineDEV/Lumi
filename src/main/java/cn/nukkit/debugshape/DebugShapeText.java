@@ -46,7 +46,7 @@ public class DebugShapeText extends DebugShape {
         return new ScriptDebugShape(
                 id, getType(), position, null,
                 null, null, color,
-                dimensionId, text, null, null,
+                null, dimensionId, text, null, null,
                 null, null, null
         );
     }
