@@ -14,7 +14,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 
@@ -25,65 +24,34 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegistry.CreativeItems, CreativeItemRegistry.CreativeItems> {
 
-    private static final Object2ObjectOpenHashMap<Integer, CreativeItems> CREATIVE_ITEMS = new Object2ObjectOpenHashMap<>();
+    private static final CreativeItems CREATIVE_ITEMS = new CreativeItems();
 
     private static final AtomicBoolean isLoad = new AtomicBoolean(false);
-
-    public static final List<Integer> CREATIVE_ITEMS_PROTOCOLS = List.of(
-            ProtocolInfo.v1_20_0,
-            ProtocolInfo.v1_20_10,
-            ProtocolInfo.v1_20_30,
-            ProtocolInfo.v1_20_40,
-            ProtocolInfo.v1_20_50,
-            ProtocolInfo.v1_20_60,
-            ProtocolInfo.v1_20_70,
-            ProtocolInfo.v1_20_80,
-            ProtocolInfo.v1_21_0,
-            ProtocolInfo.v1_21_20,
-            ProtocolInfo.v1_21_30,
-            ProtocolInfo.v1_21_40,
-            ProtocolInfo.v1_21_50,
-            ProtocolInfo.v1_21_60,
-            ProtocolInfo.v1_21_70,
-            ProtocolInfo.v1_21_80,
-            ProtocolInfo.v1_21_90,
-            ProtocolInfo.v1_21_93,
-            ProtocolInfo.v1_21_100,
-            ProtocolInfo.v1_21_111,
-            ProtocolInfo.v1_21_120,
-            ProtocolInfo.v1_21_124,
-            ProtocolInfo.v1_21_130,
-            ProtocolInfo.v1_26_0
-    );
 
     @Override
     public void init() {
         if (isLoad.getAndSet(true)) return;
 
-        CREATIVE_ITEMS_PROTOCOLS.forEach(protocol -> {
-            if (!Server.getInstance().isVersionSupported(protocol)) {
+        if (!Server.getInstance().isVersionSupported(ProtocolInfo.CURRENT_PROTOCOL)) {
+            return;
+        }
+        try (InputStream stream = CreativeItemRegistry.class.getClassLoader()
+                .getResourceAsStream("gamedata/item/creative_items.json")) {
+            if (stream == null) {
                 return;
             }
-            try (InputStream stream = CreativeItemRegistry.class.getClassLoader()
-                    .getResourceAsStream("gamedata/item/creative/creative_items_" + protocol + ".json")) {
-                if (stream == null) {
-                    return;
-                }
 
-                JsonObject root = JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonObject();
-                if (protocol >= ProtocolInfo.v1_21_60) {
-                    this.initNewItems(root, protocol);
-                }
-                this.initOldItems(root, protocol);
+            JsonObject root = JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonObject();
+            this.parseNewItems(root);
+            this.parseOldItems(root);
 
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to load gamedata/item/creative/creative_items_" + protocol + ".json", e);
-            }
-        });
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load gamedata/item/creative_items.json", e);
+        }
     }
 
-    private void initNewItems(JsonObject object, int protocol) {
-        RuntimeItemMapping mapping = RuntimeItems.getMapping(protocol);
+    private void parseNewItems(JsonObject object) {
+        RuntimeItemMapping mapping = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
 
         JsonArray groups = object.getAsJsonObject().get("groups").getAsJsonArray();
         if (groups.isEmpty()) {
@@ -94,7 +62,7 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
         for (JsonElement element : groups.asList()) {
             JsonObject group = element.getAsJsonObject();
 
-            Item icon = mapping.parseCreativeItem(group.get("icon").getAsJsonObject(), true, protocol);
+            Item icon = mapping.parseCreativeItem(group.get("icon").getAsJsonObject(), true, ProtocolInfo.CURRENT_PROTOCOL);
             if (icon == null) {
                 icon = Item.get(ItemNamespaceId.AIR);
             }
@@ -107,12 +75,12 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
                     icon
             );
 
-            this.register(protocol, creativeGroup);
+            this.register(creativeGroup);
         }
     }
 
-    private void initOldItems(JsonObject object, int protocol) {
-        RuntimeItemMapping mapping = RuntimeItems.getMapping(protocol);
+    private void parseOldItems(JsonObject object) {
+        RuntimeItemMapping mapping = RuntimeItems.getMapping(ProtocolInfo.CURRENT_PROTOCOL);
 
         JsonArray items = object.getAsJsonArray("items");
 
@@ -144,84 +112,57 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
             CreativeItemGroup creativeGroup = new CreativeItemGroup(
                     creativeGroupId++, CreativeItemCategory.ITEMS, "", icon
             );
-            this.register(protocol, creativeGroup);
+            this.register(creativeGroup);
 
             // Try to parse the same item through mapping
-            Item mappedIcon = mapping.parseCreativeItem(item, true, protocol);
+            Item mappedIcon = mapping.parseCreativeItem(item, true, ProtocolInfo.CURRENT_PROTOCOL);
             if (mappedIcon != null && !Item.UNKNOWN_STR.equals(mappedIcon.getName())) {
                 CreativeItemGroup targetGroup = null;
-                if (protocol >= ProtocolInfo.v1_21_60 && item.has("groupId")) {
-                    targetGroup = this.get(protocol).getGroups()
+                if (item.has("groupId")) {
+                    targetGroup = CREATIVE_ITEMS.getGroups()
                             .get(item.get("groupId").getAsInt());
                 }
-                this.register(protocol, mappedIcon, targetGroup);
+                this.register(mappedIcon, targetGroup);
             }
         }
     }
 
     @Override
-    public void register(Integer protocol, CreativeItems creativeItems) {
-        CREATIVE_ITEMS.put(protocol, creativeItems);
-    }
-
-    public void register(Integer protocol, CreativeItemGroup group) {
-        CREATIVE_ITEMS.computeIfAbsent(protocol, p -> new CreativeItems()).addGroup(group);
-    }
-
-    public void register(Integer protocol, Item icon, CreativeItemGroup group) {
-        CREATIVE_ITEMS.computeIfAbsent(protocol, p -> new CreativeItems()).add(icon, group);
-    }
-
-    public void register(Integer protocol, Item icon, CreativeItemCategory category, String group) {
-        CREATIVE_ITEMS.computeIfAbsent(protocol, p -> new CreativeItems()).add(icon, category, group);
-    }
-
-    public void register(Integer protocol, Item icon) {
-        CREATIVE_ITEMS.computeIfAbsent(protocol, p -> new CreativeItems()).add(icon);
+    @Deprecated
+    public void register(Integer key, CreativeItems value) {
+        //Do nothing
     }
 
     public void register(CreativeItemGroup group) {
-        CREATIVE_ITEMS.keySet().forEach(protocol -> register(protocol, group));
-    }
-
-    public void register(Item icon, CreativeItemGroup group) {
-        CREATIVE_ITEMS.keySet().forEach(protocol -> register(protocol, icon, group));
+        CREATIVE_ITEMS.addGroup(group);
     }
 
     public void register(Item icon) {
-        CREATIVE_ITEMS.keySet().forEach(protocol -> register(protocol, icon));
+        CREATIVE_ITEMS.add(icon);
     }
 
-    public void remove(Integer protocol, Item icon) {
-        CreativeItems creativeItems = CREATIVE_ITEMS.get(protocol);
-        if (creativeItems != null) {
-            creativeItems.getItems().remove(icon);
-            creativeItems.getContents().remove(icon);
-        }
+    public void register(Item icon, CreativeItemGroup group) {
+        CREATIVE_ITEMS.add(icon, group);
     }
+
 
     public void remove(Item icon) {
-        CREATIVE_ITEMS.keySet().forEach(protocol -> remove(protocol, icon));
+        CREATIVE_ITEMS.getItems().remove(icon);
+        CREATIVE_ITEMS.getContents().remove(icon);
     }
 
     @Override
+    @Deprecated
     public CreativeItems get(Integer protocol) {
-        CreativeItems items = CREATIVE_ITEMS.get(protocol);
-        if (items != null) return items;
-
-        return CREATIVE_ITEMS.keySet().stream()
-                .filter(p -> p < protocol)
-                .max(Comparator.naturalOrder())
-                .map(CREATIVE_ITEMS::get)
-                .orElse(null);
+        return get();
     }
 
-    public Map<Integer,CreativeItems> getCreativeItems() {
-        return Collections.unmodifiableMap(CREATIVE_ITEMS);
+    public CreativeItems get() {
+        return CREATIVE_ITEMS;
     }
 
-    public boolean isCreativeItem(int protocol, Item item) {
-        for (Item creativeItem : this.get(protocol).getItems()) {
+    public boolean isCreativeItem(Item item) {
+        for (Item creativeItem : CREATIVE_ITEMS.getItems()) {
             if (item.equals(creativeItem, !item.isTool())) {
                 return true;
             }
@@ -231,7 +172,7 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
 
     @Override
     public void trim() {
-        CREATIVE_ITEMS.trim();
+        //Do nothing
     }
 
     @Override
@@ -286,11 +227,16 @@ public class CreativeItemRegistry implements IRegistry<Integer, CreativeItemRegi
             return contents.keySet();
         }
 
-        public List<CreativeItemData> getCreativeItemData() {
-            int creativeNetId = 1; // 0 is not indexed by client
-            var list = new ObjectArrayList<CreativeItemData>(this.getContents().size());
-            for (Map.Entry<Item, CreativeItemGroup> entry : this.getContents().entrySet()) {
-                list.add(new CreativeItemData(entry.getKey(), creativeNetId++, entry.getValue() != null ? entry.getValue().getGroupId() : 0));
+        public List<CreativeItemData> getCreativeItemData(int protocol) {
+            int creativeNetId = 1;
+            ObjectArrayList<CreativeItemData> list = new ObjectArrayList<>();
+            for (Map.Entry<Item, CreativeItemGroup> entry : contents.entrySet()) {
+                if (entry.getKey().isSupportedOn(protocol)) {
+                    list.add(new CreativeItemData(
+                            entry.getKey(), creativeNetId++,
+                            entry.getValue() != null ? entry.getValue().getGroupId() : 0
+                    ));
+                }
             }
             return list;
         }
