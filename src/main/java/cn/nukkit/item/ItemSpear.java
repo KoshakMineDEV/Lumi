@@ -129,7 +129,7 @@ public abstract class ItemSpear extends StringItemToolBase {
         int playerGamemode = player.getGamemode();
         int enchantmentLevel = getEnchantmentLevel(Enchantment.ID_LUNGE);
 
-        if (player.isGliding() || player.isSwimming() || player.isInsideOfWater() || player.isInsideOfWater()) {
+        if (player.isGliding() || player.isSwimming() || player.isInsideOfWater()) {
             return false;
         }
 
