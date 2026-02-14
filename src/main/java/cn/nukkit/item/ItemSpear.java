@@ -32,6 +32,8 @@ public abstract class ItemSpear extends StringItemToolBase {
     }
 
     public void onSpearStab(Player player, float movementSpeed) {
+        if (player.getServer().getTick() - player.getLastSpearUse() < 20) return;
+
         player.setItemCoolDown(20, this.getIdentifier());
 
         PlayerSpearStabEvent event = new PlayerSpearStabEvent(player, this, movementSpeed);
@@ -42,6 +44,7 @@ public abstract class ItemSpear extends StringItemToolBase {
 
         if (movementSpeed < getMinimumSpeed() || !player.isSprinting()) {
             player.getLevel().addSound(player.getPosition(), Sound.ITEM_SPEAR_ATTACK_MISS);
+            player.setLastSpearUse();
             return;
         }
 
@@ -92,6 +95,8 @@ public abstract class ItemSpear extends StringItemToolBase {
         } else {
             level.addSound(player.getPosition(), Sound.ITEM_SPEAR_ATTACK_MISS);
         }
+
+        player.setLastSpearUse();
     }
 
     public float getJabDamage() {
@@ -104,7 +109,7 @@ public abstract class ItemSpear extends StringItemToolBase {
     }
 
     public void applyLunge(Player player) {
-        if(this.canLunge(player)){
+        if (this.canLunge(player)){
             int lungeLevel = getEnchantmentLevel(Enchantment.ID_LUNGE);
             Vector3 dir = player.getDirectionVector();
             dir.y = 0;
