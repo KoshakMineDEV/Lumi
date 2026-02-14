@@ -2349,6 +2349,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.checkNearEntities();
             }
 
+            Item itemInHand = this.getInventory().getItemInHand();
+            if (!itemInHand.isNull() && this.isUsingItem()) {
+                itemInHand.whileUsing(this);
+            }
+
             this.entityBaseTick(tickDiff);
 
             if (this.server.getDifficulty() == Difficulty.PEACEFUL && this.level.getGameRules().getBoolean(GameRule.NATURAL_REGENERATION)) {

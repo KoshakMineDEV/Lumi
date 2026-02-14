@@ -22,7 +22,8 @@ public enum EnchantmentType {
     WEARABLE,
     TRIDENT,
     CROSSBOW,
-    MACE;
+    MACE,
+    SPEAR;
 
     public boolean canEnchantItem(Item item) {
         if (this == ALL) {
@@ -52,6 +53,7 @@ public enum EnchantmentType {
                 case WEARABLE -> item.getBlock() instanceof BlockSkull;
                 case TRIDENT -> item instanceof ItemTrident;
                 case CROSSBOW -> item instanceof ItemCrossbow;
+                case SPEAR -> item.isSpear();
                 default -> false;
             };
         }
