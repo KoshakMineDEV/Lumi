@@ -35,6 +35,7 @@ public abstract class ItemSpear extends StringItemToolBase {
         if (player.getServer().getTick() - player.getLastSpearUse() < 20) return;
 
         player.setItemCoolDown(20, this.getIdentifier());
+        player.setLastSpearUse();
 
         PlayerSpearStabEvent event = new PlayerSpearStabEvent(player, this, movementSpeed);
 
@@ -44,7 +45,6 @@ public abstract class ItemSpear extends StringItemToolBase {
 
         if (movementSpeed < getMinimumSpeed() || !player.isSprinting()) {
             player.getLevel().addSound(player.getPosition(), Sound.ITEM_SPEAR_ATTACK_MISS);
-            player.setLastSpearUse();
             return;
         }
 
@@ -95,8 +95,6 @@ public abstract class ItemSpear extends StringItemToolBase {
         } else {
             level.addSound(player.getPosition(), Sound.ITEM_SPEAR_ATTACK_MISS);
         }
-
-        player.setLastSpearUse();
     }
 
     public float getJabDamage() {
