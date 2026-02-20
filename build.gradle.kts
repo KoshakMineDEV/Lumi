@@ -36,7 +36,7 @@ repositories {
 
 val log4j2Version = "2.17.1"
 val jlineVersion = "3.21.0"
-val leveldbMcpeJavaVersion = "1.0.1"
+val leveldbMcpeJavaVersion = "1.1.0"
 val leveldbMcpeJniVersion = "0.0.10"
 val blockStateUpdaterVersion = "1.21.110-SNAPSHOT"
 
