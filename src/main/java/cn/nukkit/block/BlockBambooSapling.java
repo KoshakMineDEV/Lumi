@@ -131,6 +131,11 @@ public class BlockBambooSapling extends BlockFlowable {
         return 5;
     }
 
+    @Override
+    public double getHardness() {
+        return 1;
+    }
+
     public int getAge() {
         return getDamage() & 0x1;
     }
