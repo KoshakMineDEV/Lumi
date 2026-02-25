@@ -222,7 +222,7 @@ public class StateBlockStorage {
     }
 
     public void writeTo(Level level, int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
-        PalettedBlockStorage palettedBlockStorage = PalettedBlockStorage.createFromBlockPalette(protocol);
+        PalettedBlockStorage palettedBlockStorage = PalettedBlockStorage.createFromBlockPalette(this.bitArray.getVersion(), protocol);
 
         if(antiXray) {
             final NukkitRandom nukkitRandom = new NukkitRandom();

@@ -131,7 +131,7 @@ public class Level implements ChunkManager, Metadatable {
     public static final int MAX_BLOCK_CACHE = 512;
 
     // The blocks that can randomly tick
-    public static final List<Integer> RANDOM_TICK_BLOCKS = new ArrayList<>();
+    public static final IntList RANDOM_TICK_BLOCKS = new IntArrayList();
 
     static {
         RANDOM_TICK_BLOCKS.add(Block.GRASS);
