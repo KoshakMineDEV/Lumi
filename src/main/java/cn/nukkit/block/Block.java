@@ -747,9 +747,9 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
             hasAquaAffinity = Optional.ofNullable(player.getInventory().getHelmet().getEnchantment(Enchantment.ID_WATER_WORKER))
                     .map(Enchantment::getLevel).map(l -> l >= 1).orElse(false);
             hasteEffectLevel = Optional.ofNullable(player.getEffect(EffectType.HASTE))
-                    .map(Effect::getAmplifier).orElse(-1) + 1;
+                    .map(Effect::getLevel).orElse(0);
             miningFatigueLevel = Optional.ofNullable(player.getEffect(EffectType.MINING_FATIGUE))
-                    .map(Effect::getAmplifier).orElse(-1) + 1;
+                    .map(Effect::getLevel).orElse(0);
         }
 
 
