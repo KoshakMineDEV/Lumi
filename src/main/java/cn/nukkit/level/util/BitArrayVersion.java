@@ -39,7 +39,7 @@ public enum BitArrayVersion {
     }
 
     public BitArray createPalette() {
-        return this.createPalette(4096);
+        return this.createPalette(4096);// chunk section size 16 * 16 * 16
     }
 
     public BitArray createPalette(int size) {

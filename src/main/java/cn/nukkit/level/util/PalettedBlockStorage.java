@@ -23,8 +23,8 @@ public class PalettedBlockStorage {
         return createFromBlockPalette(BitArrayVersion.V2, 0);
     }
 
-    public static PalettedBlockStorage createFromBlockPalette(int protocol) {
-        return PalettedBlockStorage.createFromBlockPalette(BitArrayVersion.V2, protocol);
+    public static PalettedBlockStorage createFromBlockPalette(int protocol, BitArrayVersion version) {
+        return PalettedBlockStorage.createFromBlockPalette(version, protocol);
     }
 
     public static PalettedBlockStorage createFromBlockPalette(BitArrayVersion version, int protocol) {
