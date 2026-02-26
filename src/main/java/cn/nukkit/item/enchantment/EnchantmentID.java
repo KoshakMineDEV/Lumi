@@ -45,6 +45,7 @@ public interface EnchantmentID {
     int ID_WIND_BURST = 38;
     int ID_DENSITY = 39;
     int ID_BREACH = 40;
+    int ID_LUNGE = 41;
 
     String NAME_PROTECTION_ALL = "protection";
     String NAME_PROTECTION_FIRE = "fire_protection";
@@ -87,4 +88,5 @@ public interface EnchantmentID {
     String NAME_WIND_BURST = "wind_burst";
     String NAME_DENSITY = "density";
     String NAME_BREACH = "breach";
+    String NAME_LUNGE = "lunge";
 }
