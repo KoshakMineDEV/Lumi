@@ -6,6 +6,7 @@ import cn.nukkit.event.player.PlayerItemConsumeEvent;
 import cn.nukkit.level.vibration.VanillaVibrationTypes;
 import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.network.protocol.ProtocolInfo;
 
 import javax.annotation.Nullable;
 
@@ -119,5 +120,13 @@ public class ItemPotion extends Item {
 
     public static ItemPotion fromPotion(PotionType potion) {
         return new ItemPotion(potion.id());
+    }
+
+    @Override
+    public boolean isSupportedOn(int protocolId) {
+        if(protocolId < ProtocolInfo.v1_21_0) {
+            if(getDamage() > 40) return false;
+        }
+        return true;
     }
 }

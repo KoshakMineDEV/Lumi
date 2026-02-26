@@ -6,6 +6,7 @@ import cn.nukkit.item.customitem.CustomItem;
 import cn.nukkit.item.customitem.CustomItemDefinition;
 import cn.nukkit.item.material.CustomItemType;
 import cn.nukkit.item.material.ItemTypes;
+import cn.nukkit.network.protocol.ProtocolInfo;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -250,18 +251,20 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
         register(customItem.getNamespaceId(), supplier);
 
         // Registering custom items for all creative item protocols
-        CreativeItemRegistry.CREATIVE_ITEMS_PROTOCOLS.forEach(protocol -> {
-            registerCustom(customItem, protocol, addCreativeItem);
+        ProtocolInfo.SUPPORTED_PROTOCOLS.forEach(protocol -> {
+            RuntimeItems.getMapping(protocol).registerCustomItem(customItem);
         });
+
+        if(addCreativeItem) {
+            registerCustomCreativeItem(customItem);
+        }
 
         // Registering custom item type
         ItemTypes.register(new CustomItemType(customItem));
     }
 
-    private void registerCustom(CustomItem item, int protocol, boolean addCreativeItem) {
-        if (RuntimeItems.getMapping(protocol).registerCustomItem(item) && addCreativeItem) {
-            Registries.CREATIVE_ITEM.register(protocol, (Item) item);
-        }
+    private void registerCustomCreativeItem(CustomItem item) {
+        Registries.CREATIVE_ITEM.register((Item) item);
     }
 
     public void addToCustom(String namespace, Item item) {
@@ -275,15 +278,16 @@ public class ItemRegistry implements ItemNamespaceId, IRegistry<String, Item, Su
             CUSTOM_ITEMS.remove(namespaceId);
             CUSTOM_ITEM_DEFINITIONS.remove(namespaceId);
 
-            CreativeItemRegistry.CREATIVE_ITEMS_PROTOCOLS.forEach(protocol -> {
-                deleteCustom(customItem, protocol);
+            ProtocolInfo.SUPPORTED_PROTOCOLS.forEach(protocol -> {
+                RuntimeItems.getMapping(protocol).deleteCustomItem((CustomItem) customItem);
             });
+
+            deleteCustomCreativeItem(customItem);
         }
     }
 
-    private void deleteCustom(Item item, int protocol) {
-        RuntimeItems.getMapping(protocol).deleteCustomItem((CustomItem) item);
-        Registries.CREATIVE_ITEM.remove(protocol, item);
+    private void deleteCustomCreativeItem(Item item) {
+        Registries.CREATIVE_ITEM.remove(item);
     }
 
     @Override

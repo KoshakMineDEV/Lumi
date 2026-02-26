@@ -517,7 +517,7 @@ public class PlayerInventory extends BaseInventory {
 
         CreativeContentPacket packet = new CreativeContentPacket();
         if (!player.isSpectator()) {
-            packet.creativeItems = Registries.CREATIVE_ITEM.get(player.protocol);
+            packet.creativeItems = Registries.CREATIVE_ITEM.get();
         }
         player.dataPacket(packet);
     }
