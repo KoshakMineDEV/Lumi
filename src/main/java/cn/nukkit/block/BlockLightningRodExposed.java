@@ -3,27 +3,27 @@ package cn.nukkit.block;
 import cn.nukkit.block.properties.enums.OxidizationLevel;
 import org.jetbrains.annotations.NotNull;
 
-public class BlockLightningRod extends BlockLightningRodBase {
-    public BlockLightningRod() {
+public class BlockLightningRodExposed extends BlockLightningRodBase {
+    public BlockLightningRodExposed() {
         this(0);
     }
 
-    public BlockLightningRod(int meta) {
+    public BlockLightningRodExposed(int meta) {
         super(meta);
     }
 
     @Override
     public String getName() {
-        return "Lightning Rod";
+        return "Exposed Lightning Rod";
     }
 
     @Override
     public int getId() {
-        return LIGHTNING_ROD;
+        return EXPOSED_LIGHTNING_ROD;
     }
 
     @Override
     public @NotNull OxidizationLevel getOxidizationLevel() {
-        return OxidizationLevel.UNAFFECTED;
+        return OxidizationLevel.EXPOSED;
     }
 }
