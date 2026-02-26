@@ -916,6 +916,13 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(WAXED_WEATHERED_COPPER_CHEST, BlockCopperChestWeatheredWaxed.class); //1292
         register(WAXED_OXIDIZED_COPPER_CHEST, BlockCopperChestOxidizedWaxed.class); //1293
 
+        register(EXPOSED_LIGHTNING_ROD, BlockLightningRodExposed.class); //1314
+        register(WEATHERED_LIGHTNING_ROD, BlockLightningRodWeathered.class); //1315
+        register(OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidized.class); //1316
+        register(WAXED_LIGHTNING_ROD, BlockLightningRodWaxed.class);
+        register(WAXED_EXPOSED_LIGHTNING_ROD, BlockLightningRodExposedWaxed.class);
+        register(WAXED_WEATHERED_LIGHTNING_ROD, BlockLightningRodWeatheredWaxed.class);
+        register(WAXED_OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidizedWaxed.class);
         register(COPPER_BARS, BlockCopperBars.class); //1321
         register(EXPOSED_COPPER_BARS, BlockCopperBarsExposed.class); //1322
         register(WEATHERED_COPPER_BARS, BlockCopperBarsWeathered.class); //1323

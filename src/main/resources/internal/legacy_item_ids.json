@@ -1,4 +1,11 @@
 {
+  "minecraft:exposed_lightning_rod": -1059,
+  "minecraft:weathered_lightning_rod": -1060,
+  "minecraft:oxidized_lightning_rod": -1061,
+  "minecraft:waxed_lightning_rod": -1062,
+  "minecraft:waxed_exposed_lightning_rod": -1063,
+  "minecraft:waxed_weathered_lightning_rod": -1064,
+  "minecraft:waxed_oxidized_lightning_rod": -1065,
   "minecraft:spruce_log": -569,
   "minecraft:birch_log": -570,
   "minecraft:jungle_log": -571,
