@@ -129,7 +129,12 @@ public class BlockNoteblock extends BlockSolid implements BlockEntityHolder<Bloc
             case JUNGLE_WOOD_STAIRS:
             case ACACIA_WOOD_STAIRS:
             case DARK_OAK_WOOD_STAIRS:
-            case FENCE:
+            case OAK_FENCE:
+            case ACACIA_FENCE:
+            case BIRCH_FENCE:
+            case DARK_OAK_FENCE:
+            case JUNGLE_FENCE:
+            case SPRUCE_FENCE:
             case FENCE_GATE:
             case FENCE_GATE_SPRUCE:
             case FENCE_GATE_BIRCH:
