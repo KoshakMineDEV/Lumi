@@ -849,6 +849,9 @@ public interface BlockID {
     int CORNFLOWER = 1093;
     int LILY_OF_THE_VALLEY = 1094;
 
+    int DARK_PRISMARINE = 1202;
+    int PRISMARINE_BRICKS = 1203;
+
     int CHIPPED_ANVIL = 1214;
     int DAMAGED_ANVIL = 1215;
     int DEPRECATED_ANVIL = 1216;

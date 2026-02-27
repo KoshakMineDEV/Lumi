@@ -4,29 +4,19 @@ import cn.nukkit.item.ItemTool;
 import cn.nukkit.block.data.BlockColor;
 
 
-public class BlockPrismarine extends BlockSolidMeta {
-
-    public static final int NORMAL = 0;
-    public static final int DARK = 1;
-    public static final int BRICKS = 2;
-
-    private static final String[] NAMES = new String[]{
-            "Prismarine",
-            "Dark Prismarine",
-            "Prismarine Bricks"
-    };
-
+public class BlockPrismarine extends BlockSolid {
     public BlockPrismarine() {
-        this(0);
-    }
-
-    public BlockPrismarine(int meta) {
-        super(meta);
+        super();
     }
 
     @Override
     public int getId() {
         return PRISMARINE;
+    }
+
+    @Override
+    public String getName() {
+        return "Prismarine";
     }
 
     @Override
@@ -36,7 +26,7 @@ public class BlockPrismarine extends BlockSolidMeta {
 
     @Override
     public double getResistance() {
-        return 30;
+        return 6;
     }
 
     @Override
@@ -50,25 +40,12 @@ public class BlockPrismarine extends BlockSolidMeta {
     }
 
     @Override
-    public String getName() {
-        return NAMES[this.getDamage() > 2 ? 0 : this.getDamage()];
-    }
-
-    @Override
     public boolean canHarvestWithHand() {
         return false;
     }
 
     @Override
     public BlockColor getColor() {
-        switch (getDamage() & 0x07) {
-            case NORMAL:
-                return BlockColor.CYAN_BLOCK_COLOR;
-            case BRICKS:
-            case DARK:
-                return BlockColor.DIAMOND_BLOCK_COLOR;
-            default:
-                return BlockColor.STONE_BLOCK_COLOR;
-        }
+        return BlockColor.CYAN_BLOCK_COLOR;
     }
 }

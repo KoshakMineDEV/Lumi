@@ -841,6 +841,9 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(CORNFLOWER, BlockCornflower.class); //1093
         register(LILY_OF_THE_VALLEY, BlockLilyOfTheValley.class); //1094
 
+        register(DARK_PRISMARINE, BlockDarkPrismarine.class); //1202
+        register(PRISMARINE_BRICKS, BlockPrismarineBricks.class); //1203
+
         register(CHIPPED_ANVIL, BlockChippedAnvil.class); //1214
         register(DAMAGED_ANVIL, BlockDamagedAnvil.class); //1215
         register(DEPRECATED_ANVIL, BlockDeprecatedAnvil.class); //1216
@@ -919,10 +922,10 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(EXPOSED_LIGHTNING_ROD, BlockLightningRodExposed.class); //1314
         register(WEATHERED_LIGHTNING_ROD, BlockLightningRodWeathered.class); //1315
         register(OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidized.class); //1316
-        register(WAXED_LIGHTNING_ROD, BlockLightningRodWaxed.class);
-        register(WAXED_EXPOSED_LIGHTNING_ROD, BlockLightningRodExposedWaxed.class);
-        register(WAXED_WEATHERED_LIGHTNING_ROD, BlockLightningRodWeatheredWaxed.class);
-        register(WAXED_OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidizedWaxed.class);
+        register(WAXED_LIGHTNING_ROD, BlockLightningRodWaxed.class); //1317
+        register(WAXED_EXPOSED_LIGHTNING_ROD, BlockLightningRodExposedWaxed.class); //1318
+        register(WAXED_WEATHERED_LIGHTNING_ROD, BlockLightningRodWeatheredWaxed.class); //1319
+        register(WAXED_OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidizedWaxed.class); //1320
         register(COPPER_BARS, BlockCopperBars.class); //1321
         register(EXPOSED_COPPER_BARS, BlockCopperBarsExposed.class); //1322
         register(WEATHERED_COPPER_BARS, BlockCopperBarsWeathered.class); //1323
