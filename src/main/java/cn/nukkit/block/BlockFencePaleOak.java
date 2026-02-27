@@ -7,11 +7,7 @@ import cn.nukkit.item.ItemBlock;
 public class BlockFencePaleOak extends BlockFence {
 
     public BlockFencePaleOak() {
-        this(0);
-    }
-
-    public BlockFencePaleOak(int meta) {
-        super(meta);
+        super();
     }
 
     @Override

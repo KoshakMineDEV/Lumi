@@ -143,7 +143,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(CLAY_BLOCK, BlockClay.class); //82
         register(SUGARCANE_BLOCK, BlockSugarcane.class); //83
         register(JUKEBOX, BlockJukebox.class); //84
-        register(FENCE, BlockFence.class); //85
+        register(OAK_FENCE, BlockOakFence.class); //85
         register(PUMPKIN, BlockPumpkin.class); //86
         register(NETHERRACK, BlockNetherrack.class); //87
         register(SOUL_SAND, BlockSoulSand.class); //88
@@ -748,7 +748,11 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(DARK_OAK_LOG, BlockDarkOakLog.class); //827
         register(SUSPICIOUS_GRAVEL, BlockSuspiciousGravel.class); //828
         register(PITCHER_CROP, BlockPitcherCrop.class); //829
-
+        register(ACACIA_FENCE, BlockAcaciaFence.class); //830
+        register(BIRCH_FENCE, BlockBirchFence.class); //831
+        register(DARK_OAK_FENCE, BlockDarkOakFence.class); //832
+        register(JUNGLE_FENCE, BlockJungleFence.class); //833
+        register(SPRUCE_FENCE, BlockSpruceFence.class); //834
         register(CALIBRATED_SCULK_SENSOR, BlockCalibratedSculkSensor.class); //835
 
         register(SNIFFER_EGG, BlockSnifferEgg.class); //851
