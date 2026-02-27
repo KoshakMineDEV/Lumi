@@ -1,4 +1,9 @@
 {
+  "minecraft:acacia_fence": -575,
+  "minecraft:birch_fence": -576,
+  "minecraft:dark_oak_fence": -577,
+  "minecraft:jungle_fence": -578,
+  "minecraft:spruce_fence,": -579,
   "minecraft:exposed_lightning_rod": -1059,
   "minecraft:weathered_lightning_rod": -1060,
   "minecraft:oxidized_lightning_rod": -1061,
@@ -800,7 +805,7 @@
   "minecraft:clay": 82,
   "minecraft:item.reeds": 83,
   "minecraft:jukebox": 84,
-  "minecraft:fence": 85,
+  "minecraft:oak_fence": 85,
   "minecraft:pumpkin": 86,
   "minecraft:netherrack": 87,
   "minecraft:soul_sand": 88,
