@@ -117,7 +117,7 @@ public interface BlockID {
     int REEDS = 83;
     int SUGARCANE_BLOCK = 83;
     int JUKEBOX = 84;
-    int FENCE = 85;
+    int OAK_FENCE = 85;
     int PUMPKIN = 86;
     int NETHERRACK = 87;
     int SOUL_SAND = 88;
@@ -759,6 +759,11 @@ public interface BlockID {
     int DARK_OAK_LOG = 827;
     int SUSPICIOUS_GRAVEL = 828;
     int PITCHER_CROP = 829;
+    int ACACIA_FENCE = 830;
+    int BIRCH_FENCE = 831;
+    int DARK_OAK_FENCE = 832;
+    int JUNGLE_FENCE = 833;
+    int SPRUCE_FENCE = 834;
     int CALIBRATED_SCULK_SENSOR = 835;
     int SNIFFER_EGG = 851;
     int PITCHER_PLANT = 867;
@@ -848,6 +853,9 @@ public interface BlockID {
     int OXEYE_DAISY = 1092;
     int CORNFLOWER = 1093;
     int LILY_OF_THE_VALLEY = 1094;
+
+    int DARK_PRISMARINE = 1202;
+    int PRISMARINE_BRICKS = 1203;
 
     int CHIPPED_ANVIL = 1214;
     int DAMAGED_ANVIL = 1215;

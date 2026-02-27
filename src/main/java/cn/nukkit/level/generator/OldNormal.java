@@ -68,14 +68,10 @@ public class OldNormal extends Generator {
     private List<Populator> structurePopulators = ImmutableList.of(
         new PopulatorFossil(),
         new PopulatorShipwreck(),
-        new PopulatorSwampHut(),
         new PopulatorDesertPyramid(),
         new PopulatorJungleTemple(),
         new PopulatorIgloo(),
-        new PopulatorPillagerOutpost(),
         new PopulatorOceanRuin(),
-        new PopulatorStronghold(),
-        new PopulatorMineshaft(),
         new PopulatorDesertWell(),
         new PopulatorDungeon()
     );
