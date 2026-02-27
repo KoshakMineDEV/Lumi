@@ -11,11 +11,7 @@ import cn.nukkit.block.data.BlockColor;
 public class BlockFenceNetherBrick extends BlockFence {
 
     public BlockFenceNetherBrick() {
-        this(0);
-    }
-
-    public BlockFenceNetherBrick(int meta) {
-        super(meta);
+        super();
     }
 
     @Override
