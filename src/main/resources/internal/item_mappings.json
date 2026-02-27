@@ -25,12 +25,6 @@
     "0": "minecraft:sand",
     "1": "minecraft:red_sand"
   },
-  "minecraft:prismarine": {
-    "protocol": 712,
-    "0": "minecraft:prismarine",
-    "1": "minecraft:dark_prismarine",
-    "2": "minecraft:prismarine_bricks"
-  },
   "minecraft:sandstone": {
     "protocol": 712,
     "0": "minecraft:sandstone",
