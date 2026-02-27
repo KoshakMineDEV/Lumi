@@ -341,14 +341,6 @@
     "14": "minecraft:red_carpet",
     "15": "minecraft:black_carpet"
   },
-  "minecraft:fence": {
-    "0": "minecraft:oak_fence",
-    "1": "minecraft:spruce_fence",
-    "2": "minecraft:birch_fence",
-    "3": "minecraft:jungle_fence",
-    "4": "minecraft:acacia_fence",
-    "5": "minecraft:dark_oak_fence"
-  },
   "minecraft:wool": {
     "0": "minecraft:white_wool",
     "1": "minecraft:orange_wool",
