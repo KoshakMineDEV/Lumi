@@ -215,8 +215,8 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(HOPPER_BLOCK, BlockHopper.class); //154
         register(QUARTZ_BLOCK, BlockQuartz.class); //155
         register(QUARTZ_STAIRS, BlockStairsQuartz.class); //156
-        register(DOUBLE_WOOD_SLAB, BlockDoubleSlabWood.class); //157
-        register(WOOD_SLAB, BlockSlabWood.class); //158
+        register(OAK_DOUBLE_SLAB, BlockDoubleSlabWood.class); //157
+        register(OAK_SLAB, BlockOakSlab.class); //158
         register(STAINED_TERRACOTTA, BlockTerracottaStained.class); //159
         register(STAINED_GLASS_PANE, BlockGlassPaneStained.class); //160
         register(LEAVES2, BlockLeaves2.class); //161
@@ -821,6 +821,12 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(WAXED_EXPOSED_COPPER_TRAPDOOR, BlockWaxedExposedCopperTrapdoor.class); //1052
         register(WAXED_WEATHERED_COPPER_TRAPDOOR, BlockWaxedWeatheredCopperTrapdoor.class); //1053
         register(WAXED_OXIDIZED_COPPER_TRAPDOOR, BlockWaxedOxidizedCopperTrapdoor.class); //1054
+
+        register(SPRUCE_SLAB, BlockSpruceSlab.class); //1059
+        register(BIRCH_SLAB, BlockBirchSlab.class); //1060
+        register(JUNGLE_SLAB, BlockJungleSlab.class); //1061
+        register(ACACIA_SLAB, BlockAcaciaSlab.class); //1062
+        register(DARK_OAK_SLAB, BlockDarkOakSlab.class); //1063
 
         register(SPRUCE_WOOD, BlockSpruceWood.class); //1069
         register(BIRCH_WOOD, BlockBirchWood.class); //1070
