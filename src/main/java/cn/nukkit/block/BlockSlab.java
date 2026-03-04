@@ -100,7 +100,7 @@ public abstract class BlockSlab extends BlockTransparentMeta {
 
     @Override
     public Item toItem() {
-        return new ItemBlock(this, 0);
+        return new ItemBlock(Block.get(getId()), 0);
     }
 
     @Override
