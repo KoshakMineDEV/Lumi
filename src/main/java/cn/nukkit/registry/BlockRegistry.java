@@ -215,7 +215,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(HOPPER_BLOCK, BlockHopper.class); //154
         register(QUARTZ_BLOCK, BlockQuartz.class); //155
         register(QUARTZ_STAIRS, BlockStairsQuartz.class); //156
-        register(OAK_DOUBLE_SLAB, BlockDoubleSlabWood.class); //157
+        register(OAK_DOUBLE_SLAB, BlockOakDoubleSlab.class); //157
         register(OAK_SLAB, BlockOakSlab.class); //158
         register(STAINED_TERRACOTTA, BlockTerracottaStained.class); //159
         register(STAINED_GLASS_PANE, BlockGlassPaneStained.class); //160
@@ -827,6 +827,11 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(JUNGLE_SLAB, BlockJungleSlab.class); //1061
         register(ACACIA_SLAB, BlockAcaciaSlab.class); //1062
         register(DARK_OAK_SLAB, BlockDarkOakSlab.class); //1063
+        register(SPRUCE_DOUBLE_SLAB, BlockSpruceDoubleSlab.class); //1064
+        register(BIRCH_DOUBLE_SLAB, BlockBirchDoubleSlab.class); //1065
+        register(JUNGLE_DOUBLE_SLAB, BlockJungleDoubleSlab.class); //1066
+        register(ACACIA_DOUBLE_SLAB, BlockAcaciaDoubleSlab.class); //1067
+        register(DARK_OAK_DOUBLE_SLAB, BlockDarkOakDoubleSlab.class); //1068
 
         register(SPRUCE_WOOD, BlockSpruceWood.class); //1069
         register(BIRCH_WOOD, BlockBirchWood.class); //1070
