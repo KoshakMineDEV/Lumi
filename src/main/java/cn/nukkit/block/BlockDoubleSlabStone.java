@@ -30,7 +30,7 @@ public class BlockDoubleSlabStone extends BlockSolidMeta {
 
     @Override
     public int getId() {
-        return DOUBLE_SLAB;
+        return SMOOTH_STONE_DOUBLE_SLAB;
     }
 
     @Override
@@ -66,22 +66,6 @@ public class BlockDoubleSlabStone extends BlockSolidMeta {
                 "Nether Brick"
         };
         return "Double " + names[this.getDamage() & 0x07] + " Slab";
-    }
-
-    @Override
-    public Item toItem() {
-        return new ItemBlock(Block.get(STONE_SLAB), this.getDamage() & 0x07);
-    }
-
-    @Override
-    public Item[] getDrops(Item item) {
-        if (item.isPickaxe()) {
-            return new Item[]{
-                    Item.get(Item.SLAB, this.getDamage() & 0x07, 2)
-            };
-        } else {
-            return Item.EMPTY_ARRAY;
-        }
     }
 
     @Override

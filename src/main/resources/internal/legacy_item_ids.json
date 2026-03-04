@@ -1,4 +1,11 @@
 {
+  "minecraft:sandstone_slab": -872,
+  "minecraft:cobblestone_slab": -873,
+  "minecraft:brick_slab": -874,
+  "minecraft:stone_brick_slab": -875,
+  "minecraft:quartz_slab": -876,
+  "minecraft:nether_brick_slab": -877,
+  "minecraft:petrified_oak_slab": -902,
   "minecraft:spruce_slab": -804,
   "minecraft:birch_slab": -805,
   "minecraft:jungle_slab": -806,
