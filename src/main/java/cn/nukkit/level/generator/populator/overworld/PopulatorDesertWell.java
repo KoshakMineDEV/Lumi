@@ -1,7 +1,7 @@
 package cn.nukkit.level.generator.populator.overworld;
 
 import cn.nukkit.block.BlockID;
-import cn.nukkit.block.BlockSlabStone;
+import cn.nukkit.block.BlockSmoothStoneSlab;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.FullChunk;
@@ -52,16 +52,16 @@ public class PopulatorDesertWell extends Populator {
                     }
                 }
             }
-            level.setBlockAt(x + 2, y + 1, z, BlockID.STONE_SLAB, BlockSlabStone.SANDSTONE);
-            level.setBlockAt(x - 2, y + 1, z, BlockID.STONE_SLAB, BlockSlabStone.SANDSTONE);
-            level.setBlockAt(x, y + 1, z + 2, BlockID.STONE_SLAB, BlockSlabStone.SANDSTONE);
-            level.setBlockAt(x, y + 1, z - 2, BlockID.STONE_SLAB, BlockSlabStone.SANDSTONE);
+            level.setBlockAt(x + 2, y + 1, z, BlockID.SANDSTONE_SLAB);
+            level.setBlockAt(x - 2, y + 1, z, BlockID.SANDSTONE_SLAB);
+            level.setBlockAt(x, y + 1, z + 2, BlockID.SANDSTONE_SLAB);
+            level.setBlockAt(x, y + 1, z - 2, BlockID.SANDSTONE_SLAB);
             for (int dx = -1; dx <= 1; ++dx) {
                 for (int dz = -1; dz <= 1; ++dz) {
                     if (dx == 0 && dz == 0) {
                         level.setBlockAt(x + dx, y + 4, z + dz, BlockID.SANDSTONE);
                     } else {
-                        level.setBlockAt(x + dx, y + 4, z + dz, BlockID.STONE_SLAB, BlockSlabStone.SANDSTONE);
+                        level.setBlockAt(x + dx, y + 4, z + dz, BlockID.SANDSTONE_SLAB);
                     }
                 }
             }

@@ -58,12 +58,8 @@ public interface BlockID {
     int RED_MUSHROOM = 40;
     int GOLD_BLOCK = 41;
     int IRON_BLOCK = 42;
-    int DOUBLE_SLAB = 43;
-    int DOUBLE_STONE_SLAB = 43;
-    int DOUBLE_SLABS = 43;
-    int SLAB = 44;
-    int STONE_SLAB = 44;
-    int SLABS = 44;
+    int SMOOTH_STONE_DOUBLE_SLAB = 43;
+    int SMOOTH_STONE_SLAB = 44;
     int BRICKS = 45;
     int BRICKS_BLOCK = 45;
     int TNT = 46;
@@ -858,6 +854,22 @@ public interface BlockID {
     int OXEYE_DAISY = 1092;
     int CORNFLOWER = 1093;
     int LILY_OF_THE_VALLEY = 1094;
+
+    int SANDSTONE_SLAB = 1127;
+    int COBBLESTONE_SLAB = 1128;
+    int BRICK_SLAB = 1129;
+    int STONE_BRICK_SLAB = 1130;
+    int QUARTZ_SLAB = 1131;
+    int NETHER_BRICK_SLAB = 1132;
+    int SANDSTONE_DOUBLE_SLAB = 1133;
+    int COBBLESTONE_DOUBLE_SLAB = 1134;
+    int BRICK_DOUBLE_SLAB = 1135;
+    int STONE_BRICK_DOUBLE_SLAB = 1136;
+    int QUARTZ_DOUBLE_SLAB = 1137;
+    int NETHER_BRICK_DOUBLE_SLAB = 1138;
+
+    int PETRIFIED_SLAB = 1157;
+    int PETRIFIED_DOUBLE_SLAB = 1158;
 
     int DARK_PRISMARINE = 1202;
     int PRISMARINE_BRICKS = 1203;
