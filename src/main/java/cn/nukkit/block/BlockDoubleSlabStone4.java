@@ -5,7 +5,7 @@ import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.block.data.BlockColor;
 
-public class BlockDoubleSlabStone4 extends BlockDoubleSlabStone {
+public class BlockDoubleSlabStone4 extends BlockSmoothStoneDoubleSlab {
 
     public static final int MOSSY_STONE_BRICKS = 0;
     public static final int SMOOTH_QUARTZ = 1;

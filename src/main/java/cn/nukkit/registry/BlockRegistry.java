@@ -101,7 +101,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(RED_MUSHROOM, BlockMushroomRed.class); //40
         register(GOLD_BLOCK, BlockGold.class); //41
         register(IRON_BLOCK, BlockIron.class); //42
-        register(SMOOTH_STONE_DOUBLE_SLAB, BlockDoubleSlabStone.class); //43
+        register(SMOOTH_STONE_DOUBLE_SLAB, BlockSmoothStoneDoubleSlab.class); //43
         register(SMOOTH_STONE_SLAB, BlockSmoothStoneSlab.class); //44
         register(BRICKS_BLOCK, BlockBricks.class); //45
         register(TNT, BlockTNT.class); //46
@@ -859,11 +859,18 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(SANDSTONE_SLAB, BlockSandstoneSlab.class); //1127
         register(COBBLESTONE_SLAB, BlockCobblestoneSlab.class); //1128
         register(BRICK_SLAB, BlockBrickSlab.class); //1129
-        register(STONE_BRICK_SLAB,  BlockStoneBrickSlab.class); //1130
+        register(STONE_BRICK_SLAB, BlockStoneBrickSlab.class); //1130
         register(QUARTZ_SLAB, BlockQuartzSlab.class); //1131
         register(NETHER_BRICK_SLAB, BlockNetherBrickSlab.class); //1132
+        register(SANDSTONE_DOUBLE_SLAB, BlockSandstoneDoubleSlab.class); //1133
+        register(COBBLESTONE_DOUBLE_SLAB, BlockCobblestoneDoubleSlab.class); //1134
+        register(BRICK_DOUBLE_SLAB, BlockBrickDoubleSlab.class); //1135
+        register(STONE_BRICK_DOUBLE_SLAB, BlockStoneBrickDoubleSlab.class); //1136
+        register(QUARTZ_DOUBLE_SLAB, BlockQuartzDoubleSlab.class); //1137
+        register(NETHER_BRICK_DOUBLE_SLAB, BlockNetherBrickDoubleSlab.class); //1138
 
         register(PETRIFIED_SLAB, BlockPetrifiedSlab.class); //1157
+        register(PETRIFIED_DOUBLE_SLAB, BlockPetrifiedDoubleSlab.class); //1158
 
         register(DARK_PRISMARINE, BlockDarkPrismarine.class); //1202
         register(PRISMARINE_BRICKS, BlockPrismarineBricks.class); //1203
