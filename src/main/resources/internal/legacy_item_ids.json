@@ -1,4 +1,18 @@
 {
+  "minecraft:sandstone_double_slab": -878,
+  "minecraft:cobblestone_double_slab": -879,
+  "minecraft:brick_double_slab": -880,
+  "minecraft:stone_brick_double_slab": -881,
+  "minecraft:quartz_double_slab": -882,
+  "minecraft:nether_brick_double_slab": -883,
+  "minecraft:petrified_oak_double_slab": -903,
+  "minecraft:spruce_double_slab": -809,
+  "minecraft:birch_double_slab": -810,
+  "minecraft:jungle_double_slab": -811,
+  "minecraft:acacia_double_slab": -812,
+  "minecraft:dark_oak_double_slab": -813,
+  "minecraft:smooth_stone_double_slab": 43,
+
   "minecraft:sandstone_slab": -872,
   "minecraft:cobblestone_slab": -873,
   "minecraft:brick_slab": -874,
