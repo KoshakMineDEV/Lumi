@@ -879,6 +879,14 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(PETRIFIED_SLAB, BlockPetrifiedSlab.class); //1157
         register(PETRIFIED_DOUBLE_SLAB, BlockPetrifiedDoubleSlab.class); //1158
 
+        register(PURPUR_DOUBLE_SLAB, BlockPurpurDoubleSlab.class); //1166
+        register(PRISMARINE_DOUBLE_SLAB, BlockPrismarineDoubleSlab.class); //1167
+        register(DARK_PRISMARINE_DOUBLE_SLAB, BlockDarkPrismarineDoubleSlab.class); //1168
+        register(PRISMARINE_BRICK_DOUBLE_SLAB, BlockPrismarineBrickDoubleSlab.class); //1169
+        register(MOSSY_COBBLESTONE_DOUBLE_SLAB, BlockMossyCobblestoneDoubleSlab.class); //1170
+        register(SMOOTH_SANDSTONE_DOUBLE_SLAB, BlockSmoothSandstoneDoubleSlab.class); //1171
+        register(RED_NETHER_BRICK_DOUBLE_SLAB, BlockRedNetherBrickDoubleSlab.class); //1172
+
         register(DARK_PRISMARINE, BlockDarkPrismarine.class); //1202
         register(PRISMARINE_BRICKS, BlockPrismarineBricks.class); //1203
 
