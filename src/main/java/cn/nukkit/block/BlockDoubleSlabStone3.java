@@ -2,20 +2,11 @@ package cn.nukkit.block;
 
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
+import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.block.data.BlockColor;
 
-public class BlockDoubleSlabStone3 extends BlockSmoothStoneDoubleSlab {
-
-    public static final int END_STONE_BRICKS = 0;
-    public static final int SMOOTH_RED_SANDSTONE = 1;
-    public static final int POLISHED_ANDESITE = 2;
-    public static final int ANDESITE = 3;
-    public static final int DIORITE = 4;
-    public static final int POLISHED_DIORITE = 5;
-    public static final int GRANITE = 6;
-    public static final int POLISHED_GRANITE = 7;
-
+public class BlockDoubleSlabStone3 extends BlockSlab {
     public BlockDoubleSlabStone3() {
         this(0);
     }
@@ -26,7 +17,7 @@ public class BlockDoubleSlabStone3 extends BlockSmoothStoneDoubleSlab {
 
     @Override
     public int getId() {
-        return DOUBLE_STONE_SLAB3;
+        return SMOOTH_RED_SANDSTONE_DOUBLE_SLAB;
     }
 
     @Override
@@ -36,7 +27,7 @@ public class BlockDoubleSlabStone3 extends BlockSmoothStoneDoubleSlab {
 
     @Override
     public double getResistance() {
-        return this.getToolType() > ItemTool.TIER_WOODEN ? 30 : 15;
+        return 30;
     }
 
     @Override
@@ -65,16 +56,11 @@ public class BlockDoubleSlabStone3 extends BlockSmoothStoneDoubleSlab {
     }
 
     @Override
-    public Item toItem() {
-        return new ItemBlock(new BlockEndStoneBrickSlab(), this.getDamage() & 0x07);
-    }
-
-    @Override
     public Item[] getDrops(Item item) {
         if (item.isPickaxe() && item.getTier() >= ItemTool.TIER_WOODEN) {
-            Item drop = Block.get(Block.STONE_SLAB3, this.getDamage() & 0x07).toItem();
-            drop.setCount(2);
-            return new Item[]{ drop };
+            return new Item[] {
+                    Item.get(ItemNamespaceId.SMOOTH_STONE_SLAB, 0, 2)
+            };
         } else {
             return Item.EMPTY_ARRAY;
         }
