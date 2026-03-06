@@ -37,7 +37,7 @@ public class DesertPyramid extends ScatteredStructurePiece {
         builder.fill(new BlockVector3(2, 22, 4), new BlockVector3(2, 24, 4), BlockID.AIR);
         builder.fill(new BlockVector3(1, 19, 3), new BlockVector3(2, 20, 3), BlockID.SANDSTONE);
         builder.setBlock(new BlockVector3(1, 19, 2), BlockID.SANDSTONE);
-        builder.setBlock(new BlockVector3(1, 20, 2), BlockID.STONE_SLAB, 1);
+        builder.setBlock(new BlockVector3(1, 20, 2), BlockID.SANDSTONE_SLAB);
         builder.setBlock(new BlockVector3(2, 19, 2), BlockID.SANDSTONE_STAIRS, 1); // E
         for (int i = 0; i < 2; i++) {
             builder.setBlock(new BlockVector3(2, 21 + i, 4 + i), BlockID.SANDSTONE_STAIRS, 2); // N
@@ -53,7 +53,7 @@ public class DesertPyramid extends ScatteredStructurePiece {
         builder.fill(new BlockVector3(18, 22, 4), new BlockVector3(18, 24, 4), BlockID.AIR);
         builder.fill(new BlockVector3(18, 19, 3), new BlockVector3(19, 20, 3), BlockID.SANDSTONE);
         builder.setBlock(new BlockVector3(19, 19, 2), BlockID.SANDSTONE);
-        builder.setBlock(new BlockVector3(19, 20, 2), BlockID.STONE_SLAB, 1);
+        builder.setBlock(new BlockVector3(19, 20, 2), BlockID.SANDSTONE_SLAB);
         builder.setBlock(new BlockVector3(18, 19, 2), BlockID.SANDSTONE_STAIRS, 0); // W
         for (int i = 0; i < 2; i++) {
             builder.setBlock(new BlockVector3(18, 21 + i, 4 + i), BlockID.SANDSTONE_STAIRS, 2); // N

@@ -112,4 +112,9 @@ public abstract class BlockSlabCutCopperBase extends BlockSlab implements Oxidiz
                 return getId();
         }
     }
+
+    @Override
+    public String getName() {
+        return getOxidizationLevel().name().toLowerCase() + "Slab";
+    }
 }

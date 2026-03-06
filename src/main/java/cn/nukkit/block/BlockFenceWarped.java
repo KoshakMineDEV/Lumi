@@ -7,11 +7,7 @@ import cn.nukkit.block.data.BlockColor;
 public class BlockFenceWarped extends BlockFence {
 
     public BlockFenceWarped() {
-        this(0);
-    }
-
-    public BlockFenceWarped(int meta) {
-        super(meta);
+        super();
     }
 
     @Override
