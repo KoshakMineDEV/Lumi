@@ -24,22 +24,7 @@ public class BlockEndStoneBrickSlab extends BlockSlab {
 
     @Override
     public BlockColor getColor() {
-        switch (this.getDamage() & 0x07) {
-            case END_STONE_BRICKS:
-                return BlockColor.SAND_BLOCK_COLOR;
-            case SMOOTH_RED_SANDSTONE:
-                return BlockColor.ORANGE_BLOCK_COLOR;
-            default:
-            case POLISHED_ANDESITE:
-            case ANDESITE:
-                return BlockColor.STONE_BLOCK_COLOR;
-            case DIORITE:
-            case POLISHED_DIORITE:
-                return BlockColor.QUARTZ_BLOCK_COLOR;
-            case GRANITE:
-            case POLISHED_GRANITE:
-                return BlockColor.DIRT_BLOCK_COLOR;
-        }
+        return BlockColor.SAND_BLOCK_COLOR;
     }
 
     @Override

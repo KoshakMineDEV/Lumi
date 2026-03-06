@@ -195,9 +195,10 @@ public class BlockNoteblock extends BlockSolid implements BlockEntityHolder<Bloc
             case NETHER_BRICK_BLOCK:
             case RED_NETHER_BRICK:
             case QUARTZ_BLOCK:
-            case DOUBLE_SLAB:
-            case SLAB:
-            case DOUBLE_RED_SANDSTONE_SLAB:
+            //TODO: Fix
+            //case DOUBLE_SLAB:
+            //case SLAB:
+            //case DOUBLE_RED_SANDSTONE_SLAB:
             case RED_SANDSTONE_SLAB:
             case COBBLE_STAIRS:
             case BRICK_STAIRS:
