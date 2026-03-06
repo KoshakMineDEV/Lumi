@@ -66,7 +66,7 @@ public class BlockDoubleSlabStone3 extends BlockSmoothStoneDoubleSlab {
 
     @Override
     public Item toItem() {
-        return new ItemBlock(new BlockSlabStone3(), this.getDamage() & 0x07);
+        return new ItemBlock(new BlockEndStoneBrickSlab(), this.getDamage() & 0x07);
     }
 
     @Override
