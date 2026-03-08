@@ -101,8 +101,8 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(RED_MUSHROOM, BlockMushroomRed.class); //40
         register(GOLD_BLOCK, BlockGold.class); //41
         register(IRON_BLOCK, BlockIron.class); //42
-        register(DOUBLE_STONE_SLAB, BlockDoubleSlabStone.class); //43
-        register(STONE_SLAB, BlockSlabStone.class); //44
+        register(SMOOTH_STONE_DOUBLE_SLAB, BlockSmoothStoneDoubleSlab.class); //43
+        register(SMOOTH_STONE_SLAB, BlockSmoothStoneSlab.class); //44
         register(BRICKS_BLOCK, BlockBricks.class); //45
         register(TNT, BlockTNT.class); //46
         register(BOOKSHELF, BlockBookshelf.class); //47
@@ -143,7 +143,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(CLAY_BLOCK, BlockClay.class); //82
         register(SUGARCANE_BLOCK, BlockSugarcane.class); //83
         register(JUKEBOX, BlockJukebox.class); //84
-        register(FENCE, BlockFence.class); //85
+        register(OAK_FENCE, BlockOakFence.class); //85
         register(PUMPKIN, BlockPumpkin.class); //86
         register(NETHERRACK, BlockNetherrack.class); //87
         register(SOUL_SAND, BlockSoulSand.class); //88
@@ -215,8 +215,8 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(HOPPER_BLOCK, BlockHopper.class); //154
         register(QUARTZ_BLOCK, BlockQuartz.class); //155
         register(QUARTZ_STAIRS, BlockStairsQuartz.class); //156
-        register(DOUBLE_WOOD_SLAB, BlockDoubleSlabWood.class); //157
-        register(WOOD_SLAB, BlockSlabWood.class); //158
+        register(OAK_DOUBLE_SLAB, BlockOakDoubleSlab.class); //157
+        register(OAK_SLAB, BlockOakSlab.class); //158
         register(STAINED_TERRACOTTA, BlockTerracottaStained.class); //159
         register(STAINED_GLASS_PANE, BlockGlassPaneStained.class); //160
         register(LEAVES2, BlockLeaves2.class); //161
@@ -239,8 +239,8 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(DAYLIGHT_DETECTOR_INVERTED, BlockDaylightDetectorInverted.class); //178
         register(RED_SANDSTONE, BlockRedSandstone.class); //179
         register(RED_SANDSTONE_STAIRS, BlockStairsRedSandstone.class); //180
-        register(DOUBLE_RED_SANDSTONE_SLAB, BlockDoubleSlabRedSandstone.class); //181
-        register(RED_SANDSTONE_SLAB, BlockSlabRedSandstone.class); //182
+        register(RED_SANDSTONE_DOUBLE_SLAB, BlockRedSandstoneDoubleSlab.class); //181
+        register(RED_SANDSTONE_SLAB, BlockRedSandstoneSlab.class); //182
         register(FENCE_GATE_SPRUCE, BlockFenceGateSpruce.class); //183
         register(FENCE_GATE_BIRCH, BlockFenceGateBirch.class); //184
         register(FENCE_GATE_JUNGLE, BlockFenceGateJungle.class); //185
@@ -358,13 +358,13 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(TURTLE_EGG, BlockTurtleEgg.class); //414
         register(BUBBLE_COLUMN, BlockBubbleColumn.class); //415
         register(BARRIER, BlockBarrier.class); //416
-        register(STONE_SLAB3, BlockSlabStone3.class); //417
+        register(END_STONE_BRICK_SLAB, BlockEndStoneBrickSlab.class); //417
         register(BAMBOO, BlockBamboo.class); //418
         register(BAMBOO_SAPLING, BlockBambooSapling.class); //419
         register(SCAFFOLDING, BlockScaffolding.class); //420
-        register(STONE_SLAB4, BlockSlabStone4.class); //421
-        register(DOUBLE_STONE_SLAB3, BlockDoubleSlabStone3.class); //422
-        register(DOUBLE_STONE_SLAB4, BlockDoubleSlabStone4.class); //423
+        register(MOSSY_STONE_BRICK_SLAB, BlockMossyStoneBrickSlab.class); //421
+        register(END_STONE_BRICK_DOUBLE_SLAB, BlockEndStoneBrickDoubleSlab.class); //422
+        register(MOSSY_STONE_BRICK_DOUBLE_SLAB, BlockMossyStoneBrickDoubleSlab.class); //423
         register(GRANITE_STAIRS, BlockStairsGranite.class); //424
         register(DIORITE_STAIRS, BlockStairsDiorite.class); //425
         register(ANDESITE_STAIRS, BlockStairsAndesite.class); //426
@@ -748,7 +748,11 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(DARK_OAK_LOG, BlockDarkOakLog.class); //827
         register(SUSPICIOUS_GRAVEL, BlockSuspiciousGravel.class); //828
         register(PITCHER_CROP, BlockPitcherCrop.class); //829
-
+        register(ACACIA_FENCE, BlockAcaciaFence.class); //830
+        register(BIRCH_FENCE, BlockBirchFence.class); //831
+        register(DARK_OAK_FENCE, BlockDarkOakFence.class); //832
+        register(JUNGLE_FENCE, BlockJungleFence.class); //833
+        register(SPRUCE_FENCE, BlockSpruceFence.class); //834
         register(CALIBRATED_SCULK_SENSOR, BlockCalibratedSculkSensor.class); //835
 
         register(SNIFFER_EGG, BlockSnifferEgg.class); //851
@@ -818,6 +822,17 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(WAXED_WEATHERED_COPPER_TRAPDOOR, BlockWaxedWeatheredCopperTrapdoor.class); //1053
         register(WAXED_OXIDIZED_COPPER_TRAPDOOR, BlockWaxedOxidizedCopperTrapdoor.class); //1054
 
+        register(SPRUCE_SLAB, BlockSpruceSlab.class); //1059
+        register(BIRCH_SLAB, BlockBirchSlab.class); //1060
+        register(JUNGLE_SLAB, BlockJungleSlab.class); //1061
+        register(ACACIA_SLAB, BlockAcaciaSlab.class); //1062
+        register(DARK_OAK_SLAB, BlockDarkOakSlab.class); //1063
+        register(SPRUCE_DOUBLE_SLAB, BlockSpruceDoubleSlab.class); //1064
+        register(BIRCH_DOUBLE_SLAB, BlockBirchDoubleSlab.class); //1065
+        register(JUNGLE_DOUBLE_SLAB, BlockJungleDoubleSlab.class); //1066
+        register(ACACIA_DOUBLE_SLAB, BlockAcaciaDoubleSlab.class); //1067
+        register(DARK_OAK_DOUBLE_SLAB, BlockDarkOakDoubleSlab.class); //1068
+
         register(SPRUCE_WOOD, BlockSpruceWood.class); //1069
         register(BIRCH_WOOD, BlockBirchWood.class); //1070
         register(JUNGLE_WOOD, BlockJungleWood.class); //1071
@@ -840,6 +855,62 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(OXEYE_DAISY, BlockOxeyeDaisy.class); //1092
         register(CORNFLOWER, BlockCornflower.class); //1093
         register(LILY_OF_THE_VALLEY, BlockLilyOfTheValley.class); //1094
+
+        register(SANDSTONE_SLAB, BlockSandstoneSlab.class); //1127
+        register(COBBLESTONE_SLAB, BlockCobblestoneSlab.class); //1128
+        register(BRICK_SLAB, BlockBrickSlab.class); //1129
+        register(STONE_BRICK_SLAB, BlockStoneBrickSlab.class); //1130
+        register(QUARTZ_SLAB, BlockQuartzSlab.class); //1131
+        register(NETHER_BRICK_SLAB, BlockNetherBrickSlab.class); //1132
+        register(SANDSTONE_DOUBLE_SLAB, BlockSandstoneDoubleSlab.class); //1133
+        register(COBBLESTONE_DOUBLE_SLAB, BlockCobblestoneDoubleSlab.class); //1134
+        register(BRICK_DOUBLE_SLAB, BlockBrickDoubleSlab.class); //1135
+        register(STONE_BRICK_DOUBLE_SLAB, BlockStoneBrickDoubleSlab.class); //1136
+        register(QUARTZ_DOUBLE_SLAB, BlockQuartzDoubleSlab.class); //1137
+        register(NETHER_BRICK_DOUBLE_SLAB, BlockNetherBrickDoubleSlab.class); //1138
+        register(PURPUR_SLAB, BlockPurpurSlab.class); //1139
+        register(PRISMARINE_SLAB, BlockPrismarineSlab.class); //1140
+        register(DARK_PRISMARINE_SLAB, BlockDarkPrismarineSlab.class); //1141
+        register(PRISMARINE_BRICK_SLAB, BlockPrismarineBrickSlab.class); //1142
+        register(MOSSY_COBBLESTONE_SLAB, BlockMossyCobblestoneSlab.class); //1143
+        register(SMOOTH_SANDSTONE_SLAB, BlockSmoothSandstoneSlab.class); //1144
+        register(RED_NETHER_BRICK_SLAB, BlockRedNetherBrickSlab.class); //1145
+        register(SMOOTH_RED_SANDSTONE_SLAB, BlockSmoothRedSandstoneSlab.class); //1146
+        register(POLISHED_ANDESITE_SLAB, BlockPolishedAndesiteSlab.class); //1147
+        register(ANDESITE_SLAB, BlockAndesiteSlab.class); //1148
+        register(DIORITE_SLAB, BlockDioriteSlab.class); //1149
+        register(POLISHED_DIORITE_SLAB, BlockPolishedDioriteSlab.class); //1150
+        register(GRANITE_SLAB, BlockGraniteSlab.class); //1151
+        register(POLISHED_GRANITE_SLAB, BlockPolishedGraniteSlab.class); //1152
+        register(SMOOTH_QUARTZ_SLAB, BlockSmoothQuartzSlab.class); //1153
+        register(NORMAL_STONE_SLAB, BlockNormalStoneSlab.class); //1154
+        register(CUT_SANDSTONE_SLAB, BlockCutSandstoneSlab.class); //1155
+        register(CUT_RED_SANDSTONE_SLAB, BlockCutRedSandstoneSlab.class); //1156
+
+        register(PETRIFIED_SLAB, BlockPetrifiedSlab.class); //1157
+        register(PETRIFIED_DOUBLE_SLAB, BlockPetrifiedDoubleSlab.class); //1158
+
+        register(PURPUR_DOUBLE_SLAB, BlockPurpurDoubleSlab.class); //1166
+        register(PRISMARINE_DOUBLE_SLAB, BlockPrismarineDoubleSlab.class); //1167
+        register(DARK_PRISMARINE_DOUBLE_SLAB, BlockDarkPrismarineDoubleSlab.class); //1168
+        register(PRISMARINE_BRICK_DOUBLE_SLAB, BlockPrismarineBrickDoubleSlab.class); //1169
+        register(MOSSY_COBBLESTONE_DOUBLE_SLAB, BlockMossyCobblestoneDoubleSlab.class); //1170
+        register(SMOOTH_SANDSTONE_DOUBLE_SLAB, BlockSmoothSandstoneDoubleSlab.class); //1171
+        register(RED_NETHER_BRICK_DOUBLE_SLAB, BlockRedNetherBrickDoubleSlab.class); //1172
+        register(SMOOTH_RED_SANDSTONE_DOUBLE_SLAB, BlockSmoothRedSandstoneDoubleSlab.class); //1173
+        register(POLISHED_ANDESITE_DOUBLE_SLAB, BlockPolishedAndesiteDoubleSlab.class); //1174
+        register(ANDESITE_DOUBLE_SLAB, BlockAndesiteDoubleSlab.class); //1174
+        register(DIORITE_DOUBLE_SLAB, BlockDioriteDoubleSlab.class); //1175
+        register(POLISHED_DIORITE_DOUBLE_SLAB, BlockPolishedDioriteDoubleSlab.class); //1177
+        register(GRANITE_DOUBLE_SLAB, BlockGraniteDoubleSlab.class); //1178
+        register(POLISHED_GRANITE_DOUBLE_SLAB, BlockPolishedGraniteDoubleSlab.class); //1179
+        register(SMOOTH_QUARTZ_DOUBLE_SLAB, BlockSmoothQuartzDoubleSlab.class); //1180
+        register(NORMAL_STONE_DOUBLE_SLAB, BlockNormalStoneDoubleSlab.class); //1181
+        register(CUT_SANDSTONE_DOUBLE_SLAB, BlockCutSandstoneDoubleSlab.class); //1182
+        register(CUT_RED_SANDSTONE_DOUBLE_SLAB, BlockCutRedSandstoneDoubleSlab.class); //1183
+
+        register(DARK_PRISMARINE, BlockDarkPrismarine.class); //1202
+        register(PRISMARINE_BRICKS, BlockPrismarineBricks.class); //1203
 
         register(CHIPPED_ANVIL, BlockChippedAnvil.class); //1214
         register(DAMAGED_ANVIL, BlockDamagedAnvil.class); //1215
@@ -919,10 +990,10 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(EXPOSED_LIGHTNING_ROD, BlockLightningRodExposed.class); //1314
         register(WEATHERED_LIGHTNING_ROD, BlockLightningRodWeathered.class); //1315
         register(OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidized.class); //1316
-        register(WAXED_LIGHTNING_ROD, BlockLightningRodWaxed.class);
-        register(WAXED_EXPOSED_LIGHTNING_ROD, BlockLightningRodExposedWaxed.class);
-        register(WAXED_WEATHERED_LIGHTNING_ROD, BlockLightningRodWeatheredWaxed.class);
-        register(WAXED_OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidizedWaxed.class);
+        register(WAXED_LIGHTNING_ROD, BlockLightningRodWaxed.class); //1317
+        register(WAXED_EXPOSED_LIGHTNING_ROD, BlockLightningRodExposedWaxed.class); //1318
+        register(WAXED_WEATHERED_LIGHTNING_ROD, BlockLightningRodWeatheredWaxed.class); //1319
+        register(WAXED_OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidizedWaxed.class); //1320
         register(COPPER_BARS, BlockCopperBars.class); //1321
         register(EXPOSED_COPPER_BARS, BlockCopperBarsExposed.class); //1322
         register(WEATHERED_COPPER_BARS, BlockCopperBarsWeathered.class); //1323

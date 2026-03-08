@@ -25,50 +25,6 @@
     "42": "minecraft:stripped_birch_wood",
     "40": "minecraft:stripped_oak_wood"
   },
-  "-166": {
-    "8": "minecraft:mossy_stone_brick_slab",
-    "9": "minecraft:smooth_quartz_slab",
-    "11": "minecraft:cut_sandstone_slab",
-    "10": "minecraft:normal_stone_slab",
-    "12": "minecraft:cut_red_sandstone_slab"
-  },
-  "158": {
-    "9": "minecraft:spruce_slab",
-    "8": "minecraft:oak_slab",
-    "11": "minecraft:jungle_slab",
-    "12": "minecraft:acacia_slab",
-    "10": "minecraft:birch_slab",
-    "13": "minecraft:dark_oak_slab"
-  },
-  "182": {
-    "8": "minecraft:red_sandstone_slab",
-    "9": "minecraft:purpur_slab",
-    "10": "minecraft:prismarine_slab",
-    "11": "minecraft:dark_prismarine_slab",
-    "14": "minecraft:smooth_sandstone_slab",
-    "15": "minecraft:red_nether_brick_slab",
-    "12": "minecraft:prismarine_brick_slab",
-    "13": "minecraft:mossy_cobblestone_slab"
-  },
-  "44": {
-    "8": "minecraft:smooth_stone_slab",
-    "9": "minecraft:sandstone_slab",
-    "14": "minecraft:quartz_slab",
-    "13": "minecraft:stone_brick_slab",
-    "15": "minecraft:nether_brick_slab",
-    "12": "minecraft:brick_slab",
-    "11": "minecraft:cobblestone_slab"
-  },
-  "-162": {
-    "10": "minecraft:polished_andesite_slab",
-    "11": "minecraft:andesite_slab",
-    "12": "minecraft:diorite_slab",
-    "13": "minecraft:polished_diorite_slab",
-    "14": "minecraft:granite_slab",
-    "15": "minecraft:polished_granite_slab",
-    "9": "minecraft:smooth_red_sandstone_slab",
-    "8": "minecraft:end_stone_brick_slab"
-  },
   "-137": {
     "10": "minecraft:dead_horn_coral_wall_fan",
     "12": "minecraft:horn_coral_wall_fan",
