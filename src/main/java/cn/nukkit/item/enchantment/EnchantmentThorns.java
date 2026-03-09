@@ -22,8 +22,8 @@ public class EnchantmentThorns extends Enchantment {
         return level > 0 && random.nextFloat() < 0.15 * level;
     }
 
-    private static int getDamage(ThreadLocalRandom random, int level) {
-        return level > 10 ? level - 10 : random.nextInt(1, 5);
+    private static float getDamage(ThreadLocalRandom random, int level) {
+        return level > 10 ? level - 10 : random.nextFloat(1, 5);
     }
 
     @Override
