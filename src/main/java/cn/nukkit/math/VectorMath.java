@@ -1,5 +1,6 @@
 package cn.nukkit.math;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,80 +36,137 @@ public abstract class VectorMath {
     }
 
     public static List<Vector3> getPassByVector3(Vector3 from, Vector3 to) {
-        if (from.equals(to)) throw new IllegalArgumentException("from == to");
-
-        var xCuts = new LinkedList<FixedVector3>();
-        var lastXCut = from.x < to.x ? from : to;
-        var targetXCut = from.x > to.x ? from : to;
-        if (from.x != to.x) {
-            for (int xCut = NukkitMath.ceilDouble(Math.min(from.x, to.x)); xCut < NukkitMath.floorDouble(Math.max(from.x, to.x)) + 1; xCut++) {
-                var ratio = (xCut - from.x) / (to.x - from.x);
-                Vector3 currentXCut = new Vector3(xCut, from.y + (to.y - from.y) * ratio, from.z + (to.z - from.z) * ratio);
-                if (xCut != lastXCut.x) {
-                    xCuts.add(new FixedVector3(lastXCut, currentXCut));
-                }
-                lastXCut = currentXCut;
-                if (xCut + 1 > NukkitMath.floorDouble(Math.max(from.x, to.x))) {
-                    xCuts.add(new FixedVector3(lastXCut, targetXCut));
-                }
-            }
+        if (from.equals(to)) {
+            throw new IllegalArgumentException("from == to");
         }
 
-        if (xCuts.size() == 0) xCuts.add(new FixedVector3(from, to));
+        List<Vector3> result = new ArrayList<>();
 
-        var zCuts = new LinkedList<FixedVector3>();
-        if (from.z != to.z) {
-            for (var xCut : xCuts) {
-                var lastZCut = xCut.from.z < xCut.to.z ? xCut.from : xCut.to;
-                var targetZCut = xCut.from.z > xCut.to.z ? xCut.from : xCut.to;
-                var oldSize = zCuts.size();
-                for (int zCut = NukkitMath.ceilDouble(Math.min(xCut.from.z, xCut.to.z)); zCut < NukkitMath.floorDouble(Math.max(xCut.from.z, xCut.to.z)) + 1; zCut++) {
-                    var ratio = (zCut - xCut.from.z) / (xCut.to.z - xCut.from.z);
-                    Vector3 currentZCut = new Vector3(xCut.from.x + (xCut.to.x - xCut.from.x) * ratio, xCut.from.y + (xCut.to.y - xCut.from.y) * ratio, zCut);
-                    if (zCut != lastZCut.z) {
-                        zCuts.add(new FixedVector3(lastZCut, currentZCut));
-                    }
-                    lastZCut = currentZCut;
-                    if (zCut + 1 > NukkitMath.floorDouble(Math.max(xCut.from.z, xCut.to.z))) {
-                        zCuts.add(new FixedVector3(lastZCut, targetZCut));
-                    }
-                }
-                if (oldSize == zCuts.size()) zCuts.add(xCut);
-            }
-        }
+        double startX = from.x;
+        double startY = from.y;
+        double startZ = from.z;
+        double endX = to.x;
+        double endY = to.y;
+        double endZ = to.z;
 
-        var yCuts = new LinkedList<FixedVector3>();
-        if (from.y != to.y) {
-            for (var zCut : zCuts) {
-                var lastYCut = zCut.from.y < zCut.to.y ? zCut.from : zCut.to;
-                var targetYCut = zCut.from.y > zCut.to.y ? zCut.from : zCut.to;
-                var oldSize = yCuts.size();
-                for (int yCut = NukkitMath.ceilDouble(Math.min(zCut.from.y, zCut.to.y)); yCut < NukkitMath.floorDouble(Math.max(zCut.from.y, zCut.to.y)) + 1; yCut++) {
-                    var ratio = (yCut - zCut.from.y) / (zCut.to.y - zCut.from.y);
-                    Vector3 currentYCut = new Vector3(zCut.from.x + (zCut.to.x - zCut.from.x) * ratio, yCut, zCut.from.z + (zCut.to.z - zCut.from.z) * ratio);
-                    if (yCut != lastYCut.y) {
-                        yCuts.add(new FixedVector3(lastYCut, currentYCut));
-                    }
-                    lastYCut = currentYCut;
-                    if (yCut + 1 > NukkitMath.floorDouble(Math.max(zCut.from.y, zCut.to.y))) {
-                        yCuts.add(new FixedVector3(lastYCut, targetYCut));
-                    }
-                }
-                if (oldSize == yCuts.size()) yCuts.add(zCut);
-            }
+        // Текущий воксель (целые координаты)
+        int x = (int) Math.floor(startX);
+        int y = (int) Math.floor(startY);
+        int z = (int) Math.floor(startZ);
+
+        // Направление шага по каждой оси
+        int stepX = (int) Math.signum(endX - startX);
+        int stepY = (int) Math.signum(endY - startY);
+        int stepZ = (int) Math.signum(endZ - startZ);
+
+        // Расстояния до следующей границы в параметрическом пространстве t
+        double tMaxX, tMaxY, tMaxZ;
+        double tDeltaX, tDeltaY, tDeltaZ;
+
+        if (stepX != 0) {
+            double nextBoundary = (stepX > 0) ? (x + 1) : x;
+            tMaxX = (nextBoundary - startX) / (endX - startX);
+            tDeltaX = 1.0 / Math.abs(endX - startX);
         } else {
-            yCuts = zCuts;
+            tMaxX = Double.POSITIVE_INFINITY;
+            tDeltaX = Double.POSITIVE_INFINITY;
         }
 
-        return yCuts
-                .stream()
-                .map(yCut ->
-                        new Vector3(
-                                (yCut.from.x + yCut.to.x) * 0.5,
-                                (yCut.from.y + yCut.to.y) * 0.5,
-                                (yCut.from.z + yCut.to.z) * 0.5
-                        ).floor()//这里取中点是为了防止浮点数精度丢失影响结果
-                )
-                .collect(Collectors.toList());
+        if (stepY != 0) {
+            double nextBoundary = (stepY > 0) ? (y + 1) : y;
+            tMaxY = (nextBoundary - startY) / (endY - startY);
+            tDeltaY = 1.0 / Math.abs(endY - startY);
+        } else {
+            tMaxY = Double.POSITIVE_INFINITY;
+            tDeltaY = Double.POSITIVE_INFINITY;
+        }
+
+        if (stepZ != 0) {
+            double nextBoundary = (stepZ > 0) ? (z + 1) : z;
+            tMaxZ = (nextBoundary - startZ) / (endZ - startZ);
+            tDeltaZ = 1.0 / Math.abs(endZ - startZ);
+        } else {
+            tMaxZ = Double.POSITIVE_INFINITY;
+            tDeltaZ = Double.POSITIVE_INFINITY;
+        }
+
+        // Начальный воксель всегда включается
+        result.add(new Vector3(x, y, z));
+
+        double t = 0;
+        while (t < 1.0) {
+            // Определяем, по какой оси произойдёт следующее пересечение
+            if (tMaxX < tMaxY && tMaxX < tMaxZ) {
+                // Переход по X
+                x += stepX;
+                t = tMaxX;
+                tMaxX += tDeltaX;
+            } else if (tMaxY < tMaxX && tMaxY < tMaxZ) {
+                // Переход по Y
+                y += stepY;
+                t = tMaxY;
+                tMaxY += tDeltaY;
+            } else if (tMaxZ < tMaxX && tMaxZ < tMaxY) {
+                // Переход по Z
+                z += stepZ;
+                t = tMaxZ;
+                tMaxZ += tDeltaZ;
+            } else {
+                // Случай равенства двух или трёх значений (пересечение ребра или вершины)
+                // Обрабатываем все равные оси одновременно, чтобы не пропустить воксели
+                final double EPS = 1e-9;
+                if (Math.abs(tMaxX - tMaxY) < EPS && Math.abs(tMaxX - tMaxZ) < EPS) {
+                    x += stepX;
+                    y += stepY;
+                    z += stepZ;
+                    t = tMaxX;
+                    tMaxX += tDeltaX;
+                    tMaxY += tDeltaY;
+                    tMaxZ += tDeltaZ;
+                } else if (Math.abs(tMaxX - tMaxY) < EPS) {
+                    x += stepX;
+                    y += stepY;
+                    t = tMaxX;
+                    tMaxX += tDeltaX;
+                    tMaxY += tDeltaY;
+                } else if (Math.abs(tMaxX - tMaxZ) < EPS) {
+                    x += stepX;
+                    z += stepZ;
+                    t = tMaxX;
+                    tMaxX += tDeltaX;
+                    tMaxZ += tDeltaZ;
+                } else if (Math.abs(tMaxY - tMaxZ) < EPS) {
+                    y += stepY;
+                    z += stepZ;
+                    t = tMaxY;
+                    tMaxY += tDeltaY;
+                    tMaxZ += tDeltaZ;
+                } else {
+                    // Защита от неопределённости – выбираем минимальное
+                    double min = Math.min(tMaxX, Math.min(tMaxY, tMaxZ));
+                    if (Math.abs(min - tMaxX) < EPS) {
+                        x += stepX;
+                        t = tMaxX;
+                        tMaxX += tDeltaX;
+                    } else if (Math.abs(min - tMaxY) < EPS) {
+                        y += stepY;
+                        t = tMaxY;
+                        tMaxY += tDeltaY;
+                    } else {
+                        z += stepZ;
+                        t = tMaxZ;
+                        tMaxZ += tDeltaZ;
+                    }
+                }
+            }
+
+            // Добавляем новый воксель, только если пересечение произошло внутри отрезка
+            var test = new Vector3(x, y, z);
+            if (t <= 1.0 && !result.contains(test)) {
+                result.add(test);
+            }
+        }
+
+        return result;
     }
 }
