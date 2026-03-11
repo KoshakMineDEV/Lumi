@@ -222,7 +222,6 @@ public final class PlayerHandle {
         return player.getBaseOffset();
     }
 
-
     public boolean isMovementServerAuthoritative() {
         return player.isMovementServerAuthoritative();
     }
@@ -259,11 +258,6 @@ public final class PlayerHandle {
         player.setRotation(yaw, pitch, headYaw);
     }
 
-    public void offerClientMovement(Vector3 pos) {
-        player.clientMovements.offer(pos);
-    }
-
-
     public void sendPosition(Vector3 pos, float yaw, float pitch, int mode) {
         player.sendPosition(pos, yaw, pitch, mode);
     }
@@ -271,7 +265,6 @@ public final class PlayerHandle {
     public void sendPosition(Player p, float yaw, float pitch, int mode) {
         player.sendPosition(p, yaw, pitch, mode);
     }
-
 
     public void setNeedSendData(boolean v) {
         player.setNeedSendData(v);

@@ -485,7 +485,6 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
 
             if (!ignoreCoordinateMove) {
                 handle.setNewPosition(clientPosition);
-                handle.offerClientMovement(clientPosition);
             }
 
             handle.setForceMovement(null);
