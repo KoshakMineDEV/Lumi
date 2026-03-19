@@ -30,7 +30,10 @@ public abstract class EntityWalking extends BaseEntity {
         super(chunk, nbt);
     }
 
+    @Override
     protected void checkTarget() {
+        super.checkTarget();
+
         if (this.isKnockback()) {
             return;
         }

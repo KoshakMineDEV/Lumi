@@ -16,7 +16,10 @@ public abstract class EntityJumping extends BaseEntity {
         super(chunk, nbt);
     }
 
+    @Override
     protected void checkTarget() {
+        super.checkTarget();
+
         if (this.isKnockback()) {
             return;
         }

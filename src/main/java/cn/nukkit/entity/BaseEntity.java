@@ -16,6 +16,7 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.HeartParticle;
 import cn.nukkit.math.AxisAlignedBB;
+import cn.nukkit.math.BVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.EntityEventPacket;
@@ -736,5 +737,11 @@ public abstract class BaseEntity extends EntityCreature implements EntityAgeable
             }
         }
         return false;
+    }
+
+    protected void checkTarget() {
+        if(this.target != null) {
+            this.setPitch(BVector3.getPitchFromVector(target.subtract(this)));
+        }
     }
 }
