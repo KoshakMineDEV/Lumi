@@ -5,12 +5,11 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.format.anvil.util.BlockStorage;
-import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.level.format.leveldb.BlockStateMapping;
 import cn.nukkit.level.util.BitArray;
 import cn.nukkit.level.util.BitArrayVersion;
 import cn.nukkit.level.util.PalettedBlockStorage;
+import cn.nukkit.level.util.SingletonBitArray;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.registry.Registries;
@@ -26,7 +25,6 @@ import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import static cn.nukkit.level.format.leveldb.LevelDBConstants.SUB_CHUNK_SIZE;
@@ -40,10 +38,6 @@ public class StateBlockStorage {
     private List<BlockStateSnapshot> palette;
     private BitArray bitArray;
 
-    //用于兼容1.13以下版本
-    private byte[] blockIds;
-    private NibbleArray blockData;
-
     public StateBlockStorage() {
         this(BitArrayVersion.V2);
     }
@@ -52,16 +46,11 @@ public class StateBlockStorage {
         this.bitArray = version.createPalette();
         this.palette = new ObjectArrayList<>(16);
         this.palette.add(AIR);
-
-        this.blockIds = null;
-        this.blockData = null;
     }
 
-    protected StateBlockStorage(BitArray bitArray, List<BlockStateSnapshot> palette, byte[] blockIds, NibbleArray blockData) {
+    protected StateBlockStorage(BitArray bitArray, List<BlockStateSnapshot> palette) {
         this.palette = palette;
         this.bitArray = bitArray;
-        this.blockIds = blockIds;
-        this.blockData = blockData;
     }
 
     private static int getPaletteHeader(BitArrayVersion version, boolean runtime) {
@@ -200,10 +189,6 @@ public class StateBlockStorage {
         try {
             int paletteIndex = this.getOrAdd(value);
             this.bitArray.set(index, paletteIndex);
-            if(this.blockIds != null && this.blockData != null) {
-                this.blockIds[index] = (byte) (value.getLegacyId() & 0xff);
-                this.blockData.set(index, (byte) (value.getLegacyData() & 0xf));
-            }
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unable to set value: " + value + ", palette: " + palette, e);
         }
@@ -224,39 +209,41 @@ public class StateBlockStorage {
     public void writeTo(Level level, int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
         PalettedBlockStorage palettedBlockStorage = PalettedBlockStorage.createFromBlockPalette(this.bitArray.getVersion(), protocol);
 
-        if(antiXray) {
-            final NukkitRandom nukkitRandom = new NukkitRandom();
-            var realOreToFakeMap = level.getAntiXraySystem().getRealOreToReplacedBlockIds();
-            var fakeBlockMap = level.getAntiXraySystem().getFakeOreToPutBlockIds();
-            var XAndDenominator = level.getAntiXraySystem().getFakeOreDenominator() - 1;
+        if(this.bitArray.getClass() != SingletonBitArray.class) {
+            if (antiXray) {
+                final NukkitRandom nukkitRandom = new NukkitRandom();
+                var realOreToFakeMap = level.getAntiXraySystem().getRealOreToReplacedBlockIds();
+                var fakeBlockMap = level.getAntiXraySystem().getFakeOreToPutBlockIds();
+                var XAndDenominator = level.getAntiXraySystem().getFakeOreDenominator() - 1;
 
-            for (int i = 0; i < SECTION_SIZE; i++) {
-                int x = (i >> 8) & 0xF;
-                int z = (i >> 4) & 0xF;
-                int y = i & 0xF;
+                for (int i = 0; i < SECTION_SIZE; i++) {
+                    int x = (i >> 8) & 0xF;
+                    int z = (i >> 4) & 0xF;
+                    int y = i & 0xF;
 
-                final int fullId = get(i);
-                int id = fullId >> Block.DATA_BITS;
-                int meta = fullId & Block.DATA_MASK;
+                    final int fullId = get(i);
+                    int id = fullId >> Block.DATA_BITS;
+                    int meta = fullId & Block.DATA_MASK;
 
-                if (x != 0 && z != 0 && y != 0 && x != 15 && z != 15 && y != 15) {
-                    var tmp = realOreToFakeMap.getOrDefault(id, Integer.MAX_VALUE);
-                    if (tmp != Integer.MAX_VALUE && canBeObfuscated(x, y, z)) {
-                        id = tmp;
-                    } else {
-                        var tmp2 = fakeBlockMap.get(id);
-                        if (tmp2 != null && (nukkitRandom.nextInt() & XAndDenominator) == 0 && canBeObfuscated(x, y, z)) {
-                            id = tmp2.getInt(nukkitRandom.nextRange(0, tmp2.size() - 1));
-                            meta = 0;
+                    if (x != 0 && z != 0 && y != 0 && x != 15 && z != 15 && y != 15) {
+                        var tmp = realOreToFakeMap.getOrDefault(id, Integer.MAX_VALUE);
+                        if (tmp != Integer.MAX_VALUE && canBeObfuscated(x, y, z)) {
+                            id = tmp;
+                        } else {
+                            var tmp2 = fakeBlockMap.get(id);
+                            if (tmp2 != null && (nukkitRandom.nextInt() & XAndDenominator) == 0 && canBeObfuscated(x, y, z)) {
+                                id = tmp2.getInt(nukkitRandom.nextRange(0, tmp2.size() - 1));
+                                meta = 0;
+                            }
                         }
                     }
+                    palettedBlockStorage.setBlock(i, blockPalette.getRuntimeId(id, meta));
                 }
-                palettedBlockStorage.setBlock(i, blockPalette.getRuntimeId(id, meta));
-            }
-        } else {
-            for (int i = 0; i < SECTION_SIZE; i++) {
-                final int fullId = get(i);
-                palettedBlockStorage.setBlock(i, blockPalette.getRuntimeId(fullId >> Block.DATA_BITS, fullId & Block.DATA_MASK));
+            } else {
+                for (int i = 0; i < SECTION_SIZE; i++) {
+                    final int fullId = get(i);
+                    palettedBlockStorage.setBlock(i, blockPalette.getRuntimeId(fullId >> Block.DATA_BITS, fullId & Block.DATA_MASK));
+                }
             }
         }
 
@@ -274,6 +261,12 @@ public class StateBlockStorage {
 
     private void grow(BitArrayVersion version) {
         BitArray newBitArray = version.createPalette(SECTION_SIZE);
+
+        if(bitArray.getClass() == SingletonBitArray.class) {
+            bitArray = newBitArray;
+            return;
+        }
+
         for (int i = 0; i < SECTION_SIZE; i++) {
             newBitArray.set(i, this.bitArray.get(i));
         }
@@ -314,24 +307,6 @@ public class StateBlockStorage {
             }
         }
         return true;
-    }
-
-    public byte[] getBlockIds() {
-        if (!this.isEmpty()) {
-            this.computeOldData();
-            return Arrays.copyOf(blockIds, blockIds.length);
-        } else {
-            return new byte[BlockStorage.SECTION_SIZE];
-        }
-    }
-
-    public byte[] getBlockData() {
-        if (!this.isEmpty()) {
-            this.computeOldData();
-            return this.blockData.getData();
-        } else {
-            return new byte[2048];
-        }
     }
 
     /**
@@ -396,25 +371,10 @@ public class StateBlockStorage {
         return true;
     }
 
-    protected void computeOldData() {
-        if (this.blockIds == null || this.blockData == null) {
-            this.blockIds = new byte[SECTION_SIZE];
-            this.blockData = new NibbleArray(BlockStorage.SECTION_SIZE);
-
-            for (int i = 0; i < this.bitArray.size(); i++) {
-                int fullId = this.get(i);
-                this.blockIds[i] = (byte) ((fullId >> Block.DATA_BITS) & 0xff);
-                this.blockData.set(i, (byte) (fullId & 0xf));
-            }
-        }
-    }
-
     public StateBlockStorage copy() {
         return new StateBlockStorage(
                 this.bitArray.copy(),
-                new ObjectArrayList<>(this.palette),
-                this.blockIds != null ? this.blockIds.clone() : null,
-                this.blockData != null ? this.blockData.copy(): null
+                new ObjectArrayList<>(this.palette)
         );
     }
 

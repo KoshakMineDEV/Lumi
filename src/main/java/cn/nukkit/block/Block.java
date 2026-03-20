@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import static cn.nukkit.utils.Utils.dynamic;
@@ -59,7 +60,8 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
      */
     protected static final int[] FACES2534 = {2, 5, 3, 4};
 
-    private BlockType type;
+    private final AtomicReference<BlockType> type = new AtomicReference<>();
+    private final AtomicReference<Set<BlockTag>> types = new AtomicReference<>();
 
     protected Block() {}
 
@@ -476,24 +478,26 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
      * @return BlockType
      */
     public BlockType getBlockType() {
-        if (this.type != null) {
-            return this.type;
+        BlockType blockType = this.type.get();
+        if (blockType != null) {
+            return blockType;
         }
 
         if (this instanceof CustomBlock customBlock) {
-            this.type = BlockTypes.get(customBlock.getIdentifier());
+            blockType = BlockTypes.get(customBlock.getIdentifier());
         } else if (this.isAir()) {
-            this.type = BlockTypes.AIR;
+            blockType = BlockTypes.AIR;
         } else {
-            this.type = BlockTypes.get(Registries.BLOCK_TO_ITEM.get(this.getId() > 255 ? 255 - this.getId() : this.getId(), this.getDamage()));
+            blockType = BlockTypes.get(Registries.BLOCK_TO_ITEM.get(this.getId() > 255 ? 255 - this.getId() : this.getId(), this.getDamage()));
         }
 
-        // Throw an exception if for some reason the type cannot be determined.
-        if (this.type == null) {
-            throw new IllegalStateException("Failed to initialize block type " + this.getName() + ": " + this.getId() + ":" + this.getDamage());
+        if (blockType == null) {
+            log.warn("Failed to initialize block type {}: {}:{}", this.getName(), this.getId(), this.getDamage());
+            blockType = BlockTypes.AIR;
         }
 
-        return this.type;
+        this.type.set(blockType);
+        return blockType;
     }
 
     /**
@@ -502,7 +506,14 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
      * @return Set<BlockType>
      */
     public Set<BlockTag> getBlockTags() {
-        return BlockTags.getTagsSet(this.getIdentifier());
+        Set<BlockTag> blockTags = this.types.get();
+        if(blockTags != null) {
+            return blockTags;
+        }
+
+        blockTags = BlockTags.getTagsSet(this.getIdentifier());
+        this.types.set(blockTags);
+        return blockTags;
     }
 
     /**

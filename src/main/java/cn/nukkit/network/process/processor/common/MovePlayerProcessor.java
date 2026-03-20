@@ -97,7 +97,6 @@ public class MovePlayerProcessor extends DataPacketProcessor<MovePlayerPacket> {
 
         handle.setRotation(packet.yaw, packet.pitch, packet.headYaw);
         handle.setNewPosition(newPos);
-        handle.offerClientMovement(newPos);
         handle.setForceMovement(null);
     }
 

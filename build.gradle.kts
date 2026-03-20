@@ -34,16 +34,17 @@ repositories {
     maven("https://storehouse.okaeri.eu/repository/maven-public/")
 }
 
-val log4j2Version = "2.17.1"
-val jlineVersion = "3.21.0"
+val log4j2Version = "2.25.3"
+val jlineVersion = "3.30.8"
 val leveldbMcpeJavaVersion = "1.1.0"
 val leveldbMcpeJniVersion = "0.0.10"
 val blockStateUpdaterVersion = "1.21.110-SNAPSHOT"
+val fastutilMapsVersion = "8.5.15-SNAPSHOT"
 
 dependencies {
     // Compile dependencies
     implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT")
-    implementation("io.netty:netty-transport-native-epoll:4.1.101.Final")
+    implementation("io.netty:netty-transport-native-epoll:4.1.131.Final")
     implementation("com.nukkitx:natives:1.0.3")
     implementation("org.cloudburstmc.protocol:common:3.0.0.Beta3-SNAPSHOT") {
         exclude(group = "org.cloudburstmc.math", module = "immutable")
@@ -51,23 +52,24 @@ dependencies {
         exclude(group = "org.cloudburstmc.fastutil.maps", module = "int-object-maps")
         exclude(group = "org.cloudburstmc.fastutil.maps", module = "object-int-maps")
     }
-    implementation("it.unimi.dsi:fastutil:8.5.15")
-    implementation("com.google.guava:guava:33.1.0-jre")
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8") {
+    implementation("it.unimi.dsi:fastutil-core:8.5.15")
+    implementation("org.cloudburstmc.fastutil.maps:int-short-maps:$fastutilMapsVersion")
+    implementation("org.cloudburstmc.fastutil.maps:long-byte-maps:$fastutilMapsVersion")
+    implementation("com.google.guava:guava:33.5.0-jre")
+    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.3") {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
+    compileOnly("org.checkerframework:checker-qual:3.54.0")
     implementation("org.yaml:snakeyaml:2.0")
     implementation("org.snakeyaml:snakeyaml-engine:2.7")
     implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:5.0.9")
-    implementation("com.nimbusds:nimbus-jose-jwt:9.37.2")
-    implementation("org.ow2.asm:asm:9.2")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.8")
+    implementation("org.ow2.asm:asm:9.9.1")
     implementation("org.apache.logging.log4j:log4j-api:$log4j2Version")
     implementation("org.apache.logging.log4j:log4j-core:$log4j2Version")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version") {
-        exclude(group = "org.slf4j", module = "slf4j-api")
-    }
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j2Version")
     compileOnly("org.projectlombok:lombok:1.18.36")
     implementation("net.minecrell:terminalconsoleappender:1.3.0") {
         exclude(group = "org.apache.logging.log4j", module = "log4j-core")
@@ -96,15 +98,15 @@ dependencies {
     }
     implementation("io.sentry:sentry:6.25.0")
     implementation("org.apache.commons:commons-math3:3.6.1")
-    implementation("org.xerial.snappy:snappy-java:1.1.10.5")
-    implementation("com.github.oshi:oshi-core:5.8.7")
-    compileOnly("org.jetbrains:annotations:24.1.0")
+    implementation("org.xerial.snappy:snappy-java:1.1.10.8")
+    implementation("com.github.oshi:oshi-core:6.10.0")
+    compileOnly("org.jetbrains:annotations:26.1.0")
     implementation("org.bitbucket.b_c:jose4j:0.9.6") {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
     implementation("org.cloudburstmc:block-state-updater:$blockStateUpdaterVersion")
     implementation("com.github.daniellansun:fast-reflection:08ec134a5c")
-    implementation("org.jctools:jctools-core:4.0.5")
+    implementation("org.jctools:jctools-core:4.0.6")
 
     // Test dependencies
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
