@@ -234,6 +234,10 @@ public final class PlayerHandle {
         return player.lastTeleportTick;
     }
 
+    public void setLastTeleportTick(int tick) {
+        player.lastTeleportTick = tick;
+    }
+
     public double getLastX() {
         return player.lastX;
     }

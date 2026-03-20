@@ -2124,16 +2124,13 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             if (this.riding == null && this.inventory != null) {
                 if (this.getFoodData().isEnabled() && this.server.getDifficulty() != Difficulty.PEACEFUL && distanceSquared >= 0.05) {
                     double jump = 0;
-                    double swimming = this.isInsideOfWater() ? 0.015 * distanceSquared : 0;
-                    double distance2 = distanceSquared;
-                    if (swimming != 0) {
-                        distance2 = 0;
-                    }
+                    double distance = Math.sqrt(distanceSquared);
+                    double swimming = this.isInsideOfWater() ? 0.01 * distance : 0;
                     if (this.isSprinting()) {
                         if (this.inAirTicks == 3 && swimming == 0) {
                             jump = 0.2;
                         }
-                        this.getFoodData().exhaust(0.1 * distance2 + jump + swimming);
+                        this.getFoodData().exhaust(0.1 * (swimming != 0 ? 0 : distance) + jump + swimming);
                     } else if (this.isSneaking() && this.inAirTicks == 3) {
                         jump = 0.05;
                         this.getFoodData().exhaust(jump);
@@ -2382,14 +2379,16 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 } else {
                     this.lastInAirTick = server.getTick();
 
-                    if (this.checkMovement && !this.isGliding() && !server.getSettings().player().allowFlight() && this.inAirTicks > 20 && !this.getAllowFlight() && !this.isSleeping() && !this.isImmobile() && !this.isSwimming() && this.riding == null && !this.hasEffect(EffectType.LEVITATION) && !this.hasEffect(EffectType.SLOW_FALLING)) {
+                    if (this.checkMovement && !this.isGliding() && !server.getSettings().player().allowFlight() && this.inAirTicks > 20 && !this.getAllowFlight() && !this.isSleeping() && !this.isImmobile() && !this.isSwimming() && this.riding == null && !this.hasEffect(EffectType.LEVITATION) && !this.hasEffect(EffectType.SLOW_FALLING) && this.speed.y != 0) {
                         double expectedVelocity = (-this.getGravity()) / ((double) this.getDrag()) - ((-this.getGravity()) / ((double) this.getDrag())) * FastMath.exp(-((double) this.getDrag()) * ((double) (this.inAirTicks - this.startAirTicks)));
-                        double diff = (this.speed.y - expectedVelocity) * (this.speed.y - expectedVelocity);
+                        // speed.y: positive=down (from-to), expectedVelocity: negative=down (physics)
+                        // Their sum cancels to ~0 during normal falling
+                        double diff = Math.abs(this.speed.y + expectedVelocity);
 
                         if (this.isOnLadder()) {
                             this.resetFallDistance();
                         } else {
-                            if (diff > 2 && expectedVelocity < this.speed.y && this.speed.y != 0) {
+                            if (diff > 1 && expectedVelocity < 0) {
                                 if (this.inAirTicks < 150) {
                                     PlayerInvalidMoveEvent ev = new PlayerInvalidMoveEvent(this, true);
                                     this.getServer().getPluginManager().callEvent(ev);
