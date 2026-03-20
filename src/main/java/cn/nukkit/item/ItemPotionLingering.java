@@ -1,9 +1,10 @@
 package cn.nukkit.item;
 
-import cn.nukkit.Player;
+import  cn.nukkit.Player;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
+import cn.nukkit.network.protocol.ProtocolInfo;
 
 public class ItemPotionLingering extends ItemProjectile {
 
@@ -48,5 +49,13 @@ public class ItemPotionLingering extends ItemProjectile {
     protected CompoundTag correctNBT(CompoundTag nbt) {
         nbt.putInt("PotionId", this.meta);
         return nbt;
+    }
+
+    @Override
+    public boolean isSupportedOn(int protocolId) {
+        if(protocolId < ProtocolInfo.v1_21_0) {
+            if(getDamage() > 40) return false;
+        }
+        return true;
     }
 }
