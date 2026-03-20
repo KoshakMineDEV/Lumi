@@ -68,33 +68,33 @@ public class BlockSponge extends BlockSolidMeta {
     }
 
     @Override
-    public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
-        if (this.getDamage() == WET && level.getDimension() == Level.DIMENSION_NETHER) {
-            level.setBlock(block, Block.get(BlockID.SPONGE, DRY), true, true);
-            level.addSoundToViewers(block.getLocation(), Sound.RANDOM_FIZZ);
-            level.addParticle(new ExplodeParticle(block.add(0.5, 1, 0.5)));
-            return true;
-        } else if (this.getDamage() == DRY
-                && (block instanceof BlockWater
-                        || block.getLevelBlockAround().stream().anyMatch(b -> b instanceof BlockWater)
-                        || block.getLevelBlockAround(1).stream().anyMatch(b -> b instanceof BlockWater))
-                && performWaterAbsorb(block)) {
-            level.setBlock(block, Block.get(BlockID.SPONGE, WET), true, true);
+    public int onUpdate(int type) {
+        if (type == Level.BLOCK_UPDATE_NORMAL) {
+            if (this.getDamage() == WET && level.getDimension() == Level.DIMENSION_NETHER) {
+                level.setBlock(this, Block.get(BlockID.SPONGE, DRY), true, true);
+                level.addSoundToViewers(this.getLocation(), Sound.RANDOM_FIZZ);
+                level.addParticle(new ExplodeParticle(this.add(0.5, 1, 0.5)));
+                return type;
+            } else if (this.getDamage() == DRY
+                    && (this.getLevelBlockAround().stream().anyMatch(b -> b instanceof BlockWater)
+                    || this.getLevelBlockAround(1).stream().anyMatch(b -> b instanceof BlockWater))
+                    && performWaterAbsorb(this)) {
+                level.setBlock(this, Block.get(BlockID.SPONGE, WET), true, true);
 
-            for (int i = 0; i < 4; i++) {
-                LevelEventPacket packet = new LevelEventPacket();
-                packet.evid = LevelEventPacket.EVENT_PARTICLE_DESTROY;
-                packet.x = (float) block.getX() + 0.5f;
-                packet.y = (float) block.getY() + 1f;
-                packet.z = (float) block.getZ() + 0.5f;
-                packet.data = GlobalBlockPalette.getOrCreateRuntimeId(ProtocolInfo.CURRENT_PROTOCOL, BlockID.WATER, 0);
-                level.addChunkPacket(getChunkX(), getChunkZ(), packet);
+                for (int i = 0; i < 4; i++) {
+                    LevelEventPacket packet = new LevelEventPacket();
+                    packet.evid = LevelEventPacket.EVENT_PARTICLE_DESTROY;
+                    packet.x = (float) this.getX() + 0.5f;
+                    packet.y = (float) this.getY() + 1f;
+                    packet.z = (float) this.getZ() + 0.5f;
+                    packet.data = GlobalBlockPalette.getOrCreateRuntimeId(ProtocolInfo.CURRENT_PROTOCOL, BlockID.WATER, 0);
+                    level.addChunkPacket(getChunkX(), getChunkZ(), packet);
+                }
+
+                return type;
             }
-
-            return true;
         }
-
-        return super.place(item, block, target, face, fx, fy, fz, player);
+        return 0;
     }
 
     private boolean performWaterAbsorb(Block block) {
