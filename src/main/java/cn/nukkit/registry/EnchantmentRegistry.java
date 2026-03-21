@@ -19,6 +19,7 @@ import cn.nukkit.item.enchantment.mace.EnchantmentMaceBreach;
 import cn.nukkit.item.enchantment.mace.EnchantmentMaceDensity;
 import cn.nukkit.item.enchantment.mace.EnchantmentMaceWindBurst;
 import cn.nukkit.item.enchantment.protection.*;
+import cn.nukkit.item.enchantment.spear.EnchantmentLunge;
 import cn.nukkit.item.enchantment.trident.EnchantmentTridentChanneling;
 import cn.nukkit.item.enchantment.trident.EnchantmentTridentImpaling;
 import cn.nukkit.item.enchantment.trident.EnchantmentTridentLoyalty;
@@ -88,6 +89,7 @@ public class EnchantmentRegistry implements IRegistry<Identifier, Enchantment, E
         register(new EnchantmentMaceWindBurst());
         register(new EnchantmentMaceDensity());
         register(new EnchantmentMaceBreach());
+        register(new EnchantmentLunge());
     }
 
     @Override

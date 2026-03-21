@@ -1092,6 +1092,12 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         return false;
     }
 
+    /**
+     * Triggers when the player uses an item.
+     * @param player The player using item
+     */
+    public void whileUsing(Player player) {}
+
     public boolean onRelease(Player player, int ticksUsed) {
         return false;
     }

@@ -562,8 +562,41 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
                                 inventory.sendContents(player);
                             }
                         }
+                    case InventoryTransactionPacket.USE_ITEM_ACTION_SPEAR_STAB:
+                            Item spearItem;
+                            Item useItemDataItem = useItemData.itemInHand;
+                            Item serverItemInHand = player.getInventory().getItemInHand();
+                            // Removes Damage Tag that the client adds, but we do not store.
+                            if(useItemDataItem.hasCompoundTag() && (!serverItemInHand.hasCompoundTag() || !serverItemInHand.getNamedTag().containsInt("Damage"))) {
+                                if(useItemDataItem.getNamedTag().containsInt("Damage")) {
+                                    useItemDataItem.getNamedTag().remove("Damage");
+                                }
+                            }
 
-                        return;
+                            if (player.isCreative()) {
+                                spearItem = serverItemInHand;
+                            } else if (!player.getInventory().getItemInHand().equals(useItemDataItem)) {
+                                player.getServer().getLogger().debug("Item received did not match item in hand.");
+                                player.getInventory().sendHeldItem(player);
+                                return;
+                            } else {
+                                spearItem = serverItemInHand;
+                            }
+
+                            PlayerInteractEvent event = new PlayerInteractEvent(player, spearItem.clone(), player.getDirectionVector(), face, PlayerInteractEvent.Action.RIGHT_CLICK_AIR);
+                            player.getServer().getPluginManager().callEvent(event);
+
+                            if (event.isCancelled()) {
+                                player.getInventory().sendSlot(useItemData.hotbarSlot, player);
+                                return;
+                            }
+
+                            if (!(spearItem instanceof ItemSpear spear)) {
+                                return;
+                            }
+
+                            spear.onSpearStab(player, player.getMovementSpeed());
+                            return;
                     default:
                         break;
                 }
