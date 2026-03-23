@@ -4718,16 +4718,33 @@ public class Level implements ChunkManager, Metadatable {
         throw new IllegalArgumentException("Invalid chunk protocol: " + protocol);
     }
 
+    private int getChunkGenerationQueueSize = 0;
+
     public CompletableFuture<BaseFullChunk> getChunkFuture(int cx, int cz, boolean generate) {
         return CompletableFuture.supplyAsync(() -> {
+
             BaseFullChunk chunk = this.getChunk(cx, cz, generate);
 
-            if(generate && !(chunk.isGenerated() || chunk.isPopulated())) {
-                this.generateChunkCallback(cx, cz, chunk, true);
+            if(generate) {
+                if(this.isBlockingGeneration()) {
+                    return null;
+                }
+
+                getChunkGenerationQueueSize++;
+
+                if(!chunk.isGenerated()) new GenerationTask(this, chunk).run();
+                if(!chunk.isPopulated()) new PopulationTask(this, chunk).run();
+
+                getChunkGenerationQueueSize--;
             }
+
 
             return chunk;
         });
+    }
+
+    public boolean isBlockingGeneration() {
+        return this.getChunkGenerationQueueSize > this.getServer().getSettings().world().chunk().generationQueueSize();
     }
 
     private static class CharacterHashMap extends HashMap<Character, Object> {

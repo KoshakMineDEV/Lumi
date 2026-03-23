@@ -230,19 +230,19 @@ public class PlayerChunkManager {
                 this.player.getLevel().getChunkFuture(cx, cz, true)
                         .thenApplyAsync(chunk -> {
                             if(chunk == null) return null;
-
                             this.player.getLevel().registerChunkLoader(this.player, cx, cz);
                             return chunk;
                         })
                         .thenApplyAsync(this::createChunkPacket)
                         .whenCompleteAsync((packet, throwable) -> {
-                            if(packet == null) {
-                                viewChunks.remove(Level.chunkHash(cx, cz));
-                                sendQueue.remove(key);
-                                return;
-                            }
-
                             synchronized (PlayerChunkManager.this) {
+                                if(packet == null) {
+                                    if (this.sendQueue.remove(key, null)) {
+                                        this.viewChunks.remove(key);
+                                    }
+                                    return;
+                                }
+
                                 if (throwable != null) {
                                     if (this.sendQueue.remove(key, null)) {
                                         this.viewChunks.remove(key);
