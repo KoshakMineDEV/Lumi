@@ -97,41 +97,6 @@ public class Anvil extends BaseLevelProvider {
         return Chunk.getEmptyChunk(chunkX, chunkZ, this);
     }
 
-    @Override
-    public void requestChunkTask(IntSet protocols, int x, int z) throws ChunkException {
-        Chunk chunk = (Chunk) this.getChunk(x, z, false);
-        if (chunk == null) {
-            throw new ChunkException("Invalid Chunk Set");
-        }
-
-        long timestamp = chunk.getChanges();
-
-        if (this.getServer().getSettings().world().chunk().asyncChunks()) {
-            final Chunk chunkClone = chunk.cloneForChunkSending();
-            this.level.getAsyncChuckExecutor().execute(() -> {
-                NetworkChunkSerializer.serialize(protocols, chunkClone, networkChunkSerializerCallback -> {
-                    getLevel().asyncChunkRequestCallback(networkChunkSerializerCallback.getProtocolId(),
-                            timestamp,
-                            x,
-                            z,
-                            networkChunkSerializerCallback.getSubchunks(),
-                            networkChunkSerializerCallback.getStream().getBuffer()
-                    );
-                }, level.isAntiXrayEnabled(), getLevel().getDimensionData());
-            });
-        }else {
-            NetworkChunkSerializer.serialize(protocols, chunk, networkChunkSerializerCallback -> {
-                this.getLevel().chunkRequestCallback(networkChunkSerializerCallback.getProtocolId(),
-                        timestamp,
-                        x,
-                        z,
-                        networkChunkSerializerCallback.getSubchunks(),
-                        networkChunkSerializerCallback.getStream().getBuffer()
-                );
-            }, level.isAntiXrayEnabled(), this.level.getDimensionData());
-        }
-    }
-
     private int lastPosition = 0;
 
     @Override

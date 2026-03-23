@@ -100,7 +100,7 @@ public final class PlayerHandle {
     }
 
     public void setChunkRadius(int chunkRadius) {
-        player.chunkRadius = chunkRadius;
+        player.setChunkRadius(chunkRadius);
     }
 
     public boolean isCheckMovement() {

@@ -106,7 +106,7 @@ public class EntityFallingBlock extends Entity {
 
     @Override // Multiversion: display correct block
     public void spawnTo(Player player) {
-        if (!this.hasSpawned.containsKey(player.getLoaderId()) && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
+        if (!this.hasSpawned.containsKey(player.getLoaderId()) && player.isChunkSent(this.chunk.getX(), this.chunk.getZ())) {
             AddEntityPacket addEntity = new AddEntityPacket();
             addEntity.type = this.getNetworkId();
             addEntity.entityUniqueId = this.id;

@@ -10,11 +10,9 @@ import cn.nukkit.entity.BaseEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.custom.EntityDefinition;
 import cn.nukkit.entity.custom.EntityManager;
-import cn.nukkit.entity.effect.EffectType;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.entity.item.EntityXPOrb;
 import cn.nukkit.entity.mob.EntitySnowGolem;
-import cn.nukkit.entity.mob.EntityWither;
 import cn.nukkit.entity.passive.EntityIronGolem;
 import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.entity.weather.EntityLightning;
@@ -92,6 +90,7 @@ import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -1191,16 +1190,6 @@ public class Level implements ChunkManager, Metadatable {
                 this.changedBlocks.clear();
             }
         }
-
-        if (this.server.getSettings().world().chunk().asyncChunks()) {
-            NetworkChunkSerializer.NetworkChunkSerializerCallbackData data;
-            int count = (this.getPlayers().size() + 1) * this.server.getSettings().world().chunk().sendingPerTick();
-            for (int i = 0; i < count && (data = this.asyncChunkRequestCallbackQueue.poll()) != null; ++i) {
-                this.chunkRequestCallback(data.getProtocol(), data.getTimestamp(), data.getX(), data.getZ(), data.getSubChunkCount(), data.getPayload());
-            }
-        }
-
-        this.processChunkRequest();
 
         if (this.sleepTicks > 0 && --this.sleepTicks <= 0) {
             this.checkSleep();
@@ -3623,107 +3612,8 @@ public class Level implements ChunkManager, Metadatable {
                 new Int2ObjectOpenHashMap<>()).put(player.getLoaderId(), player);
     }
 
-    @Deprecated
-    private void sendChunk(int x, int z, long index, DataPacket packet) {
-        for (int protocolId : chunkSendTasks.keySet()) {
-            this.sendChunkInternal(x, z, index, packet, protocolId);
-        }
-    }
-
-    private void sendChunkInternal(int x, int z, long index, DataPacket packet, int protocol) {
-        LongSet tasks = this.getChunkSendTasks(protocol);
-        if (!tasks.contains(index)) {
-            return;
-        }
-
-        ConcurrentMap<Long, Int2ObjectMap<Player>> queue = this.getChunkSendQueue(protocol);
-        for (Player player : queue.get(index).values()) {
-            if (player.isConnected() && player.usedChunks.containsKey(index)) {
-                player.sendChunk(x, z, packet);
-            }
-        }
-        queue.remove(index);
-        tasks.remove(index);
-    }
-
-    private void processChunkRequest() {
-        // Map shorted by index => requested protocols
-        Long2ObjectMap<IntSet> chunkRequests = new Long2ObjectOpenHashMap<>();
-        for (int protocolId : this.chunkSendQueues.keySet()) {
-            for (long index : this.getChunkSendQueue(protocolId).keySet()) {
-                LongSet tasks = this.getChunkSendTasks(protocolId);
-                if (tasks.contains(index)) {
-                    continue;
-                }
-                chunkRequests.computeIfAbsent(index, l -> new IntOpenHashSet()).add(protocolId);
-                tasks.add(index);
-            }
-        }
-
-        this.chunkRequestInternal(chunkRequests);
-    }
-
-    private void chunkRequestInternal(Long2ObjectMap<IntSet> chunkRequests) {
-        for (long index : chunkRequests.keySet()) {
-            IntSet protocols = new IntOpenHashSet(chunkRequests.get(index));
-            int x = getHashX(index);
-            int z = getHashZ(index);
-
-            for (int protocol : chunkRequests.get(index)) {
-                BaseFullChunk chunk = this.getChunk(x, z);
-                if (chunk != null) {
-                    BatchPacket packet = chunk.getChunkPacket(protocol);
-                    if (packet != null) {
-                        //this.sendChunk(x, z, index, packet);
-                        this.sendChunkInternal(x, z, index, packet, protocol);
-                        protocols.remove(protocol);
-                    }
-                }
-            }
-
-            if (protocols.isEmpty()) {
-                continue;
-            }
-
-            this.requireProvider().requestChunkTask(protocols, x, z);
-        }
-    }
-
     public void asyncChunkRequestCallback(int protocol, long timestamp, int x, int z, int subChunkCount, byte[] payload) {
         this.asyncChunkRequestCallbackQueue.add(new NetworkChunkSerializer.NetworkChunkSerializerCallbackData(protocol, timestamp, x, z, subChunkCount, payload));
-    }
-
-    public void chunkRequestCallback(int protocol, long timestamp, int x, int z, int subChunkCount, byte[] payload) {
-        long index = Level.chunkHash(x, z);
-
-        if (server.getSettings().world().chunk().cacheChunks()) {
-            BatchPacket data = Player.getChunkCacheFromData(protocol, x, z, subChunkCount, payload, this.getDimension());
-            BaseFullChunk chunk = getChunkIfLoaded(x, z);
-            if (chunk != null && chunk.getChanges() <= timestamp) {
-                chunk.setChunkPacket(protocol, data);
-            }
-            //this.sendChunk(x, z, index, data);
-            this.sendChunkInternal(x, z, index, data, protocol);
-            return;
-        }
-
-        LongSet tasks = this.getChunkSendTasks(protocol);
-        if (tasks.contains(index)) {
-            ConcurrentMap<Long, Int2ObjectMap<Player>> queue = this.getChunkSendQueue(protocol);
-
-            if (queue.containsKey(index)) {
-                for (Player player : queue.get(index).values()) {
-                    if (player.isConnected() && player.usedChunks.containsKey(index)) {
-                        if (matchMVChunkProtocol(protocol, player.protocol)) {
-                            player.sendChunk(x, z, subChunkCount, payload, this.getDimension());
-                        }
-                    }
-                }
-            }
-
-            queue.remove(index);
-            tasks.remove(index);
-        }
     }
 
     public void removeEntity(Entity entity) {
@@ -4019,6 +3909,7 @@ public class Level implements ChunkManager, Metadatable {
     public boolean populateChunk(int x, int z) {
         return this.populateChunk(x, z, false);
     }
+
 
     public boolean populateChunk(int x, int z, boolean force) {
         long index = Level.chunkHash(x, z);
@@ -4827,33 +4718,16 @@ public class Level implements ChunkManager, Metadatable {
         throw new IllegalArgumentException("Invalid chunk protocol: " + protocol);
     }
 
-    private static boolean matchMVChunkProtocol(int chunk, int player) {
-        if (chunk == ProtocolInfo.v1_20_0)
-            if (player >= ProtocolInfo.v1_20_0_23) if (player < ProtocolInfo.v1_20_10_21) return true;
-        if (chunk == ProtocolInfo.v1_20_10)
-            if (player >= ProtocolInfo.v1_20_10_21) if (player < ProtocolInfo.v1_20_30_24) return true;
-        if (chunk == ProtocolInfo.v1_20_30)
-            if (player >= ProtocolInfo.v1_20_30_24) if (player < ProtocolInfo.v1_20_40) return true;
-        if (chunk == ProtocolInfo.v1_20_40) if (player == ProtocolInfo.v1_20_40) return true;
-        if (chunk == ProtocolInfo.v1_20_50) if (player == ProtocolInfo.v1_20_50) return true;
-        if (chunk == ProtocolInfo.v1_20_60) if (player == ProtocolInfo.v1_20_60) return true;
-        if (chunk == ProtocolInfo.v1_20_70) if (player == ProtocolInfo.v1_20_70) return true;
-        if (chunk == ProtocolInfo.v1_20_80) if (player == ProtocolInfo.v1_20_80) return true;
-        if (chunk == ProtocolInfo.v1_21_0)
-            if (player >= ProtocolInfo.v1_21_0) if (player < ProtocolInfo.v1_21_20) return true;
-        if (chunk == ProtocolInfo.v1_21_20) if (player == ProtocolInfo.v1_21_20) return true;
-        if (chunk == ProtocolInfo.v1_21_30) if (player == ProtocolInfo.v1_21_30) return true;
-        if (chunk == ProtocolInfo.v1_21_40) if (player == ProtocolInfo.v1_21_40) return true;
-        if (chunk == ProtocolInfo.v1_21_50)
-            if (player >= ProtocolInfo.v1_21_50_26) if (player < ProtocolInfo.v1_21_60) return true;
-        if (chunk == ProtocolInfo.v1_21_60) if (player == ProtocolInfo.v1_21_60) return true;
-        if (chunk == ProtocolInfo.v1_21_70)
-            if (player >= ProtocolInfo.v1_21_70_24) if (player < ProtocolInfo.v1_21_80) return true;
-        if (chunk == ProtocolInfo.v1_21_80) if (player < ProtocolInfo.v1_21_90) return true;
-        if (chunk >= ProtocolInfo.v1_21_90) if (player < ProtocolInfo.v1_21_100) return true;
-        if (chunk == ProtocolInfo.v1_21_100) if (player == ProtocolInfo.v1_21_100) return true;
-        if (chunk == ProtocolInfo.v1_21_111) if (player >= ProtocolInfo.v1_21_110_26) return true;
-        return false; //TODO Multiversion  Remember to update when block palette changes
+    public CompletableFuture<BaseFullChunk> getChunkFuture(int cx, int cz, boolean generate) {
+        return CompletableFuture.supplyAsync(() -> {
+            BaseFullChunk chunk = this.getChunk(cx, cz, generate);
+
+            if(generate && !(chunk.isGenerated() || chunk.isPopulated())) {
+                this.generateChunkCallback(cx, cz, chunk, true);
+            }
+
+            return chunk;
+        });
     }
 
     private static class CharacterHashMap extends HashMap<Character, Object> {

@@ -61,7 +61,7 @@ public class LevelDBProvider implements LevelProvider {
 
     private static final DBProvider JAVA_LDB_PROVIDER = (DBProvider) FeatureBuilder.create(LevelDBProvider.class).addJava("net.daporkchop.ldbjni.java.JavaDBProvider").build();
 
-    protected final Long2ObjectMap<BaseFullChunk> chunks = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
+    protected final Long2ObjectMap<BaseFullChunk> chunks = new Long2ObjectOpenHashMap<>();
 
     protected final DB db;
 
@@ -322,41 +322,6 @@ public class LevelDBProvider implements LevelProvider {
     }
 
     @Override
-    public void requestChunkTask(IntSet protocols, int chunkX, int chunkZ) {
-        LevelDBChunk chunk = (LevelDBChunk) this.getChunk(chunkX, chunkZ, false);
-        if (chunk == null) {
-            throw new ChunkException("Invalid Chunk Set");
-        }
-
-        long timestamp = chunk.getChanges();
-
-        if (this.getServer().getSettings().world().chunk().asyncChunks()) {
-            final BaseChunk chunkClone = chunk.cloneForChunkSending();
-            this.level.getAsyncChuckExecutor().execute(() -> {
-                NetworkChunkSerializer.serialize(protocols, chunkClone, networkChunkSerializerCallback -> {
-                    getLevel().asyncChunkRequestCallback(networkChunkSerializerCallback.getProtocolId(),
-                            timestamp,
-                            chunkX,
-                            chunkZ,
-                            networkChunkSerializerCallback.getSubchunks(),
-                            networkChunkSerializerCallback.getStream().getBuffer()
-                    );
-                }, level.isAntiXrayEnabled(), getLevel().getDimensionData());
-            });
-        }else {
-            NetworkChunkSerializer.serialize(protocols, chunk, networkChunkSerializerCallback -> {
-                this.getLevel().chunkRequestCallback(networkChunkSerializerCallback.getProtocolId(),
-                        timestamp,
-                        chunkX,
-                        chunkZ,
-                        networkChunkSerializerCallback.getSubchunks(),
-                        networkChunkSerializerCallback.getStream().getBuffer()
-                );
-            }, level.isAntiXrayEnabled(), this.level.getDimensionData());
-        }
-    }
-
-    @Override
     public Map<String, Object> getGeneratorOptions() {
         Map<String, Object> options = new Object2ObjectOpenHashMap<>();
         options.put("preset", levelData.getString("generatorOptions"));
@@ -366,17 +331,23 @@ public class LevelDBProvider implements LevelProvider {
     @Override
     public BaseFullChunk getLoadedChunk(int chunkX, int chunkZ) {
         long index = Level.chunkHash(chunkX, chunkZ);
-        return this.chunks.get(index);
+        synchronized (chunks) {
+            return this.chunks.get(index);
+        }
     }
 
     @Override
     public BaseFullChunk getLoadedChunk(long hash) {
-        return this.chunks.get(hash);
+        synchronized (chunks) {
+            return this.chunks.get(hash);
+        }
     }
 
     @Override
     public Map<Long, BaseFullChunk> getLoadedChunks() {
-        return ImmutableMap.copyOf(chunks);
+        synchronized (chunks) {
+            return ImmutableMap.copyOf(chunks);
+        }
     }
 
     public Long2ObjectMap<? extends FullChunk> getLoadedChunksUnsafe() {
@@ -390,7 +361,9 @@ public class LevelDBProvider implements LevelProvider {
 
     @Override
     public boolean isChunkLoaded(long hash) {
-        return this.chunks.containsKey(hash);
+        synchronized (chunks) {
+            return this.chunks.containsKey(hash);
+        }
     }
 
     @Override
@@ -401,8 +374,11 @@ public class LevelDBProvider implements LevelProvider {
     @Override
     public boolean loadChunk(int chunkX, int chunkZ, boolean create) {
         long index = Level.chunkHash(chunkX, chunkZ);
-        if (this.chunks.containsKey(index)) {
-            return true;
+
+        synchronized (chunks) {
+            if (this.chunks.containsKey(index)) {
+                return true;
+            }
         }
 
         return this.readOrCreateChunk(chunkX, chunkZ, create) != null;
@@ -470,12 +446,15 @@ public class LevelDBProvider implements LevelProvider {
     @Override
     public boolean unloadChunk(int chunkX, int chunkZ, boolean safe) {
         long index = Level.chunkHash(chunkX, chunkZ);
-        BaseFullChunk chunk = this.chunks.get(index);
-        if (chunk == null || !chunk.unload(false, safe)) {
-            return false;
+
+        synchronized (chunks) {
+            BaseFullChunk chunk = this.chunks.get(index);
+            if (chunk == null || !chunk.unload(false, safe)) {
+                return false;
+            }
+            // TODO: this.lastChunk.set(null);
+            this.chunks.remove(index, chunk); // TODO: Do this after saveChunkFuture to prevent loading of old copy
         }
-        // TODO: this.lastChunk.set(null);
-        this.chunks.remove(index, chunk); // TODO: Do this after saveChunkFuture to prevent loading of old copy
         return true;
     }
 
@@ -618,10 +597,12 @@ public class LevelDBProvider implements LevelProvider {
 
     @Override
     public void saveChunks() {
-        for (BaseFullChunk chunk : this.chunks.values()) {
-            if (chunk.hasChanged()) {
-                chunk.setChanged(false);
-                this.saveChunk(chunk.getX(), chunk.getZ(), chunk);
+        synchronized (chunks) {
+            for (BaseFullChunk chunk : this.chunks.values()) {
+                if (chunk.hasChanged()) {
+                    chunk.setChanged(false);
+                    this.saveChunk(chunk.getX(), chunk.getZ(), chunk);
+                }
             }
         }
     }
@@ -632,17 +613,19 @@ public class LevelDBProvider implements LevelProvider {
     }
 
     private void unloadChunksUnsafe(boolean wait) {
-        Iterator<BaseFullChunk> iterator = this.chunks.values().iterator();
-        while (iterator.hasNext()) {
-            LevelDBChunk chunk = (LevelDBChunk) iterator.next();
-            chunk.unload(level.isSaveOnUnloadEnabled(), false);
-            if (wait) {
-                if (!chunk.writeLock().tryLock()) {
-                    chunk.writeLock().lock();
+        synchronized (chunks) {
+            Iterator<BaseFullChunk> iterator = this.chunks.values().iterator();
+            while (iterator.hasNext()) {
+                LevelDBChunk chunk = (LevelDBChunk) iterator.next();
+                chunk.unload(level.isSaveOnUnloadEnabled(), false);
+                if (wait) {
+                    if (!chunk.writeLock().tryLock()) {
+                        chunk.writeLock().lock();
+                    }
+                    chunk.writeLock().unlock();
                 }
-                chunk.writeLock().unlock();
+                iterator.remove();
             }
-            iterator.remove();
         }
     }
 
@@ -654,11 +637,13 @@ public class LevelDBProvider implements LevelProvider {
     @Override
     public BaseFullChunk getChunk(int chunkX, int chunkZ, boolean create) {
         long index = Level.chunkHash(chunkX, chunkZ);
-        BaseFullChunk chunk = this.chunks.get(index);
-        if (chunk == null) {
-            chunk = this.readOrCreateChunk(chunkX, chunkZ, create);
+        synchronized (chunks) {
+            BaseFullChunk chunk = this.chunks.get(index);
+            if (chunk == null) {
+                chunk = this.readOrCreateChunk(chunkX, chunkZ, create);
+            }
+            return chunk;
         }
-        return chunk;
     }
 
     @Override
@@ -677,11 +662,13 @@ public class LevelDBProvider implements LevelProvider {
         chunk.setPosition(chunkX, chunkZ);
         long index = Level.chunkHash(chunkX, chunkZ);
 
-        FullChunk oldChunk = this.chunks.get(index);
-        if (oldChunk != null && !oldChunk.equals(chunk)) {
-            this.unloadChunk(chunkX, chunkZ, false);
+        synchronized (chunks) {
+            FullChunk oldChunk = this.chunks.get(index);
+            if (oldChunk != null && !oldChunk.equals(chunk)) {
+                this.unloadChunk(chunkX, chunkZ, false);
+            }
+            this.chunks.put(index, (LevelDBChunk) chunk);
         }
-        this.chunks.put(index, (LevelDBChunk) chunk);
     }
 
     private boolean chunkExists(int chunkX, int chunkZ) {
@@ -718,7 +705,10 @@ public class LevelDBProvider implements LevelProvider {
             return null;
         }
 
-        this.chunks.put(Level.chunkHash(chunkX, chunkZ), chunk);
+
+        synchronized (chunks) {
+            this.chunks.put(Level.chunkHash(chunkX, chunkZ), chunk);
+        }
         return chunk;
     }
 
@@ -908,35 +898,38 @@ public class LevelDBProvider implements LevelProvider {
     @Override
     public void doGarbageCollection(long time) {
         long start = System.currentTimeMillis();
-        int maxIterations = this.chunks.size();
-        if (this.lastGcPosition > maxIterations) {
-            this.lastGcPosition = 0;
-        }
 
-        ObjectIterator<BaseFullChunk> iterator = chunks.values().iterator();
-        if (this.lastGcPosition != 0) {
-            iterator.skip(lastGcPosition);
-        }
-
-        int iterations;
-        for (iterations = 0; iterations < maxIterations; iterations++) {
-            if (!iterator.hasNext()) {
-                iterator = this.chunks.values().iterator();
+        synchronized (chunks) {
+            int maxIterations = this.chunks.size();
+            if (this.lastGcPosition > maxIterations) {
+                this.lastGcPosition = 0;
             }
 
-            if (!iterator.hasNext()) {
-                break;
+            ObjectIterator<BaseFullChunk> iterator = chunks.values().iterator();
+            if (this.lastGcPosition != 0) {
+                iterator.skip(lastGcPosition);
             }
 
-            BaseFullChunk chunk = iterator.next();
-            if (chunk instanceof LevelDBChunk && chunk.isGenerated() && chunk.isPopulated()) {
-                chunk.compress();
-                if (System.currentTimeMillis() - start >= time) {
+            int iterations;
+            for (iterations = 0; iterations < maxIterations; iterations++) {
+                if (!iterator.hasNext()) {
+                    iterator = this.chunks.values().iterator();
+                }
+
+                if (!iterator.hasNext()) {
                     break;
                 }
+
+                BaseFullChunk chunk = iterator.next();
+                if (chunk instanceof LevelDBChunk && chunk.isGenerated() && chunk.isPopulated()) {
+                    chunk.compress();
+                    if (System.currentTimeMillis() - start >= time) {
+                        break;
+                    }
+                }
             }
+            this.lastGcPosition += iterations;
         }
-        this.lastGcPosition += iterations;
     }
 
     public CompoundTag getLevelData() {
@@ -1095,25 +1088,29 @@ public class LevelDBProvider implements LevelProvider {
                 int chunkX = Binary.readLInt(key);
                 int chunkZ = Binary.readLInt(key, 4);
                 long index = Level.chunkHash(chunkX, chunkZ);
-                BaseFullChunk chunk = this.chunks.get(index);
-                if (chunk == null) {
-                    try {
-                        chunk = this.readChunk(chunkX, chunkZ);
-                    } catch (Exception e) {
-                        if (!skipCorrupted) {
-                            throw e;
+
+
+                synchronized (chunks) {
+                    BaseFullChunk chunk = this.chunks.get(index);
+                    if (chunk == null) {
+                        try {
+                            chunk = this.readChunk(chunkX, chunkZ);
+                        } catch (Exception e) {
+                            if (!skipCorrupted) {
+                                throw e;
+                            }
+                            log.error("Skipped corrupted chunk {} {}", chunkX, chunkZ, e);
+                            continue;
                         }
-                        log.error("Skipped corrupted chunk {} {}", chunkX, chunkZ, e);
+                    }
+
+                    if (chunk == null) {
                         continue;
                     }
-                }
 
-                if (chunk == null) {
-                    continue;
-                }
-
-                if (!action.apply(chunk)) {
-                    break;
+                    if (!action.apply(chunk)) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {

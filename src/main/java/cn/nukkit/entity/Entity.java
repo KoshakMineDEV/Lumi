@@ -1386,7 +1386,7 @@ public abstract class Entity extends Location implements Metadatable {
             this.server.getLogger().warning("(BUG) Spawned an entity that is not initialized yet: " + this.getName() + " (" + this.id + ')');
         }
 
-        if (!this.hasSpawned.containsKey(player.getLoaderId()) && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
+        if (!this.hasSpawned.containsKey(player.getLoaderId()) && player.isChunkSent(this.chunk.getX(), this.chunk.getZ())) {
             player.dataPacket(createAddEntityPacket());
             this.hasSpawned.put(player.getLoaderId(), player);
 
