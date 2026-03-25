@@ -1019,6 +1019,8 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(WAXED_EXPOSED_COPPER_LANTERN, BlockCopperLanternExposedWaxed.class); //1343
         register(WAXED_WEATHERED_COPPER_LANTERN, BlockCopperLanternWeatheredWaxed.class); //1344
         register(WAXED_OXIDIZED_COPPER_LANTERN, BlockCopperLanternOxidizedWaxed.class); //1345
+        register(GOLDEN_DANDELION, BlockGoldenDandelion.class); //1346
+
 
         IntStream idStream = IntStream.range(0, Block.MAX_BLOCK_ID);
         idStream.parallel().forEach(id -> {
