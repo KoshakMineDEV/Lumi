@@ -43,7 +43,8 @@ public class GlobalBlockPalette {
             ProtocolInfo.v1_21_80,
             ProtocolInfo.v1_21_90,
             ProtocolInfo.v1_21_100,
-            ProtocolInfo.v1_21_110_26
+            ProtocolInfo.v1_21_110_26,
+            ProtocolInfo.v1_26_10
     };
 
     static {

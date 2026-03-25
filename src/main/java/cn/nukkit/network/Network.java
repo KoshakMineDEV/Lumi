@@ -540,6 +540,13 @@ public class Network {
                 .registerPacket(ProtocolInfo.VOXEL_SHAPES_PACKET, VoxelShapesPacket.class, VoxelShapesPacket::new)
                 .registerPacket(ProtocolInfo.CAMERA_SPLINE_PACKET, CameraSplinePacket.class, CameraSplinePacket::new)
                 .registerPacket(ProtocolInfo.CAMERA_AIM_ASSIST_ACTOR_PRIORITY_PACKET, CameraAimAssistActorPriorityPacket.class, CameraSplinePacket::new)
+                // v944 packets
+                .registerPacket(ProtocolInfo.RESOURCE_PACKS_READY_FOR_VALIDATION_PACKET, ResourcePacksReadyForValidationPacket.class, ResourcePacksReadyForValidationPacket::new)
+                .registerPacket(ProtocolInfo.LOCATOR_BAR_PACKET, LocatorBarPacket.class, LocatorBarPacket::new)
+                .registerPacket(ProtocolInfo.PARTY_CHANGED_PACKET, PartyChangedPacket.class, PartyChangedPacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_DATA_DRIVEN_SCREEN_CLOSED_PACKET, ServerboundDataDrivenScreenClosedPacket.class, ServerboundDataDrivenScreenClosedPacket::new)
+                .registerPacket(ProtocolInfo.SYNC_WORLD_CLOCKS_PACKET, SyncWorldClocksPacket.class, SyncWorldClocksPacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_ATTRIBUTE_LAYER_SYNC_PACKET, ClientboundAttributeLayerSyncPacket.class, ClientboundAttributeLayerSyncPacket::new)
                 .build();
 
         this.packetPoolCurrent = this.packetPool.toBuilder()

@@ -78,6 +78,8 @@ public final class ItemTags {
 
     public static final ItemTag IS_SHOVEL = register("minecraft:is_shovel", new LazyItemTag("minecraft:is_shovel"));
 
+    public static final ItemTag IS_SPEAR = register("minecraft:is_spear", new LazyItemTag("minecraft:is_spear"));
+
     public static final ItemTag IS_SWORD = register("minecraft:is_sword", new LazyItemTag("minecraft:is_sword"));
 
     public static final ItemTag IS_TOOL = register("minecraft:is_tool", new LazyItemTag("minecraft:is_tool"));
@@ -94,7 +96,11 @@ public final class ItemTags {
 
     public static final ItemTag MANGROVE_LOGS = register("minecraft:mangrove_logs", new LazyItemTag("minecraft:mangrove_logs"));
 
+    public static final ItemTag METAL_NUGGETS = register("minecraft:metal_nuggets", new LazyItemTag("minecraft:metal_nuggets"));
+
     public static final ItemTag MUSIC_DISC = register("minecraft:music_disc", new LazyItemTag("minecraft:music_disc"));
+
+    public static final ItemTag NAUTILUS_ARMOR = register("minecraft:nautilus_armor", new LazyItemTag("minecraft:nautilus_armor"));
 
     public static final ItemTag NETHERITE_TIER = register("minecraft:netherite_tier", new LazyItemTag("minecraft:netherite_tier"));
 

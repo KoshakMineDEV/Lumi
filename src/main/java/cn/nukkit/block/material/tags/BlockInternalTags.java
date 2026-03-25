@@ -190,7 +190,6 @@ public interface BlockInternalTags {
 
     BlockTag WOODEN_FENCE = BlockTags.register("lumi:wooden_fence", new SimpleBlockTag(
             BlockTypes.ACACIA_FENCE,
-            BlockTypes.FENCE,
             BlockTypes.BIRCH_FENCE,
             BlockTypes.CRIMSON_FENCE,
             BlockTypes.DARK_OAK_FENCE,
