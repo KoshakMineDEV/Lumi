@@ -877,6 +877,10 @@ public class BinaryStream {
         return new BlockVector3(this.getVarInt(), (int) this.getUnsignedVarInt(), this.getVarInt());
     }
 
+    public BlockVector3 getBlockVector3(int protocol) {
+        return new BlockVector3(this.getVarInt(), protocol >= ProtocolInfo.v1_26_10 ? this.getVarInt() : (int) this.getUnsignedVarInt(), this.getVarInt());
+    }
+
     public BlockVector3 getSignedBlockPosition() {
         return new BlockVector3(getVarInt(), getVarInt(), getVarInt());
     }
@@ -891,11 +895,26 @@ public class BinaryStream {
         this.putBlockVector3(v.x, v.y, v.z);
     }
 
+    public void putBlockVector3(int protocol, BlockVector3 v) {
+        this.putBlockVector3(protocol, v.x, v.y, v.z);
+    }
+
     public void putBlockVector3(int x, int y, int z) {
         this.putVarInt(x);
         this.putUnsignedVarInt(y);
         this.putVarInt(z);
     }
+
+    public void putBlockVector3(int protocol, int x, int y, int z) {
+        this.putVarInt(x);
+        if (protocol >= ProtocolInfo.v1_26_10) {
+            this.putVarInt(y);
+        } else {
+            this.putUnsignedVarInt(y);
+        }
+        this.putVarInt(z);
+    }
+
 
     public Vector3f getVector3f() {
         return new Vector3f(this.getLFloat(), this.getLFloat(), this.getLFloat());

@@ -4674,7 +4674,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     private int getChunkProtocol(int protocol) {
-        if (protocol >= ProtocolInfo.v1_21_110_26) {
+        if (protocol >= ProtocolInfo.v1_26_10) {
+            return ProtocolInfo.v1_26_10;
+        } else if (protocol >= ProtocolInfo.v1_21_110_26) {
             return ProtocolInfo.v1_21_111;
         } else if (protocol >= ProtocolInfo.v1_21_100) {
             return ProtocolInfo.v1_21_100;
