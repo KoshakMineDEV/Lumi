@@ -72,6 +72,8 @@ public enum Sound {
 
     ARMOR_EQUIP_DIAMOND("armor.equip_diamond"),
 
+    ARMOR_EQUIP_ELYTRA("armor.equip_elytra"),
+
     ARMOR_EQUIP_GENERIC("armor.equip_generic"),
 
     ARMOR_EQUIP_GOLD("armor.equip_gold"),
@@ -279,6 +281,8 @@ public enum Sound {
     BLOCK_MANGROVE_ROOTS_STEP("block.mangrove_roots.step"),
 
     BLOCK_MOB_SPAWNER_BREAK("block.mob_spawner.break"),
+
+    BLOCK_MOB_SPAWNER_PLACE("block.mob_spawner.place"),
 
     BLOCK_MOB_SPAWNER_STEP("block.mob_spawner.step"),
 
@@ -764,7 +768,11 @@ public enum Sound {
 
     ELYTRA_LOOP("elytra.loop"),
 
+    ENTITY_FOX_TELEPORT("entity.fox.teleport"),
+
     ENTITY_GENERIC_SPLASH("entity.generic.splash"),
+
+    ENTITY_PLAYER_TELEPORT("entity.player.teleport"),
 
     ENTITY_WITHER_SKELETON_AMBIENT("entity.wither_skeleton.ambient"),
 
@@ -1078,6 +1086,8 @@ public enum Sound {
 
     ITEM_ENCHANT_LUNGE3("item.enchant.lunge3"),
 
+    ITEM_FIRECHARGE_USE("item.firecharge.use"),
+
     ITEM_SHIELD_BLOCK("item.shield.block"),
 
     ITEM_SPEAR_ATTACK_HIT("item.spear.attack_hit"),
@@ -1360,13 +1370,75 @@ public enum Sound {
 
     MOB_AXOLOTL_SWIM("mob.axolotl.swim"),
 
+    MOB_BABY_CAT_AMBIENT("mob.baby_cat.ambient"),
+
+    MOB_BABY_CAT_DEATH("mob.baby_cat.death"),
+
+    MOB_BABY_CAT_EAT("mob.baby_cat.eat"),
+
+    MOB_BABY_CAT_HURT("mob.baby_cat.hurt"),
+
+    MOB_BABY_CHICKEN_AMBIENT("mob.baby_chicken.ambient"),
+
+    MOB_BABY_CHICKEN_DEATH("mob.baby_chicken.death"),
+
+    MOB_BABY_CHICKEN_HURT("mob.baby_chicken.hurt"),
+
+    MOB_BABY_CHICKEN_STEP("mob.baby_chicken.step"),
+
+    MOB_BABY_HORSE_AMBIENT("mob.baby_horse.ambient"),
+
+    MOB_BABY_HORSE_ANGRY("mob.baby_horse.angry"),
+
+    MOB_BABY_HORSE_BREATHE("mob.baby_horse.breathe"),
+
+    MOB_BABY_HORSE_DEATH("mob.baby_horse.death"),
+
+    MOB_BABY_HORSE_EAT("mob.baby_horse.eat"),
+
+    MOB_BABY_HORSE_HURT("mob.baby_horse.hurt"),
+
+    MOB_BABY_HORSE_LAND("mob.baby_horse.land"),
+
     MOB_BABY_NAUTILUS_AMBIENT("mob.baby_nautilus.ambient"),
 
+    MOB_BABY_NAUTILUS_AMBIENT_IN_WATER("mob.baby_nautilus.ambient.in.water"),
+
     MOB_BABY_NAUTILUS_DEATH("mob.baby_nautilus.death"),
+
+    MOB_BABY_NAUTILUS_DEATH_IN_WATER("mob.baby_nautilus.death.in.water"),
 
     MOB_BABY_NAUTILUS_EAT("mob.baby_nautilus.eat"),
 
     MOB_BABY_NAUTILUS_HURT("mob.baby_nautilus.hurt"),
+
+    MOB_BABY_NAUTILUS_HURT_IN_WATER("mob.baby_nautilus.hurt.in.water"),
+
+    MOB_BABY_NAUTILUS_SWIM("mob.baby_nautilus.swim"),
+
+    MOB_BABY_PIG_AMBIENT("mob.baby_pig.ambient"),
+
+    MOB_BABY_PIG_DEATH("mob.baby_pig.death"),
+
+    MOB_BABY_PIG_HURT("mob.baby_pig.hurt"),
+
+    MOB_BABY_PIG_STEP("mob.baby_pig.step"),
+
+    MOB_BABY_WOLF_BARK("mob.baby_wolf.bark"),
+
+    MOB_BABY_WOLF_DEATH("mob.baby_wolf.death"),
+
+    MOB_BABY_WOLF_GROWL("mob.baby_wolf.growl"),
+
+    MOB_BABY_WOLF_HURT("mob.baby_wolf.hurt"),
+
+    MOB_BABY_WOLF_PANTING("mob.baby_wolf.panting"),
+
+    MOB_BABY_WOLF_SHAKE("mob.baby_wolf.shake"),
+
+    MOB_BABY_WOLF_STEP("mob.baby_wolf.step"),
+
+    MOB_BABY_WOLF_WHINE("mob.baby_wolf.whine"),
 
     MOB_BAT_DEATH("mob.bat.death"),
 
@@ -1387,6 +1459,12 @@ public enum Sound {
     MOB_BEE_POLLINATE("mob.bee.pollinate"),
 
     MOB_BEE_STING("mob.bee.sting"),
+
+    MOB_BIG_PIG_DEATH("mob.big_pig.death"),
+
+    MOB_BIG_PIG_HURT("mob.big_pig.hurt"),
+
+    MOB_BIG_PIG_SAY("mob.big_pig.say"),
 
     MOB_BLAZE_BREATHE("mob.blaze.breathe"),
 
@@ -1657,6 +1735,8 @@ public enum Sound {
     MOB_EVOCATION_ILLAGER_PREPARE_SUMMON("mob.evocation_illager.prepare_summon"),
 
     MOB_EVOCATION_ILLAGER_PREPARE_WOLOLO("mob.evocation_illager.prepare_wololo"),
+
+    MOB_FISH_DEATH("mob.fish.death"),
 
     MOB_FISH_FLOP("mob.fish.flop"),
 
@@ -1978,6 +2058,18 @@ public enum Sound {
 
     MOB_MAGMACUBE_SMALL("mob.magmacube.small"),
 
+    MOB_MINI_PIG_DEATH("mob.mini_pig.death"),
+
+    MOB_MINI_PIG_HURT("mob.mini_pig.hurt"),
+
+    MOB_MINI_PIG_SAY("mob.mini_pig.say"),
+
+    MOB_MOODY_COW_DEATH("mob.moody_cow.death"),
+
+    MOB_MOODY_COW_HURT("mob.moody_cow.hurt"),
+
+    MOB_MOODY_COW_SAY("mob.moody_cow.say"),
+
     MOB_MOOSHROOM_CONVERT("mob.mooshroom.convert"),
 
     MOB_MOOSHROOM_EAT("mob.mooshroom.eat"),
@@ -1985,6 +2077,8 @@ public enum Sound {
     MOB_MOOSHROOM_SUSPICIOUS_MILK("mob.mooshroom.suspicious_milk"),
 
     MOB_NAUTILUS_AMBIENT("mob.nautilus.ambient"),
+
+    MOB_NAUTILUS_AMBIENT_IN_WATER("mob.nautilus.ambient.in.water"),
 
     MOB_NAUTILUS_ARMOR_UNEQUIP("mob.nautilus.armor_unequip"),
 
@@ -1994,13 +2088,23 @@ public enum Sound {
 
     MOB_NAUTILUS_DEATH("mob.nautilus.death"),
 
+    MOB_NAUTILUS_DEATH_IN_WATER("mob.nautilus.death.in.water"),
+
     MOB_NAUTILUS_EAT("mob.nautilus.eat"),
 
     MOB_NAUTILUS_HURT("mob.nautilus.hurt"),
 
+    MOB_NAUTILUS_HURT_IN_WATER("mob.nautilus.hurt.in.water"),
+
     MOB_NAUTILUS_NAUTILUS_SADDLE("mob.nautilus.nautilus_saddle"),
 
     MOB_NAUTILUS_RIDE("mob.nautilus.ride"),
+
+    MOB_NAUTILUS_SADDLE("mob.nautilus.saddle"),
+
+    MOB_NAUTILUS_SADDLE_UNDERWATER("mob.nautilus.saddle_underwater"),
+
+    MOB_NAUTILUS_SWIM("mob.nautilus.swim"),
 
     MOB_OCELOT_DEATH("mob.ocelot.death"),
 
@@ -2052,6 +2156,8 @@ public enum Sound {
 
     MOB_PARROT_STEP("mob.parrot.step"),
 
+    MOB_PAUSE_GROWTH("mob.pause_growth"),
+
     MOB_PHANTOM_BITE("mob.phantom.bite"),
 
     MOB_PHANTOM_DEATH("mob.phantom.death"),
@@ -2063,6 +2169,12 @@ public enum Sound {
     MOB_PHANTOM_IDLE("mob.phantom.idle"),
 
     MOB_PHANTOM_SWOOP("mob.phantom.swoop"),
+
+    MOB_PICKY_CHICKEN_DEATH("mob.picky_chicken.death"),
+
+    MOB_PICKY_CHICKEN_HURT("mob.picky_chicken.hurt"),
+
+    MOB_PICKY_CHICKEN_SAY("mob.picky_chicken.say"),
 
     MOB_PIG_BOOST("mob.pig.boost"),
 
@@ -2153,6 +2265,16 @@ public enum Sound {
     MOB_RAVAGER_STEP("mob.ravager.step"),
 
     MOB_RAVAGER_STUN("mob.ravager.stun"),
+
+    MOB_RESET_GROWTH("mob.reset_growth"),
+
+    MOB_ROYAL_CAT_AMBIENT("mob.royal_cat.ambient"),
+
+    MOB_ROYAL_CAT_DEATH("mob.royal_cat.death"),
+
+    MOB_ROYAL_CAT_HURT("mob.royal_cat.hurt"),
+
+    MOB_ROYAL_CAT_PURREOW("mob.royal_cat.purreow"),
 
     MOB_SHEEP_SAY("mob.sheep.say"),
 
@@ -2536,15 +2658,23 @@ public enum Sound {
 
     MOB_ZOMBIE_NAUTILUS_AMBIENT("mob.zombie_nautilus.ambient"),
 
+    MOB_ZOMBIE_NAUTILUS_AMBIENT_IN_WATER("mob.zombie_nautilus.ambient.in.water"),
+
     MOB_ZOMBIE_NAUTILUS_DASH("mob.zombie_nautilus.dash"),
 
     MOB_ZOMBIE_NAUTILUS_DASH_READY("mob.zombie_nautilus.dash_ready"),
 
     MOB_ZOMBIE_NAUTILUS_DEATH("mob.zombie_nautilus.death"),
 
+    MOB_ZOMBIE_NAUTILUS_DEATH_IN_WATER("mob.zombie_nautilus.death.in.water"),
+
     MOB_ZOMBIE_NAUTILUS_EAT("mob.zombie_nautilus.eat"),
 
     MOB_ZOMBIE_NAUTILUS_HURT("mob.zombie_nautilus.hurt"),
+
+    MOB_ZOMBIE_NAUTILUS_HURT_IN_WATER("mob.zombie_nautilus.hurt.in.water"),
+
+    MOB_ZOMBIE_NAUTILUS_SWIM("mob.zombie_nautilus.swim"),
 
     MOB_ZOMBIE_VILLAGER_DEATH("mob.zombie_villager.death"),
 
@@ -2680,6 +2810,14 @@ public enum Sound {
 
     NOTE_SNARE("note.snare"),
 
+    NOTE_TRUMPET("note.trumpet"),
+
+    NOTE_TRUMPET_EXPOSED("note.trumpet_exposed"),
+
+    NOTE_TRUMPET_OXIDIZED("note.trumpet_oxidized"),
+
+    NOTE_TRUMPET_WEATHERED("note.trumpet_weathered"),
+
     NOTE_WITHERSKELETON("note.witherskeleton"),
 
     NOTE_XYLOPHONE("note.xylophone"),
@@ -2738,25 +2876,49 @@ public enum Sound {
 
     PLACE_AMETHYST_CLUSTER("place.amethyst_cluster"),
 
+    PLACE_ANCIENT_DEBRIS("place.ancient_debris"),
+
     PLACE_AZALEA("place.azalea"),
 
     PLACE_AZALEA_LEAVES("place.azalea_leaves"),
 
     PLACE_BAMBOO_WOOD("place.bamboo_wood"),
 
+    PLACE_BAMBOO_WOOD_HANGING_SIGN("place.bamboo_wood_hanging_sign"),
+
+    PLACE_BASALT("place.basalt"),
+
     PLACE_BIG_DRIPLEAF("place.big_dripleaf"),
 
+    PLACE_BONE_BLOCK("place.bone_block"),
+
     PLACE_CALCITE("place.calcite"),
+
+    PLACE_CANDLE("place.candle"),
+
+    PLACE_CAVE_VINES("place.cave_vines"),
+
+    PLACE_CHAIN("place.chain"),
 
     PLACE_CHERRY_LEAVES("place.cherry_leaves"),
 
     PLACE_CHERRY_WOOD("place.cherry_wood"),
 
+    PLACE_CHERRY_WOOD_HANGING_SIGN("place.cherry_wood_hanging_sign"),
+
     PLACE_CHISELED_BOOKSHELF("place.chiseled_bookshelf"),
+
+    PLACE_CLOTH("place.cloth"),
 
     PLACE_COPPER("place.copper"),
 
     PLACE_COPPER_BULB("place.copper_bulb"),
+
+    PLACE_COPPER_GRATE("place.copper_grate"),
+
+    PLACE_CORAL("place.coral"),
+
+    PLACE_DECORATED_POT("place.decorated_pot"),
 
     PLACE_DEEPSLATE("place.deepslate"),
 
@@ -2766,23 +2928,61 @@ public enum Sound {
 
     PLACE_DRIPSTONE_BLOCK("place.dripstone_block"),
 
+    PLACE_FROG_SPAWN("place.frog_spawn"),
+
+    PLACE_FROGLIGHT("place.froglight"),
+
+    PLACE_FUNGUS("place.fungus"),
+
+    PLACE_GRASS("place.grass"),
+
+    PLACE_GRAVEL("place.gravel"),
+
     PLACE_HANGING_ROOTS("place.hanging_roots"),
+
+    PLACE_HANGING_SIGN("place.hanging_sign"),
+
+    PLACE_HEAVY_CORE("place.heavy_core"),
+
+    PLACE_HONEY_BLOCK("place.honey_block"),
 
     PLACE_IRON("place.iron"),
 
     PLACE_LARGE_AMETHYST_BUD("place.large_amethyst_bud"),
 
+    PLACE_LODESTONE("place.lodestone"),
+
     PLACE_MEDIUM_AMETHYST_BUD("place.medium_amethyst_bud"),
 
     PLACE_MOSS("place.moss"),
 
+    PLACE_NETHER_BRICK("place.nether_brick"),
+
+    PLACE_NETHER_GOLD_ORE("place.nether_gold_ore"),
+
+    PLACE_NETHER_SPROUTS("place.nether_sprouts"),
+
+    PLACE_NETHER_WART("place.nether_wart"),
+
     PLACE_NETHER_WOOD("place.nether_wood"),
+
+    PLACE_NETHER_WOOD_HANGING_SIGN("place.nether_wood_hanging_sign"),
+
+    PLACE_NETHERITE("place.netherite"),
+
+    PLACE_NETHERRACK("place.netherrack"),
+
+    PLACE_NYLIUM("place.nylium"),
 
     PLACE_PINK_PETALS("place.pink_petals"),
 
     PLACE_POINTED_DRIPSTONE("place.pointed_dripstone"),
 
     PLACE_POWDER_SNOW("place.powder_snow"),
+
+    PLACE_ROOTS("place.roots"),
+
+    PLACE_SAND("place.sand"),
 
     PLACE_SCULK("place.sculk"),
 
@@ -2792,11 +2992,27 @@ public enum Sound {
 
     PLACE_SCULK_SHRIEKER("place.sculk_shrieker"),
 
+    PLACE_SCULK_VEIN("place.sculk_vein"),
+
+    PLACE_SHROOMLIGHT("place.shroomlight"),
+
+    PLACE_SLIME_BIG("place.slime.big"),
+
     PLACE_SMALL_AMETHYST_BUD("place.small_amethyst_bud"),
+
+    PLACE_SNOW("place.snow"),
+
+    PLACE_SOUL_SAND("place.soul_sand"),
+
+    PLACE_SOUL_SOIL("place.soul_soil"),
 
     PLACE_SPONGE("place.sponge"),
 
     PLACE_SPORE_BLOSSOM("place.spore_blossom"),
+
+    PLACE_STEM("place.stem"),
+
+    PLACE_STONE("place.stone"),
 
     PLACE_SUSPICIOUS_GRAVEL("place.suspicious_gravel"),
 
@@ -2806,7 +3022,13 @@ public enum Sound {
 
     PLACE_TUFF_BRICKS("place.tuff_bricks"),
 
+    PLACE_VINES("place.vines"),
+
+    PLACE_WEB("place.web"),
+
     PLACE_WET_SPONGE("place.wet_sponge"),
+
+    PLACE_WOOD("place.wood"),
 
     PORTAL_PORTAL("portal.portal"),
 

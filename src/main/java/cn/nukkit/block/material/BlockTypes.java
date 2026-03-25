@@ -897,14 +897,6 @@ public final class BlockTypes {
 
     public static final BlockType DOUBLE_PLANT = register("minecraft:double_plant", 814);
 
-    public static final BlockType DOUBLE_STONE_BLOCK_SLAB = register("minecraft:double_stone_block_slab", 803);
-
-    public static final BlockType DOUBLE_STONE_BLOCK_SLAB2 = register("minecraft:double_stone_block_slab2", 804);
-
-    public static final BlockType DOUBLE_STONE_BLOCK_SLAB3 = register("minecraft:double_stone_block_slab3", 805);
-
-    public static final BlockType DOUBLE_STONE_BLOCK_SLAB4 = register("minecraft:double_stone_block_slab4", 806);
-
     public static final BlockType DRAGON_BREATH = register("minecraft:dragon_breath", 599);
 
     public static final BlockType DRAGON_EGG = register("minecraft:dragon_egg", 122);
@@ -1245,8 +1237,6 @@ public final class BlockTypes {
 
     public static final BlockType FARMLAND = register("minecraft:farmland", 60);
 
-    public static final BlockType FENCE = register("minecraft:fence", 796);
-
     public static final BlockType FENCE_GATE = register("minecraft:fence_gate", 107);
 
     public static final BlockType FERMENTED_SPIDER_EYE = register("minecraft:fermented_spider_eye", 461);
@@ -1334,6 +1324,8 @@ public final class BlockTypes {
     public static final BlockType GOLDEN_CARROT = register("minecraft:golden_carrot", 312);
 
     public static final BlockType GOLDEN_CHESTPLATE = register("minecraft:golden_chestplate", 384);
+
+    public static final BlockType GOLDEN_DANDELION = register("minecraft:golden_dandelion", -1091);
 
     public static final BlockType GOLDEN_HELMET = register("minecraft:golden_helmet", 383);
 
@@ -2739,14 +2731,6 @@ public final class BlockTypes {
 
     public static final BlockType STONE_AXE = register("minecraft:stone_axe", 346);
 
-    public static final BlockType STONE_BLOCK_SLAB = register("minecraft:stone_block_slab", 799);
-
-    public static final BlockType STONE_BLOCK_SLAB2 = register("minecraft:stone_block_slab2", 800);
-
-    public static final BlockType STONE_BLOCK_SLAB3 = register("minecraft:stone_block_slab3", 801);
-
-    public static final BlockType STONE_BLOCK_SLAB4 = register("minecraft:stone_block_slab4", 802);
-
     public static final BlockType STONE_BRICK_DOUBLE_SLAB = register("minecraft:stone_brick_double_slab", -881);
 
     public static final BlockType STONE_BRICK_SLAB = register("minecraft:stone_brick_slab", -875);
@@ -3192,8 +3176,6 @@ public final class BlockTypes {
     public static final BlockType WOODEN_PRESSURE_PLATE = register("minecraft:wooden_pressure_plate", 72);
 
     public static final BlockType WOODEN_SHOVEL = register("minecraft:wooden_shovel", 340);
-
-    public static final BlockType WOODEN_SLAB = register("minecraft:wooden_slab", 812);
 
     public static final BlockType WOODEN_SWORD = register("minecraft:wooden_sword", 339);
 
