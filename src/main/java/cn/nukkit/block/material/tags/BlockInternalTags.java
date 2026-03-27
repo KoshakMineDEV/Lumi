@@ -227,6 +227,45 @@ public interface BlockInternalTags {
             BlockTypes.PALE_OAK_SAPLING
     ));
 
+    BlockTag LEAVES = BlockTags.register("lumi:leaves", new SimpleBlockTag(
+            BlockTypes.ACACIA_LEAVES,
+            BlockTypes.OAK_LEAVES,
+            BlockTypes.BIRCH_LEAVES,
+            BlockTypes.DARK_OAK_LEAVES,
+            BlockTypes.JUNGLE_LEAVES,
+            BlockTypes.SPRUCE_LEAVES,
+            BlockTypes.MANGROVE_LEAVES,
+            BlockTypes.CHERRY_LEAVES,
+            BlockTypes.PALE_OAK_LEAVES,
+            BlockTypes.AZALEA_LEAVES,
+            BlockTypes.AZALEA_LEAVES_FLOWERED
+    ));
+
+    BlockTag FLOWERS = BlockTags.register("lumi:flowers", new SimpleBlockTag(
+            BlockTypes.DANDELION,
+            BlockTypes.POPPY,
+            BlockTypes.BLUE_ORCHID,
+            BlockTypes.ALLIUM,
+            BlockTypes.AZURE_BLUET,
+            BlockTypes.RED_TULIP,
+            BlockTypes.ORANGE_TULIP,
+            BlockTypes.WHITE_TULIP,
+            BlockTypes.PINK_TULIP,
+            BlockTypes.OXEYE_DAISY,
+            BlockTypes.CORNFLOWER,
+            BlockTypes.LILY_OF_THE_VALLEY,
+            BlockTypes.WITHER_ROSE,
+            BlockTypes.TORCHFLOWER,
+            BlockTypes.OPEN_EYEBLOSSOM,
+            BlockTypes.CLOSED_EYEBLOSSOM,
+            BlockTypes.GOLDEN_DANDELION,
+            BlockTypes.LILAC,
+            BlockTypes.PEONY,
+            BlockTypes.PITCHER_PLANT,
+            BlockTypes.ROSE_BUSH,
+            BlockTypes.SUNFLOWER
+    ));
+
     BlockTag WEARABLE_BLOCK = BlockTags.register("lumi:wearable_block", new SimpleBlockTag(
             BlockTypes.ZOMBIE_HEAD,
             BlockTypes.PIGLIN_HEAD,
