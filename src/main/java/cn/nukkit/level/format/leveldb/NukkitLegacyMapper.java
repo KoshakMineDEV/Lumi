@@ -2,6 +2,7 @@ package cn.nukkit.level.format.leveldb;
 
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.GlobalBlockPalette;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
@@ -44,14 +45,16 @@ public class NukkitLegacyMapper implements LegacyStateMapper {
         return nbtMaps;
     }
 
+    private final BlockPalette blockPalette = GlobalBlockPalette.getPaletteByProtocol(PALETTE_VERSION);
+
     @Override
     public int legacyToRuntime(int legacyId, int meta) {
-        return GlobalBlockPalette.getOrCreateRuntimeId(PALETTE_VERSION, legacyId, meta);
+        return blockPalette.getRuntimeId(legacyId, meta);
     }
 
     @Override
     public int runtimeToFullId(int runtimeId) {
-        return GlobalBlockPalette.getLegacyFullId(PALETTE_VERSION, runtimeId);
+        return blockPalette.getLegacyFullId(runtimeId);
     }
 
     @Override

@@ -5,8 +5,10 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.effect.Effect;
 import cn.nukkit.entity.effect.EffectType;
 import cn.nukkit.event.entity.EntityEffectUpdateEvent;
+import cn.nukkit.level.Explosion;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.SmokeParticle;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
 
@@ -85,5 +87,11 @@ public class EntityWitherSkull extends EntityProjectile {
     public void onCollideWithEntity(Entity entity) {
         super.onCollideWithEntity(entity);
         entity.addEffect(Effect.get(EffectType.WITHER).setDuration(200), EntityEffectUpdateEvent.Cause.ATTACK);
+    }
+
+    @Override
+    protected void onHit() {
+        Explosion explosion = new Explosion(this, 2, this);
+        explosion.explode();
     }
 }

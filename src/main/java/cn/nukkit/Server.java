@@ -1026,8 +1026,6 @@ public class Server {
         }
 
         if ((this.tickCounter & 0b1111) == 0) {
-
-            this.network.resetStatistics();
             this.maxTick = 20;
             this.maxUse = 0;
 

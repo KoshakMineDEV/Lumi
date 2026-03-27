@@ -20,6 +20,8 @@ public final class BlockTags {
 
     public static final BlockTag BIRCH = register("minecraft:birch", new LazyBlockTag("minecraft:birch"));
 
+    public static final BlockTag CORNERABLE_STAIRS = register("minecraft:cornerable_stairs", new LazyBlockTag("minecraft:cornerable_stairs"));
+
     public static final BlockTag CROP = register("minecraft:crop", new LazyBlockTag("minecraft:crop"));
 
     public static final BlockTag DARK_OAK = register("minecraft:dark_oak", new LazyBlockTag("minecraft:dark_oak"));

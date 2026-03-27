@@ -118,7 +118,20 @@ public class RecipeParser {
                                 ), xp);
                             }
 
-                            case "stonecutter", "smoker", "soul_campfire" -> {
+                            case "stonecutter" -> {
+                                final String id = recipe.get("id").getAsString();
+                                final Collection<Item> outputs = new ArrayList<>();
+
+                                recipe.getAsJsonArray("output").getAsJsonArray().forEach(item -> {
+                                    outputs.add(parseItem(item.getAsJsonObject()).getItem());
+                                });
+
+                                for (Item output : outputs) {
+                                    Registries.RECIPE.addStonecutterRecipe(new StonecutterRecipe(id, recipe.get("priority").getAsInt(), output, List.of(new DefaultDescriptor(input))));
+                                }
+                            }
+
+                            case "smoker", "soul_campfire" -> {
                             }
 
                             default -> log.warn("Not support block type: {}", block);
@@ -201,7 +214,27 @@ public class RecipeParser {
                                 }
                             }
 
-                            case "stonecutter", "cartography_table" -> {
+                            case "stonecutter" -> {
+                                final String id = recipe.get("id").getAsString();
+                                final Collection<Item> inputs = new ArrayList<>();
+                                final Collection<Item> outputs = new ArrayList<>();
+
+                                recipe.getAsJsonArray("input").getAsJsonArray().forEach(item -> {
+                                    inputs.add(parseItem(item.getAsJsonObject()).getItem());
+                                });
+
+                                recipe.getAsJsonArray("output").getAsJsonArray().forEach(item -> {
+                                    outputs.add(parseItem(item.getAsJsonObject()).getItem());
+                                });
+
+                                for (Item input : inputs) {
+                                    for (Item output : outputs) {
+                                        Registries.RECIPE.addStonecutterRecipe(new StonecutterRecipe(id, recipe.get("priority").getAsInt(), output, List.of(new DefaultDescriptor(input))));
+                                    }
+                                }
+                            }
+
+                            case "cartography_table" -> {
                             }
 
                             default -> log.warn("Not support block type: {}", block);

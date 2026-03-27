@@ -103,45 +103,17 @@ public class BlockEntityEndGateway extends BlockEntitySpawnable {
         if (exitPortal != null) {
             if (entity instanceof EntityEnderPearl) {
                 if (((EntityProjectile) entity).shootingEntity != null) {
-                    ((EntityProjectile) entity).shootingEntity.teleport(getSafeExitPortal().asVector3().add(0.5, 0, 0.5), TeleportCause.END_GATEWAY);
+                    ((EntityProjectile) entity).shootingEntity.teleport(exitPortal.asVector3().add(0.5, 3, 0.5), TeleportCause.END_GATEWAY);
                     entity.close();
                 } else {
-                    entity.teleport(getSafeExitPortal().asVector3().add(0.5, 0, 0.5), TeleportCause.END_GATEWAY);
+                    entity.teleport(exitPortal.asVector3().add(0.5, 3, 0.5), TeleportCause.END_GATEWAY);
                 }
             } else {
-                entity.teleport(getSafeExitPortal().asVector3().add(0.5, 0, 0.5), TeleportCause.END_GATEWAY);
+                entity.teleport(exitPortal.asVector3().add(0.5, 3, 0.5), TeleportCause.END_GATEWAY);
             }
         }
 
         setTeleportCooldown();
-    }
-
-    public BlockVector3 getSafeExitPortal() {
-        // TODO: Find better way
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                int chunkX = (exitPortal.getX() >> 4) + x;
-                int chunkZ = (exitPortal.getZ() >> 4) + z;
-                FullChunk chunk = this.getLevel().getChunk(chunkX, chunkZ, false);
-                if (chunk == null || !(chunk.isGenerated() || chunk.isPopulated())) {
-                    this.getLevel().generateChunk(chunkX, chunkZ, true);
-                }
-            }
-        }
-
-        for (int x = exitPortal.getX() - 5; x <= exitPortal.getX() + 5; x++) {
-            for (int z = exitPortal.getZ() - 5; z <= exitPortal.getZ() + 5; z++) {
-                for (int y = this.level.getMaxBlockY(); y > Math.max(0, exitPortal.getY() + 2); y--) {
-                    if (this.getLevel().getBlockIdAt(x, y, z) != Block.BEDROCK) {
-                        if (this.getLevel().getBlockIdAt(x, y, z) != Block.BEDROCK) {
-                            return new BlockVector3(x, y + 1, z);
-                        }
-                    }
-                }
-            }
-        }
-
-        return this.exitPortal.up(2);
     }
 
     public int getAge() {

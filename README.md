@@ -7,7 +7,7 @@
 Lumi is a server software based on [Nukkit-MOT](https://github.com/MemoriesOfTime/Nukkit-MOT/) which was made to introduce many new features and improvements.
 
 ### What's new in Lumi?
-1. Support for 1.20.0 – 1.21.130 version (you can set the minimum protocol in the config)
+1. Support for 1.20.0 – 1.26.0 version (you can set the minimum protocol in the config)
 2. More vanilla features
 3. Custom Blocks support
 4. Custom Enchantments support
@@ -18,7 +18,7 @@ Lumi is a server software based on [Nukkit-MOT](https://github.com/MemoriesOfTim
 ### How to install?
 1. Install java 21 or higher (recommended is Azul Zulu 21)
 2. Download the .jar file from the links below
-3. Write a command to run: `java -jar Lumi-1.4.0-SNAPSHOT.jar`
+3. Write a command to run: `java -jar Lumi-1.5.0-SNAPSHOT.jar`
 
 ### Plugin Development
 To develop your own plugin we recommend to check this [template](https://github.com/LuminiaDev/ExamplePlugin)
@@ -42,7 +42,7 @@ Adding dependency:
 <dependency>
     <groupId>com.koshakmine</groupId>
     <artifactId>Lumi</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -57,7 +57,7 @@ maven {
 
 Adding dependency:
 ```kts
-compileOnly("com.koshakmine:Lumi:1.4.0-SNAPSHOT")
+compileOnly("com.koshakmine:Lumi:1.5.0-SNAPSHOT")
 ```
 
 ## Credits

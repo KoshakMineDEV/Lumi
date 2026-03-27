@@ -1558,6 +1558,8 @@ public interface ItemNamespaceId {
 
     String GOLDEN_CHESTPLATE = "minecraft:golden_chestplate";
 
+    String GOLDEN_DANDELION = "minecraft:golden_dandelion";
+
     String GOLDEN_HELMET = "minecraft:golden_helmet";
 
     String GOLDEN_HOE = "minecraft:golden_hoe";

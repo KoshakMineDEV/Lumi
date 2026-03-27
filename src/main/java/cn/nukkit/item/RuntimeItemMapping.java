@@ -342,9 +342,7 @@ public class RuntimeItemMapping {
         LegacyEntry legacyEntry = this.fromIdentifier(identifier);
         if (legacyEntry == null || !Utils.hasItemOrBlock(legacyEntry.getLegacyId())) {
             OptionalInt networkId = this.getNetworkIdByNamespaceId(identifier);
-            if ("minecraft:raw_iron".equalsIgnoreCase(identifier)) {
-                int test = 1;
-            }
+
             if (networkId.isEmpty() || !Registries.ITEM.isItemRegistered(identifier)) {
                 if (!ignoreUnknown) {
                     throw new IllegalStateException("Can not find legacyEntry for " + identifier);

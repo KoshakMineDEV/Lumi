@@ -37,7 +37,7 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
                     getUnsignedVarLong(), getOptional(null, BinaryStream::getScriptDebugShapeType),
                     getOptional(null, BinaryStream::getVector3f), getOptional(null, BinaryStream::getLFloat),
                     getOptional(null, BinaryStream::getVector3f),  getOptional(null, BinaryStream::getLFloat),
-                    getOptional(null, BinaryStream::getColor), 0 /* 1.21.120+ */, getOptional(null, BinaryStream::getString),
+                    getOptional(null, BinaryStream::getColor), null /* 1.26.0+ */, 0 /* 1.21.120+ */, getOptional(null, BinaryStream::getString),
                     getOptional(null, BinaryStream::getVector3f), getOptional(null, BinaryStream::getVector3f),
                     getOptional(null, BinaryStream::getLFloat), getOptional(null, BinaryStream::getLFloat),
                     getOptional(null, BinaryStream::getByte)
@@ -103,7 +103,16 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
             buffer.putLInt(argb);
         });
 
-        this.putVarInt(shape.getDimensionId());
+        if (this.protocol >= ProtocolInfo.v1_26_0) {
+            // v924: dimension is optional
+            this.putBoolean(true);
+            this.putVarInt(shape.getDimensionId());
+        } else {
+            this.putVarInt(shape.getDimensionId());
+        }
+        if (this.protocol >= ProtocolInfo.v1_26_0) {
+            this.putOptionalNull(shape.getAttachedToEntityId(), val -> this.putUnsignedVarLong(val));
+        }
 
         writeShapePayload(shape);
     }
@@ -253,7 +262,7 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
 
         return new ScriptDebugShape(
                 id, type, position, scale, rotation, totalTimeLeft,
-                color, dimensionId, text, boxBounds, lineEndPosition,
+                color, null, dimensionId, text, boxBounds, lineEndPosition,
                 arrowHeadLength, arrowHeadRadius, segments
         );
     }

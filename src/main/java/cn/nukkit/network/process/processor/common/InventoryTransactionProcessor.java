@@ -201,7 +201,7 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
                 }
             }
 
-            if (handle.getCraftingTransaction().getPrimaryOutput() != null && handle.getCraftingTransaction().canExecute()) {
+            if ((player.craftingType == Player.STONECUTTER_WINDOW_ID || handle.getCraftingTransaction().getPrimaryOutput() != null) && handle.getCraftingTransaction().canExecute()) {
                 try {
                     handle.getCraftingTransaction().execute();
                 } catch (Exception e) {

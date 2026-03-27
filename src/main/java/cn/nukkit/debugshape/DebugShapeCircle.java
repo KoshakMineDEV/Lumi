@@ -81,7 +81,7 @@ public class DebugShapeCircle extends DebugShape {
         return new ScriptDebugShape(
                 id, getType(), position, scale,
                 null, null, color,
-                dimensionId, null, null, null,
+                null, dimensionId, null, null, null,
                 null, null, segments
         );
     }

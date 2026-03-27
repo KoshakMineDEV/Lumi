@@ -83,7 +83,7 @@ public class DebugShapeBox extends DebugShape {
         return new ScriptDebugShape(
                 id, getType(), position, scale,
                 null, null, color,
-                dimensionId,null, boxBounds, null,
+                null, dimensionId,null, boxBounds, null,
                 null, null, null
         );
     }

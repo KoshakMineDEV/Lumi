@@ -16,7 +16,10 @@ public abstract class EntityFlying extends BaseEntity {
         this.noFallDamage = true;
     }
 
+    @Override
     protected void checkTarget() {
+        super.checkTarget();
+
         if (this.isKnockback()) {
             return;
         }

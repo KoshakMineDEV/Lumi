@@ -3,13 +3,13 @@ package cn.nukkit.level.util;
 import cn.nukkit.Server;
 import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.math.BlockVector3;
-import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.level.ChunkException;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class PalettedBlockStorage {
 
@@ -22,8 +22,8 @@ public class PalettedBlockStorage {
         return createFromBlockPalette(BitArrayVersion.V2, 0);
     }
 
-    public static PalettedBlockStorage createFromBlockPalette(int protocol) {
-        return PalettedBlockStorage.createFromBlockPalette(BitArrayVersion.V2, protocol);
+    public static PalettedBlockStorage createFromBlockPalette(int protocol, BitArrayVersion version) {
+        return PalettedBlockStorage.createFromBlockPalette(version, protocol);
     }
 
     public static PalettedBlockStorage createFromBlockPalette(BitArrayVersion version, int protocol) {
@@ -104,7 +104,7 @@ public class PalettedBlockStorage {
         } else {
             int expectedWordSize = version.getWordsForSize(SIZE);
             int[] words = new int[expectedWordSize];
-            int i2 = 0;
+
             for (int i = 0; i < expectedWordSize; ++i) {
                 words[i] = byteBuf.readIntLE();
             }
@@ -146,7 +146,7 @@ public class PalettedBlockStorage {
         this.writeTo(stream, id -> id);
     }
 
-    public void writeTo(BinaryStream stream, Int2IntFunction idConvert) {
+    public void writeTo(BinaryStream stream, @NonNull Int2IntFunction idConvert) {
         stream.putByte((byte) getPaletteHeader(bitArray.getVersion()));
 
         if (bitArray.getVersion() != BitArrayVersion.V0) {
@@ -158,16 +158,17 @@ public class PalettedBlockStorage {
         }
 
         for (int i = 0; i < this.palette.size(); i++) {
-            int id = this.palette.getInt(i);
-            if (idConvert != null) {
-                id = idConvert.applyAsInt(id);
-            }
-            stream.putVarInt(id);
+            stream.putVarInt(idConvert.applyAsInt(this.palette.getInt(i)));
         }
     }
 
     private void onResize(BitArrayVersion version) {
         BitArray newBitArray = version.createPalette();
+
+        if(this.bitArray.getClass() == SingletonBitArray.class) {
+            this.bitArray = newBitArray;
+            return;
+        }
 
         for (int i = 0; i < SIZE; i++) {
             newBitArray.set(i, this.bitArray.get(i));

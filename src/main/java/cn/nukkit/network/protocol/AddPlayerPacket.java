@@ -36,6 +36,7 @@ public class AddPlayerPacket extends DataPacket {
     public float speedZ;
     public float pitch;
     public float yaw;
+    public float headYaw = -1;
     public Item item;
     /**
      * v1.18.30 and above
@@ -56,19 +57,13 @@ public class AddPlayerPacket extends DataPacket {
         this.reset();
         this.putUUID(this.uuid);
         this.putString(this.username);
-        if (protocol >= 223 && protocol <= 282) {
-            this.putString("");
-            this.putVarInt(0);
-        }
         this.putEntityRuntimeId(this.entityRuntimeId);
-        if (protocol >= 223) {
-            this.putString(this.platformChatId);
-        }
+        this.putString(this.platformChatId);
         this.putVector3f(this.x, this.y, this.z);
         this.putVector3f(this.speedX, this.speedY, this.speedZ);
         this.putLFloat(this.pitch);
         this.putLFloat(this.yaw);
-        this.putLFloat(this.yaw);
+        this.putLFloat(this.headYaw == -1 ? this.yaw : this.headYaw);
         this.putSlot(protocol, this.item);
         this.putVarInt(this.gameType);
         this.put(Binary.writeMetadata(protocol, this.metadata));
@@ -92,8 +87,6 @@ public class AddPlayerPacket extends DataPacket {
         }
 
         this.putString(deviceId);
-        if (protocol >= 388) {
-            this.putLInt(buildPlatform);
-        }
+        this.putLInt(buildPlatform);
     }
 }

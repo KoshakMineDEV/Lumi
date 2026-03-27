@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import static cn.nukkit.utils.Utils.dynamic;
@@ -59,7 +60,8 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
      */
     protected static final int[] FACES2534 = {2, 5, 3, 4};
 
-    private BlockType type;
+    private final AtomicReference<BlockType> type = new AtomicReference<>();
+    private final AtomicReference<Set<BlockTag>> types = new AtomicReference<>();
 
     protected Block() {}
 
@@ -113,13 +115,11 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
             id = 255 - id;
         }
 
-        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return Registries.BLOCK.getCustom(id).toCustomBlock(meta);
-        }
-
         Block block;
         int fullId = id << DATA_BITS;
-        if (meta != null && meta > DATA_SIZE) {
+        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
+            block = Registries.BLOCK.getCustom(id).toCustomBlock(meta);
+        } else if (meta != null && meta > DATA_SIZE) {
             if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
                 return new BlockUnknown(id, meta);
@@ -181,21 +181,23 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     public static Block get(int fullId, Level level, int x, int y, int z, int layer) {
         int id = fullId << DATA_BITS;
 
+        Block block;
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_BITS);
+            block = Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_BITS);
+        } else {
+            if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
+                int meta = fullId & DATA_BITS;
+                log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
+                return new BlockUnknown(id, meta);
+            }
+            block = Registries.BLOCK.get(fullId).clone();
         }
 
-        if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
-            int meta = fullId & DATA_BITS;
-            log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
-            return new BlockUnknown(id, meta);
-        }
-        Block block = Registries.BLOCK.get(fullId).clone();
         block.x = x;
         block.y = y;
         block.z = z;
         block.level = level;
-        //block.layer = layer;
+        block.layer = layer;
         return block;
     }
 
@@ -204,17 +206,16 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     }
 
     public static Block get(int id, int meta, Level level, int x, int y, int z, int layer) {
-        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            return Registries.BLOCK.getCustom(id).toCustomBlock(meta);
-        }
-
         Block block;
-        if (meta <= DATA_SIZE) {
+        if (id >= LOWEST_CUSTOM_BLOCK_ID) {
+            block = Registries.BLOCK.getCustom(id).toCustomBlock(meta);
+        } else if (meta <= DATA_SIZE) {
             block = Registries.BLOCK.get(id << DATA_BITS | meta).clone();
         } else {
             block = Registries.BLOCK.get(id << DATA_BITS).clone();
             block.setDamage(meta);
         }
+
         block.x = x;
         block.y = y;
         block.z = z;
@@ -477,24 +478,26 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
      * @return BlockType
      */
     public BlockType getBlockType() {
-        if (this.type != null) {
-            return this.type;
+        BlockType blockType = this.type.get();
+        if (blockType != null) {
+            return blockType;
         }
 
         if (this instanceof CustomBlock customBlock) {
-            this.type = BlockTypes.get(customBlock.getIdentifier());
+            blockType = BlockTypes.get(customBlock.getIdentifier());
         } else if (this.isAir()) {
-            this.type = BlockTypes.AIR;
+            blockType = BlockTypes.AIR;
         } else {
-            this.type = BlockTypes.get(Registries.BLOCK_TO_ITEM.get(this.getId() > 255 ? 255 - this.getId() : this.getId(), this.getDamage()));
+            blockType = BlockTypes.get(Registries.BLOCK_TO_ITEM.get(this.getId() > 255 ? 255 - this.getId() : this.getId(), this.getDamage()));
         }
 
-        // Throw an exception if for some reason the type cannot be determined.
-        if (this.type == null) {
-            throw new IllegalStateException("Failed to initialize block type " + this.getName() + ": " + this.getId() + ":" + this.getDamage());
+        if (blockType == null) {
+            log.warn("Failed to initialize block type {}: {}:{}", this.getName(), this.getId(), this.getDamage());
+            blockType = BlockTypes.AIR;
         }
 
-        return this.type;
+        this.type.set(blockType);
+        return blockType;
     }
 
     /**
@@ -503,7 +506,14 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
      * @return Set<BlockType>
      */
     public Set<BlockTag> getBlockTags() {
-        return BlockTags.getTagsSet(this.getIdentifier());
+        Set<BlockTag> blockTags = this.types.get();
+        if(blockTags != null) {
+            return blockTags;
+        }
+
+        blockTags = BlockTags.getTagsSet(this.getIdentifier());
+        this.types.set(blockTags);
+        return blockTags;
     }
 
     /**
@@ -748,9 +758,9 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
             hasAquaAffinity = Optional.ofNullable(player.getInventory().getHelmet().getEnchantment(Enchantment.ID_WATER_WORKER))
                     .map(Enchantment::getLevel).map(l -> l >= 1).orElse(false);
             hasteEffectLevel = Optional.ofNullable(player.getEffect(EffectType.HASTE))
-                    .map(Effect::getAmplifier).orElse(0);
+                    .map(Effect::getLevel).orElse(0);
             miningFatigueLevel = Optional.ofNullable(player.getEffect(EffectType.MINING_FATIGUE))
-                    .map(Effect::getAmplifier).orElse(0);
+                    .map(Effect::getLevel).orElse(0);
         }
 
 
@@ -767,7 +777,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
                     .map(Enchantment::getLevel).orElse(0);
 
             if (canHarvest && efficiencyLevel > 0) {
-                speedMultiplier += efficiencyLevel ^ 2 + 1;
+                speedMultiplier += efficiencyLevel * efficiencyLevel + 1;
             }
 
             if (hasConduitPower) hasteEffectLevel = Integer.max(hasteEffectLevel, 2);
@@ -778,7 +788,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         }
 
         if (miningFatigueLevel > 0) {
-            speedMultiplier /= 3 ^ miningFatigueLevel;
+            speedMultiplier *= Math.pow(0.3, miningFatigueLevel);
         }
 
         seconds /= speedMultiplier;

@@ -34,7 +34,7 @@ public final class LevelDBConstants {
     /**
      * This is protocol version if block palette used in storage
      */
-    public static final int PALETTE_VERSION = ProtocolInfo.v1_21_111;
+    public static final int PALETTE_VERSION = ProtocolInfo.v1_26_10;
 
     public static final int STATE_MAYOR_VERSION = 1;
     public static final int STATE_MINOR_VERSION = 21;
@@ -44,8 +44,8 @@ public final class LevelDBConstants {
     public static final List<IntTag> CURRENT_LEVEL_VERSION = Collections.unmodifiableList(ObjectArrayList.of(
             new IntTag("", STATE_MAYOR_VERSION), // major
             new IntTag("", STATE_MINOR_VERSION), // minor
-            new IntTag("", 100), // patch
-            new IntTag("", 23), // revision
+            new IntTag("", 33), // patch
+            new IntTag("", 0), // revision
             new IntTag("", 0))); // beta
 
     public static final String DEFAULT_FLAT_WORLD_LAYERS = "{\"biome_id\":1,\"block_layers\":[{\"block_name\":\"minecraft:bedrock\",\"count\":1},{\"block_name\":\"minecraft:dirt\",\"count\":2},{\"block_name\":\"minecraft:grass\",\"count\":1}],\"encoding_version\":6,\"structure_options\":null,\"world_version\":\"version.post_1_18\"}";

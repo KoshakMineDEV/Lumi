@@ -272,6 +272,7 @@ public class Materials implements NBTData {
     public enum RenderMethod {
         OPAQUE,
         ALPHA_TEST,
+        ALPHA_TEST_SINGLE_SIDED,
         BLEND,
         DOUBLE_SIDED
     }

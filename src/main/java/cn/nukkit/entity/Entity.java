@@ -246,6 +246,18 @@ public abstract class Entity extends Location implements Metadatable {
      * @since v800
      */
     public static final int DATA_SEAT_CAMERA_RELAX_DISTANCE_SMOOTHING = 135; //float
+    /**
+     * @since v924
+     */
+    public static final int DATA_AIM_ASSIST_PRIORITY_PRESET_ID = 136; //int
+    /**
+     * @since v924
+     */
+    public static final int DATA_AIM_ASSIST_PRIORITY_CATEGORY_ID = 137; //int
+    /**
+     * @since v924
+     */
+    public static final int DATA_AIM_ASSIST_PRIORITY_ACTOR_ID = 138; //int
 
     // Flags
     public static final int DATA_FLAG_ONFIRE = 0;
@@ -2423,7 +2435,16 @@ public abstract class Entity extends Location implements Metadatable {
 
         AxisAlignedBB bb = block.getBoundingBox();
 
-        return bb != null && block.isSolid() && !block.isTransparent() && bb.intersectsWith(this.boundingBox);
+        if (bb == null || !block.isSolid() || block.isTransparent()) {
+            return false;
+        }
+
+        // Check eye position against block BB to avoid false suffocation in non-full blocks like stairs
+        double halfWidth = this.getWidth() * 0.4;
+        return bb.intersectsWith(
+                this.x - halfWidth, y - 0.0001, this.z - halfWidth,
+                this.x + halfWidth, y + 0.0001, this.z + halfWidth
+        );
     }
 
     public boolean isInsideOfFire() {

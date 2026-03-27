@@ -115,7 +115,7 @@ public abstract class DebugShape {
         return new ScriptDebugShape(
                 this.id, null, null,
                 null, null, null,
-                null, dimensionId,null, null,
+                null, null, dimensionId,null, null,
                 null, null, null, null
         );
     }

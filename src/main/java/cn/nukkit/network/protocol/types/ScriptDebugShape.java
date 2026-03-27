@@ -21,6 +21,8 @@ public class ScriptDebugShape {
     Float totalTimeLeft;
     @Nullable
     Color color;
+    @Nullable
+    private final Long attachedToEntityId;
     int dimensionId;
     @Nullable
     String text;

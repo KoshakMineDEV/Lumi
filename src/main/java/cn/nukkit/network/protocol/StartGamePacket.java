@@ -166,8 +166,14 @@ public class StartGamePacket extends DataPacket {
      */
     public String scenarioId = "";
     /**
-     * @since v827
+     * @since v818
      */
+    public String ownerIdentifier = "";
+    /**
+     * @since v827
+     * @deprecated v897
+     */
+    @SuppressWarnings("dep-ann")
     public boolean tickDeathSystemsEnabled;
 
     @Override
@@ -286,12 +292,12 @@ public class StartGamePacket extends DataPacket {
             this.putBoolean(/*Server.getInstance().enableExperimentMode*/ false); //Force Experimental Gameplay (exclusive to debug clients)
             this.putByte(this.chatRestrictionLevel);
             this.putBoolean(this.disablePlayerInteractions);
-            if (protocol >= ProtocolInfo.v1_21_0) {
+            if (protocol >= ProtocolInfo.v1_21_0 && protocol < ProtocolInfo.v1_26_0) {
                 this.putString(this.serverId);
                 this.putString(this.worldId);
                 this.putString(this.scenarioId);
                 if (protocol >= ProtocolInfo.v1_21_90) {
-                    this.putString(""); // OwnerId
+                    this.putString(this.ownerIdentifier); // OwnerId
                 }
             }
         }
@@ -337,9 +343,17 @@ public class StartGamePacket extends DataPacket {
         this.putBoolean(this.clientSideGenerationEnabled);
         this.putBoolean(this.blockNetworkIdsHashed);
         if (protocol >= ProtocolInfo.v1_20_0_23) {
-            this.putBoolean(this.networkPermissions.isServerAuthSounds());
             if(protocol >= ProtocolInfo.v1_21_100 && protocol < ProtocolInfo.v1_21_130) {
                 this.putBoolean(this.tickDeathSystemsEnabled);
+            }
+            this.putBoolean(this.networkPermissions.isServerAuthSounds());
+            if (protocol >= ProtocolInfo.v1_26_0) {
+                // v924: Server telemetry data
+                this.putBoolean(false); // containServerJoinInformation
+                this.putString(this.serverId); // serverIdentifier
+                this.putString(this.scenarioId); // scenarioIdentifier
+                this.putString(this.worldId); // worldIdentifier
+                this.putString(this.ownerIdentifier); // ownerIdentifier
             }
         }
     }

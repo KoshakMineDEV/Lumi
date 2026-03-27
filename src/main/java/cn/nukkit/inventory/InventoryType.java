@@ -37,7 +37,8 @@ public enum InventoryType {
     SMITHING_TABLE(3, "Smithing Table", 33),
     LECTERN(0, "Lectern", 25),
     GRINDSTONE(3, "Grindstone", 26),
-    COMMAND_BLOCK(0, "Command Block", 16);
+    COMMAND_BLOCK(0, "Command Block", 16),
+    STONECUTTER(2, "Stonecutter", 29);
 
     private final int size;
     private final String title;

@@ -160,6 +160,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public static final int LOOM_WINDOW_ID = 5;
     public static final int SMITHING_WINDOW_ID = 6;
     public static final int GRINDSTONE_WINDOW_ID = 7;
+    public static final int STONECUTTER_WINDOW_ID = 8;
     /**
      * @since 649 1.20.60
      * 自1.20.60开始，需要发送ContainerOpenPacket给玩家才能正常打开讲台上的书
@@ -200,8 +201,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     protected int closingWindowId = Integer.MIN_VALUE;
 
     public Vector3 speed = null;
-
-    protected final Queue<Vector3> clientMovements = PlatformDependent.newMpscQueue(4);
 
     public int craftingType = CRAFTING_SMALL;
 
@@ -1776,11 +1775,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
         if (server.getSettings().world().enableEnd() && inEndPortalTicks == (this.gamemode == CREATIVE ? 1 : 80)) {
             EntityPortalEnterEvent ev = new EntityPortalEnterEvent(this, EntityPortalEnterEvent.PortalType.END);
-
-            if (this.portalPos == null) {
-                ev.setCancelled();
-            }
-
             this.getServer().getPluginManager().callEvent(ev);
 
             if (!ev.isCancelled()) {
@@ -1906,7 +1900,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         }
     }
 
-    protected void handleMovement(Vector3 clientPos) {
+    protected void handleMovement(Vector3 clientPos, int tickDiff) {
         if (!this.isAlive() || !this.spawned || this.teleportPosition != null || this.isSleeping()) {
             return;
         }
@@ -1947,28 +1941,28 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return;
         }
 
-        int maxDist = 9;
-        if (this.riptideTicks > 95 || clientPos.y - this.y < 2 || this.isOnLadder()) { // TODO: Remove ladder/vines check when block collisions are fixed
-            maxDist = 49;
-        }
+        double tickDiffSq = (double) tickDiff * tickDiff;
+        boolean revert = false;
 
-        if (distanceSquared > maxDist) {
-            this.revertClientMotion(this);
-            server.getLogger().debug(username + ": distanceSquared=" + distanceSquared + " > maxDist=" + maxDist);
-            return;
-        }
-
-        if (this.chunk == null || !this.chunk.isGenerated()) {
-            BaseFullChunk chunk = this.level.getChunk(clientPos.getChunkX(), clientPos.getChunkZ(), false);
-            if (chunk == null || !chunk.isGenerated()) {
-                this.nextChunkOrderRun = 0;
-                this.revertClientMotion(this);
-                return;
-            } else {
-                if (this.chunk != null) {
-                    this.chunk.removeEntity(this);
+        // Extreme distance check
+        if (distanceSquared / tickDiffSq > 225) {
+            revert = true;
+            System.out.println("SYKA BLYAT 1");
+            server.getLogger().debug(username + ": distanceSquared=" + distanceSquared + " > 225 * tickDiffSq=" + (225 * tickDiffSq));
+        } else {
+            // Chunk generation check
+            if (this.chunk == null || !this.chunk.isGenerated()) {
+                BaseFullChunk chunk = this.level.getChunk(clientPos.getChunkX(), clientPos.getChunkZ(), false);
+                if (chunk == null || !chunk.isGenerated()) {
+                    revert = true;
+                    System.out.println("SYKA BLYAT 2");
+                    this.nextChunkOrderRun = 0;
+                } else {
+                    if (this.chunk != null) {
+                        this.chunk.removeEntity(this);
+                    }
+                    this.chunk = chunk;
                 }
-                this.chunk = chunk;
             }
         }
 
@@ -1976,63 +1970,60 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         double dy = clientPos.y - this.y;
         double dz = clientPos.z - this.z;
 
-        //the client likes to clip into blocks like stairs, but we do full server-side prediction of that without
-        //help from the client's position changes, so we deduct the expected clip height from the moved distance.
-        dy += this.ySize * (1 - STEP_CLIP_MULTIPLIER); // FIXME: ySize is always 0
+        // fastMove collision resolution + speed check on server correction amount (EC pattern)
+        if (!revert) {
+            this.fastMove(dx, dy, dz);
 
-        if (this.checkMovement && this.riptideTicks <= 0 && this.riding == null && !this.isGliding() && !this.getAllowFlight()) {
-            double hSpeed = dx * dx + dz * dz;
-            if (hSpeed > MAXIMUM_SPEED) {
-                PlayerInvalidMoveEvent ev;
-                this.getServer().getPluginManager().callEvent(ev = new PlayerInvalidMoveEvent(this, true));
-                if (!ev.isCancelled()) {
-                    server.getLogger().debug(username + ": hSpeed=" + hSpeed + " > MAXIMUM_SPEED=" + MAXIMUM_SPEED);
-                    this.revertClientMotion(this);
-                    return;
+            // Calculate server correction amount (how much fastMove deviated from client position)
+            double diffX = this.x - clientPos.x;
+            double diffY = this.y - clientPos.y;
+            double diffZ = this.z - clientPos.z;
+
+            if (diffX != 0 || diffY != 0 || diffZ != 0) {
+                // Check correction amount, not raw client movement delta
+                if (this.checkMovement && this.riptideTicks <= 0 && this.riding == null && !this.isGliding() && !this.getAllowFlight()) {
+                    double diffHorizontalSqr = (diffX * diffX + diffZ * diffZ) / tickDiffSq;
+                    if (diffHorizontalSqr > MAXIMUM_SPEED) {
+                        PlayerInvalidMoveEvent ev;
+                        this.getServer().getPluginManager().callEvent(ev = new PlayerInvalidMoveEvent(this, true));
+                        if (!ev.isCancelled()) {
+                            revert = ev.isRevert();
+                            if (revert) {
+                                server.getLogger().debug(username + ": diffHSpeed=" + diffHorizontalSqr + " > MAXIMUM_SPEED=" + MAXIMUM_SPEED);
+                            }
+                        }
+                    }
                 }
-            }
-        }
 
-        // Replacement for this.fastMove(dx, dy, dz) start
-        if (this.isSpectator() || !this.level.hasCollision(this, this.boundingBox.getOffsetBoundingBox(dx, dy, dz).shrink(0.1, this.getStepHeight(), 0.1), false)) {
-            this.x = clientPos.x;
-            this.y = clientPos.y;
-            this.z = clientPos.z;
+                // Accept client position (revert flag handles correction at end)
+                this.x = clientPos.x;
+                this.y = clientPos.y;
+                this.z = clientPos.z;
+                this.boundingBox.setBounds(this.x - 0.3, this.y, this.z - 0.3, this.x + 0.3, this.y + this.getHeight(), this.z + 0.3);
 
-            this.boundingBox.setBounds(this.x - 0.3, this.y, this.z - 0.3, this.x + 0.3, this.y + this.getHeight(), this.z + 0.3);
-        }
-
-        this.checkChunks();
-
-        if (!this.isSpectator() && (!this.onGround || dy != 0)) {
-            AxisAlignedBB bb = this.boundingBox.clone();
-            bb.setMinY(bb.getMinY() - 0.75);
-
-            // Hack: fix fall damage from walls while falling
-            if (Math.abs(dy) > 0.01) {
-                bb.setMinX(bb.getMinX() + 0.1);
-                bb.setMaxX(bb.getMaxX() - 0.1);
-                bb.setMinZ(bb.getMinZ() + 0.1);
-                bb.setMaxZ(bb.getMaxZ() - 0.1);
+                this.checkChunks();
             }
 
-            this.onGround = this.level.hasCollisionBlocks(this, bb);
+            // Ground check
+            if (!this.isSpectator() && (!this.onGround || dy != 0)) {
+                AxisAlignedBB bb = this.boundingBox.clone();
+                bb.setMinY(bb.getMinY() - 0.75);
+
+                // Hack: fix fall damage from walls while falling
+                if (Math.abs(dy) > 0.01) {
+                    bb.setMinX(bb.getMinX() + 0.1);
+                    bb.setMaxX(bb.getMaxX() - 0.1);
+                    bb.setMinZ(bb.getMinZ() + 0.1);
+                    bb.setMaxZ(bb.getMaxZ() - 0.1);
+                }
+
+                this.onGround = this.level.hasCollisionBlocks(this, bb);
+            }
+
+            this.isCollided = this.onGround;
+            this.updateFallState(this.onGround);
         }
 
-        this.isCollided = this.onGround;
-        this.updateFallState(this.onGround);
-        // Replacement for this.fastMove(dx, dy, dz) end
-
-        double corrX = this.x - clientPos.getX();
-        double corrY = this.y - clientPos.getY();
-        double corrZ = this.z - clientPos.getZ();
-
-        double yS = this.getStepHeight() + this.ySize;
-        if (corrY >= -yS || corrY <= yS) {
-            corrY = 0;
-        }
-
-        // 瞬移检测
         Location from = new Location(
                 this.lastX,
                 this.lastY,
@@ -2042,42 +2033,39 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.level);
         Location to = this.getLocation();
 
-        if (!this.firstMove) {
+        if (!revert && !this.firstMove) {
             PlayerMoveEvent moveEvent = new PlayerMoveEvent(this, from, to);
             this.server.getPluginManager().callEvent(moveEvent);
 
-            if (moveEvent.isCancelled()) {
-                this.teleport(from, null);
-                return;
-            }
+            if (!(revert = moveEvent.isCancelled())) {
+                this.lastX = to.x;
+                this.lastY = to.y;
+                this.lastZ = to.z;
 
-            this.lastX = to.x;
-            this.lastY = to.y;
-            this.lastZ = to.z;
+                this.lastYaw = to.yaw;
+                this.lastPitch = to.pitch;
 
-            this.lastYaw = to.yaw;
-            this.lastPitch = to.pitch;
+                this.blocksAround = null;
+                this.collisionBlocks = null;
 
-            this.blocksAround = null;
-            this.collisionBlocks = null;
-
-            if (!to.equals(moveEvent.getTo())) { // If plugins modify the destination
-                if (this.getGamemode() != Player.SPECTATOR)
-                    this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, moveEvent.getTo().clone(), VanillaVibrationTypes.TELEPORT));
-                this.teleport(moveEvent.getTo(), null);
-            } else {
-                if (this.getGamemode() != Player.SPECTATOR && (lastX != to.x || lastY != to.y || lastX != to.z)) {
-                    if (this.isOnGround() && this.isGliding()) {
-                        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.ELYTRA_GLIDE));
-                    } else if (this.isOnGround() && !(this.getSide(BlockFace.DOWN).getLevelBlock().hasBlockTag(BlockInternalTags.VIBRATION_DAMPER)) && !this.isSneaking()) {
-                        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.STEP));
-                    } else if (this.isSwimming()) {
-                        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this.getLocation().clone(), VanillaVibrationTypes.SWIM));
+                if (!to.equals(moveEvent.getTo())) { // If plugins modify the destination
+                    if (this.getGamemode() != Player.SPECTATOR)
+                        this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, moveEvent.getTo().clone(), VanillaVibrationTypes.TELEPORT));
+                    this.teleport(moveEvent.getTo(), null);
+                } else {
+                    if (this.getGamemode() != Player.SPECTATOR && (lastX != to.x || lastY != to.y || lastX != to.z)) {
+                        if (this.isOnGround() && this.isGliding()) {
+                            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.ELYTRA_GLIDE));
+                        } else if (this.isOnGround() && !(this.getSide(BlockFace.DOWN).getLevelBlock().hasBlockTag(BlockInternalTags.VIBRATION_DAMPER)) && !this.isSneaking()) {
+                            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this, VanillaVibrationTypes.STEP));
+                        } else if (this.isSwimming()) {
+                            this.level.getVibrationManager().callVibrationEvent(new VibrationEvent(this, this.getLocation().clone(), VanillaVibrationTypes.SWIM));
+                        }
                     }
+                    this.broadcastMovement();
                 }
-                this.broadcastMovement();
             }
-        } else {
+        } else if (!revert) {
             this.lastX = to.x;
             this.lastY = to.y;
             this.lastZ = to.z;
@@ -2088,45 +2076,71 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.firstMove = false;
         }
 
-        if (this.speed == null) {
-            speed = new Vector3(from.x - to.x, from.y - to.y, from.z - to.z);
-        } else {
-            this.speed.setComponents(from.x - to.x, from.y - to.y, from.z - to.z);
-        }
+        // Unified revert handling (EC pattern: MODE_NORMAL for softer correction)
+        if (revert) {
+            this.x = from.x;
+            this.y = from.y;
+            this.z = from.z;
+            this.boundingBox.setBounds(this.x - 0.3, this.y, this.z - 0.3, this.x + 0.3, this.y + this.getHeight(), this.z + 0.3);
 
-        if (this.riding == null && this.inventory != null) {
-            if (this.getFoodData().isEnabled() && this.server.getDifficulty() != Difficulty.PEACEFUL && distanceSquared >= 0.05) {
-                double jump = 0;
-                double swimming = this.isInsideOfWater() ? 0.015 * distanceSquared : 0;
-                double distance2 = distanceSquared;
-                if (swimming != 0) {
-                    distance2 = 0;
-                }
-                if (this.isSprinting()) {
-                    if (this.inAirTicks == 3 && swimming == 0) {
-                        jump = 0.2;
-                    }
-                    this.getFoodData().exhaust(0.1 * distance2 + jump + swimming);
-                } else if (this.isSneaking() && this.inAirTicks == 3) {
-                    jump = 0.05;
-                    this.getFoodData().exhaust(jump);
-                } else {
-                    if (this.inAirTicks == 3 && swimming == 0) {
-                        jump = 0.05;
-                    }
-                    this.getFoodData().exhaust(jump + swimming);
-                }
+            this.lastX = from.x;
+            this.lastY = from.y;
+            this.lastZ = from.z;
+
+            this.lastYaw = from.yaw;
+            this.lastPitch = from.pitch;
+
+            this.needSendRotation = false;
+            this.sendPosition(from.add(0, 0.00001, 0), from.yaw, from.pitch, MovePlayerPacket.MODE_NORMAL);
+            this.forceMovement = new Vector3(from.x, from.y + 0.00001, from.z);
+
+            if (this.speed == null) {
+                this.speed = new Vector3(0, 0, 0);
+            } else {
+                this.speed.setComponents(0, 0, 0);
+            }
+        } else {
+            this.forceMovement = null;
+
+            if (this.speed == null) {
+                speed = new Vector3(from.x - to.x, from.y - to.y, from.z - to.z);
+            } else {
+                this.speed.setComponents(from.x - to.x, from.y - to.y, from.z - to.z);
             }
 
-            this.handleEnchantmentInMove();
+            if (this.riding == null && this.inventory != null) {
+                if (this.getFoodData().isEnabled() && this.server.getDifficulty() != Difficulty.PEACEFUL && distanceSquared >= 0.05) {
+                    double jump = 0;
+                    double distance = Math.sqrt(distanceSquared);
+                    double swimming = this.isInsideOfWater() ? 0.01 * distance : 0;
+                    if (this.isSprinting()) {
+                        if (this.inAirTicks == 3 && swimming == 0) {
+                            jump = 0.2;
+                        }
+                        this.getFoodData().exhaust(0.1 * (swimming != 0 ? 0 : distance) + jump + swimming);
+                    } else if (this.isSneaking() && this.inAirTicks == 3) {
+                        jump = 0.05;
+                        this.getFoodData().exhaust(jump);
+                    } else {
+                        if (this.inAirTicks == 3 && swimming == 0) {
+                            jump = 0.05;
+                        }
+                        this.getFoodData().exhaust(jump + swimming);
+                    }
+                }
+
+                this.handleEnchantmentInMove();
+            }
+
+
+            if (distanceSquared != 0) {
+                if (this.nextChunkOrderRun > 20) {
+                    this.nextChunkOrderRun = 20;
+                }
+            }
         }
 
-        this.forceMovement = null;
-        if (distanceSquared != 0 && this.nextChunkOrderRun > 20) {
-            this.nextChunkOrderRun = 20;
-        }
         this.needSendRotation = false; // Sent with movement
-
         this.resetClientMovement();
     }
 
@@ -2170,21 +2184,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     protected void resetClientMovement() {
         this.newPosition = null;
-    }
-
-    protected void revertClientMotion(Location originalPos) {
-        this.setLastLocation(originalPos);
-
-        Vector3 syncPos = originalPos.add(0, 0.00001, 0);
-        this.needSendRotation = false;
-        this.sendPosition(syncPos, originalPos.getYaw(), originalPos.getPitch(), MovePlayerPacket.MODE_RESET);
-        this.forceMovement = syncPos;
-
-        if (this.speed == null) {
-            this.speed = new Vector3(0, 0, 0);
-        } else {
-            this.speed.setComponents(0, 0, 0);
-        }
     }
 
     protected void setLastLocation(Location location) {
@@ -2326,8 +2325,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.spawnToAll();
             }
 
-            while (!this.clientMovements.isEmpty()) {
-                this.handleMovement(this.clientMovements.poll());
+            if (this.newPosition != null) {
+                this.handleMovement(this.newPosition, tickDiff);
+                resetClientMovement();
             }
 
             if (this.needSendRotation) {
@@ -2371,14 +2371,16 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 } else {
                     this.lastInAirTick = server.getTick();
 
-                    if (this.checkMovement && !this.isGliding() && !server.getSettings().player().allowFlight() && this.inAirTicks > 20 && !this.getAllowFlight() && !this.isSleeping() && !this.isImmobile() && !this.isSwimming() && this.riding == null && !this.hasEffect(EffectType.LEVITATION) && !this.hasEffect(EffectType.SLOW_FALLING)) {
+                    if (this.checkMovement && !this.isGliding() && !server.getSettings().player().allowFlight() && this.inAirTicks > 20 && !this.getAllowFlight() && !this.isSleeping() && !this.isImmobile() && !this.isSwimming() && this.riding == null && !this.hasEffect(EffectType.LEVITATION) && !this.hasEffect(EffectType.SLOW_FALLING) && this.speed.y != 0) {
                         double expectedVelocity = (-this.getGravity()) / ((double) this.getDrag()) - ((-this.getGravity()) / ((double) this.getDrag())) * FastMath.exp(-((double) this.getDrag()) * ((double) (this.inAirTicks - this.startAirTicks)));
-                        double diff = (this.speed.y - expectedVelocity) * (this.speed.y - expectedVelocity);
+                        // speed.y: positive=down (from-to), expectedVelocity: negative=down (physics)
+                        // Their sum cancels to ~0 during normal falling
+                        double diff = Math.abs(this.speed.y + expectedVelocity);
 
                         if (this.isOnLadder()) {
                             this.resetFallDistance();
                         } else {
-                            if (diff > 2 && expectedVelocity < this.speed.y && this.speed.y != 0) {
+                            if (diff > 1 && expectedVelocity < 0) {
                                 if (this.inAirTicks < 150) {
                                     PlayerInvalidMoveEvent ev = new PlayerInvalidMoveEvent(this, true);
                                     this.getServer().getPluginManager().callEvent(ev);
@@ -3518,8 +3520,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
              scriptDebugShapes.add(new ScriptDebugShape(
                      id, null, null,
                      null, null, null,
-                     null, 0, null, null,
-                     null, null, null, null
+                     null, null, 0, null,
+                     null, null, null, null,
+                     null
              ));
         }
 
@@ -3648,7 +3651,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.server.removeOnlinePlayer(this);
             this.loggedIn = false;
         }
-        this.clientMovements.clear();
+        resetClientMovement();
     }
 
     /**
@@ -4304,7 +4307,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         if (targets != null) {
             Server.broadcastPacket(targets, pk);
         } else {
-            this.clientMovements.clear();
+            resetClientMovement();
 
             this.dataPacket(pk);
         }
@@ -4823,6 +4826,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.moveBlockUIContents(Player.ENCHANT_WINDOW_ID);
             this.moveBlockUIContents(Player.BEACON_WINDOW_ID);
             this.moveBlockUIContents(Player.SMITHING_WINDOW_ID);
+            this.moveBlockUIContents(Player.STONECUTTER_WINDOW_ID);
 
             this.playerUIInventory.clearAll();
 
