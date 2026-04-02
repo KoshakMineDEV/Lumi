@@ -458,7 +458,7 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
 
         LinkedList<Block> blocks = new LinkedList<>();
 
-        BlockIterator itr = new BlockIterator(this.level, this.getPosition(), this.getDirectionVector(), this.getEyeHeight(), maxDistance);
+        BlockIterator itr = new BlockIterator(this.level, this.getPosition(), this.getDirectionVector().setY(0), this.getEyeHeight(), maxDistance);
 
         while (itr.hasNext()) {
             Block block = itr.next();
