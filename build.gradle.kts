@@ -43,7 +43,7 @@ val fastutilMapsVersion = "8.5.15-SNAPSHOT"
 
 dependencies {
     // Compile dependencies
-    implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT")
+    implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-20260328.145829-29")
     implementation("io.netty:netty-transport-native-epoll:4.1.131.Final")
     implementation("com.nukkitx:natives:1.0.3")
     implementation("org.cloudburstmc.protocol:common:3.0.0.Beta3-SNAPSHOT") {
