@@ -14,6 +14,10 @@ import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bstats.json.JsonObjectBuilder;
 
+/**
+ * This class is used to send metrics to bStats to the Lumi personal resource:
+ * https://bstats.org/plugin/server-implementation/Lumi/30587
+ */
 @Slf4j
 public class LumiMetrics {
 

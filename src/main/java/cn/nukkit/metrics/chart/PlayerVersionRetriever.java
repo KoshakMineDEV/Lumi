@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+/**
+ * This class is used to collect information for the player version chart.
+ */
 public class PlayerVersionRetriever implements Callable<Map<String, Integer>> {
 
     @Override

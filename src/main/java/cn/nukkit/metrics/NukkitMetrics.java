@@ -14,6 +14,10 @@ import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bstats.json.JsonObjectBuilder;
 
+/**
+ * This class is used to send metrics to bStats to the Nukkit resource:
+ * https://bstats.org/plugin/server-implementation/Nukkit/10277
+ */
 @Slf4j
 public class NukkitMetrics {
 

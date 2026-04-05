@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+/**
+ * This class is used to collect information for the player platform chart.
+ */
 public class PlayerPlatformRetriever implements Callable<Map<String, Integer>> {
 
     @Override
@@ -21,7 +24,7 @@ public class PlayerPlatformRetriever implements Callable<Map<String, Integer>> {
                 valueMap.put(deviceOS, valueMap.get(deviceOS) + 1);
             }
         });
-        
+
         return valueMap;
     }
 }
