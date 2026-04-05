@@ -2,6 +2,7 @@ package cn.nukkit.settings;
 
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
+import eu.okaeri.configs.annotation.CustomKey;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -26,4 +27,8 @@ public class ServerSettings extends OkaeriConfig {
 
     @Comment("Player-related settings")
     private PlayerSettings player = new PlayerSettings();
+
+    @Comment("bStats settings")
+    @CustomKey("bstats")
+    private BStatsSettings bStats = new BStatsSettings();
 }

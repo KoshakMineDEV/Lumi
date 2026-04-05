@@ -31,6 +31,7 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.metadata.EntityMetadataStore;
 import cn.nukkit.metadata.LevelMetadataStore;
 import cn.nukkit.metadata.PlayerMetadataStore;
+import cn.nukkit.metrics.LumiMetrics;
 import cn.nukkit.metrics.NukkitMetrics;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -460,9 +461,8 @@ public class Server {
             this.scheduler.scheduleDelayedRepeatingTask(InternalPlugin.INSTANCE, this.spawnerTask, spawnerTicks, spawnerTicks);
         }
 
-        if (this.settings.general().bstatsMetrics()) {
-            new NukkitMetrics(this);
-        }
+        LumiMetrics.start();
+        NukkitMetrics.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::forceShutdown));
 

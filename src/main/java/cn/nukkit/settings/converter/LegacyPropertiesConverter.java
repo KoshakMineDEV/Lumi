@@ -1,7 +1,6 @@
 package cn.nukkit.settings.converter;
 
 import cn.nukkit.Difficulty;
-import cn.nukkit.settings.GeneralSettings;
 import cn.nukkit.settings.PlayerSettings;
 import cn.nukkit.settings.ServerSettings;
 import cn.nukkit.settings.WorldSettings;
@@ -50,7 +49,6 @@ public class LegacyPropertiesConverter {
         general.forceResources(this.getPropertyBoolean("force-resources", general.forceResources()));
         general.forceResourcesAllowClientPacks(this.getPropertyBoolean("force-resources-allow-client-packs", general.forceResourcesAllowClientPacks()));
         general.shutdownMessage(this.getPropertyString("shutdown-message", general.shutdownMessage()));
-        general.bstatsMetrics(this.getPropertyBoolean("bstats-metrics", general.bstatsMetrics()));
         general.debugLevel(this.getPropertyInt("debug-level", general.debugLevel()));
         general.enableSpark(this.getPropertyBoolean("enable-spark", general.enableSpark()));
         general.useWaterdog(this.getPropertyBoolean("use-waterdog", general.useWaterdog()));
@@ -215,6 +213,9 @@ public class LegacyPropertiesConverter {
         performance.threadWatchdog(this.getPropertyBoolean("thread-watchdog", performance.threadWatchdog()));
         performance.threadWatchdogTick(this.getPropertyInt("thread-watchdog-tick", performance.threadWatchdogTick()));
 
+        // bStats settings
+        settings.bStats().enable(this.getPropertyBoolean("bstats-metrics", settings.bStats().enable()));
+
         settings.save();
 
         if (file.delete()) {
@@ -224,11 +225,11 @@ public class LegacyPropertiesConverter {
         }
     }
 
-    public String getPropertyString(String key, String defaultValue) {
+    private String getPropertyString(String key, String defaultValue) {
         return this.config.exists(key) ? this.config.getString(key) : defaultValue;
     }
 
-    public int getPropertyInt(String variable, Integer defaultValue) {
+    private int getPropertyInt(String variable, Integer defaultValue) {
         Object value = this.config.get(variable);
         if (value == null) {
             value = defaultValue;
@@ -243,7 +244,7 @@ public class LegacyPropertiesConverter {
         return Integer.parseInt(trimmed);
     }
 
-    public boolean getPropertyBoolean(String variable, boolean defaultValue) {
+    private boolean getPropertyBoolean(String variable, boolean defaultValue) {
         Object value = this.config.exists(variable) ? this.config.get(variable) : defaultValue;
         if (value instanceof Boolean bool) {
             return bool;
