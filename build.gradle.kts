@@ -52,9 +52,10 @@ dependencies {
         exclude(group = "org.cloudburstmc.fastutil.maps", module = "int-object-maps")
         exclude(group = "org.cloudburstmc.fastutil.maps", module = "object-int-maps")
     }
-    implementation("it.unimi.dsi:fastutil-core:8.5.15")
-    implementation("org.cloudburstmc.fastutil.maps:int-short-maps:$fastutilMapsVersion")
-    implementation("org.cloudburstmc.fastutil.maps:long-byte-maps:$fastutilMapsVersion")
+    //implementation("it.unimi.dsi:fastutil-core:8.5.15")
+    //implementation("org.cloudburstmc.fastutil.maps:int-short-maps:$fastutilMapsVersion")
+    //implementation("org.cloudburstmc.fastutil.maps:long-byte-maps:$fastutilMapsVersion")
+    implementation("it.unimi.dsi:fastutil:8.5.15")
     implementation("com.google.guava:guava:33.5.0-jre")
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.3") {
