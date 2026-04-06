@@ -4133,6 +4133,11 @@
             "block_state_b64": "CgAAAwgAYmxvY2tfaWQlAAAACAQAbmFtZRMAbWluZWNyYWZ0OmRhbmRlbGlvbgQJAG5hbWVfaGFzaBJ3bEUi+Nn/AwoAbmV0d29ya19pZBjjC44KBgBzdGF0ZXMAAwcAdmVyc2lvbiE8FQEA"
         },
         {
+            "id": "minecraft:golden_dandelion",
+            "groupId": 39,
+            "block_state_b64": "CgAAAwgAYmxvY2tfaWRCBQAACAQAbmFtZRoAbWluZWNyYWZ0OmdvbGRlbl9kYW5kZWxpb24ECQBuYW1lX2hhc2i0V079Fvb7GAMKAG5ldHdvcmtfaWRZcMXSCgYAc3RhdGVzAAMHAHZlcnNpb24hPBUBAA=="
+        },
+        {
             "id": "minecraft:poppy",
             "groupId": 39,
             "block_state_b64": "CgAAAwgAYmxvY2tfaWQmAAAACAQAbmFtZQ8AbWluZWNyYWZ0OnBvcHB5BAkAbmFtZV9oYXNocMF8pITMbkcDCgBuZXR3b3JrX2lk8im6ywoGAHN0YXRlcwADBwB2ZXJzaW9uITwVAQA="
