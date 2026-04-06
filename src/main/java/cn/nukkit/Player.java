@@ -1955,7 +1955,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         // Extreme distance check
         if (distanceSquared / tickDiffSq > 225) {
             revert = true;
-            System.out.println("SYKA BLYAT 1");
             server.getLogger().debug(username + ": distanceSquared=" + distanceSquared + " > 225 * tickDiffSq=" + (225 * tickDiffSq));
         } else {
             // Chunk generation check
@@ -1963,7 +1962,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 BaseFullChunk chunk = this.level.getChunk(clientPos.getChunkX(), clientPos.getChunkZ(), false);
                 if (chunk == null || !chunk.isGenerated()) {
                     revert = true;
-                    System.out.println("SYKA BLYAT 2");
                     this.nextChunkOrderRun = 0;
                 } else {
                     if (this.chunk != null) {
