@@ -44,10 +44,10 @@ public class ObjectWell {
         }
         
         //slabs for all sides
-        level.setBlockAt(x + 2, y, z, Block.SLAB, 1);
-        level.setBlockAt(x - 2, y, z, Block.SLAB, 1);
-        level.setBlockAt(x, y, z + 2, Block.SLAB, 1);
-        level.setBlockAt(x, y, z - 2, Block.SLAB, 1);
+        level.setBlockAt(x + 2, y, z, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x - 2, y, z, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x, y, z + 2, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x, y, z - 2, Block.SANDSTONE_SLAB, 0);
 
         //water
         level.setBlockAt(x, y, z, Block.WATER);
@@ -72,13 +72,13 @@ public class ObjectWell {
         
         //roof
         level.setBlockAt(x, y + 3, z, Block.SANDSTONE);
-        level.setBlockAt(x + 1, y + 3, z, Block.SLAB, 1);
-        level.setBlockAt(x - 1, y + 3, z, Block.SLAB, 1);
-        level.setBlockAt(x, y + 3, z + 1, Block.SLAB, 1);
-        level.setBlockAt(x, y + 3, z - 1, Block.SLAB, 1);
-        level.setBlockAt(x + 1, y + 3, z + 1, Block.SLAB, 1);
-        level.setBlockAt(x + 1, y + 3, z - 1, Block.SLAB, 1);
-        level.setBlockAt(x - 1, y + 3, z - 1, Block.SLAB, 1);
-        level.setBlockAt(x - 1, y + 3, z + 1, Block.SLAB, 1);
+        level.setBlockAt(x + 1, y + 3, z, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x - 1, y + 3, z, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x, y + 3, z + 1, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x, y + 3, z - 1, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x + 1, y + 3, z + 1, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x + 1, y + 3, z - 1, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x - 1, y + 3, z - 1, Block.SANDSTONE_SLAB, 0);
+        level.setBlockAt(x - 1, y + 3, z + 1, Block.SANDSTONE_SLAB, 0);
     }
 }

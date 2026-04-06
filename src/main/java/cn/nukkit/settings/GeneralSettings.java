@@ -46,9 +46,6 @@ public class GeneralSettings extends OkaeriConfig {
     @CustomKey("shutdown-message")
     private String shutdownMessage = "Server closed";
 
-    @CustomKey("bstats-metrics")
-    private boolean bstatsMetrics = true;
-
     @CustomKey("debug-level")
     @Comment("Logger debug level, can be from 1 to 3")
     private int debugLevel = 1;

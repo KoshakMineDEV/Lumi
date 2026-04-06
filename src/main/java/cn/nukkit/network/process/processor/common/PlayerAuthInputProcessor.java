@@ -104,6 +104,10 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
         }
 
         if (handle.getTeleportPosition() != null) {
+            if (handle.getLastTeleportTick() != -1
+                    && packet.getInputData().contains(AuthInputAction.HANDLE_TELEPORT)) {
+                handle.setLastTeleportTick(-1);
+            }
             return;
         }
 
@@ -485,7 +489,6 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
 
             if (!ignoreCoordinateMove) {
                 handle.setNewPosition(clientPosition);
-                handle.offerClientMovement(clientPosition);
             }
 
             handle.setForceMovement(null);

@@ -121,15 +121,18 @@ public class BlockNoteblock extends BlockSolid implements BlockEntityHolder<Bloc
             case JUNGLE_PLANKS:
             case ACACIA_PLANKS:
             case DARK_OAK_PLANKS:
-            case DOUBLE_WOODEN_SLAB:
-            case WOODEN_SLAB:
             case WOOD_STAIRS:
             case SPRUCE_WOOD_STAIRS:
             case BIRCH_WOOD_STAIRS:
             case JUNGLE_WOOD_STAIRS:
             case ACACIA_WOOD_STAIRS:
             case DARK_OAK_WOOD_STAIRS:
-            case FENCE:
+            case OAK_FENCE:
+            case ACACIA_FENCE:
+            case BIRCH_FENCE:
+            case DARK_OAK_FENCE:
+            case JUNGLE_FENCE:
+            case SPRUCE_FENCE:
             case FENCE_GATE:
             case FENCE_GATE_SPRUCE:
             case FENCE_GATE_BIRCH:
@@ -180,10 +183,6 @@ public class BlockNoteblock extends BlockSolid implements BlockEntityHolder<Bloc
             case NETHER_BRICK_BLOCK:
             case RED_NETHER_BRICK:
             case QUARTZ_BLOCK:
-            case DOUBLE_SLAB:
-            case SLAB:
-            case DOUBLE_RED_SANDSTONE_SLAB:
-            case RED_SANDSTONE_SLAB:
             case COBBLE_STAIRS:
             case BRICK_STAIRS:
             case STONE_BRICK_STAIRS:

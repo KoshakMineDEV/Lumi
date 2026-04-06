@@ -123,6 +123,10 @@ public enum AuthInputAction {
      */
     STOP_SPIN_ATTACK,
     /**
+     * @since v765
+     */
+    HOTBAR_ONLY_TOUCH,
+    /**
      * @since v766
      */
     JUMP_RELEASED_RAW,

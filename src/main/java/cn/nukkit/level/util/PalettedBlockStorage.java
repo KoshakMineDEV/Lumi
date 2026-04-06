@@ -3,7 +3,6 @@ package cn.nukkit.level.util;
 import cn.nukkit.Server;
 import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.math.BlockVector3;
-import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.level.ChunkException;
 import io.netty.buffer.ByteBuf;
@@ -23,8 +22,8 @@ public class PalettedBlockStorage {
         return createFromBlockPalette(BitArrayVersion.V2, 0);
     }
 
-    public static PalettedBlockStorage createFromBlockPalette(int protocol) {
-        return PalettedBlockStorage.createFromBlockPalette(BitArrayVersion.V2, protocol);
+    public static PalettedBlockStorage createFromBlockPalette(int protocol, BitArrayVersion version) {
+        return PalettedBlockStorage.createFromBlockPalette(version, protocol);
     }
 
     public static PalettedBlockStorage createFromBlockPalette(BitArrayVersion version, int protocol) {
@@ -165,6 +164,11 @@ public class PalettedBlockStorage {
 
     private void onResize(BitArrayVersion version) {
         BitArray newBitArray = version.createPalette();
+
+        if(this.bitArray.getClass() == SingletonBitArray.class) {
+            this.bitArray = newBitArray;
+            return;
+        }
 
         for (int i = 0; i < SIZE; i++) {
             newBitArray.set(i, this.bitArray.get(i));

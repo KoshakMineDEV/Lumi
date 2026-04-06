@@ -1568,6 +1568,8 @@ public final class ItemTypes {
 
     public static final ItemType GOLDEN_CHESTPLATE = register("minecraft:golden_chestplate", 384);
 
+    public static final ItemType GOLDEN_DANDELION = register("minecraft:golden_dandelion", -1091);
+
     public static final ItemType GOLDEN_HELMET = register("minecraft:golden_helmet", 383);
 
     public static final ItemType GOLDEN_HOE = register("minecraft:golden_hoe", 365);

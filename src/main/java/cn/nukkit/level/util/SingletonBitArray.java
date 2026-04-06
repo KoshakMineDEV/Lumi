@@ -10,7 +10,7 @@ public class SingletonBitArray implements BitArray {
 
     @Override
     public SingletonBitArray copy() {
-        return new SingletonBitArray();
+        return this;
     }
 
     @Override

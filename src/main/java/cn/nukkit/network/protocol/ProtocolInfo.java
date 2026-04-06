@@ -42,13 +42,14 @@ public interface ProtocolInfo {
     int v1_21_124 = 860;
     int v1_21_130 = 898;
     int v1_26_0 = 924;
+    int v1_26_10 = 944;
 
-    int CURRENT_PROTOCOL = Utils.dynamic(v1_26_0);
+    int CURRENT_PROTOCOL = Utils.dynamic(v1_26_10);
 
     List<Integer> SUPPORTED_PROTOCOLS = Ints.asList(
             v1_20_0_23, v1_20_0, v1_20_10_21, v1_20_10, v1_20_30_24, v1_20_30, v1_20_40, v1_20_50, v1_20_60, v1_20_70, v1_20_80,
             v1_21_0, v1_21_2, v1_21_20, v1_21_30, v1_21_40, v1_21_50_26, v1_21_50, v1_21_60, v1_21_70_24, v1_21_70, v1_21_80, v1_21_90,
-            v1_21_93, v1_21_100, v1_21_110_26, v1_21_111, v1_21_120, v1_21_124, v1_21_130, v1_26_0
+            v1_21_93, v1_21_100, v1_21_110_26, v1_21_111, v1_21_120, v1_21_124, v1_21_130, v1_26_0, v1_26_10
     );
 
     String MINECRAFT_VERSION_NETWORK = Utils.getVersionByProtocol(CURRENT_PROTOCOL);
@@ -330,6 +331,30 @@ public interface ProtocolInfo {
      * @since v924
      */
     int CAMERA_AIM_ASSIST_ACTOR_PRIORITY_PACKET = 339;
+    /**
+     * @since v944
+     */
+    int RESOURCE_PACKS_READY_FOR_VALIDATION_PACKET = 340;
+    /**
+     * @since v944
+     */
+    int LOCATOR_BAR_PACKET = 341;
+    /**
+     * @since v944
+     */
+    int PARTY_CHANGED_PACKET = 342;
+    /**
+     * @since v944
+     */
+    int SERVERBOUND_DATA_DRIVEN_SCREEN_CLOSED_PACKET = 343;
+    /**
+     * @since v944
+     */
+    int SYNC_WORLD_CLOCKS_PACKET = 344;
+    /**
+     * @since v944
+     */
+    int CLIENTBOUND_ATTRIBUTE_LAYER_SYNC_PACKET = 345;
 
     static int toNewProtocolID(byte oldProtocolID) {
         return oldProtocolID & 0xff;

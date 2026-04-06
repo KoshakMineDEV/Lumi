@@ -7,11 +7,7 @@ import cn.nukkit.block.data.BlockColor;
 public class BlockFenceMangrove extends BlockFence {
 
     public BlockFenceMangrove() {
-        this(0);
-    }
-
-    public BlockFenceMangrove(int meta) {
-        super(meta);
+        super();
     }
 
     @Override
