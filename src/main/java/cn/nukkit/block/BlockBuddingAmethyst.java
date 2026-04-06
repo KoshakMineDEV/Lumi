@@ -79,12 +79,12 @@ public class BlockBuddingAmethyst extends BlockSolid {
     }
 
     @Override
-    public boolean canSilkTouch() {
-        return true;
+    public BlockColor getColor() {
+        return BlockColor.PURPLE_BLOCK_COLOR;
     }
 
     @Override
-    public BlockColor getColor() {
-        return BlockColor.PURPLE_BLOCK_COLOR;
+    public Item[] getDrops(Item item) {
+        return Item.EMPTY_ARRAY;
     }
 }
