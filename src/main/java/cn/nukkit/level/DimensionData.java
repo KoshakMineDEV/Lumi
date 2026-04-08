@@ -4,9 +4,6 @@ import lombok.Data;
 
 @Data
 public class DimensionData {
-
-    public static final DimensionData LEGACY_DIMENSION = new LegacyDimensionData();
-
     private final int dimensionId;
     private final int minHeight;
     private final int maxHeight;
@@ -34,16 +31,5 @@ public class DimensionData {
 
     public int getMaxSectionY() {
         return this.maxHeight >> 4;
-    }
-
-    private static class LegacyDimensionData extends DimensionData {
-        public LegacyDimensionData() {
-            super(0, 0, 255);
-        }
-
-        @Override
-        public int getHeight() {
-            return DimensionEnum.OVERWORLD.getDimensionData().getHeight();
-        }
     }
 }

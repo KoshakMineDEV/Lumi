@@ -37,7 +37,6 @@ import cn.nukkit.level.format.Chunk;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.anvil.Anvil;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import cn.nukkit.level.format.generic.serializer.NetworkChunkSerializer;
@@ -553,10 +552,6 @@ public class Level implements ChunkManager, Metadatable {
     public void initLevel() {
         Generator generator = generators.get();
         this.dimensionData = generator.getDimensionData();
-        //Anvil 不支持384世界高度
-        if (this.dimensionData.getDimensionId() == DIMENSION_OVERWORLD && this.provider instanceof Anvil) {
-            this.dimensionData = DimensionData.LEGACY_DIMENSION;
-        }
         this.gameRules = this.requireProvider().getGamerules();
     }
 

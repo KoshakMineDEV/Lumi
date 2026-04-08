@@ -79,7 +79,6 @@ public class SimpleCommandMap implements CommandMap {
         this.register("nukkit", new HudCommand("hud"));
         this.register("nukkit", new CameraShakeCommand("camerashake"));
         this.register("nukkit", new CameraCommand("camera"));
-        this.register("nukkit", new ConvertCommand("convert"));
         this.register("nukkit", new InputPermissionCommand("inputpermission"));
         this.register("nukkit", new AbilityCommand("ability"));
         this.register("nukkit", new DamageCommand("damage"));
