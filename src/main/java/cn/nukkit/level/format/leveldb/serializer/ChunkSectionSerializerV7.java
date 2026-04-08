@@ -1,7 +1,7 @@
 package cn.nukkit.level.format.leveldb.serializer;
 
 import cn.nukkit.block.Block;
-import cn.nukkit.level.format.anvil.util.NibbleArray;
+import cn.nukkit.level.util.NibbleArray;
 import cn.nukkit.level.format.leveldb.BlockStateMapping;
 import cn.nukkit.level.format.leveldb.structure.ChunkBuilder;
 import cn.nukkit.level.format.leveldb.structure.StateBlockStorage;

@@ -21,7 +21,6 @@ import cn.nukkit.level.*;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.LevelProviderManager;
-import cn.nukkit.level.format.anvil.Anvil;
 import cn.nukkit.level.format.leveldb.LevelDBProvider;
 import cn.nukkit.level.generator.*;
 import cn.nukkit.level.tickingarea.manager.SimpleTickingAreaManager;
@@ -379,7 +378,6 @@ public class Server {
 
         Registries.BLOCK.initCustomBlocks();
 
-        LevelProviderManager.addProvider(this, Anvil.class);
         LevelProviderManager.addProvider(this, LevelDBProvider.class);
 
         Generator.addGenerator(Flat.class, "flat", Generator.TYPE_FLAT);
