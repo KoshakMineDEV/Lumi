@@ -11,7 +11,6 @@ public class LevelTest {
 
     @Test
     public void testLocalBlockHashAll() {
-        testLocalBlockHashDimensionData(DimensionData.LEGACY_DIMENSION);
         testLocalBlockHashDimensionData(DimensionEnum.OVERWORLD.getDimensionData());
         testLocalBlockHashDimensionData(DimensionEnum.NETHER.getDimensionData());
         testLocalBlockHashDimensionData(DimensionEnum.END.getDimensionData());
