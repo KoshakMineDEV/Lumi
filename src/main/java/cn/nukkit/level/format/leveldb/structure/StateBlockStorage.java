@@ -207,7 +207,7 @@ public class StateBlockStorage {
     }
 
     public void writeTo(Level level, int protocol, BinaryStream stream, boolean antiXray, BlockPalette blockPalette) {
-        PalettedBlockStorage palettedBlockStorage = PalettedBlockStorage.createFromBlockPalette(this.bitArray.getVersion(), protocol);
+        PalettedBlockStorage palettedBlockStorage = PalettedBlockStorage.createFromBlockPalette(BitArrayVersion.V2, protocol);
 
         if(this.bitArray.getClass() != SingletonBitArray.class) {
             if (antiXray) {
