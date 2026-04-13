@@ -62,6 +62,7 @@ compileOnly("com.koshakmine:Lumi:1.5.0-SNAPSHOT")
 
 ## Credits
 [<img src="https://raw.githubusercontent.com/CloudburstMC/Nukkit/master/.github/images/logo.png" width="18"/>]() [Nukkit](https://github.com/CloudburstMC/Nukkit)  
+[<img src="https://github.com/AllayMC/Allay/raw/master/docs/assets/logo/allay-chan-40x.png" width="18"/>]() [AllayMC](https://github.com/AllayMC/Allay)  
 [<img src="https://avatars.githubusercontent.com/u/62042238?s=200&v=4" width="18"/>]() [Nukkit-MOT](https://github.com/MemoriesOfTime/Nukkit-MOT)  
 [<img src="https://avatars.githubusercontent.com/u/99014792?s=200&v=4" width="18"/>]() [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX)  
 [<img src="https://avatars.githubusercontent.com/u/20168691?s=200&v=4" width="18"/>]() [EaseCation Nukkit](https://github.com/EaseCation/Nukkit)  
