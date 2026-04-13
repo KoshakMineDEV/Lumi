@@ -26,8 +26,9 @@ public class EffectPoison extends Effect {
                 entity.heal(new EntityRegainHealthEvent(entity, 1, EntityRegainHealthEvent.CAUSE_MAGIC));
             }
         } else {
-            if (entity.getHealth() > 1) {
-                entity.attack(new EntityDamageEvent(entity, EntityDamageEvent.DamageCause.MAGIC, 1));
+            float damage = Math.min(1, entity.getHealth() - 1);
+            if(damage > 0) {
+                entity.attack(new EntityDamageEvent(entity, EntityDamageEvent.DamageCause.MAGIC, damage));
             }
         }
     }
