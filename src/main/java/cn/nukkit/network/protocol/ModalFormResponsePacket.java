@@ -18,7 +18,7 @@ public class ModalFormResponsePacket extends DataPacket {
 
     @Override
     public void decode() {
-        this.formId = this.getVarInt();
+        this.formId = (int) this.getUnsignedVarInt();
         if (this.getBoolean()) {
             this.data = this.getString();
         }
