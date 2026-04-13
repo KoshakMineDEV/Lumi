@@ -16,8 +16,10 @@ public enum ItemTrimMaterialType {
     MATERIAL_COPPER("copper"),
     MATERIAL_GOLD("gold"),
     MATERIAL_EMERALD("emerald"),
+    MATERIAL_DIAMOND("diamond"),
     MATERIAL_LAPIS("lapis"),
-    MATERIAL_AMETHYST("amethyst");
+    MATERIAL_AMETHYST("amethyst"),
+    MATERIAL_RESIN("resin");
 
     @Nullable
     public static ItemTrimMaterialType fromMaterialName(@NotNull String materialName) {
