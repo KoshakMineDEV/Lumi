@@ -7,7 +7,7 @@
 Lumi is a server software based on [Nukkit-MOT](https://github.com/MemoriesOfTime/Nukkit-MOT/) which was made to introduce many new features and improvements.
 
 ### What's new in Lumi?
-1. Support for 1.20.0 – 1.26.0 version (you can set the minimum protocol in the config)
+1. Support for 1.20.0 – 1.26.13 version (you can set the minimum protocol in the config)
 2. More vanilla features
 3. Custom Blocks support
 4. Custom Enchantments support
