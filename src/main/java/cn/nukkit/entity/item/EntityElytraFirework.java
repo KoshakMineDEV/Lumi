@@ -21,15 +21,10 @@ public class EntityElytraFirework extends EntityFirework {
     private int fireworkAge = 0;
 
     public EntityElytraFirework(FullChunk chunk, CompoundTag nbt, Player player) {
-        super(chunk, nbt, true);
+        super(chunk, nbt, true, player);
         this.followingPlayer = player;
 
-        ThreadLocalRandom rand = ThreadLocalRandom.current();
-        this.setLifetime(20 + rand.nextInt(13));
-
-        if (namedTag.contains("FireworkItem")) {
-            this.setFirework(NBTIO.getItemHelper(this.namedTag.getCompound("FireworkItem")));
-        }
+        this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_INVISIBLE, true);
     }
 
     @Override
@@ -49,12 +44,48 @@ public class EntityElytraFirework extends EntityFirework {
         boolean hasUpdate = this.entityBaseTick(tickDiff);
 
         if (this.isAlive() && this.followingPlayer != null && !this.followingPlayer.closed) {
-            Vector3 motion = this.followingPlayer.getMotion();
-            this.motionX = motion.x;
-            this.motionY = motion.y;
-            this.motionZ = motion.z;
+            if (!this.followingPlayer.isGliding()) {
+                this.setPosition(this.followingPlayer.add(0, this.followingPlayer.getEyeHeight() * 0.5, 0));
+                this.motionX = 0;
+                this.motionY = 0;
+                this.motionZ = 0;
+                this.updateMovement();
+            } else {
+                Vector3 motion = this.followingPlayer.getMotion();
+                Vector3 look = this.followingPlayer.getDirectionVector();
+                this.followingPlayer.setMotion(motion.add(
+                        look.x * 0.1 + (look.x * 1.5 - motion.x) * 0.5,
+                        look.y * 0.1 + (look.y * 1.5 - motion.y) * 0.5,
+                        look.z * 0.1 + (look.z * 1.5 - motion.z) * 0.5
+                ));
+                motion = this.followingPlayer.getMotion();
 
-            this.setPosition(this.followingPlayer.getNextPosition().add(0, -0.5, 0));
+                this.motionX = motion.x;
+                this.motionY = motion.y;
+                this.motionZ = motion.z;
+
+                this.setPosition(this.followingPlayer.add(0, this.followingPlayer.getEyeHeight() * 0.5, 0));
+
+                Vector3 moveVector = new Vector3(this.x + this.motionX, this.y + this.motionY, this.z + this.motionZ);
+                Entity collisionEntity = this.findCollisionEntity(moveVector);
+                if (collisionEntity != null) {
+                    this.explode();
+                    return true;
+                }
+
+                if (this.hasExplosions()) {
+                    boolean isCollidedWithBlock = this.level
+                            .getCollisionCubes(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ))
+                            .length > 0;
+                    if (isCollidedWithBlock && !this.hadCollision) {
+                        this.hadCollision = true;
+                        this.explode();
+                        return true;
+                    } else if (!isCollidedWithBlock && this.hadCollision) {
+                        this.hadCollision = false;
+                    }
+                }
+            }
 
             updateRotation();
 
@@ -85,11 +116,29 @@ public class EntityElytraFirework extends EntityFirework {
 
     @Override
     public void setFirework(Item item) {
-        this.firework = item;
-        this.setDataProperty(new NBTEntityData(Entity.DATA_DISPLAY_ITEM, firework));
+        super.setFirework(item);
         this.setDataProperty(new LongEntityData(Entity.DATA_HAS_DISPLAY, -1), false);
         this.setDataProperty(new Vector3fEntityData(Entity.DATA_FIREWORK_DIRECTION,
                 new Vector3f((float) motionX, (float) motionY, (float) motionZ)), false);
+    }
+
+    @Override
+    protected void dealExplosionDamage() {
+        int explosionCount = this.getExplosionCount();
+        if (explosionCount <= 0) {
+            return;
+        }
+
+        if (this.followingPlayer != null && this.followingPlayer.isAlive()) {
+            this.followingPlayer.attack(this.createExplosionDamageEvent(this.followingPlayer, 5 + explosionCount * 2));
+        }
+
+        super.dealExplosionDamage();
+    }
+
+    @Override
+    protected boolean shouldSkipExplosionDamageTarget(Entity target) {
+        return target == this.followingPlayer;
     }
 
     public Player getFollowingPlayer() {

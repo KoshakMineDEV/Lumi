@@ -71,22 +71,26 @@ public class ItemFirework extends Item {
 
     @Override
     public boolean onClickAir(Player player, Vector3 directionVector) {
-        if (player.getInventory().getChestplateFast() instanceof ItemElytra && player.isGliding()) {
-            this.spawnElytraFirework(player.getLevel(), player, player);
+        return this.tryBoostGlidingPlayer(player);
+    }
 
-            if (!player.isCreative()) {
-                this.count--;
-            }
-
-            player.setMotion(new Vector3(
-                    -Math.sin(FastMath.toRadians(player.yaw)) * Math.cos(FastMath.toRadians(player.pitch)) * 2,
-                    -Math.sin(FastMath.toRadians(player.pitch)) * 2,
-                    Math.cos(FastMath.toRadians(player.yaw)) * Math.cos(FastMath.toRadians(player.pitch)) * 2));
-
-            return true;
+    private boolean tryBoostGlidingPlayer(Player player) {
+        if (!(player.getInventory().getChestplateFast() instanceof ItemElytra) || !player.isGliding()) {
+            return false;
         }
 
-        return false;
+        this.dropPlayerLeashes(player);
+        this.spawnElytraFirework(player.getLevel(), player, player);
+
+        if (!player.isCreative()) {
+            this.count--;
+        }
+
+        return true;
+    }
+
+    private void dropPlayerLeashes(Player player) {
+        //TODO: Add logic after mob refactor and leash implementation added
     }
 
     public void addExplosion(FireworkExplosion explosion) {
@@ -127,11 +131,15 @@ public class ItemFirework extends Item {
     }
 
     public EntityFirework spawnFirework(Level level, Vector3 pos, @Nullable Vector3 motion) {
+        return spawnFirework(level, pos, motion, null);
+    }
+
+    public EntityFirework spawnFirework(Level level, Vector3 pos, @Nullable Vector3 motion, @Nullable Entity shootingEntity) {
         boolean projectile = motion != null;
         CompoundTag nbt = Entity.getDefaultNBT(pos, motion, projectile ? (float) motion.yRotFromDirection() : 0, projectile ? (float) motion.xRotFromDirection() : 0)
                 .putCompound("FireworkItem", NBTIO.putItemHelper(this, true));
 
-        EntityFirework entity = new EntityFirework(level.getChunk(pos.getChunkX(), pos.getChunkZ()), nbt, projectile);
+        EntityFirework entity = new EntityFirework(level.getChunk(pos.getChunkX(), pos.getChunkZ()), nbt, projectile, shootingEntity);
         entity.spawnToAll();
         return entity;
     }
