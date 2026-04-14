@@ -59,7 +59,7 @@ public class BlockShulkerBox extends BlockTransparentMeta implements BlockEntity
 
     @Override
     public double getHardness() {
-        return 2.5;
+        return 2;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class BlockShulkerBox extends BlockTransparentMeta implements BlockEntity
     public int getToolType() {
         return ItemTool.TYPE_PICKAXE;
     }
-
+    
     @Override
     public WaterloggingType getWaterloggingType() {
         return WaterloggingType.WHEN_PLACED_IN_WATER;

@@ -20,6 +20,7 @@ package cn.nukkit.inventory;
 
 import cn.nukkit.Player;
 import cn.nukkit.item.*;
+import cn.nukkit.item.trim.ItemTrimMaterialType;
 import cn.nukkit.level.Position;
 import cn.nukkit.recipe.impl.SmithingRecipe;
 import cn.nukkit.registry.Registries;
@@ -46,32 +47,6 @@ public class SmithingInventory extends FakeBlockUIComponent {
     public static final int SMITHING_TEMPLATE_UI_SLOT = 53;
 
     private Item currentResult = Item.get(0);
-
-    private static final IntSet ITEMS = new IntOpenHashSet(new int[]{
-            Item.AIR,
-            //材料 Material
-            Item.IRON_INGOT, Item.GOLD_INGOT, Item.EMERALD, Item.REDSTONE, Item.NETHER_QUARTZ,
-            ItemID.NETHERITE_INGOT,
-            //工具与护甲 Tools and Armor
-            ItemID.DIAMOND_SWORD, ItemID.DIAMOND_SHOVEL, ItemID.DIAMOND_PICKAXE, ItemID.DIAMOND_AXE,
-            ItemID.DIAMOND_HOE, ItemID.DIAMOND_HELMET, ItemID.DIAMOND_CHESTPLATE, ItemID.DIAMOND_LEGGINGS, ItemID.DIAMOND_BOOTS,
-            ItemID.NETHERITE_SWORD, ItemID.NETHERITE_SHOVEL, ItemID.NETHERITE_PICKAXE, ItemID.NETHERITE_AXE, ItemID.NETHERITE_HOE,
-            ItemID.NETHERITE_HELMET, ItemID.NETHERITE_CHESTPLATE, ItemID.NETHERITE_LEGGINGS, ItemID.NETHERITE_BOOTS
-    });
-
-    private static final ObjectSet<String> ITEMS_NAMESPACE = new ObjectOpenHashSet<>(new String[]{
-            //材料 Material
-            ItemNamespaceId.COPPER_INGOT,
-            ItemNamespaceId.AMETHYST_SHARD,
-            //模板 Template
-            ItemNamespaceId.NETHERITE_UPGRADE_SMITHING_TEMPLATE, ItemNamespaceId.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE,
-            ItemNamespaceId.COAST_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.WILD_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.WARD_ARMOR_TRIM_SMITHING_TEMPLATE,
-            ItemNamespaceId.EYE_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.VEX_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE,
-            ItemNamespaceId.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.RIB_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE,
-            ItemNamespaceId.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE,
-            ItemNamespaceId.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, ItemNamespaceId.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE,
-            ItemNamespaceId.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE
-    });
 
     public SmithingInventory(PlayerUIInventory playerUI, Position position) {
         super(playerUI, InventoryType.SMITHING_TABLE, 51, position);
@@ -159,20 +134,54 @@ public class SmithingInventory extends FakeBlockUIComponent {
 
     public Item getTrimOutPutItem() {
         Item input = this.getEquipment().clone();
-        if (this.getIngredient() instanceof ItemTrimMaterial && this.getTemplate() instanceof ItemTrimPattern) {
-            if (!input.isNull() && input instanceof ItemArmor) {
+        ItemTrimMaterialType material = resolveTrimMaterial(this.getIngredient());
+        if (material != null && this.getTemplate() instanceof ItemTrimPattern) {
+            if (isTrimmableArmor(input)) {
                 ItemArmor trimmedArmor = (ItemArmor) input.clone();
-                ItemTrimMaterial material = (ItemTrimMaterial) this.getIngredient();
                 ItemTrimPattern pattern = (ItemTrimPattern) this.getTemplate();
-                trimmedArmor.setTrim(pattern.getPattern(), material.getMaterial());
-                return trimmedArmor;
+                return trimmedArmor.setArmorTrim(pattern.getPattern(), material);
             }
         }
         return Item.AIR_ITEM.clone();
     }
 
+    @Nullable
+    private ItemTrimMaterialType resolveTrimMaterial(Item item) {
+        if (item instanceof ItemTrimMaterial trimMaterial) {
+            return trimMaterial.getMaterial();
+        }
+        
+        return null;
+    }
+
+    static boolean isTrimmableArmor(Item item) {
+        return item instanceof ItemArmor
+                && item.isArmor()
+                && (item.isHelmet() || item.isChestplate() || item.isLeggings() || item.isBoots());
+    }
+
     @Override
     public boolean allowedToAdd(Item item) {
-        return ITEMS.contains(item.getId()) || ITEMS_NAMESPACE.contains(item.getNamespaceId());
+        if (item.isNull()) {
+            return true;
+        }
+
+        if (isTrimmableArmor(item)) {
+            return true;
+        }
+
+        if (item instanceof ItemTool && item.getTier() == ItemTool.TIER_DIAMOND) {
+            return true;
+        }
+
+        if (resolveTrimMaterial(item) != null) {
+            return true;
+        }
+
+        if (item instanceof ItemTrimPattern) {
+            return true;
+        }
+
+        return item.getNamespaceId().equals(ItemNamespaceId.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
     }
 }

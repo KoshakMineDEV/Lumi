@@ -33,6 +33,8 @@ public class TrimFactory {
         trimPatterns.add(new TrimPattern("minecraft:wayfinder_armor_trim_smithing_template", "wayfinder"));
         trimPatterns.add(new TrimPattern("minecraft:raiser_armor_trim_smithing_template", "raiser"));
         trimPatterns.add(new TrimPattern("minecraft:host_armor_trim_smithing_template", "host"));
+        trimPatterns.add(new TrimPattern("minecraft:flow_armor_trim_smithing_template", "flow"));
+        trimPatterns.add(new TrimPattern("minecraft:bolt_armor_trim_smithing_template", "bolt"));
         
         trimMaterials.add(new TrimMaterial("quartz", "§h", "minecraft:quartz"));
         trimMaterials.add(new TrimMaterial("iron", "§i", "minecraft:iron_ingot"));
@@ -44,5 +46,6 @@ public class TrimFactory {
         trimMaterials.add(new TrimMaterial("diamond", "§s", "minecraft:diamond"));
         trimMaterials.add(new TrimMaterial("lapis", "§t", "minecraft:lapis_lazuli"));
         trimMaterials.add(new TrimMaterial("amethyst", "§u", "minecraft:amethyst_shard"));
+        trimMaterials.add(new TrimMaterial("resin", "§v", "minecraft:resin_brick"));
     }
 }

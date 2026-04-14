@@ -10,11 +10,9 @@ import cn.nukkit.entity.BaseEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.custom.EntityDefinition;
 import cn.nukkit.entity.custom.EntityManager;
-import cn.nukkit.entity.effect.EffectType;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.entity.item.EntityXPOrb;
 import cn.nukkit.entity.mob.EntitySnowGolem;
-import cn.nukkit.entity.mob.EntityWither;
 import cn.nukkit.entity.passive.EntityIronGolem;
 import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.entity.weather.EntityLightning;
@@ -468,10 +466,11 @@ public class Level implements ChunkManager, Metadatable {
 
     @Deprecated
     public static long blockHash(int x, int y, int z) {
-        if (y < -64 || y >= 384) {
+        DimensionData overworld = DimensionEnum.OVERWORLD.getDimensionData();
+        if (y < overworld.getMinHeight() || y > overworld.getMaxHeight()) {
             throw new IllegalArgumentException("Y coordinate " + y + " is out of range!");
         }
-        return blockHash(x, y, z, DimensionEnum.OVERWORLD.getDimensionData());
+        return blockHash(x, y, z, overworld);
     }
 
     public static long blockHash(int x, int y, int z, DimensionData dimensionData) {

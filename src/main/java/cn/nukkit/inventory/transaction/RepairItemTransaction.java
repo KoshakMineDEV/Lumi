@@ -2,6 +2,8 @@ package cn.nukkit.inventory.transaction;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockAnvil;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.event.block.AnvilDamageEvent;
 import cn.nukkit.event.block.AnvilDamageEvent.DamageCause;
 import cn.nukkit.event.inventory.RepairItemEvent;
@@ -99,32 +101,28 @@ public class RepairItemTransaction extends InventoryTransaction {
         }
 
         FakeBlockMenu holder = inventory.getHolder();
-        Block block = this.source.level.getBlock(holder.getFloorX(), holder.getFloorY(), holder.getFloorZ());
-        if (block.getId() == Block.ANVIL) {
-            int oldDamage = block.getDamage() >= 8 ? 2 : block.getDamage() >= 4 ? 1 : 0;
-            int newDamage = !this.source.isCreative() && ThreadLocalRandom.current().nextInt(100) < 12 ? oldDamage + 1 : oldDamage;
+        Block oldBlock = this.source.level.getBlock(holder.getFloorX(), holder.getFloorY(), holder.getFloorZ());
+        if (oldBlock instanceof BlockAnvil) {
+            int id = switch (oldBlock.getId()) {
+                case BlockID.ANVIL -> BlockID.CHIPPED_ANVIL;
+                case BlockID.CHIPPED_ANVIL -> BlockID.DAMAGED_ANVIL;
+                default -> BlockID.AIR;
+            };
 
-            AnvilDamageEvent ev = new AnvilDamageEvent(block, oldDamage, newDamage, DamageCause.USE, this.source);
-            ev.setCancelled(oldDamage == newDamage);
-            this.source.getServer().getPluginManager().callEvent(ev);
-            if (!ev.isCancelled()) {
-                newDamage = ev.getNewDamage();
-                if (newDamage > 2) {
-                    this.source.level.setBlock(block, Block.get(Block.AIR), true);
-                    this.source.level.addLevelEvent(block, LevelEventPacket.EVENT_SOUND_ANVIL_BREAK);
-                } else {
-                    if (newDamage < 0) {
-                        newDamage = 0;
+            if (!this.source.isCreative() && ThreadLocalRandom.current().nextInt(100) < 12) {
+                Block newBlock = Block.get(id);
+                newBlock.setDamage(oldBlock.getDamage());
+                AnvilDamageEvent ev = new AnvilDamageEvent(oldBlock, newBlock, DamageCause.USE, this.source);
+                this.source.getServer().getPluginManager().callEvent(ev);
+                if (!ev.isCancelled()) {
+                    this.source.level.setBlock(oldBlock, ev.getNewBlock(), true);
+                    if (id == Block.AIR) {
+                        this.source.level.addLevelEvent(oldBlock, LevelEventPacket.EVENT_SOUND_ANVIL_BREAK);
                     }
-                    if (newDamage != oldDamage) {
-                        block.setDamage((newDamage << 2) | (block.getDamage() & 0x3));
-                        this.source.level.setBlock(block, block, true);
-                    }
-                    this.source.level.addLevelEvent(block, LevelEventPacket.EVENT_SOUND_ANVIL_USE);
                 }
-            } else {
-                this.source.level.addLevelEvent(block, LevelEventPacket.EVENT_SOUND_ANVIL_USE);
             }
+
+            this.source.level.addLevelEvent(oldBlock, LevelEventPacket.EVENT_SOUND_ANVIL_USE);
         }
 
         if (!this.source.isCreative()) {

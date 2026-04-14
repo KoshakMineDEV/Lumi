@@ -94,7 +94,6 @@ dependencies {
     implementation("net.daporkchop.lib:natives:0.5.8-SNAPSHOT") {
         exclude(group = "io.netty", module = "netty-buffer")
     }
-    implementation("io.sentry:sentry:6.25.0")
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("org.xerial.snappy:snappy-java:1.1.10.8")
     implementation("com.github.oshi:oshi-core:6.10.0")

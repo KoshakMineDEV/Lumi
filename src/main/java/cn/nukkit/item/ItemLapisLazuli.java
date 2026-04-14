@@ -1,8 +1,15 @@
 package cn.nukkit.item;
 
-public class ItemLapisLazuli extends StringItemBase {
+import cn.nukkit.item.trim.ItemTrimMaterialType;
+
+public class ItemLapisLazuli extends StringItemBase implements ItemTrimMaterial {
 
     public ItemLapisLazuli() {
         super(LAPIS_LAZULI, "Lapis Lazuli");
+    }
+
+    @Override
+    public ItemTrimMaterialType getMaterial() {
+        return ItemTrimMaterialType.MATERIAL_LAPIS;
     }
 }

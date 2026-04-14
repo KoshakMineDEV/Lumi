@@ -2799,6 +2799,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return;
         }
 
+        DimensionDataPacket dimensionDataPacket = DimensionDataPacket.createIfModified();
+        if (dimensionDataPacket != null) {
+            this.forceDataPacket(dimensionDataPacket, null);
+        }
+
         StartGamePacket startGamePacket = new StartGamePacket();
         startGamePacket.entityUniqueId = this.id;
         startGamePacket.entityRuntimeId = this.id;
@@ -4435,8 +4440,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
         // HACK: solve the client-side teleporting bug (inside into the block)
         if (super.teleport(to.getY() == to.getFloorY() ? to.add(0, 0.00001, 0) : to, null)) { // null to prevent fire of duplicate EntityTeleportEvent
-            //this.removeAllWindows();
-            //this.formOpen = false;
+            this.removeAllWindows();
+            this.formOpen = false;
 
             this.lastTeleportTick = this.server.getTick();
             this.teleportPosition = this;
@@ -4486,6 +4491,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         Location from = this.getLocation();
         if (super.teleport(location.add(0, 0.00001, 0), cause)) {
             this.removeAllWindows();
+            this.formOpen = false;
 
             if (from.getLevel().getId() != location.getLevel().getId()) { // Different level, update compass position
                 SetSpawnPositionPacket pk = new SetSpawnPositionPacket();
@@ -4549,11 +4555,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
      * Close form windows sent with showFormWindow
      */
     public void closeFormWindows() {
-        if (this.protocol < ProtocolInfo.v1_21_2) {
-            return;
-        }
+        this.formOpen = false;
         this.formWindows.clear();
-        this.dataPacket(new ClientboundCloseFormPacket());
+        if (this.protocol >= ProtocolInfo.v1_21_2) {
+            this.dataPacket(new ClientboundCloseFormPacket());
+        }
     }
 
     public void showDialogWindow(FormWindowDialog dialog) {
