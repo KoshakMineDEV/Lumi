@@ -98,6 +98,13 @@ public class EntityAreaEffectCloud extends Entity {
             }
         }
 
+        // Hardcoded color for area effect cloud from potions with water
+        // to get rid of diving by zero
+        if (count == 0) {
+            setPotionColor(0xFF385DC6, send);
+            return;
+        }
+
         int a = (color[0] / count) & 0xff;
         int r = (color[1] / count) & 0xff;
         int g = (color[2] / count) & 0xff;
