@@ -986,7 +986,14 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(WAXED_EXPOSED_COPPER_CHEST, BlockCopperChestExposedWaxed.class); //1291
         register(WAXED_WEATHERED_COPPER_CHEST, BlockCopperChestWeatheredWaxed.class); //1292
         register(WAXED_OXIDIZED_COPPER_CHEST, BlockCopperChestOxidizedWaxed.class); //1293
-
+        register(COPPER_GOLEM_STATUE, BlockCopperGolemStatue.class); //1294
+        register(EXPOSED_COPPER_GOLEM_STATUE, BlockCopperGolemStatueExposed.class); //1295
+        register(WEATHERED_COPPER_GOLEM_STATUE, BlockCopperGolemStatueWeathered.class); //1296
+        register(OXIDIZED_COPPER_GOLEM_STATUE, BlockCopperGolemStatueOxidized.class); //1297
+        register(WAXED_COPPER_GOLEM_STATUE, BlockCopperGolemStatueWaxed.class); //1298
+        register(WAXED_EXPOSED_COPPER_GOLEM_STATUE, BlockCopperGolemStatueExposedWaxed.class); //1299
+        register(WAXED_WEATHERED_COPPER_GOLEM_STATUE, BlockCopperGolemStatueWeatheredWaxed.class); //1300
+        register(WAXED_OXIDIZED_COPPER_GOLEM_STATUE, BlockCopperGolemStatueOxidizedWaxed.class); //1301
         register(OAK_SHELF, BlockOakShelf.class); //1302
         register(SPRUCE_SHELF, BlockSpruceShelf.class); //1303
         register(BIRCH_SHELF, BlockBirchShelf.class); //1304
