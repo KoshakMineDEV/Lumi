@@ -1,4 +1,12 @@
 {
+  "minecraft:copper_golem_statue": -1039,
+  "minecraft:exposed_copper_golem_statue": -1040,
+  "minecraft:weathered_copper_golem_statue":-1041,
+  "minecraft:oxidized_copper_golem_statue": -1042,
+  "minecraft:waxed_copper_golem_statue":-1043,
+  "minecraft:waxed_exposed_copper_golem_statue": -1044,
+  "minecraft:waxed_weathered_copper_golem_statue":-1045,
+  "minecraft:waxed_oxidized_copper_golem_statue": -1046,
   "minecraft:oak_shelf": -1047,
   "minecraft:spruce_shelf": -1048,
   "minecraft:birch_shelf": -1049,
