@@ -16,6 +16,8 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+    withSourcesJar()
+    withJavadocJar()
 }
 
 repositories {
@@ -121,6 +123,15 @@ tasks {
 
     test {
         useJUnitPlatform()
+    }
+
+    javadoc {
+        isFailOnError  = false
+        (options as StandardJavadocDocletOptions).apply {
+            addBooleanOption("Xdoclint:none", true)
+            addStringOption("encoding", "UTF-8")
+            addStringOption("charSet", "UTF-8")
+        }
     }
 
     jar {
