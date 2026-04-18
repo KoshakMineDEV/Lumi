@@ -40,6 +40,7 @@ public interface BlockEntityID {
     String TARGET = "Target";
     String BRUSHABLE_BLOCK = "BrushableBlock";
     String CONDUIT = "Conduit";
+    String COPPER_GOLEM_STATUE = "CopperGolemStatue";
     String CHISELED_BOOKSHELF = "ChiseledBookshelf";
     String HANGING_SIGN = "HangingSign";
     String SCULK_SENSOR = "SculkSensor";

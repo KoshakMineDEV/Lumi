@@ -12,6 +12,7 @@ import cn.nukkit.blockentity.impl.BlockEntityShelf;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
@@ -58,6 +59,16 @@ public abstract class BlockShelf extends BlockTransparentMeta implements Faceabl
         this.getLevel().setBlock(this, this, true);
         this.getOrCreateBlockEntity();
         this.updateConnection(this);
+        return true;
+    }
+
+    @Override
+    public boolean canBeActivated() {
+        return true;
+    }
+
+    @Override
+    public boolean onActivate(Item item, Player player) {
         return true;
     }
 
@@ -242,6 +253,13 @@ public abstract class BlockShelf extends BlockTransparentMeta implements Faceabl
             }
             return shelves;
         }
+    }
+
+    @Override
+    public Item[] getDrops(Item item) {
+        return new Item[]{
+                new ItemBlock(this, 0)
+        };
     }
 
     public PoweredShelfType getType() {
