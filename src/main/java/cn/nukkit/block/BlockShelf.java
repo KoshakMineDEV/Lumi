@@ -12,6 +12,7 @@ import cn.nukkit.blockentity.impl.BlockEntityShelf;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
@@ -242,6 +243,13 @@ public abstract class BlockShelf extends BlockTransparentMeta implements Faceabl
             }
             return shelves;
         }
+    }
+
+    @Override
+    public Item[] getDrops(Item item) {
+        return new Item[]{
+                new ItemBlock(this, 0)
+        };
     }
 
     public PoweredShelfType getType() {
