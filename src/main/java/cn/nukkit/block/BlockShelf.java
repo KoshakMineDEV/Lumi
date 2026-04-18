@@ -63,6 +63,16 @@ public abstract class BlockShelf extends BlockTransparentMeta implements Faceabl
     }
 
     @Override
+    public boolean canBeActivated() {
+        return true;
+    }
+
+    @Override
+    public boolean onActivate(Item item, Player player) {
+        return true;
+    }
+
+    @Override
     public int onTouch(@NotNull Vector3 vector, @NotNull Item item, @NotNull BlockFace blockFace, float fx, float fy, float fz, @Nullable Player player, PlayerInteractEvent.Action action) {
         if (action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
             if (player != null && !player.isSneaking() && blockFace == getBlockFace() && fy > 0.25f && fy < 0.75f) {
