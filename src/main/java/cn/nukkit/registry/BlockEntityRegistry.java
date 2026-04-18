@@ -37,6 +37,7 @@ public class BlockEntityRegistry implements IRegistry<String, Class<? extends Bl
         register(BlockEntityID.HOPPER, BlockEntityHopper.class);
         register(BlockEntityID.BED, BlockEntityBed.class);
         register(BlockEntityID.JUKEBOX, BlockEntityJukebox.class);
+        register(BlockEntityID.SHELF, BlockEntityShelf.class);
         register(BlockEntityID.SHULKER_BOX, BlockEntityShulkerBox.class);
         register(BlockEntityID.BANNER, BlockEntityBanner.class);
         register(BlockEntityID.DROPPER, BlockEntityDropper.class);
