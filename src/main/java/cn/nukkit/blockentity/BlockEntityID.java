@@ -25,6 +25,7 @@ public interface BlockEntityID {
     String HOPPER = "Hopper";
     String BED = "Bed";
     String JUKEBOX = "Jukebox";
+    String SHELF = "Shelf";
     String SHULKER_BOX = "ShulkerBox";
     String BANNER = "Banner";
     String LECTERN = "Lectern";

@@ -987,6 +987,18 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(WAXED_WEATHERED_COPPER_CHEST, BlockCopperChestWeatheredWaxed.class); //1292
         register(WAXED_OXIDIZED_COPPER_CHEST, BlockCopperChestOxidizedWaxed.class); //1293
 
+        register(OAK_SHELF, BlockOakShelf.class); //1302
+        register(SPRUCE_SHELF, BlockSpruceShelf.class); //1303
+        register(BIRCH_SHELF, BlockBirchShelf.class); //1304
+        register(JUNGLE_SHELF, BlockJungleShelf.class); //1305
+        register(ACACIA_SHELF, BlockAcaciaShelf.class); //1306
+        register(DARK_OAK_SHELF, BlockDarkOakShelf.class); //1307
+        register(MANGROVE_SHELF, BlockMangroveShelf.class); //1308
+        register(CHERRY_SHELF, BlockCherryShelf.class); //1309
+        register(PALE_OAK_SHELF, BlockPaleOakShelf.class); //1310
+        register(BAMBOO_SHELF, BlockBambooShelf.class); //1311
+        register(CRIMSON_SHELF, BlockCrimsonShelf.class); //1312
+        register(WARPED_SHELF, BlockWarpedShelf.class); //1313
         register(EXPOSED_LIGHTNING_ROD, BlockLightningRodExposed.class); //1314
         register(WEATHERED_LIGHTNING_ROD, BlockLightningRodWeathered.class); //1315
         register(OXIDIZED_LIGHTNING_ROD, BlockLightningRodOxidized.class); //1316
