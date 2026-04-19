@@ -15,6 +15,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import java.lang.reflect.Constructor;
+import java.util.function.BiFunction;
 
 /**
  * @author MagicDroidX
@@ -56,44 +57,21 @@ public abstract class BlockEntity extends Position implements BlockEntityID {
         this.getLevel().addBlockEntity(this);
     }
 
-    public static BlockEntity createBlockEntity(String type, Position pos, CompoundTag nbt, Object... args) {
-        return createBlockEntity(type, pos.getLevel().getChunk(pos.getFloorX() >> 4, pos.getFloorZ() >> 4), nbt, args);
+    public static BlockEntity createBlockEntity(String type, Position pos, CompoundTag nbt) {
+        return createBlockEntity(type, pos.getLevel().getChunk(pos.getFloorX() >> 4, pos.getFloorZ() >> 4), nbt);
     }
 
-    public static BlockEntity createBlockEntity(String type, FullChunk chunk, CompoundTag nbt, Object... args) {
+    public static BlockEntity createBlockEntity(String type, FullChunk chunk, CompoundTag nbt) {
         BlockEntity blockEntity = null;
 
         if (Registries.BLOCK_ENTITY.isRegistered(type)) {
-            Class<? extends BlockEntity> clazz = Registries.BLOCK_ENTITY.get(type);
+            BiFunction<FullChunk, CompoundTag, BlockEntity> builder = Registries.BLOCK_ENTITY.get(type);
 
-            if (clazz == null) {
+            if (builder == null) {
                 return null;
             }
 
-            for (Constructor<?> constructor : clazz.getConstructors()) {
-                if (blockEntity != null) {
-                    break;
-                }
-
-                if (constructor.getParameterCount() != (args == null ? 2 : args.length + 2)) {
-                    continue;
-                }
-
-                try {
-                    if (args == null || args.length == 0) {
-                        blockEntity = (BlockEntity) constructor.newInstance(chunk, nbt);
-                    } else {
-                        Object[] objects = new Object[args.length + 2];
-
-                        objects[0] = chunk;
-                        objects[1] = nbt;
-                        System.arraycopy(args, 0, objects, 2, args.length);
-                        blockEntity = (BlockEntity) constructor.newInstance(objects);
-
-                    }
-                } catch (Exception ignored) {
-                }
-            }
+            blockEntity = builder.apply(chunk, nbt);
         } else {
             Server.getInstance().getLogger().debug("Tried to create block entity that doesn't exists: " + type);
         }
