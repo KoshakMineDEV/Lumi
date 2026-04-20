@@ -47,7 +47,7 @@ public interface BlockEntityHolder<E extends BlockEntity> {
     }
 
     @NotNull
-    default E createBlockEntity(@Nullable CompoundTag initialData, @Nullable Object... args) {
+    default E createBlockEntity(@Nullable CompoundTag initialData) {
         String typeName = getBlockEntityType();
         FullChunk chunk = getChunk();
         if (chunk == null) {
@@ -63,8 +63,7 @@ public interface BlockEntityHolder<E extends BlockEntity> {
                     .putString("id", typeName)
                     .putInt("x", getFloorX())
                     .putInt("y", getFloorY())
-                    .putInt("z", getFloorZ()), 
-                args);
+                    .putInt("z", getFloorZ()));
 
         Class<? extends E> entityClass = getBlockEntityClass();
 
@@ -121,15 +120,14 @@ public interface BlockEntityHolder<E extends BlockEntity> {
 
     @Nullable
     static <E extends BlockEntity, H extends BlockEntityHolder<E>> E setBlockAndCreateEntity(
-            @NotNull H holder, boolean direct, boolean update, @Nullable CompoundTag initialData,
-            @Nullable Object... args) {
+            @NotNull H holder, boolean direct, boolean update, @Nullable CompoundTag initialData) {
         Block block = holder.getBlock(); 
         Level level = block.getLevel();
         Block layer0 = level.getBlock(block, 0);
         Block layer1 = level.getBlock(block, 1);
         if (level.setBlock(block, block, direct, update)) {
             try {
-                return holder.createBlockEntity(initialData, args);
+                return holder.createBlockEntity(initialData);
             } catch (Exception e) {
                 log.warn("Failed to create block entity {} at {} at ", holder.getBlockEntityType(), holder.getLocation(), e);
                 level.setBlock(layer0, 0, layer0, direct, update);
