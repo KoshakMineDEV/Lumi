@@ -7,9 +7,7 @@ import cn.nukkit.block.BlockFire;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockWater;
 import cn.nukkit.blockentity.impl.BlockEntityPistonArm;
-import cn.nukkit.entity.custom.CustomEntity;
 import cn.nukkit.entity.custom.EntityDefinition;
-import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.data.*;
 import cn.nukkit.entity.data.property.*;
 import cn.nukkit.entity.effect.Effect;
@@ -49,7 +47,6 @@ import cn.nukkit.utils.Identifier;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.Utils;
 import com.google.common.collect.Iterables;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.math3.util.FastMath;
 import org.jetbrains.annotations.NotNull;
 
@@ -1144,7 +1141,7 @@ public abstract class Entity extends Location implements Metadatable {
         if (Registries.ENTITY.isRegistered(name)) {
             return createEntity(Registries.ENTITY.get(name), chunk, nbt, args);
         }
-        EntityDefinition entityDefinition = EntityManager.get().getDefinition(name);
+        EntityDefinition entityDefinition = Registries.ENTITY.getCustomEntityDefinition(name);
         if (entityDefinition != null) {
             return createEntity(entityDefinition.getImplementation(), chunk, nbt, args);
         }
@@ -1156,7 +1153,7 @@ public abstract class Entity extends Location implements Metadatable {
         if (Registries.ENTITY.isRegistered(name)) {
             return createEntity(Registries.ENTITY.get(name), chunk, nbt, args);
         }
-        EntityDefinition entityDefinition = EntityManager.get().getDefinition(type);
+        EntityDefinition entityDefinition = Registries.ENTITY.getCustomEntityDefinition(type);
         if (entityDefinition != null) {
             return createEntity(entityDefinition.getImplementation(), chunk, nbt, args);
         }
@@ -1277,7 +1274,7 @@ public abstract class Entity extends Location implements Metadatable {
         if (str != null) {
             return new Identifier(str);
         }
-        EntityDefinition definition = EntityManager.get().getDefinition(networkID);
+        EntityDefinition definition = Registries.ENTITY.getCustomEntityDefinition(networkID);
         if (definition != null) {
             return new Identifier(definition.getIdentifier());
         }

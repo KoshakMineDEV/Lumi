@@ -18,7 +18,6 @@ public class EntityDefinition {
     private final Class<? extends Entity> clazz;
     private final int runtimeId;
     private CompoundTag networkTag;
-    private CompoundTag networkTagOld;
 
     public EntityDefinition(String identifier, String parentEntity, boolean spawnEgg, String alternateName, Class<? extends Entity> clazz) {
         if (!CustomEntity.class.isAssignableFrom(clazz)) {
@@ -49,14 +48,6 @@ public class EntityDefinition {
         return this.networkTag;
     }
 
-    public CompoundTag getNetworkTagOld() {
-        if (this.networkTagOld == null) {
-            this.networkTagOld = this.createNetworkTag();
-            this.networkTagOld.putBoolean("experimental", false);
-        }
-        return this.networkTagOld;
-    }
-
     public static EntityDefinitionBuilder builder() {
         return new EntityDefinitionBuilder();
     }
@@ -83,10 +74,6 @@ public class EntityDefinition {
 
     public int getRuntimeId() {
         return this.runtimeId;
-    }
-
-    private static IllegalArgumentException a(IllegalArgumentException illegalArgumentException) {
-        return illegalArgumentException;
     }
 
     @ToString

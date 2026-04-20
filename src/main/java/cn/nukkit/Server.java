@@ -448,6 +448,8 @@ public class Server {
         EntityProperty.buildPacket();
         EntityProperty.buildPlayerProperty();
 
+        Registries.ENTITY.buildNetworkIdentifiersCache();
+
         if (this.settings.performance().threadWatchdog()) {
             this.watchdog = new Watchdog(this, this.settings.performance().threadWatchdogTick());
             this.watchdog.start();
