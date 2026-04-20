@@ -3,7 +3,7 @@ package cn.nukkit.network.protocol;
 import cn.nukkit.Nukkit;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.custom.EntityManager;
+import cn.nukkit.registry.Registries;
 import com.google.common.io.ByteStreams;
 
 import java.io.InputStream;
@@ -42,8 +42,8 @@ public class AvailableEntityIdentifiersPacket extends DataPacket {
     @Override
     public void encode() {
         this.reset();
-        if (Server.getInstance().getSettings().features().enableExperimentMode()) { //自定义实体
-            this.put(EntityManager.get().getNetworkTagCached());
+        if (Server.getInstance().getSettings().features().enableExperimentMode()) {
+            this.put(Registries.ENTITY.getNetworkIdentifiersCache(protocol));
         }else {
             if (this.identifiers == null) {
                 this.identifiers = Entity.getEntityIdentifiersCache(this.protocol);

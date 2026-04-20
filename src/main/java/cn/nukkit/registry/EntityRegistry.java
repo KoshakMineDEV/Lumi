@@ -1,18 +1,26 @@
 package cn.nukkit.registry;
 
+import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.custom.CustomEntity;
 import cn.nukkit.entity.custom.EntityDefinition;
-import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.item.*;
 import cn.nukkit.entity.mob.*;
 import cn.nukkit.entity.passive.*;
 import cn.nukkit.entity.projectile.*;
 import cn.nukkit.entity.weather.EntityLightning;
+import cn.nukkit.nbt.NBTIO;
+import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.nbt.tag.ListTag;
+import cn.nukkit.network.protocol.AvailableEntityIdentifiersPacket;
 import cn.nukkit.utils.Identifier;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,6 +29,10 @@ public class EntityRegistry implements IRegistry<String, Class<? extends Entity>
 
     private static final Object2ObjectOpenHashMap<String, Class<? extends Entity>> KNOWN_ENTITIES = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectOpenHashMap<String, String> SHORT_NAMES = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectOpenHashMap<String, EntityDefinition> IDENTIFIER_TO_CUSTOM_ENTITY_DEFINITION = new Object2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<EntityDefinition> RUNTIME_ID_TO_CUSTOM_ENTITY_DEFINITION = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<byte[]> NETWORK_IDENTIFIER_CACHED = new Int2ObjectOpenHashMap<>();
+
     private static final AtomicBoolean isLoad = new AtomicBoolean(false);
 
     @Override
@@ -173,6 +185,24 @@ public class EntityRegistry implements IRegistry<String, Class<? extends Entity>
         SHORT_NAMES.put(value.getSimpleName(), key);
     }
 
+    public void registerCustomEntityDefinition(EntityDefinition entityDefinition) {
+        if (!Server.getInstance().getSettings().features().enableExperimentMode()) {
+            Server.getInstance().getLogger().warning("The server does not have the experiment mode feature enabled. Unable to register custom entity!");
+            return;
+        }
+
+        IDENTIFIER_TO_CUSTOM_ENTITY_DEFINITION.put(entityDefinition.getIdentifier(), entityDefinition);
+        RUNTIME_ID_TO_CUSTOM_ENTITY_DEFINITION.put(entityDefinition.getRuntimeId(), entityDefinition);
+    }
+
+    public EntityDefinition getCustomEntityDefinition(String identifier) {
+        return IDENTIFIER_TO_CUSTOM_ENTITY_DEFINITION.get(identifier);
+    }
+
+    public EntityDefinition getCustomEntityDefinition(int runtimeId) {
+        return RUNTIME_ID_TO_CUSTOM_ENTITY_DEFINITION.get(runtimeId);
+    }
+
     @Override
     public Class<? extends Entity> get(String key) {
         return KNOWN_ENTITIES.get(key);
@@ -206,7 +236,7 @@ public class EntityRegistry implements IRegistry<String, Class<? extends Entity>
             }
         }
 
-        EntityDefinition definition = EntityManager.get().getDefinition(identifier);
+        EntityDefinition definition = getCustomEntityDefinition(identifier);
         if (definition != null) {
             return definition.getRuntimeId();
         }
@@ -214,9 +244,44 @@ public class EntityRegistry implements IRegistry<String, Class<? extends Entity>
         return -1;
     }
 
-
     public boolean isRegistered(String name) {
         return KNOWN_ENTITIES.containsKey(name);
+    }
+
+    public byte[] getNetworkIdentifiersCache(int protocol) {
+        if (protocol >= 898) {
+            return NETWORK_IDENTIFIER_CACHED.get(898);
+        } else {
+            return NETWORK_IDENTIFIER_CACHED.get(582);
+        }
+    }
+
+    @ApiStatus.Internal
+    public void buildNetworkIdentifiersCache() {
+        //582
+        try {
+            CompoundTag compoundTag = (CompoundTag) NBTIO.readNetwork(new ByteArrayInputStream(AvailableEntityIdentifiersPacket.TAG));
+            ListTag<CompoundTag> listTag = compoundTag.getList("idlist", CompoundTag.class);
+            for (EntityDefinition entityDefinition : IDENTIFIER_TO_CUSTOM_ENTITY_DEFINITION.values()) {
+                listTag.add(entityDefinition.getNetworkTag());
+            }
+            compoundTag.putList(listTag);
+            NETWORK_IDENTIFIER_CACHED.put(582, NBTIO.writeNetwork(compoundTag));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to init entityIdentifiers", e);
+        }
+        //898
+        try {
+            CompoundTag compoundTag = (CompoundTag) NBTIO.readNetwork(new ByteArrayInputStream(AvailableEntityIdentifiersPacket.TAG_898));
+            ListTag<CompoundTag> listTag = compoundTag.getList("idlist", CompoundTag.class);
+            for (EntityDefinition entityDefinition : IDENTIFIER_TO_CUSTOM_ENTITY_DEFINITION.values()) {
+                listTag.add(entityDefinition.getNetworkTag());
+            }
+            compoundTag.putList(listTag);
+            NETWORK_IDENTIFIER_CACHED.put(898, NBTIO.writeNetwork(compoundTag));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to init entityIdentifiers", e);
+        }
     }
 
     @Override

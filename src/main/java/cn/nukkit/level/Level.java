@@ -9,7 +9,6 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.BaseEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.custom.EntityDefinition;
-import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.entity.item.EntityXPOrb;
 import cn.nukkit.entity.mob.EntitySnowGolem;
@@ -731,7 +730,7 @@ public class Level implements ChunkManager, Metadatable {
     public void addLevelSoundEvent(@NotNull Vector3 pos, int type, int data, int entityType, boolean isBaby, boolean isGlobal, Player[] players) {
         String identifier = Entity.getEntityRuntimeMapping().get(entityType);
         if (identifier == null) {
-            EntityDefinition entityDefinition = EntityManager.get().getDefinition(entityType);
+            EntityDefinition entityDefinition = Registries.ENTITY.getCustomEntityDefinition(entityType);
             identifier = entityDefinition == null ? ":" : entityDefinition.getIdentifier();
         }
         this.addLevelSoundEvent(pos, type, data, identifier, isBaby, isGlobal, players);

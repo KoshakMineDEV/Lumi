@@ -3,7 +3,6 @@ package cn.nukkit.network.protocol;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.custom.EntityDefinition;
-import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.data.EntityMetadata;
 import cn.nukkit.entity.item.*;
 import cn.nukkit.entity.mob.*;
@@ -12,6 +11,7 @@ import cn.nukkit.entity.projectile.*;
 import cn.nukkit.entity.weather.EntityLightning;
 import cn.nukkit.network.protocol.types.EntityLink;
 import cn.nukkit.network.protocol.types.PropertySyncData;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Binary;
 import lombok.ToString;
 
@@ -260,7 +260,7 @@ public class AddEntityPacket extends DataPacket {
 
         String identifier = this.mapping.get(type);
         if (identifier == null) {
-            EntityDefinition entityDefinition = EntityManager.get().getDefinition(this.type);
+            EntityDefinition entityDefinition = Registries.ENTITY.getCustomEntityDefinition(this.type);
             if (entityDefinition != null) {
                 return entityDefinition.getIdentifier();
             }
