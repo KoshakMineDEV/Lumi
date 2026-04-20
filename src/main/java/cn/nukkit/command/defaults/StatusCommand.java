@@ -19,6 +19,7 @@ import oshi.util.platform.windows.WmiQueryHandler;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.util.*;
@@ -112,6 +113,18 @@ public class StatusCommand extends VanillaCommand {
         uptime -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(uptime);
         return String.format(UPTIME_FORMAT, days, hours, minutes, seconds);
+    }
+
+    private static String getCPULoad() {
+        OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+        if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
+            double cpuLoad = ((com.sun.management.OperatingSystemMXBean) osBean).getProcessCpuLoad();
+            if (cpuLoad < 0) {
+                return "N/A";
+            }
+            return String.format("%.1f%%", cpuLoad * 100);
+        }
+        return "N/A";
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -210,7 +223,7 @@ public class StatusCommand extends VanillaCommand {
 
             sender.sendMessage(TextFormat.GOLD + "Current TPS: " + tpsColor + NukkitMath.round(tps, 2));
 
-            sender.sendMessage(TextFormat.GOLD + "Load: " + tpsColor + server.getTickUsage() + "%");
+            sender.sendMessage(TextFormat.GOLD + "Load: " + tpsColor + getCPULoad());
 
             sender.sendMessage(TextFormat.GOLD + "Thread count: " + TextFormat.GREEN + Thread.getAllStackTraces().size());
 
