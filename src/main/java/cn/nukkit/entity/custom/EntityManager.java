@@ -10,6 +10,9 @@ public class EntityManager {
         return ENTITY_MANAGER;
     }
 
+    /**
+     * @deprecated use Registries.ENTITY.registerCustomEntityDefinition() instead
+     */
     @Deprecated
     public void registerDefinition(EntityDefinition entityDefinition) {
         Registries.ENTITY.registerCustomEntityDefinition(entityDefinition);
