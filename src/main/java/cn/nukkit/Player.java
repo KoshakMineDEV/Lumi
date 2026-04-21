@@ -3586,6 +3586,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.forceDataPacket(pk, null);
             }
 
+            this.resetCraftingGridType();
+            this.removeAllWindows(true);
+
             this.connected = false;
             PlayerQuitEvent ev = null;
             if (this.username != null && !this.username.isEmpty()) {
@@ -3605,8 +3608,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             }
 
             this.hiddenPlayers.clear();
-
-            this.removeAllWindows(true);
 
             this.unloadChunks(false);
 
