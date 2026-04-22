@@ -12,7 +12,7 @@ public class BoneMealDispenseBehavior extends DefaultDispenseBehavior {
         Block target = block.getSide(face);
 
         if (item instanceof ItemBoneMeal) {
-            if (target instanceof BlockCrops || target instanceof BlockSapling || target instanceof BlockTallGrass || target instanceof BlockDoublePlant || target instanceof BlockMushroom) {
+            if (target instanceof BlockCrops || target instanceof BlockSapling || target instanceof BlockTallGrass || target instanceof BlockDoublePlant || target instanceof BlockMushroom || target instanceof BlockSugarcane || target instanceof BlockBamboo || target instanceof BlockBambooSapling) {
                 target.onActivate(item);
             } else {
                 this.success = false;
