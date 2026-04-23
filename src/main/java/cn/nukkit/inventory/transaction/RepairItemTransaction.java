@@ -16,6 +16,7 @@ import cn.nukkit.inventory.transaction.action.RepairItemAction;
 import cn.nukkit.inventory.transaction.action.SlotChangeAction;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentID;
 import cn.nukkit.network.protocol.LevelEventPacket;
 import cn.nukkit.network.protocol.types.NetworkInventoryAction;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -259,6 +260,8 @@ public class RepairItemTransaction extends InventoryTransaction {
                 if (hasIncompatibleEnchantments && (!hasCompatibleEnchantments || enchantments.size() != outputEnchantments.length)) {
                     return false;
                 }
+
+                if(enchantments.size() != outputEnchantments.length) return false;
 
                 for (Enchantment enchantment : outputEnchantments) {
                     if (enchantments.get(enchantment.getId()) != enchantment.getLevel()) {
