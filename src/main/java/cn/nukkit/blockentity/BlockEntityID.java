@@ -45,6 +45,8 @@ public interface BlockEntityID {
     String HANGING_SIGN = "HangingSign";
     String SCULK_SENSOR = "SculkSensor";
     String COMMAND_BLOCK = "CommandBlock";
+    String TRIAL_SPAWNER = "TrialSpawner";
+    String VAULT = "Vault";
 
     // Not a vanilla block entity
     String PERSISTENT_CONTAINER = "PersistentContainer";

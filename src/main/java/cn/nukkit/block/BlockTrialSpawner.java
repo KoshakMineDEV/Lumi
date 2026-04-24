@@ -1,8 +1,11 @@
 package cn.nukkit.block;
 
+import cn.nukkit.blockentity.BlockEntityID;
+import cn.nukkit.blockentity.impl.BlockEntityTrialSpawner;
 import cn.nukkit.item.Item;
+import org.jetbrains.annotations.NotNull;
 
-public class BlockTrialSpawner extends BlockSolidMeta {
+public class BlockTrialSpawner extends BlockSolidMeta implements BlockEntityHolder<BlockEntityTrialSpawner> {
     public BlockTrialSpawner() {
         this(0);
     }
@@ -34,5 +37,15 @@ public class BlockTrialSpawner extends BlockSolidMeta {
     @Override
     public Item[] getDrops(Item item) {
         return Item.EMPTY_ARRAY;
+    }
+
+    @Override
+    public @NotNull Class<? extends BlockEntityTrialSpawner> getBlockEntityClass() {
+        return BlockEntityTrialSpawner.class;
+    }
+
+    @Override
+    public @NotNull String getBlockEntityType() {
+        return BlockEntityID.TRIAL_SPAWNER;
     }
 }
