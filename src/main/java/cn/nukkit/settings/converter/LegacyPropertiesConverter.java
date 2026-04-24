@@ -1,10 +1,10 @@
 package cn.nukkit.settings.converter;
 
 import cn.nukkit.Difficulty;
+import cn.nukkit.level.antixray.AntiXrayMode;
 import cn.nukkit.settings.PlayerSettings;
 import cn.nukkit.settings.ServerSettings;
 import cn.nukkit.settings.WorldSettings;
-import cn.nukkit.settings.WorldSettings.AntiXraySettings.AntiXrayMode;
 import cn.nukkit.utils.Config;
 import lombok.extern.slf4j.Slf4j;
 

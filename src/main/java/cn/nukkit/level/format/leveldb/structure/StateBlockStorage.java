@@ -227,11 +227,12 @@ public class StateBlockStorage {
 
                     if (x != 0 && z != 0 && y != 0 && x != 15 && z != 15 && y != 15) {
                         var tmp = realOreToFakeMap.getOrDefault(id, Integer.MAX_VALUE);
-                        if (tmp != Integer.MAX_VALUE && canBeObfuscated(x, y, z)) {
+                        boolean canBeObfuscated = canBeObfuscated(x, y, z);
+                        if (tmp != Integer.MAX_VALUE && canBeObfuscated) {
                             id = tmp;
                         } else {
                             var tmp2 = fakeBlockMap.get(id);
-                            if (tmp2 != null && (nukkitRandom.nextInt() & XAndDenominator) == 0 && canBeObfuscated(x, y, z)) {
+                            if (tmp2 != null && (nukkitRandom.nextInt() & XAndDenominator) == 0 && canBeObfuscated) {
                                 id = tmp2.getInt(nukkitRandom.nextRange(0, tmp2.size() - 1));
                                 meta = 0;
                             }

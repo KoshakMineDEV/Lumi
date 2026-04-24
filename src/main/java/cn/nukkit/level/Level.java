@@ -452,7 +452,7 @@ public class Level implements ChunkManager, Metadatable {
                 default -> 16;
             });
             this.antiXraySystem.setPreDeObfuscate(antiXraySettings.preDeobfuscate());
-            this.antiXraySystem.reinitAntiXray();
+            this.antiXraySystem.initObfuscatedBlockList(antiXraySettings.obfuscatedBlocks());
         }
 
         if (this.server.getSettings().world().chunk().asyncChunks()) {
