@@ -11,7 +11,7 @@ public abstract class Zlib {
     private static ZlibProvider provider;
 
     static {
-        providers = new ZlibProvider[3];
+        providers = new ZlibProvider[4];
         providers[2] = new ZlibThreadLocal();
         provider = providers[2];
     }
@@ -36,6 +36,10 @@ public abstract class Zlib {
             case 2:
                 if (providers[providerIndex] == null)
                     providers[providerIndex] = new ZlibThreadLocal();
+                break;
+            case 3:
+                if (providers[providerIndex] == null)
+                    providers[providerIndex] = new LibDeflateThreadLocal();
                 break;
             default:
                 throw new UnsupportedOperationException("Invalid provider: " + providerIndex);
