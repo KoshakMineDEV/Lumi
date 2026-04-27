@@ -18,6 +18,9 @@ import javax.annotation.Nullable;
 
 import static cn.nukkit.blockentity.impl.BlockEntityCopperGolemStatue.CopperPose;
 
+/**
+ * @author keksdev
+ */
 public abstract class BlockCopperGolemStatueBase extends BlockTransparentMeta implements Oxidizable, Waxable, Faceable, BlockEntityHolder<BlockEntityCopperGolemStatue>, BlockPropertiesHelper {
     private static final BlockProperties PROPERTIES = new BlockProperties(VanillaProperties.CARDINAL_DIRECTION);
 

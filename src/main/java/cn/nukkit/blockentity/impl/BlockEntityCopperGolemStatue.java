@@ -6,7 +6,10 @@ import cn.nukkit.blockentity.BlockEntitySpawnable;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 
-
+/**
+ * @author Buddelbubi
+ * @see <a href="https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/level/block/entity/CopperBlockEntityTranslator.java#L35">NBT Info</a>
+ */
 public class BlockEntityCopperGolemStatue extends BlockEntitySpawnable {
     public BlockEntityCopperGolemStatue(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);

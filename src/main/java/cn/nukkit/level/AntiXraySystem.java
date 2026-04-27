@@ -3,6 +3,8 @@ package cn.nukkit.level;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
+import cn.nukkit.item.Item;
+import cn.nukkit.level.antixray.ObfuscatedBlock;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.UpdateBlockPacket;
@@ -153,34 +155,16 @@ public final class AntiXraySystem {
         level.sendBlocks(new Player[]{player}, vecList.toArray(Vector3[]::new), UpdateBlockPacket.FLAG_ALL);
     }
 
-    public void reinitAntiXray() {
+    public void initObfuscatedBlockList(List<ObfuscatedBlock> obfuscatedBlocks) {
         this.fakeOreToPutBlockIds.clear();
         this.realOreToReplacedBlockIds.clear();
 
-        this.addAntiXrayFakeBlock(BlockID.STONE, List.of(
-                BlockID.COAL_ORE,
-                BlockID.DIAMOND_ORE,
-                BlockID.EMERALD_ORE,
-                BlockID.GOLD_ORE,
-                BlockID.IRON_ORE,
-                BlockID.LAPIS_ORE,
-                BlockID.REDSTONE_ORE,
-                BlockID.COPPER_ORE
-        ));
-        this.addAntiXrayFakeBlock(BlockID.NETHERRACK, List.of(
-                BlockID.QUARTZ_ORE,
-                BlockID.NETHER_GOLD_ORE,
-                BlockID.ANCIENT_DEBRIS
-        ));
-        this.addAntiXrayFakeBlock(BlockID.DEEPSLATE, List.of(
-                BlockID.DEEPSLATE_COAL_ORE,
-                BlockID.DEEPSLATE_DIAMOND_ORE,
-                BlockID.DEEPSLATE_EMERALD_ORE,
-                BlockID.DEEPSLATE_GOLD_ORE,
-                BlockID.DEEPSLATE_IRON_ORE,
-                BlockID.DEEPSLATE_LAPIS_ORE,
-                BlockID.DEEPSLATE_REDSTONE_ORE,
-                BlockID.DEEPSLATE_COPPER_ORE
-        ));
+        for (ObfuscatedBlock obfuscatedBlock : obfuscatedBlocks) {
+            List<Integer> fakeBlocks = new ArrayList<>();
+            for (String block : obfuscatedBlock.getFakeBlocks()) {
+                fakeBlocks.add(Item.get(block).getBlock().getId());
+            }
+            this.addAntiXrayFakeBlock(Item.get(obfuscatedBlock.getOriginalBlock()).getBlock().getId(), fakeBlocks);
+        }
     }
 }

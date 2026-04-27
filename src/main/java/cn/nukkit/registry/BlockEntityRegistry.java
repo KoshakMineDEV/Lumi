@@ -66,6 +66,8 @@ public class BlockEntityRegistry implements IRegistry<String, BiFunction<FullChu
         register(BlockEntityID.HANGING_SIGN, BlockEntityHangingSign::new, BlockEntityHangingSign.class);
         register(BlockEntityID.SCULK_SENSOR, BlockEntitySculkSensor::new, BlockEntitySculkSensor.class);
         register(BlockEntityID.COMMAND_BLOCK, BlockEntityCommandBlock::new, BlockEntityCommandBlock.class);
+        register(BlockEntityID.VAULT, BlockEntityVault::new, BlockEntityVault.class);
+        register(BlockEntityID.TRIAL_SPAWNER, BlockEntityTrialSpawner::new, BlockEntityTrialSpawner.class);
 
         // Persistent container, not on vanilla
         register(BlockEntityID.PERSISTENT_CONTAINER, PersistentDataContainerBlockEntity::new, PersistentDataContainerBlockEntity.class);

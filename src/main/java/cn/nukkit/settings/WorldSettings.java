@@ -1,6 +1,8 @@
 package cn.nukkit.settings;
 
 import cn.nukkit.Difficulty;
+import cn.nukkit.level.antixray.AntiXrayMode;
+import cn.nukkit.level.antixray.ObfuscatedBlock;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
@@ -201,10 +203,7 @@ public class WorldSettings extends OkaeriConfig {
         @CustomKey("pre-deobfuscate")
         private boolean preDeobfuscate;
 
-        public enum AntiXrayMode {
-            LOW,
-            MEDIUM,
-            HIGH
-        }
+        @CustomKey("obfuscated-blocks")
+        private List<ObfuscatedBlock> obfuscatedBlocks = new ArrayList<>();
     }
 }

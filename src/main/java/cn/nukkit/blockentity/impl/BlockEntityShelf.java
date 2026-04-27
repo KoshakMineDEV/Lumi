@@ -10,6 +10,9 @@ import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 
+/**
+ * @author Buddelbubi
+ */
 public class BlockEntityShelf extends BlockEntitySpawnableContainer {
 
     public BlockEntityShelf(FullChunk chunk, CompoundTag nbt) {
