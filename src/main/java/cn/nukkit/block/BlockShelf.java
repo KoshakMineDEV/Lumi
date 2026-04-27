@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author buddelbubi
+ */
 public abstract class BlockShelf extends BlockTransparentMeta implements Faceable, BlockEntityHolder<BlockEntityShelf>, BlockPropertiesHelper {
     private static final BooleanBlockProperty POWERED_BIT = new BooleanBlockProperty("powered_bit", false);
     private static final IntBlockProperty POWERED_SHELF_TYPE = new IntBlockProperty("powered_shelf_type", false, 3, 0);
