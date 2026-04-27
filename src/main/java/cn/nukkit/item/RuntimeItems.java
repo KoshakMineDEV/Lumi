@@ -6,6 +6,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class RuntimeItems {
 
     private static final Map<String, Integer> legacyString2LegacyInt = new HashMap<>();
-    private final Map<Integer, Map<String, String>> downgradeMappings = new HashMap<>();
+    private final Map<Integer, Map<String, String>> downgradeMappings = new Object2ObjectOpenHashMap<>();
     private final Gson gson = new Gson();
 
     private static RuntimeItemMapping mapping589;

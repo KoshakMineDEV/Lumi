@@ -73,7 +73,7 @@ public class NetworkSettings extends OkaeriConfig {
     public static class CompressionSettings extends OkaeriConfig {
 
         @CustomKey("zlib-provider")
-        private int zlibProvider = 2;
+        private int zlibProvider = 3;
 
         @CustomKey("compression-level")
         private int compressionLevel = 5;
