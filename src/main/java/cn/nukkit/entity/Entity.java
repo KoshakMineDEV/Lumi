@@ -2040,7 +2040,7 @@ public abstract class Entity extends Location implements Metadatable {
         }
 
         // Entity entering a vehicle
-        EntityVehicleEnterEvent ev = new EntityVehicleEnterEvent(entity, (EntityVehicle) this);
+        EntityVehicleEnterEvent ev = new EntityVehicleEnterEvent(entity, this);
         server.getPluginManager().callEvent(ev);
         if (ev.isCancelled()) {
             return false;
