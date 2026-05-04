@@ -93,11 +93,6 @@ public class WorldSettings extends OkaeriConfig {
     private int leveldbCacheMb = 80;
 
     @Setter(value = AccessLevel.NONE)
-    @CustomKey("entity")
-    @Comment("World entities settings")
-    private EntitySettings entity = new EntitySettings();
-
-    @Setter(value = AccessLevel.NONE)
     @CustomKey("chunk")
     @Comment("World chunks settings")
     private ChunkSettings chunk = new ChunkSettings();
@@ -116,36 +111,6 @@ public class WorldSettings extends OkaeriConfig {
     @Comment("      pre-deobfuscate: false")
     @Setter(value = AccessLevel.NONE)
     private Map<String, AntiXraySettings> antiXray = new HashMap<>();
-
-    @Getter
-    @Setter
-    public static class EntitySettings extends OkaeriConfig {
-
-        @CustomKey("spawn-animals")
-        private boolean spawnAnimals = true;
-
-        @CustomKey("spawn-mobs")
-        private boolean spawnMobs = true;
-
-        @CustomKey("entity-auto-spawn-task")
-        private boolean entityAutoSpawnTask = true;
-
-        @CustomKey("entity-despawn-task")
-        private boolean entityDespawnTask = true;
-
-        @CustomKey("ticks-per-entity-spawns")
-        private int ticksPerEntitySpawns = 200;
-
-        @CustomKey("ticks-per-entity-despawns")
-        private int ticksPerEntityDespawns = 12000;
-
-        @CustomKey("mob-ai")
-        private boolean mobAi = true;
-
-        @CustomKey("worlds-entity-spawning-disabled")
-        @Comment("List of worlds where entity shouldn't spawn")
-        private List<String> worldsEntitySpawningDisabled = new ArrayList<>();
-    }
 
     @Getter
     @Setter
