@@ -7,7 +7,6 @@ import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockLiquid;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.passive.EntityBee;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
@@ -120,12 +119,7 @@ public class BlockEntityBeehive extends BlockEntity {
     }
 
     public Occupant addOccupant(Entity entity) {
-        if (entity instanceof EntityBee bee) {
-            boolean hasNectar = bee.getHasNectar();
-            return addOccupant(bee, hasNectar ? 2400 : 600, hasNectar, true);
-        } else {
-            return addOccupant(entity, 600, false, true);
-        }
+        return addOccupant(entity, 600, false, true);
     }
 
     public Occupant addOccupant(Entity entity, int ticksLeftToStay) {
@@ -273,21 +267,6 @@ public class BlockEntityBeehive extends BlockEntity {
             level.addSound(this, Sound.BLOCK_BEEHIVE_EXIT);
         }
 
-        EntityBee bee = entity instanceof EntityBee ? (EntityBee) entity : null;
-
-        if (occupant.getHasNectar() && occupant.getTicksLeftToStay() <= 0) {
-            if (!isHoneyFull()) {
-                setHoneyLevel(getHoneyLevel() + 1);
-            }
-            if (bee != null) {
-                bee.nectarDelivered(this);
-            }
-        } else {
-            if (bee != null) {
-                bee.leftBeehive(this);
-            }
-        }
-
         if (entity != null) {
             entity.spawnToAll();
         }
@@ -301,9 +280,6 @@ public class BlockEntityBeehive extends BlockEntity {
             for (Occupant occupant : getOccupants()) {
                 Entity entity = spawnOccupant(occupant, null);
                 if (level == null || level.getBlock(down()).getId() != BlockID.CAMPFIRE_BLOCK) {
-                    if (entity instanceof EntityBee) {
-                        ((EntityBee) entity).setAngry(true);
-                    }
                 }
             }
         }
@@ -320,9 +296,6 @@ public class BlockEntityBeehive extends BlockEntity {
             }
             for (Occupant occupant : getOccupants()) {
                 Entity entity = spawnOccupant(occupant, validFaces);
-                if (entity instanceof EntityBee bee) {
-                    bee.setAngry(true);
-                }
             }
         }
     }

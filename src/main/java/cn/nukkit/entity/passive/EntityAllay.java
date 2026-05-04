@@ -1,12 +1,13 @@
 package cn.nukkit.entity.passive;
 
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 
 /**
  * @author LT_Name
  */
-public class EntityAllay extends EntityFlyingAnimal {
+public class EntityAllay extends EntityCreature {
 
     public static final int NETWORK_ID = 134;
 
@@ -32,12 +33,6 @@ public class EntityAllay extends EntityFlyingAnimal {
     @Override
     public void initEntity() {
         this.setMaxHealth(20);
-
         super.initEntity();
-    }
-
-    @Override
-    public int getKillExperience() {
-        return 0;
     }
 }

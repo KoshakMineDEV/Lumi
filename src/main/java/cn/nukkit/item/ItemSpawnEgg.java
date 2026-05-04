@@ -5,7 +5,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockMobSpawner;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.impl.BlockEntitySpawner;
-import cn.nukkit.entity.BaseEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.mob.EntityZombie;
 import cn.nukkit.entity.passive.EntityChicken;
@@ -129,16 +128,6 @@ public class ItemSpawnEgg extends Item {
             entity.spawnToAll();
 
             level.getVibrationManager().callVibrationEvent(new VibrationEvent(player, entity.clone(), VanillaVibrationTypes.ENTITY_PLACE));
-
-            if (Utils.rand(1, 20) == 1 &&
-                    (entity instanceof EntityCow ||
-                            entity instanceof EntityChicken ||
-                            entity instanceof EntityPig ||
-                            entity instanceof EntitySheep ||
-                            entity instanceof EntityZombie)) {
-
-                ((BaseEntity) entity).setBaby(true);
-            }
 
             return true;
         }

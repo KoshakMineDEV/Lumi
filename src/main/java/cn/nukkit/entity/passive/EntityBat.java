@@ -1,10 +1,10 @@
 package cn.nukkit.entity.passive;
 
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 
-public class EntityBat extends EntityFlyingAnimal {
-
+public class EntityBat extends EntityCreature {
     public static final int NETWORK_ID = 19;
 
     public EntityBat(FullChunk chunk, CompoundTag nbt) {
@@ -29,12 +29,6 @@ public class EntityBat extends EntityFlyingAnimal {
     @Override
     public void initEntity() {
         this.setMaxHealth(6);
-
         super.initEntity();
-    }
-
-    @Override
-    public int getKillExperience() {
-        return 0;
     }
 }

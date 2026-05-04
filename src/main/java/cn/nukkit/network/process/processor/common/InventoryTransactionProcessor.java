@@ -297,7 +297,8 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
                     if (inv instanceof TradeInventory tradeInventory) {
                         EntityVillager ent = tradeInventory.getHolder();
                         ent.namedTag.putBoolean("traded", true);
-                        for (Tag tag : ent.getRecipes().getAll()) {
+                        //TODO: uncomment this
+                        /*for (Tag tag : ent.getRecipes().getAll()) {
                             CompoundTag ta = (CompoundTag) tag;
                             if (ta.getCompound("buyA").getShort("id") == tradeInventory.getItem(0).getId()) {
                                 int tradeXP = ta.getInt("traderExp");
@@ -305,7 +306,7 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
                                 ent.addExperience(tradeXP);
                                 level.addSound(player, Sound.RANDOM_ORB, 0, 3f, player);
                             }
-                        }
+                        }*/
                     }
                 }
 

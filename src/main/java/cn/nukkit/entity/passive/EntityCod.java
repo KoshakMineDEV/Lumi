@@ -1,22 +1,18 @@
 package cn.nukkit.entity.passive;
 
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
 
-public class EntityCod extends EntityFish {
+public class EntityCod extends EntityCreature {
 
     public static final int NETWORK_ID = 112;
 
     public EntityCod(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-    }
-
-    @Override
-    protected int getBucketMeta() {
-        return 2;
     }
 
     @Override
@@ -37,7 +33,6 @@ public class EntityCod extends EntityFish {
     @Override
     public void initEntity() {
         this.setMaxHealth(3);
-
         super.initEntity();
     }
 

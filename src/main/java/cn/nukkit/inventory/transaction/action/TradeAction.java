@@ -23,7 +23,8 @@ public class TradeAction extends InventoryAction {
 		if (type == NetworkInventoryAction.SOURCE_TYPE_TRADING_INPUT_1) {
 			boolean result1 = false;
 			boolean result2 = false;
-			for (var tag : villager.getRecipes().getAll()) {
+			//TODO: uncomment this
+			/*for (var tag : villager.getRecipes().getAll()) {
 				CompoundTag cmp = (CompoundTag) tag;
 				if (cmp.containsCompound("buyA")) {
 					CompoundTag buyA = cmp.getCompound("buyA");
@@ -48,11 +49,12 @@ public class TradeAction extends InventoryAction {
 				if (result1 || result2) {
 					return true;
 				}
-			}
+			}*/
 			return false;
 		} else if (type == NetworkInventoryAction.SOURCE_TYPE_TRADING_OUTPUT) {
 			var result = false;
-			for (var tag : villager.getRecipes().getAll()) {
+			//TODO: uncomment this
+			/*for (var tag : villager.getRecipes().getAll()) {
 				CompoundTag cmp = (CompoundTag) tag;
 				if (cmp.contains("sell")) {
 					var sell = cmp.getCompound("sell");
@@ -67,7 +69,7 @@ public class TradeAction extends InventoryAction {
 				if (result) {
 					return true;
 				}
-			}
+			}*/
 			return false;
 		}
 		return false;

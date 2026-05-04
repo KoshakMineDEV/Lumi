@@ -1,16 +1,15 @@
 package cn.nukkit.entity.passive;
 
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.ItemDye;
 import cn.nukkit.item.ItemInkSac;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.EntityEventPacket;
-import cn.nukkit.item.data.DyeColor;
 import cn.nukkit.utils.Utils;
 
-public class EntitySquid extends EntityWaterAnimal {
+public class EntitySquid extends EntityCreature {
 
     public static final int NETWORK_ID = 17;
 
@@ -25,24 +24,17 @@ public class EntitySquid extends EntityWaterAnimal {
 
     @Override
     public float getWidth() {
-        if (this.isBaby()) {
-            return 0.475f;
-        }
         return 0.95f;
     }
 
     @Override
     public float getHeight() {
-        if (this.isBaby()) {
-            return 0.475f;
-        }
         return 0.95f;
     }
 
     @Override
     public void initEntity() {
         this.setMaxHealth(10);
-
         super.initEntity();
     }
 
@@ -51,11 +43,6 @@ public class EntitySquid extends EntityWaterAnimal {
         ItemInkSac item = new ItemInkSac();
         item.setCount(Utils.rand(1, 3));
         return new Item[]{item};
-    }
-
-    @Override
-    public int getKillExperience() {
-        return Utils.rand(1, 3);
     }
 
     @Override

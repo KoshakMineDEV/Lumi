@@ -26,12 +26,9 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntitySkeleton extends EntityWalkingMob implements EntitySmite {
+public class EntitySkeleton extends EntityCreature {
 
     public static final int NETWORK_ID = 34;
-
-    private boolean angryFlagSet;
-    private boolean hasPumpkin;
 
     public EntitySkeleton(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -40,12 +37,7 @@ public class EntitySkeleton extends EntityWalkingMob implements EntitySmite {
     @Override
     public void initEntity() {
         this.setMaxHealth(20);
-
         super.initEntity();
-
-        if (java.time.LocalDate.now().toString().contains("-10-31") && Utils.rand(0, 10) < 2) {
-            this.hasPumpkin = true;
-        }
     }
 
     @Override
@@ -69,57 +61,6 @@ public class EntitySkeleton extends EntityWalkingMob implements EntitySmite {
     }
 
     @Override
-    public void attackEntity(Entity player) {
-        if (this.attackDelay > 23 && Utils.rand(1, 32) < 4 && this.distanceSquared(player) <= 55) {
-            this.attackDelay = 0;
-
-            for (Block block : this.getLineOfSight(7, 7)) {
-                if (!block.canPassThrough()) {
-                    return;
-                }
-            }
-
-            double f = 1.3;
-            double yaw = this.yaw;
-            double pitch = this.pitch;
-            double yawR = FastMath.toRadians(yaw);
-            double pitchR = FastMath.toRadians(pitch);
-            Location pos = new Location(this.x - Math.sin(yawR) * Math.cos(pitchR) * 0.5, this.y + this.getHeight() - 0.18,
-                    this.z + Math.cos(yawR) * Math.cos(pitchR) * 0.5, yaw, pitch, this.level);
-            if (this.getLevel().getBlockIdAt(pos.getFloorX(), pos.getFloorY(), pos.getFloorZ()) == Block.AIR) {
-                Entity k = Entity.createEntity("Arrow", pos, this);
-                if (!(k instanceof EntityArrow arrow)) {
-                    return;
-                }
-
-                setProjectileMotion(arrow, pitch, yawR, pitchR, f);
-
-                EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(Item.ARROW, 0, 1), arrow, f);
-                this.server.getPluginManager().callEvent(ev);
-
-                EntityProjectile projectile = ev.getProjectile();
-                if (ev.isCancelled()) {
-                    if (this.stayTime > 0 || this.distance(this.target) <= ((this.getWidth()) / 2 + 0.05) * nearbyDistanceMultiplier()) {
-                        projectile.close();
-                    }
-                } else {
-                    ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
-                    this.server.getPluginManager().callEvent(launch);
-                    if (launch.isCancelled()) {
-                        if (this.stayTime > 0 || this.distance(this.target) <= ((this.getWidth()) / 2 + 0.05) * nearbyDistanceMultiplier()) {
-                            projectile.close();
-                        }
-                    } else {
-                        projectile.spawnToAll();
-                        ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
-                        this.level.addLevelSoundEvent(this, LevelSoundEventPacket.SOUND_BOW);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
     public void spawnTo(Player player) {
         super.spawnTo(player);
 
@@ -128,28 +69,6 @@ public class EntitySkeleton extends EntityWalkingMob implements EntitySmite {
         pk.item = new ItemBow();
         pk.hotbarSlot = 0;
         player.dataPacket(pk);
-
-        if (this.hasPumpkin) {
-            MobArmorEquipmentPacket pk2 = new MobArmorEquipmentPacket();
-            pk2.eid = this.getId();
-            pk2.slots[0] = Item.get(Item.PUMPKIN);
-            player.dataPacket(pk2);
-        }
-    }
-
-    @Override
-    public boolean isDayBurning() {
-        return true;
-    }
-
-    @Override
-    public boolean entityBaseTick(int tickDiff) {
-        if (this.server.getDifficulty() == Difficulty.PEACEFUL) {
-            this.close();
-            return true;
-        }
-
-        return super.entityBaseTick(tickDiff);
     }
 
     @Override
@@ -160,33 +79,5 @@ public class EntitySkeleton extends EntityWalkingMob implements EntitySmite {
         drops.add(Item.get(Item.ARROW, 0, Utils.rand(0, 2)));
 
         return drops.toArray(Item.EMPTY_ARRAY);
-    }
-
-    @Override
-    public int getKillExperience() {
-        return 5;
-    }
-
-    @Override
-    public int nearbyDistanceMultiplier() {
-        return 10;
-    }
-
-    @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        boolean hasTarget = super.targetOption(creature, distance);
-        if (hasTarget) {
-            if (!this.angryFlagSet && creature != null) {
-                this.setDataProperty(new LongEntityData(DATA_TARGET_EID, creature.getId()));
-                this.angryFlagSet = true;
-            }
-        } else {
-            if (this.angryFlagSet) {
-                this.setDataProperty(new LongEntityData(DATA_TARGET_EID, 0));
-                this.angryFlagSet = false;
-                this.stayTime = 100;
-            }
-        }
-        return hasTarget;
     }
 }

@@ -1,28 +1,19 @@
 package cn.nukkit.entity.mob;
 
 import cn.nukkit.Player;
-import cn.nukkit.block.Block;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
-import cn.nukkit.entity.data.ByteEntityData;
-import cn.nukkit.entity.projectile.EntityGhastFireBall;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.event.entity.ProjectileLaunchEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemNamespaceId;
-import cn.nukkit.level.Location;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.LevelEventPacket;
 import cn.nukkit.utils.Utils;
-import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityGhast extends EntityFlyingMob {
+public class EntityGhast extends EntityCreature {
 
     public static final int NETWORK_ID = 41;
 
@@ -48,11 +39,6 @@ public class EntityGhast extends EntityFlyingMob {
     }
 
     @Override
-    public double getSpeed() {
-        return 1.2;
-    }
-
-    @Override
     public void initEntity() {
         this.setMaxHealth(10);
 
@@ -60,62 +46,6 @@ public class EntityGhast extends EntityFlyingMob {
 
         this.fireProof = true;
         this.setDataFlag(DATA_FLAGS, DATA_FLAG_FIRE_IMMUNE, true);
-    }
-
-    @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        if (creature instanceof Player player) {
-            return !player.closed && player.spawned && player.isAlive() && (player.isSurvival() || player.isAdventure()) && distance <= 4096;
-        }
-        return false;
-    }
-
-    @Override
-    public void attackEntity(Entity player) {
-        if (this.distanceSquared(player) <= (this.attacked ? 4096 : 784)) { // 28 blocks or 64 blocks if attacked)
-            if (Utils.rand()) {
-                this.attackDelay--;
-                return;
-            }
-            if (this.attackDelay == 50) {
-                this.setDataProperty(new ByteEntityData(DATA_CHARGE_AMOUNT, 0x1));
-                this.setDataFlag(DATA_FLAGS, DATA_FLAG_CHARGED, true);
-                this.level.addLevelEvent(this, LevelEventPacket.EVENT_SOUND_GHAST);
-            }
-            if (this.attackDelay > 60) {
-                this.attackDelay = 0;
-
-                double f = 1.01;
-                double yaw = this.yaw + Utils.rand(-4.0, 4.0);
-                double pitch = this.pitch + Utils.rand(-4.0, 4.0);
-                Location pos = new Location(this.x - Math.sin(FastMath.toRadians(yaw)) * Math.cos(FastMath.toRadians(pitch)) * 0.5, this.y + this.getEyeHeight(),
-                        this.z + Math.cos(FastMath.toRadians(yaw)) * Math.cos(FastMath.toRadians(pitch)) * 0.5, yaw, pitch, this.level);
-
-                // 暂时不要遍历64格，以免卡顿
-                for (Block block : this.getLineOfSight(28, 28)) {
-                    if (!block.canPassThrough()) {
-                        return;
-                    }
-                }
-
-                this.setDataProperty(new ByteEntityData(DATA_CHARGE_AMOUNT, 0x0));
-                this.setDataFlag(DATA_FLAGS, DATA_FLAG_CHARGED, false);
-
-                EntityGhastFireBall fireball = (EntityGhastFireBall) Entity.createEntity("GhastFireBall", pos, this);
-                fireball.setExplode(true);
-                fireball.setMotion(new Vector3(-Math.sin(FastMath.toRadians(yaw)) * Math.cos(FastMath.toRadians(pitch)) * f * f, -Math.sin(FastMath.toRadians(pitch)) * f * f,
-                        Math.cos(FastMath.toRadians(yaw)) * Math.cos(FastMath.toRadians(pitch)) * f * f));
-
-                ProjectileLaunchEvent launch = new ProjectileLaunchEvent(fireball);
-                this.server.getPluginManager().callEvent(launch);
-                if (launch.isCancelled()) {
-                    fireball.close();
-                } else {
-                    fireball.spawnToAll();
-                    this.level.addLevelEvent(this, LevelEventPacket.EVENT_SOUND_GHAST_SHOOT);
-                }
-            }
-        }
     }
 
     @Override
@@ -139,15 +69,5 @@ public class EntityGhast extends EntityFlyingMob {
         drops.add(Item.get(Item.GHAST_TEAR, 0, Utils.rand(0, 1)));
 
         return drops.toArray(Item.EMPTY_ARRAY);
-    }
-
-    @Override
-    public int getKillExperience() {
-        return 5;
-    }
-
-    @Override
-    public int nearbyDistanceMultiplier() {
-        return 1000; // don't follow
     }
 }

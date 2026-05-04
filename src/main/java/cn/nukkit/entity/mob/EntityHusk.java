@@ -1,21 +1,12 @@
 package cn.nukkit.entity.mob;
 
-import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntitySmite;
-import cn.nukkit.entity.effect.Effect;
-import cn.nukkit.entity.effect.EffectType;
-import cn.nukkit.event.entity.EntityDamageByEntityEvent;
-import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.event.entity.EntityEffectUpdateEvent;
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
 
-import java.util.HashMap;
-
-public class EntityHusk extends EntityWalkingMob implements EntitySmite {
+public class EntityHusk extends EntityCreature {
 
     public static final int NETWORK_ID = 47;
 
@@ -39,11 +30,6 @@ public class EntityHusk extends EntityWalkingMob implements EntitySmite {
     }
 
     @Override
-    public double getSpeed() {
-        return this.isBaby() ? 1.6 : 1.1;
-    }
-
-    @Override
     public boolean isUndead() {
         return true;
     }
@@ -51,59 +37,11 @@ public class EntityHusk extends EntityWalkingMob implements EntitySmite {
     @Override
     protected void initEntity() {
         this.setMaxHealth(20);
-
         super.initEntity();
-
-        this.setDamage(new int[]{0, 3, 4, 6});
-    }
-
-    public void setHealth(int health) {
-        super.setHealth(health);
-
-        if (this.isAlive()) {
-            if (15 < this.getHealth()) {
-                this.setDamage(new int[]{0, 2, 3, 4});
-            } else if (10 < this.getHealth()) {
-                this.setDamage(new int[]{0, 3, 4, 6});
-            } else if (5 < this.getHealth()) {
-                this.setDamage(new int[]{0, 3, 5, 7});
-            } else {
-                this.setDamage(new int[]{0, 4, 6, 9});
-            }
-        }
-    }
-
-    @Override
-    public void attackEntity(Entity player) {
-        if (this.attackDelay > 23 && player.distanceSquared(this) <= 1) {
-            this.attackDelay = 0;
-
-            HashMap<EntityDamageEvent.DamageModifier, Float> damage = new HashMap<>();
-            damage.put(EntityDamageEvent.DamageModifier.BASE, (float) this.getDamage());
-
-            if (player instanceof Player) {
-                float points = 0;
-                for (Item i : ((Player) player).getInventory().getArmorContents()) {
-                    points += this.getArmorPoints(i.getId());
-                }
-
-                damage.put(EntityDamageEvent.DamageModifier.ARMOR,
-                        (float) (damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0f) - Math.floor(damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1f) * points * 0.04)));
-            }
-            if (player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage))) {
-                player.addEffect(Effect.get(EffectType.HUNGER).setDuration(140), EntityEffectUpdateEvent.Cause.ATTACK);
-            }
-            this.playAttack();
-        }
     }
 
     @Override
     public Item[] getDrops() {
-        return this.isBaby() ? Item.EMPTY_ARRAY : new Item[]{Item.get(Item.ROTTEN_FLESH, 0, Utils.rand(0, 2))};
-    }
-
-    @Override
-    public int getKillExperience() {
-        return this.isBaby() ? 0 : 5;
+        return new Item[]{Item.get(Item.ROTTEN_FLESH, 0, Utils.rand(0, 2))};
     }
 }

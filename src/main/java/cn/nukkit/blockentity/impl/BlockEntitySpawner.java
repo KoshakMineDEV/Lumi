@@ -5,8 +5,8 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
-import cn.nukkit.entity.BaseEntity;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.event.entity.CreatureSpawnEvent;
 import cn.nukkit.level.Position;
@@ -14,7 +14,6 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ShortTag;
 import cn.nukkit.registry.Registries;
-import cn.nukkit.utils.Identifier;
 import cn.nukkit.utils.Utils;
 
 public class BlockEntitySpawner extends BlockEntitySpawnable {
@@ -125,7 +124,7 @@ public class BlockEntitySpawner extends BlockEntitySpawnable {
                     if (entity.distanceSquared(this) <= this.requiredPlayerRange2) {
                         playerInRange = true;
                     }
-                } else if (entity instanceof BaseEntity) {
+                } else if (entity instanceof EntityCreature) {
                     if (entity.distanceSquared(this) <= this.requiredPlayerRange2) {
                         nearbyEntities++;
                     }

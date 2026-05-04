@@ -1,27 +1,16 @@
 package cn.nukkit.entity.mob;
 
-import cn.nukkit.Player;
-import cn.nukkit.block.Block;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
-import cn.nukkit.entity.effect.EffectType;
-import cn.nukkit.entity.effect.PotionType;
-import cn.nukkit.entity.item.EntityPotionSplash;
-import cn.nukkit.event.entity.ProjectileLaunchEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemNamespaceId;
-import cn.nukkit.level.Location;
-import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
-import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityWitch extends EntityWalkingMob {
+public class EntityWitch extends EntityCreature {
 
     public static final int NETWORK_ID = 45;
 
@@ -47,66 +36,7 @@ public class EntityWitch extends EntityWalkingMob {
     @Override
     protected void initEntity() {
         this.setMaxHealth(26);
-
         super.initEntity();
-    }
-
-    @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        if (creature instanceof Player player) {
-            return !player.closed && player.spawned && player.isAlive() && (player.isSurvival() || player.isAdventure()) && distance <= 256;
-        }
-        return creature.isAlive() && !creature.closed && distance <= 256;
-    }
-
-    @Override
-    public void attackEntity(Entity player) {
-        if (this.attackDelay > 60 && Utils.rand(1, 3) == 2 && this.distanceSquared(player) <= 60) {
-            this.attackDelay = 0;
-            if (player.isAlive() && !player.closed) {
-                for (Block block : this.getLineOfSight(7, 7)) {
-                    if (!block.canPassThrough()) {
-                        return;
-                    }
-                }
-
-                double f = 1;
-                double yaw = this.yaw + Utils.rand(-4.0, 4.0);
-                double yawR = FastMath.toRadians(yaw);
-                double pitchR = FastMath.toRadians(pitch);
-                Location pos = new Location(this.x - Math.sin(yawR) * Math.cos(pitchR) * 0.5, this.y + this.getEyeHeight(),
-                        this.z + Math.cos(yawR) * Math.cos(pitchR) * 0.5, yaw, pitch, this.level);
-
-                if (this.getLevel().getBlockIdAt(pos.getFloorX(), pos.getFloorY(), pos.getFloorZ()) != Block.AIR) {
-                    return;
-                }
-
-                EntityPotionSplash thrownPotion = (EntityPotionSplash) Entity.createEntity("ThrownPotion", pos, this);
-
-                double distance = this.distanceSquared(player);
-
-                if (!player.hasEffect(EffectType.SLOWNESS) && distance <= 64) {
-                    thrownPotion.potionId = PotionType.SLOWNESS.id();
-                } else if (player.getHealth() >= 8) {
-                    thrownPotion.potionId = PotionType.POISON.id();
-                } else if (!player.hasEffect(EffectType.WEAKNESS) && Utils.rand(0, 4) == 0 && distance <= 9) {
-                    thrownPotion.potionId = PotionType.WEAKNESS.id();
-                } else {
-                    thrownPotion.potionId = PotionType.HARMING.id();
-                }
-
-                thrownPotion.setMotion(new Vector3(-Math.sin(yawR) * Math.cos(pitchR) * f * f, -Math.sin(pitchR) * f * f,
-                        Math.cos(yawR) * Math.cos(pitchR) * f * f));
-                ProjectileLaunchEvent launch = new ProjectileLaunchEvent(thrownPotion);
-                this.server.getPluginManager().callEvent(launch);
-                if (launch.isCancelled()) {
-                    thrownPotion.close();
-                } else {
-                    thrownPotion.spawnToAll();
-                    this.level.addSoundToViewers(this, Sound.MOB_WITCH_THROW);
-                }
-            }
-        }
     }
 
     @Override
@@ -141,15 +71,5 @@ public class EntityWitch extends EntityWalkingMob {
         }
 
         return drops.toArray(Item.EMPTY_ARRAY);
-    }
-
-    @Override
-    public int getKillExperience() {
-        return 5;
-    }
-
-    @Override
-    public int nearbyDistanceMultiplier() {
-        return 8;
     }
 }

@@ -1,6 +1,5 @@
 package cn.nukkit.entity.passive;
 
-import cn.nukkit.Player;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
@@ -9,9 +8,8 @@ import cn.nukkit.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-public class EntityMule extends EntityHorseBase {
+public class EntityMule extends EntityCreature {
 
     public static final int NETWORK_ID = 25;
 
@@ -26,17 +24,11 @@ public class EntityMule extends EntityHorseBase {
 
     @Override
     public float getWidth() {
-        if (this.isBaby()) {
-            return 0.6982f;
-        }
         return 1.3965f;
     }
 
     @Override
     public float getHeight() {
-        if (this.isBaby()) {
-            return 0.8f;
-        }
         return 1.6f;
     }
 
@@ -48,27 +40,9 @@ public class EntityMule extends EntityHorseBase {
     }
 
     @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        boolean canTarget = super.targetOption(creature, distance);
-
-        if (canTarget && (creature instanceof Player player)) {
-            return player.spawned && player.isAlive() && !player.closed &&
-                    this.isFeedItem(Objects.requireNonNullElse(player.getInventory(), EMPTY_INVENTORY).getItemInHandFast()) && distance <= 49;
-        }
-        return false;
-    }
-
-    @Override
     public Item[] getDrops() {
         List<Item> drops = new ArrayList<>();
-
-        if (!this.isBaby()) {
-            drops.add(Item.get(Item.LEATHER, 0, Utils.rand(0, 2)));
-        }
-
-        if (this.isSaddled()) {
-            drops.add(Item.get(Item.SADDLE, 0, 1));
-        }
+        drops.add(Item.get(Item.LEATHER, 0, Utils.rand(0, 2)));
 
         return drops.toArray(Item.EMPTY_ARRAY);
     }

@@ -1512,31 +1512,6 @@ public abstract class Entity extends Location implements Metadatable {
                     enchantment.doAttack(((EntityDamageByEntityEvent) source).getDamager(), this);
                 }
             }
-
-            // Wolf targets
-            if (source.getEntity() instanceof Player) {
-                for (Entity entity : source.getEntity().getLevel().getNearbyEntities(source.getEntity().getBoundingBox().grow(17, 17, 17), source.getEntity())) {
-                    if (entity instanceof EntityWolf) {
-                        if (((EntityWolf) entity).hasOwner()) {
-                            ((EntityWolf) entity).isAngryTo = ((EntityDamageByEntityEvent) source).getDamager().getId();
-                            ((EntityWolf) entity).setAngry(true);
-                        }
-                    }
-                }
-            } else if (((EntityDamageByEntityEvent) source).getDamager() instanceof Player) {
-                for (Entity entity : ((EntityDamageByEntityEvent) source).getDamager().getLevel().getNearbyEntities(((EntityDamageByEntityEvent) source).getDamager().getBoundingBox().grow(17, 17, 17), ((EntityDamageByEntityEvent) source).getDamager())) {
-                    if (entity.getId() != source.getEntity().getId()) {
-                        if (entity instanceof EntityWolf) {
-                            if (((EntityWolf) entity).hasOwner()) {
-                                if (((EntityWolf) entity).getOwner().equals(((EntityDamageByEntityEvent) source).getDamager())) {
-                                    ((EntityWolf) entity).isAngryTo = source.getEntity().getId();
-                                    ((EntityWolf) entity).setAngry(true);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         if (this.absorption > 0) { // Damage Absorption
@@ -1877,7 +1852,7 @@ public abstract class Entity extends Location implements Metadatable {
             }
         }
 
-        if (this.inPortalTicks == 80 && server.getSettings().world().enableNether() && this instanceof BaseEntity) {
+        if (this.inPortalTicks == 80 && server.getSettings().world().enableNether()) {
             EntityPortalEnterEvent ev = new EntityPortalEnterEvent(this, EntityPortalEnterEvent.PortalType.NETHER);
             this.server.getPluginManager().callEvent(ev);
 
@@ -2206,7 +2181,7 @@ public abstract class Entity extends Location implements Metadatable {
 
             if (fallDistance > 0) {
                 // check if we fell into at least 1 block of water
-                if (this instanceof EntityLiving && !(this.getLevelBlock() instanceof BlockWater) && !(this instanceof EntityFlying)) {
+                if (this instanceof EntityLiving && !(this.getLevelBlock() instanceof BlockWater)) {
                     this.fall(fallDistance);
                 }
                 this.resetFallDistance();

@@ -273,9 +273,6 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
         super.kill();
 
         EntityDeathEvent event = new EntityDeathEvent(this, this.getDrops(), 0);
-        if (event.getEntity() instanceof BaseEntity baseEntity) {
-            event.setExperience(baseEntity.getKillExperience());
-        }
         event.call();
 
         this.checkTameableEntityDeath();
@@ -345,7 +342,7 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
 
             boolean inBubbleColumn = this.isInsideBubbleColumn();
             if (inWater && !inBubbleColumn && !this.hasEffect(EffectType.WATER_BREATHING) && !this.hasEffect(EffectType.CONDUIT_POWER)) {
-                if (this instanceof EntitySwimming || this.isDrowned || this instanceof EntitySkeletonHorse || this instanceof EntityIronGolem || this instanceof Player player && (player.isCreative() || player.isSpectator())) {
+                if (this.isDrowned || this instanceof EntitySkeletonHorse || this instanceof EntityIronGolem || this instanceof Player player && (player.isCreative() || player.isSpectator())) {
                     this.setAirTicks(400);
                 } else {
                     if (turtleTicks == 0) {
@@ -363,26 +360,14 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
                     }
                 }
             } else {
-                if (this instanceof EntitySwimming) {
-                    hasUpdate = true;
-                    int airTicks = this.getAirTicks() - tickDiff;
-
-                    if (airTicks <= -20) {
-                        airTicks = 0;
-                        this.attack(new EntityDamageEvent(this, DamageCause.SUFFOCATION, 2));
-                    }
-
-                    this.setAirTicks(airTicks);
-                } else {
-                    int airTicks = getAirTicks();
-                    if (airTicks < 400) {
-                        setAirTicks(Math.min(400, airTicks + tickDiff * 5));
-                    }
+                int airTicks = getAirTicks();
+                if (airTicks < 400) {
+                    setAirTicks(Math.min(400, airTicks + tickDiff * 5));
                 }
             }
 
             // Check collisions with blocks
-            if ((this.isPlayer || this instanceof BaseEntity) && this.riding == null && this.age % (this instanceof Player ? 2 : 10) == 0) {
+            if (this.isPlayer && this.riding == null && this.age % (this instanceof Player ? 2 : 10) == 0) {
                 int floorY = NukkitMath.floorDouble(this.y - 0.25);
                 if (floorY != getFloorY()) {
                     Block block = this.level.getBlock(this.chunk, getFloorX(), floorY, getFloorZ(), false);
@@ -617,9 +602,6 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
                 if (damageEntity instanceof Player) {
                     deathMessage = new TranslationContainer("death.attack.player", killedEntity, damageEntity.getName());
                 } else {
-                    if (damageEntity instanceof EntityWolf) {
-                        ((EntityWolf) damageEntity).setAngry(false);
-                    }
                     deathMessage = new TranslationContainer("death.attack.mob", killedEntity, damageEntity.getName());
                 }
             }

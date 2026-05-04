@@ -2,11 +2,7 @@ package cn.nukkit.entity.mob;
 
 import cn.nukkit.Difficulty;
 import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
-import cn.nukkit.entity.EntitySmite;
-import cn.nukkit.event.entity.EntityDamageByEntityEvent;
-import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemSwordGold;
 import cn.nukkit.level.format.FullChunk;
@@ -15,10 +11,9 @@ import cn.nukkit.network.protocol.MobEquipmentPacket;
 import cn.nukkit.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-public class EntityZombiePigman extends EntityWalkingMob implements EntitySmite {
+public class EntityZombiePigman extends EntityCreature {
 
     public static final int NETWORK_ID = 36;
 
@@ -44,11 +39,6 @@ public class EntityZombiePigman extends EntityWalkingMob implements EntitySmite 
     }
 
     @Override
-    public double getSpeed() {
-        return this.isBaby() ? 1.6 : this.isAngry() ? 1.15 : 1.1;
-    }
-
-    @Override
     public boolean isUndead() {
         return true;
     }
@@ -64,72 +54,6 @@ public class EntityZombiePigman extends EntityWalkingMob implements EntitySmite 
         }
 
         this.fireProof = true;
-        this.setDamage(new int[] { 0, 5, 9, 13 });
-    }
-
-    @Override
-    public void saveNBT() {
-        super.saveNBT();
-        this.namedTag.putInt("Angry", this.angry);
-    }
-
-    @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        return this.isAngry() && super.targetOption(creature, distance);
-    }
-
-    @Override
-    public void attackEntity(Entity player) {
-        if (this.attackDelay > 23 && this.distanceSquared(player) < 1.44) {
-            this.attackDelay = 0;
-            HashMap<EntityDamageEvent.DamageModifier, Float> damage = new HashMap<>();
-            damage.put(EntityDamageEvent.DamageModifier.BASE, (float) this.getDamage());
-
-            if (player instanceof Player) {
-                float points = 0;
-                for (Item i : ((Player) player).getInventory().getArmorContents()) {
-                    points += this.getArmorPoints(i.getId());
-                }
-
-                damage.put(EntityDamageEvent.DamageModifier.ARMOR,
-                        (float) (damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0f) - Math.floor(damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1f) * points * 0.04)));
-            }
-            player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage));
-            this.playAttack();
-        }
-    }
-
-    public boolean isAngry() {
-        return this.angry > 0;
-    }
-
-    public void setAngry(int val) {
-        this.setAngry(val, false);
-    }
-
-    public void setAngry(int val, boolean others) {
-        this.angry = val;
-
-        if (others && val > 0) {
-            for (Entity creature : this.level.getEntities()) {
-                if (creature instanceof EntityZombiePigman entityZombiePigman && !entityZombiePigman.isAngry() && this.distanceSquared(creature) <= 400) { // 20 blocks
-                    entityZombiePigman.setAngry(val);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean attack(EntityDamageEvent ev) {
-        super.attack(ev);
-
-        if (!ev.isCancelled() && ev instanceof EntityDamageByEntityEvent) {
-            if (((EntityDamageByEntityEvent) ev).getDamager() instanceof Player) {
-                this.setAngry(2400, true);
-            }
-        }
-
-        return true;
     }
 
     @Override
@@ -147,18 +71,11 @@ public class EntityZombiePigman extends EntityWalkingMob implements EntitySmite 
     public Item[] getDrops() {
         List<Item> drops = new ArrayList<>();
 
-        if (!this.isBaby()) {
-            drops.add(Item.get(Item.ROTTEN_FLESH, 0, Utils.rand(0, 1)));
-            drops.add(Item.get(Item.GOLD_NUGGET, 0, Utils.rand(0, 1)));
-            drops.add(Item.get(Item.GOLD_SWORD, Utils.rand(20, 30), Utils.rand(0, 101) <= 9 ? 1 : 0));
-        }
+        drops.add(Item.get(Item.ROTTEN_FLESH, 0, Utils.rand(0, 1)));
+        drops.add(Item.get(Item.GOLD_NUGGET, 0, Utils.rand(0, 1)));
+        drops.add(Item.get(Item.GOLD_SWORD, Utils.rand(20, 30), Utils.rand(0, 101) <= 9 ? 1 : 0));
 
         return drops.toArray(Item.EMPTY_ARRAY);
-    }
-
-    @Override
-    public int getKillExperience() {
-        return this.isBaby() ? 0 : 5;
     }
 
     @Override
