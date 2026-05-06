@@ -990,8 +990,8 @@ public abstract class Entity extends Location implements Metadatable {
                 player.dataPacket(packet);
             }
 
-            effect.onRemove(this);
             effects.remove(type);
+            effect.onRemove(this);
 
             this.recalculateEffectColor();
         }
@@ -1065,8 +1065,8 @@ public abstract class Entity extends Location implements Metadatable {
             player.dataPacket(packet);
         }
 
-        effect.onAdd(this);
         effects.put(effect.getType(), effect);
+        effect.onAdd(this);
 
         this.recalculateEffectColor();
     }
