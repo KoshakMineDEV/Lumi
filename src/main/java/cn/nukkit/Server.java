@@ -67,7 +67,6 @@ import cn.nukkit.settings.converter.LegacyPropertiesConverter;
 import cn.nukkit.settings.initializer.ServerSettingsConfigInitializer;
 import cn.nukkit.utils.*;
 import cn.nukkit.utils.compression.Zlib;
-import cn.nukkit.utils.spawner.EntitySpawnerTask;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import eu.okaeri.configs.ConfigManager;
@@ -202,7 +201,6 @@ public class Server {
     private Watchdog watchdog;
     private final DB nameLookup;
     private PlayerDataSerializer playerDataSerializer;
-    private EntitySpawnerTask spawnerTask;
     private final BatchingHelper batchingHelper;
 
     Server(final String filePath, String dataPath, String pluginPath, boolean loadPlugins, boolean debug) {
@@ -453,12 +451,6 @@ public class Server {
         if (this.settings.performance().threadWatchdog()) {
             this.watchdog = new Watchdog(this, this.settings.performance().threadWatchdogTick());
             this.watchdog.start();
-        }
-
-        if (this.settings.world().entity().entityAutoSpawnTask()) {
-            this.spawnerTask = new EntitySpawnerTask();
-            int spawnerTicks = Math.max(this.settings.world().entity().ticksPerEntitySpawns(), 2) >> 1; // Run the spawner on 2x speed but spawn only either monsters or animals
-            this.scheduler.scheduleDelayedRepeatingTask(InternalPlugin.INSTANCE, this.spawnerTask, spawnerTicks, spawnerTicks);
         }
 
         LumiMetrics.start();
@@ -2157,15 +2149,6 @@ public class Server {
      */
     public static Server getInstance() {
         return instance;
-    }
-
-    /**
-     * Get the mob spawner task
-     *
-     * @return spawner task
-     */
-    public EntitySpawnerTask getSpawnerTask() {
-        return this.spawnerTask;
     }
 
     /**

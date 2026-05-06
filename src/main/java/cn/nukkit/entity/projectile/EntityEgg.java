@@ -100,7 +100,6 @@ public class EntityEgg extends EntityProjectile implements EntityClimateVariant 
                     }
 
                     entity.spawnToAll();
-                    entity.setBaby(true);
                 }
             }
         }

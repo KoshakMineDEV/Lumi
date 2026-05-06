@@ -125,21 +125,6 @@ public class LegacyPropertiesConverter {
 
         world.doWorldGc(this.getPropertyBoolean("do-level-gc", world.doWorldGc()));
 
-        // Entity Settings
-        world.entity().spawnAnimals(this.getPropertyBoolean("spawn-animals", world.entity().spawnAnimals()));
-        world.entity().spawnMobs(this.getPropertyBoolean("spawn-mobs", world.entity().spawnMobs()));
-        world.entity().entityAutoSpawnTask(this.getPropertyBoolean("entity-auto-spawn-task", world.entity().entityAutoSpawnTask()));
-        world.entity().entityDespawnTask(this.getPropertyBoolean("entity-despawn-task", world.entity().entityDespawnTask()));
-        world.entity().ticksPerEntitySpawns(this.getPropertyInt("ticks-per-entity-spawns", world.entity().ticksPerEntitySpawns()));
-        world.entity().ticksPerEntityDespawns(this.getPropertyInt("ticks-per-entity-despawns", world.entity().ticksPerEntityDespawns()));
-        world.entity().mobAi(this.getPropertyBoolean("mob-ai", world.entity().mobAi()));
-
-        // Worlds with disabled entity spawning
-        String worldsEntitySpawningDisabled = this.getPropertyString("worlds-entity-spawning-disabled", "");
-        if (!worldsEntitySpawningDisabled.isEmpty()) {
-            world.entity().worldsEntitySpawningDisabled(Arrays.asList(worldsEntitySpawningDisabled.split(",")));
-        }
-
         // Chunk Settings
         world.chunk().cacheChunks(this.getPropertyBoolean("cache-chunks", world.chunk().cacheChunks()));
         world.chunk().asyncChunks(this.getPropertyBoolean("async-chunks", world.chunk().asyncChunks()));

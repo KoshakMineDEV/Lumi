@@ -29,23 +29,18 @@ public class TradeInventory extends BaseInventory {
         pk.windowId = (byte) who.getWindowId(this);
         pk.windowType = (byte) InventoryType.TRADING.getNetworkType();
         pk.size = 0;
-        pk.tradeTier = this.getHolder().getTradeTier();
+        pk.tradeTier = 0;
         pk.traderUniqueEntityId = this.getHolder().getId();
         pk.playerUniqueEntityId = who.getId();
         pk.displayName = this.getHolder().getNameTag();
 
-        ListTag<CompoundTag> tierExpRequirements = new ListTag<>("TierExpRequirements");
-        for (int i = 0, len = villager.tierExpRequirement.length; i < len; ++i) {
-            tierExpRequirements.add(i, new CompoundTag().putInt(String.valueOf(i), villager.tierExpRequirement[i]));
-        }
-
-        try {
+        /*try {
             pk.offers = NBTIO.write(new CompoundTag()
                     .putList(villager.getRecipes())
                     .putList(tierExpRequirements), ByteOrder.LITTLE_ENDIAN, true);
         } catch (IOException ignored) {
 
-        }
+        }*/
 
         pk.newTradingUi = true;
         pk.usingEconomyTrade = true;
@@ -69,7 +64,6 @@ public class TradeInventory extends BaseInventory {
         
         super.onClose(who);
 
-        this.getHolder().setTradingPlayer(0L);
     }
     
     @Override

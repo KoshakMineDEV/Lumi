@@ -23,13 +23,14 @@ public class ShearsDispenseBehaviour extends DefaultDispenseBehavior {
                 target.y + 1,
                 target.z + 1
         ))) {
-            if (entity instanceof EntitySheep sheep) {
+            // TODO: uncomment when new sheep ai will be done
+            /*if (entity instanceof EntitySheep sheep) {
                 if (!sheep.isSheared()) {
                     sheep.shear(true);
                     item.useOn(entity);
                     return item.getDamage() >= item.getMaxDurability() ? null : item;
                 }
-            }
+            }*/
         }
 
         if (target instanceof BlockBeehive && target.onActivate(item, null)) {

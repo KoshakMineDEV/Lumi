@@ -1,12 +1,13 @@
 package cn.nukkit.entity.passive;
 
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemNamespaceId;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
 
-public class EntityTropicalFish extends EntityFish {
+public class EntityTropicalFish extends EntityCreature {
 
     public static final int NETWORK_ID = 111;
 
@@ -55,11 +56,6 @@ public class EntityTropicalFish extends EntityFish {
         this.namedTag.putInt("VariantA", this.variantA);
         this.namedTag.putInt("VariantB", this.variantB);
         this.namedTag.putInt("Color", this.color);
-    }
-
-    @Override
-    protected int getBucketMeta() {
-        return 4;
     }
 
     @Override

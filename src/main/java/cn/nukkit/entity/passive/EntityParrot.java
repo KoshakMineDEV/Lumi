@@ -1,6 +1,5 @@
 package cn.nukkit.entity.passive;
 
-import cn.nukkit.Player;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.data.IntEntityData;
 import cn.nukkit.item.Item;
@@ -9,11 +8,8 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
 
-public class EntityParrot extends EntityFlyingAnimal {
-
+public class EntityParrot extends EntityCreature {
     public static final int NETWORK_ID = 30;
-
-    private int variant;
 
     private static final int[] VARIANTS = {0, 1, 2, 3, 4};
 
@@ -42,46 +38,12 @@ public class EntityParrot extends EntityFlyingAnimal {
 
         super.initEntity();
 
-        if (this.namedTag.contains("Variant")) {
-            this.variant = this.namedTag.getInt("Variant");
-        } else {
-            this.variant = getRandomVariant();
-        }
-
-        this.setDataProperty(new IntEntityData(DATA_VARIANT, this.variant));
-    }
-
-    @Override
-    public void saveNBT() {
-        super.saveNBT();
-        this.namedTag.putInt("Variant", this.variant);
+        this.setDataProperty(new IntEntityData(DATA_VARIANT, getRandomVariant()));
     }
 
     @Override
     public Item[] getDrops() {
         return new Item[]{Item.get(ItemNamespaceId.FEATHER, 0, Utils.rand(1, 2))};
-    }
-
-    @Override
-    public int getKillExperience() {
-        return Utils.rand(1, 3);
-    }
-
-    @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        if (creature instanceof Player player) {
-            if (player.closed) {
-                return false;
-            }
-            int id = player.getInventory().getItemInHandFast().getId();
-            return player.spawned && player.isAlive()
-                    && (id == Item.SEEDS
-                    || id == Item.BEETROOT_SEEDS
-                    || id == Item.PUMPKIN_SEEDS
-                    || id == Item.MELON_SEEDS)
-                    && distance <= 49;
-        }
-        return false;
     }
 
     private static int getRandomVariant() {

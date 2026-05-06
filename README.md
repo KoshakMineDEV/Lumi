@@ -14,6 +14,7 @@ Lumi is a server software based on [Nukkit-MOT](https://github.com/MemoriesOfTim
 5. Better AntiXray system
 6. Better API (effects, food, projectiles and etc.)
 7. Mixin support (changing any method) through [Ignite](https://github.com/KoshakMineDEV/ignite-lumi)
+8. Mobs support (with [MobPluginLumi](https://github.com/LuminiaDev/MobPluginLumi))
 
 ### How to install?
 1. Install java 21 or higher (recommended is Azul Zulu 21)

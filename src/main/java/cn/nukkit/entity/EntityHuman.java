@@ -43,6 +43,8 @@ public class EntityHuman extends EntityHumanType {
 
     protected Skin skin;
 
+    protected static PlayerInventory EMPTY_INVENTORY = new PlayerInventory(null);
+
     @Override
     public float getWidth() {
         return 0.58f;
@@ -334,7 +336,7 @@ public class EntityHuman extends EntityHumanType {
                 this.server.updatePlayerListData(this.uuid, this.getId(), this.getName(), this.skin, new Player[]{player});
             }
 
-            PlayerInventory playerInventory = Objects.requireNonNullElse(this.inventory, BaseEntity.EMPTY_INVENTORY);
+            PlayerInventory playerInventory = Objects.requireNonNullElse(this.inventory, EMPTY_INVENTORY);
 
             AddPlayerPacket pk = new AddPlayerPacket();
             pk.uuid = this.isPlayer ? this.loginUuid : this.uuid;

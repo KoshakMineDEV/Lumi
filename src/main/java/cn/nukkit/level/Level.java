@@ -6,7 +6,6 @@ import cn.nukkit.api.NonComputationAtomic;
 import cn.nukkit.block.*;
 import cn.nukkit.block.data.BlockColor;
 import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.entity.BaseEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.custom.EntityDefinition;
 import cn.nukkit.entity.item.EntityItem;
@@ -4604,13 +4603,8 @@ public class Level implements ChunkManager, Metadatable {
         return time > 13184 && time < 22800;
     }
 
-    public boolean shouldMobBurn(BaseEntity entity) {
-        int time = this.getTime() % TIME_FULL;
-        return !entity.isOnFire() && !this.raining && !entity.isBaby() && (time < 12567 || time > 23450) && !entity.isInsideOfWater() && entity.canSeeSky();
-    }
-
     public boolean isMobSpawningAllowed() {
-        return !Server.getInstance().getSettings().world().entity().worldsEntitySpawningDisabled().contains(getName()) && gameRules.getBoolean(GameRule.DO_MOB_SPAWNING);
+        return gameRules.getBoolean(GameRule.DO_MOB_SPAWNING);
     }
 
     public boolean createPortal(Block target, boolean fireCharge) {

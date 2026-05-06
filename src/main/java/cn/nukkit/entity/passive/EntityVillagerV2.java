@@ -36,10 +36,5 @@ public class EntityVillagerV2 extends EntityVillager {
     public String getName() {
         return this.hasCustomName() ? this.getNameTag() : "Villager";
     }
-
-    @Override
-    public boolean getCanTrade() {
-        return canTrade;
-    }
     
 }

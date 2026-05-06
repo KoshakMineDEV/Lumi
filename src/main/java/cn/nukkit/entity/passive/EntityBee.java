@@ -1,37 +1,14 @@
 package cn.nukkit.entity.passive;
 
-import cn.nukkit.Difficulty;
-import cn.nukkit.Player;
-import cn.nukkit.blockentity.impl.BlockEntityBeehive;
-import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityArthropod;
 import cn.nukkit.entity.EntityCreature;
-import cn.nukkit.entity.effect.Effect;
-import cn.nukkit.entity.effect.EffectType;
-import cn.nukkit.entity.mob.EntityFlyingMob;
-import cn.nukkit.event.entity.EntityDamageByEntityEvent;
-import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.event.entity.EntityEffectUpdateEvent;
-import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.utils.Utils;
 
-import java.util.HashMap;
-
-public class EntityBee extends EntityFlyingMob implements EntityArthropod { // A mob because it needs to have an attack behavior
-
+public class EntityBee extends EntityCreature {
     public static final int NETWORK_ID = 122;
-
-    private boolean angry;
 
     public EntityBee(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-    }
-
-    @Override
-    public int getKillExperience() {
-        return Utils.rand(1, 3);
     }
 
     @Override
@@ -41,17 +18,11 @@ public class EntityBee extends EntityFlyingMob implements EntityArthropod { // A
 
     @Override
     public float getWidth() {
-        if (this.isBaby()) {
-            return 0.275f;
-        }
         return 0.55f;
     }
 
     @Override
     public float getHeight() {
-        if (this.isBaby()) {
-            return 0.25f;
-        }
         return 0.5f;
     }
 
@@ -60,78 +31,6 @@ public class EntityBee extends EntityFlyingMob implements EntityArthropod { // A
         this.setMaxHealth(10);
 
         super.initEntity();
-        this.setDamage(new int[]{0, 2, 2, 3});
     }
 
-    @Override
-    public double getSpeed() {
-        return 1.2;
-    }
-
-    @Override
-    public void attackEntity(Entity player) {
-        if (this.attackDelay > 23 && this.distanceSquared(player) < 1.3) {
-            this.attackDelay = 0;
-            HashMap<EntityDamageEvent.DamageModifier, Float> damage = new HashMap<>();
-            damage.put(EntityDamageEvent.DamageModifier.BASE, (float) this.getDamage());
-            if (player instanceof Player) {
-                float points = 0;
-                for (Item i : ((Player) player).getInventory().getArmorContents()) {
-                    points += this.getArmorPoints(i.getId());
-                }
-                damage.put(EntityDamageEvent.DamageModifier.ARMOR,
-                        (float) (damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0f) - Math.floor(
-                                damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1f) * points * 0.04)));
-            }
-            if (player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage))) {
-                if (this.server.getDifficulty() == Difficulty.NORMAL) {
-                    player.addEffect(Effect.get(EffectType.POISON).setDuration(200), EntityEffectUpdateEvent.Cause.ATTACK);
-                } else if (this.server.getDifficulty() == Difficulty.HARD) {
-                    player.addEffect(Effect.get(EffectType.POISON).setDuration(360), EntityEffectUpdateEvent.Cause.ATTACK);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        return this.isAngry() && super.targetOption(creature, distance);
-    }
-
-    @Override
-    public boolean attack(EntityDamageEvent ev) {
-        if (super.attack(ev)) {
-            if (ev instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) ev).getDamager() instanceof Player) {
-                this.setAngry(true);
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean isAngry() {
-        return this.angry;
-    }
-
-    public void setAngry(boolean angry) {
-        this.angry = angry;
-        this.setDataFlag(DATA_FLAGS, DATA_FLAG_ANGRY, angry);
-    }
-
-    public boolean getHasNectar() {
-        return false; //TODO
-    }
-
-    public void setHasNectar(boolean hasNectar) {
-        //TODO
-    }
-
-    public void nectarDelivered(BlockEntityBeehive blockEntityBeehive) {
-        //TODO
-    }
-
-    public void leftBeehive(BlockEntityBeehive blockEntityBeehive) {
-        //TODO
-    }
 }

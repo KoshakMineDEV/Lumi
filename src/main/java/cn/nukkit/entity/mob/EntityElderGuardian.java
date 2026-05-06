@@ -17,7 +17,7 @@ import cn.nukkit.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityElderGuardian extends EntitySwimmingMob {
+public class EntityElderGuardian extends EntityCreature {
 
     public static final int NETWORK_ID = 50;
 
@@ -47,16 +47,6 @@ public class EntityElderGuardian extends EntitySwimmingMob {
         super.initEntity();
 
         this.setDataFlag(DATA_FLAGS, DATA_FLAG_ELDER, true);
-        this.setDamage(new int[] { 0, 5, 8, 12 });
-    }
-
-    @Override
-    public boolean targetOption(EntityCreature creature, double distance) {
-        return false;
-    }
-
-    @Override
-    public void attackEntity(Entity player) {
     }
 
     @Override
@@ -81,31 +71,8 @@ public class EntityElderGuardian extends EntitySwimmingMob {
     }
 
     @Override
-    public int getKillExperience() {
-        return 10;
-    }
-
-    @Override
     public String getName() {
         return this.hasCustomName() ? this.getNameTag() : "Elder Guardian";
     }
 
-    @Override
-    public boolean entityBaseTick(int tickDiff) {
-        boolean result = super.entityBaseTick(tickDiff);
-        if (!this.closed && this.ticksLived % 1200 == 0 && this.isAlive()) {
-            for (Player player : this.level.getPlayers().values()) {
-                if (player.getGamemode() % 2 == 0 && player.distanceSquared(this) < 2500 && !player.hasEffect(EffectType.MINING_FATIGUE)) {
-                    player.addEffect(Effect.get(EffectType.MINING_FATIGUE).setAmplifier(2).setDuration(6000));
-                    LevelEventPacket packet = new LevelEventPacket();
-                    packet.evid = LevelEventPacket.EVENT_GUARDIAN_CURSE;
-                    packet.x = (float) this.x;
-                    packet.y = (float) this.y;
-                    packet.z = (float) this.z;
-                    player.dataPacket(packet);
-                }
-            }
-        }
-        return result;
-    }
 }

@@ -1,24 +1,15 @@
 package cn.nukkit.entity.passive;
 
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 
-public class EntityTadpole extends EntityFish {
+public class EntityTadpole extends EntityCreature {
 
     public static final int NETWORK_ID = 133;
 
     public EntityTadpole(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-    }
-
-    @Override
-    public int getKillExperience() {
-        return 0;
-    }
-
-    @Override
-    protected int getBucketMeta() {
-        return 13;
     }
 
     @Override

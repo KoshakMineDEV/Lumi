@@ -1,10 +1,10 @@
 package cn.nukkit.entity.passive;
 
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 
-public class EntityAxolotl extends EntityFish {
-
+public class EntityAxolotl extends EntityCreature {
     public static final int NETWORK_ID = 130;
 
     public EntityAxolotl(FullChunk chunk, CompoundTag nbt) {
@@ -14,7 +14,6 @@ public class EntityAxolotl extends EntityFish {
     @Override
     public void initEntity() {
         this.setMaxHealth(14);
-
         super.initEntity();
     }
 
@@ -31,10 +30,5 @@ public class EntityAxolotl extends EntityFish {
     @Override
     public float getHeight() {
         return 0.42f;
-    }
-
-    @Override
-    protected int getBucketMeta() {
-        return 12;
     }
 }

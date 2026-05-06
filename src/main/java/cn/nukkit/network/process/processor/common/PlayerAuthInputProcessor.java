@@ -6,6 +6,7 @@ import cn.nukkit.PlayerHandle;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockWater;
+import cn.nukkit.entity.EntityControllable;
 import cn.nukkit.entity.effect.EffectType;
 import cn.nukkit.entity.item.EntityBoat;
 import cn.nukkit.entity.item.EntityMinecartAbstract;
@@ -118,6 +119,15 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
             if (inputY >= -1.001 && inputY <= 1.001) {
                 minecart.setCurrentSpeed(inputY);
             }
+        } else if (handle.getRiding() instanceof EntityControllable controllable) {
+            double moveVecX = packet.getMotion().getX();
+            double moveVecY = packet.getMotion().getY();
+
+            moveVecX = NukkitMath.clamp(moveVecX, -1, 1);
+            moveVecY = NukkitMath.clamp(moveVecY, -1, 1);
+
+            controllable.onPlayerInput(handle.player, moveVecX, moveVecY);
+            ignoreCoordinateMove = true;
         } else if (handle.getRiding() instanceof EntityBoat boat) {
             if (protocol >= ProtocolInfo.v1_21_130) {
                 double moveVecX = packet.getMotion().getX();
