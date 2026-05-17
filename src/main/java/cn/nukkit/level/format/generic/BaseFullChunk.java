@@ -42,7 +42,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     /**
      * encoded as:
-     *
+     * <p>
      * (x &lt;&lt; 4) | z
      */
     protected byte[] biomes;
@@ -118,7 +118,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     protected BaseFullChunk cloneForChunkSending() {
         BaseFullChunk chunk;
         try {
-            chunk = (BaseFullChunk)super.clone();
+            chunk = (BaseFullChunk) super.clone();
         } catch (CloneNotSupportedException e) {
             return null;
         }
@@ -383,7 +383,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
                     this.setBlockSkyLight(x, y, z, light);
 
                     if (light == 0) { // skipping block checks, because everything under a block that has a skylight value
-                                      // of 0 also has a skylight value of 0
+                        // of 0 also has a skylight value of 0
                         continue;
                     }
 
@@ -391,15 +391,15 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
                     int id = this.getBlockId(x, y, z);
 
                     if (!Registries.BLOCK.isTransparent(id)) { // if we encounter an opaque block, all the blocks under it will
-                                           // have a skylight value of 0 (the block itself has a value of 15, if it's a top-most block)
+                        // have a skylight value of 0 (the block itself has a value of 15, if it's a top-most block)
                         nextLight = 0;
                     } else if (Registries.BLOCK.isDiffusesSkyLight(id)) {
                         nextDecrease += 1; // skylight value decreases by one for each block under a block
-                                           // that diffuses skylight. The block itself has a value of 15 (if it's a top-most block)
+                        // that diffuses skylight. The block itself has a value of 15 (if it's a top-most block)
                     } else {
                         nextDecrease -= Registries.BLOCK.getLightFilter(id); // blocks under a light filtering block will have a skylight value
-                                                            // decreased by the lightFilter value of that block. The block itself
-                                                            // has a value of 15 (if it's a top-most block)
+                        // decreased by the lightFilter value of that block. The block itself
+                        // has a value of 15 (if it's a top-most block)
                     }
                     // END of checks for the next block
                 }
@@ -599,7 +599,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     @Override
     public BlockEntity getTile(int x, int y, int z) {
-        if (this.tileList == null || this.getProvider() == null)  {
+        if (this.tileList == null || this.getProvider() == null) {
             return null;
         }
         int capY = y - this.getProvider().getMinBlockY();
@@ -795,7 +795,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
             setBlockId(x & 15, y, z & 15, layer, id);
         }
     }
-    
+
     @Override
     public void setBlockAt(int x, int y, int z, int id, int data) {
         if (x >> 4 == getX() && z >> 4 == getZ()) {

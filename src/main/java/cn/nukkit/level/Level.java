@@ -2267,7 +2267,7 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void breakBlock(@NotNull Block block) {
-        if(block.isValid() && block.level == this) {
+        if (block.isValid() && block.level == this) {
             this.setBlock(block, Block.get(Block.AIR));
             Position position = block.add(0.5, 0.5, 0.5);
             this.addParticle(new DestroyBlockParticle(position, block));
@@ -3074,9 +3074,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void setBlockExtraDataAt(int x, int y, int z, int id, int data) {
-       BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
-       chunk.setBlockExtraData(x & 0x0f, ensureY(y), z & 0x0f, (data << 8) | id);
-       chunk.setDirty(true);
+        BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
+        chunk.setBlockExtraData(x & 0x0f, ensureY(y), z & 0x0f, (data << 8) | id);
+        chunk.setDirty(true);
 
         this.sendBlockExtraData(x, y, z, id, data);
     }
@@ -3980,18 +3980,13 @@ public class Level implements ChunkManager, Metadatable {
 
                 if (!shouldSave) {
 
-                    for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                    if (!chunk.getBlockEntities().isEmpty()) {
                         shouldSave = true;
-                        break;
                     }
 
                     if (!shouldSave) {
-                        for (Entity entity : chunk.getEntities().values()) {
-
-                            if (!(entity instanceof Player)) {
-                                shouldSave = true;
-                                break;
-                            }
+                        if (chunk.getEntities().size() - chunk.getPlayers().size() > 0) {
+                            shouldSave = true;
                         }
                     }
                 }
@@ -4995,10 +4990,11 @@ public class Level implements ChunkManager, Metadatable {
         if (chunk == ProtocolInfo.v1_21_80) if (player < ProtocolInfo.v1_21_90) return true;
         if (chunk >= ProtocolInfo.v1_21_90) if (player < ProtocolInfo.v1_21_100) return true;
         if (chunk == ProtocolInfo.v1_21_100) if (player == ProtocolInfo.v1_21_100) return true;
-        if (chunk == ProtocolInfo.v1_21_111) if (player >= ProtocolInfo.v1_21_110_26 && player <= ProtocolInfo.v1_26_0) return true;
+        if (chunk == ProtocolInfo.v1_21_111)
+            if (player >= ProtocolInfo.v1_21_110_26 && player <= ProtocolInfo.v1_26_0) return true;
         if (chunk == ProtocolInfo.v1_26_10) if (player >= ProtocolInfo.v1_26_10) return true;
-        if (chunk == ProtocolInfo.v1_26_10)  if (player == ProtocolInfo.v1_26_10) return true;
-        if (chunk == ProtocolInfo.v1_26_20)  if (player >= ProtocolInfo.v1_26_20_26) return true;
+        if (chunk == ProtocolInfo.v1_26_10) if (player == ProtocolInfo.v1_26_10) return true;
+        if (chunk == ProtocolInfo.v1_26_20) if (player >= ProtocolInfo.v1_26_20_26) return true;
         return false; //TODO Multiversion  Remember to update when block palette changes
     }
 

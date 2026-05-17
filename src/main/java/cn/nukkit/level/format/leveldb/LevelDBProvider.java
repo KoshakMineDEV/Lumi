@@ -354,7 +354,7 @@ public class LevelDBProvider implements LevelProvider {
                     );
                 }, level.isAntiXrayEnabled(), getLevel().getDimensionData());
             });
-        }else {
+        } else {
             NetworkChunkSerializer.serialize(protocols, chunk, networkChunkSerializerCallback -> {
                 this.getLevel().chunkRequestCallback(networkChunkSerializerCallback.getProtocolId(),
                         timestamp,
@@ -778,14 +778,14 @@ public class LevelDBProvider implements LevelProvider {
                 this.executor.shutdownNow();
             }
         } finally {
-                try {
-                    this.db.close();
-                } catch (IOException e) {
-                    log.error("Can not close database: {}", this.getName(), e);
-                } finally {
-                    this.gcLock.unlock();
-                }
+            try {
+                this.db.close();
+            } catch (IOException e) {
+                log.error("Can not close database: {}", this.getName(), e);
+            } finally {
+                this.gcLock.unlock();
             }
+        }
     }
 
     @Override
