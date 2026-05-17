@@ -96,7 +96,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
 
     @Override
     protected AxisAlignedBB recalculateCollisionBoundingBox() {
-        return new SimpleAxisAlignedBB(this.x, this.y, this.z, this.x + 1, this.y + 0.9, this.z + 1);
+        return this;
     }
 
     public boolean usesWaterLogging() {
