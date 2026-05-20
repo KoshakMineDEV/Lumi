@@ -71,7 +71,7 @@ public class LibDeflateThreadLocal implements ZlibProvider {
 
     private byte[] decompress(byte[] data, int maxSize, boolean zlibFormat) throws IOException {
         LibdeflateDecompressor decompressor = DECOMPRESSOR.get();
-        int initialSize = (maxSize > 0) ? maxSize : Math.min(data.length * 4, 16 * 1024);
+        int initialSize = Math.min(data.length * 16, maxSize);
         byte[] output = new byte[initialSize];
 
         try {
@@ -86,7 +86,7 @@ public class LibDeflateThreadLocal implements ZlibProvider {
             if (maxSize > 0 && produced > maxSize) {
                 throw new IOException("Inflated data exceeds maximum size");
             }
-            return Arrays.copyOf(output, produced);
+            return output;
 
         } catch (LibdeflateException e) {
             throw new IOException("Unable to inflate Zlib stream", e);

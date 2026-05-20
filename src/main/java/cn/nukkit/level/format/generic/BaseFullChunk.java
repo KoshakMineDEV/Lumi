@@ -1,7 +1,6 @@
 package cn.nukkit.level.format.generic;
 
 import cn.nukkit.Player;
-import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.impl.PersistentDataContainerBlockEntity;
@@ -35,6 +34,7 @@ import java.util.Map;
 public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     protected Long2ObjectNonBlockingMap<Entity> entities;
+    protected Long2ObjectNonBlockingMap<Player> players = new Long2ObjectNonBlockingMap<>();
 
     protected Long2ObjectNonBlockingMap<BlockEntity> tiles;
 
@@ -42,7 +42,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     /**
      * encoded as:
-     *
+     * <p>
      * (x &lt;&lt; 4) | z
      */
     protected byte[] biomes;
@@ -77,6 +77,9 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     protected boolean lightPopulated;
 
     protected Map<Integer, BatchPacket> chunkPackets;
+
+    private volatile boolean dirty = true;
+    private volatile long lastCompression;
 
     @Override
     public BaseFullChunk clone() {
@@ -115,7 +118,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     protected BaseFullChunk cloneForChunkSending() {
         BaseFullChunk chunk;
         try {
-            chunk = (BaseFullChunk)super.clone();
+            chunk = (BaseFullChunk) super.clone();
         } catch (CloneNotSupportedException e) {
             return null;
         }
@@ -380,7 +383,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
                     this.setBlockSkyLight(x, y, z, light);
 
                     if (light == 0) { // skipping block checks, because everything under a block that has a skylight value
-                                      // of 0 also has a skylight value of 0
+                        // of 0 also has a skylight value of 0
                         continue;
                     }
 
@@ -388,15 +391,15 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
                     int id = this.getBlockId(x, y, z);
 
                     if (!Registries.BLOCK.isTransparent(id)) { // if we encounter an opaque block, all the blocks under it will
-                                           // have a skylight value of 0 (the block itself has a value of 15, if it's a top-most block)
+                        // have a skylight value of 0 (the block itself has a value of 15, if it's a top-most block)
                         nextLight = 0;
                     } else if (Registries.BLOCK.isDiffusesSkyLight(id)) {
                         nextDecrease += 1; // skylight value decreases by one for each block under a block
-                                           // that diffuses skylight. The block itself has a value of 15 (if it's a top-most block)
+                        // that diffuses skylight. The block itself has a value of 15 (if it's a top-most block)
                     } else {
                         nextDecrease -= Registries.BLOCK.getLightFilter(id); // blocks under a light filtering block will have a skylight value
-                                                            // decreased by the lightFilter value of that block. The block itself
-                                                            // has a value of 15 (if it's a top-most block)
+                        // decreased by the lightFilter value of that block. The block itself
+                        // has a value of 15 (if it's a top-most block)
                     }
                     // END of checks for the next block
                 }
@@ -506,8 +509,12 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         if (this.entities == null) {
             this.entities = new Long2ObjectNonBlockingMap<>();
         }
+
         this.entities.put(entity.getId(), entity);
-        if (!(entity instanceof Player) && this.isInit) {
+
+        if (entity instanceof Player player) {
+            this.players.put(entity.getId(), player);
+        } else if (this.isInit) {
             this.setChanged();
         }
     }
@@ -516,9 +523,12 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     public void removeEntity(Entity entity) {
         if (this.entities != null) {
             this.entities.remove(entity.getId());
-            if (!(entity instanceof Player) && this.isInit) {
-                this.setChanged();
-            }
+        }
+
+        if (entity instanceof Player) {
+            this.players.remove(entity.getId());
+        } else if (this.isInit) {
+            this.setChanged();
         }
     }
 
@@ -573,6 +583,11 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     }
 
     @Override
+    public Map<Long, Player> getPlayers() {
+        return players;
+    }
+
+    @Override
     public Map<Long, BlockEntity> getBlockEntities() {
         return tiles == null ? Collections.emptyMap() : tiles;
     }
@@ -584,7 +599,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     @Override
     public BlockEntity getTile(int x, int y, int z) {
-        if (this.tileList == null || this.getProvider() == null)  {
+        if (this.tileList == null || this.getProvider() == null) {
             return null;
         }
         int capY = y - this.getProvider().getMinBlockY();
@@ -780,7 +795,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
             setBlockId(x & 15, y, z & 15, layer, id);
         }
     }
-    
+
     @Override
     public void setBlockAt(int x, int y, int z, int id, int data) {
         if (x >> 4 == getX() && z >> 4 == getZ()) {
@@ -842,6 +857,22 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     @Override
     public int getMaxBlockY() {
         return this.getProvider().getMaxBlockY();
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public long getLastCompression() {
+        return lastCompression;
+    }
+
+    public void setLastCompression(long lastCompression) {
+        this.lastCompression = lastCompression;
     }
 
     public boolean compress() {

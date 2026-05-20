@@ -31,7 +31,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import lombok.extern.log4j.Log4j2;
 import net.daporkchop.ldbjni.DBProvider;
 import net.daporkchop.lib.natives.FeatureBuilder;
@@ -72,13 +71,25 @@ public class LevelDBProvider implements LevelProvider {
     protected CompoundTag levelData;
     private Vector3 spawn;
     private Long cachedSeed;
-    private int lastGcPosition = 0;
 
     protected volatile boolean closed;
     protected final Lock gcLock;
     private final ExecutorService executor;
 
     private Task autoCompactionTask;
+
+    private final Queue<LevelDBChunk> compressionQueue = new ArrayDeque<>();
+    private final ExecutorService compressionExecutor = Executors.newFixedThreadPool(
+            Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
+            r -> {
+                Thread thread = new Thread(r, "Chunk Compression Worker");
+                thread.setDaemon(true);
+                thread.setPriority(Thread.NORM_PRIORITY - 1);
+                return thread;
+            }
+    );
+
+    private static final long CHUNK_COMPRESSION_COOLDOWN = 30_000L;
 
     public LevelDBProvider(Level level, String path) {
         this.level = level;
@@ -343,7 +354,7 @@ public class LevelDBProvider implements LevelProvider {
                     );
                 }, level.isAntiXrayEnabled(), getLevel().getDimensionData());
             });
-        }else {
+        } else {
             NetworkChunkSerializer.serialize(protocols, chunk, networkChunkSerializerCallback -> {
                 this.getLevel().chunkRequestCallback(networkChunkSerializerCallback.getProtocolId(),
                         timestamp,
@@ -767,14 +778,14 @@ public class LevelDBProvider implements LevelProvider {
                 this.executor.shutdownNow();
             }
         } finally {
-                try {
-                    this.db.close();
-                } catch (IOException e) {
-                    log.error("Can not close database: {}", this.getName(), e);
-                } finally {
-                    this.gcLock.unlock();
-                }
+            try {
+                this.db.close();
+            } catch (IOException e) {
+                log.error("Can not close database: {}", this.getName(), e);
+            } finally {
+                this.gcLock.unlock();
             }
+        }
     }
 
     @Override
@@ -917,37 +928,78 @@ public class LevelDBProvider implements LevelProvider {
     }
 
     @Override
-    public void doGarbageCollection(long time) {
-        long start = System.currentTimeMillis();
-        int maxIterations = this.chunks.size();
-        if (this.lastGcPosition > maxIterations) {
-            this.lastGcPosition = 0;
+    public void doGarbageCollection(long allocatedTime) {
+        if (allocatedTime <= 0L || this.chunks.isEmpty()) {
+            return;
         }
 
-        ObjectIterator<BaseFullChunk> iterator = chunks.values().iterator();
-        if (this.lastGcPosition != 0) {
-            iterator.skip(lastGcPosition);
-        }
+        final long deadline = System.nanoTime() + (allocatedTime * 1_000_000L);
+        final long now = System.currentTimeMillis();
 
-        int iterations;
-        for (iterations = 0; iterations < maxIterations; iterations++) {
-            if (!iterator.hasNext()) {
-                iterator = this.chunks.values().iterator();
-            }
+        this.fillCompressionQueue(now);
 
-            if (!iterator.hasNext()) {
+        while (System.nanoTime() < deadline) {
+            LevelDBChunk chunk = this.compressionQueue.poll();
+
+            if (chunk == null) {
                 break;
             }
 
-            BaseFullChunk chunk = iterator.next();
-            if (chunk instanceof LevelDBChunk && chunk.isGenerated() && chunk.isPopulated()) {
-                chunk.compress();
-                if (System.currentTimeMillis() - start >= time) {
-                    break;
-                }
+            if (!chunk.isGenerated() || !chunk.isPopulated()) {
+                continue;
             }
+
+            if (!chunk.isDirty()) {
+                continue;
+            }
+
+            if (now - chunk.getLastCompression() < CHUNK_COMPRESSION_COOLDOWN) {
+                continue;
+            }
+
+            chunk.setDirty(false);
+            chunk.setLastCompression(now);
+
+            this.compressionExecutor.execute(() -> {
+                try {
+                    synchronized (chunk) {
+                        if (!chunk.isLoaded()) {
+                            return;
+                        }
+
+                        chunk.compress();
+                    }
+                } catch (Throwable throwable) {
+                    Server.getInstance().getLogger().error("Failed to compress chunk " + chunk.getX() + ", " + chunk.getZ(), throwable);
+                }
+            });
         }
-        this.lastGcPosition += iterations;
+    }
+
+    private void fillCompressionQueue(long now) {
+        if (!this.compressionQueue.isEmpty()) {
+            return;
+        }
+
+        for (BaseFullChunk unsafeChunk : this.chunks.values()) {
+            if (!(unsafeChunk instanceof LevelDBChunk chunk)) {
+                continue;
+            }
+
+            if (!chunk.isGenerated() || !chunk.isPopulated()) {
+                continue;
+            }
+
+            if (!chunk.isDirty()) {
+                continue;
+            }
+
+            if (now - chunk.getLastCompression() < CHUNK_COMPRESSION_COOLDOWN) {
+                continue;
+            }
+
+            this.compressionQueue.offer(chunk);
+        }
     }
 
     public CompoundTag getLevelData() {

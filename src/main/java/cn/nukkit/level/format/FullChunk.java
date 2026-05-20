@@ -1,5 +1,6 @@
 package cn.nukkit.level.format;
 
+import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.Entity;
@@ -35,7 +36,7 @@ public interface FullChunk extends Cloneable {
     void setProvider(LevelProvider provider);
 
     int getFullBlock(int x, int y, int z);
-    
+
     int getFullBlock(int x, int y, int z, int layer);
 
     default int getBlockRuntimeId(int protocolId, int x, int y, int z) {
@@ -52,7 +53,7 @@ public interface FullChunk extends Cloneable {
 
     default int[] getBlockState(int x, int y, int z, int layer) {
         int full = getFullBlock(x, y, z, layer);
-        return new int[] { full >> Block.DATA_BITS, full & Block.DATA_MASK };
+        return new int[]{full >> Block.DATA_BITS, full & Block.DATA_MASK};
     }
 
     Block getAndSetBlock(int x, int y, int z, Block block);
@@ -69,11 +70,11 @@ public interface FullChunk extends Cloneable {
 
     boolean setBlock(int x, int y, int z, int blockId);
 
-    boolean setBlockAtLayer(int x, int y, int z, int layer, int  blockId);
+    boolean setBlockAtLayer(int x, int y, int z, int layer, int blockId);
 
-    boolean setBlock(int x, int y, int z, int  blockId, int  meta);
+    boolean setBlock(int x, int y, int z, int blockId, int meta);
 
-    boolean setBlockAtLayer(int x, int y, int z, int layer, int blockId, int  meta);
+    boolean setBlockAtLayer(int x, int y, int z, int layer, int blockId, int meta);
 
     int getBlockId(int x, int y, int z);
 
@@ -142,7 +143,7 @@ public interface FullChunk extends Cloneable {
         this.setBiomeId(x, z, biomeId);
     }
 
-    default void setBiomeId(int x, int z, int biomeId)  {
+    default void setBiomeId(int x, int z, int biomeId) {
         setBiomeId(x, z, (byte) biomeId);
     }
 
@@ -191,6 +192,8 @@ public interface FullChunk extends Cloneable {
     void removeBlockEntity(BlockEntity blockEntity);
 
     Map<Long, Entity> getEntities();
+
+    Map<Long, Player> getPlayers();
 
     Map<Long, BlockEntity> getBlockEntities();
 
