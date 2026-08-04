@@ -5,8 +5,6 @@ import cn.nukkit.command.RemoteConsoleCommandSender;
 import cn.nukkit.event.server.RemoteServerCommandEvent;
 import cn.nukkit.utils.TextFormat;
 
-import java.io.IOException;
-
 /**
  * Implementation of Source RCON protocol.
  * https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
@@ -21,7 +19,7 @@ public class RCON {
     private final RCONServer serverThread;
 
     public RCON(Server server, String password, String address, int port) {
-        if (password.isEmpty()) {
+        if (password == null || password.isEmpty()) {
             throw new IllegalArgumentException("nukkit.server.rcon.emptyPasswordError");
         }
 
@@ -30,7 +28,7 @@ public class RCON {
         try {
             this.serverThread = new RCONServer(address, port, password);
             this.serverThread.start();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("nukkit.server.rcon.startupError", e);
         }
 
@@ -38,14 +36,15 @@ public class RCON {
     }
 
     public void check() {
-        if (this.serverThread == null) {
-            return;
-        } else if (!this.serverThread.isAlive()) {
+        if (this.serverThread == null || !this.serverThread.isAlive()) {
             return;
         }
 
         RCONCommand command;
-        while ((command = serverThread.receive()) != null) {
+        while ((command = this.serverThread.receive()) != null) {
+            if (command.getSender() == null || !command.getSender().isOpen()) {
+                continue;
+            }
             RemoteConsoleCommandSender sender = new RemoteConsoleCommandSender();
             RemoteServerCommandEvent event = new RemoteServerCommandEvent(sender, command.getCommand());
             if (event.call()) {
@@ -57,11 +56,8 @@ public class RCON {
     }
 
     public void close() {
-        try {
-            synchronized (serverThread) {
-                serverThread.close();
-                serverThread.wait(5000);
-            }
-        } catch (InterruptedException ignored) {}
+        if (this.serverThread != null) {
+            this.serverThread.close();
+        }
     }
 }
