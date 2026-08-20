@@ -131,6 +131,17 @@ public class Vector2f {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Vector2f)) {
+            return false;
+        }
+
+        Vector2f other = (Vector2f) obj;
+
+        return this.x == other.x && this.y == other.y;
+    }
+
+    @Override
     public String toString() {
         return "Vector2(x=" + this.x + ",y=" + this.y + ')';
     }

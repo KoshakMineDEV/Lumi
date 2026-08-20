@@ -639,14 +639,33 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void addSound(Vector3 pos, String sound) {
-        this.addSound(pos, sound, (Player[]) null);
+        this.addSound(pos, sound, 1F, 1F, (Player[]) null);
     }
 
     public void addSound(Vector3 pos, String sound, Player... players) {
+        this.addSound(pos, sound, 1F, 1F, players);
+    }
+
+    public void addSound(Vector3 pos, String sound, float volume, Player... players) {
+        this.addSound(pos, sound, volume, 1F, players);
+    }
+
+    public void addSound(Vector3 pos, String sound, float volume) {
+        this.addSound(pos, sound, volume, 1F, (Player[]) null);
+    }
+
+    public void addSound(Vector3 pos, String sound, float volume, float pitch) {
+        this.addSound(pos, sound, volume, pitch, (Player[]) null);
+    }
+
+    public void addSound(Vector3 pos, String sound, float volume, float pitch, Player... players) {
+        Preconditions.checkArgument(volume >= 0 && volume <= 1, "Sound volume must be between 0 and 1");
+        Preconditions.checkArgument(pitch >= 0, "Sound pitch must be higher than 0");
+
         PlaySoundPacket packet = new PlaySoundPacket();
         packet.name = sound;
-        packet.volume = 1;
-        packet.pitch = 1;
+        packet.volume = volume;
+        packet.pitch = pitch;
         packet.x = pos.getFloorX();
         packet.y = pos.getFloorY();
         packet.z = pos.getFloorZ();
