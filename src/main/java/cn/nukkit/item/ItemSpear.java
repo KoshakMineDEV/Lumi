@@ -33,21 +33,6 @@ public abstract class ItemSpear extends StringItemToolBase {
     }
 
     @Override
-    public int getMaxDurability() {
-        return this.getStats().durability();
-    }
-
-    @Override
-    public int getAttackDamage() {
-        return this.getStats().damage();
-    }
-
-    @Override
-    public int getTier() {
-        return this.getStats().tier();
-    }
-
-    @Override
     public boolean onClickAir(Player player, Vector3 directionVector) {
         player.getLevel().addLevelSoundEvent(player, this.getUseSound());
         return true;
@@ -63,66 +48,44 @@ public abstract class ItemSpear extends StringItemToolBase {
         return true;
     }
 
-    public double getMinimumReach() {
-        return MIN_REACH;
-    }
-
     public double getMaximumReach(boolean creative) {
         return creative ? CREATIVE_MAX_REACH : MAX_REACH;
     }
 
-    public int getChargeDelay() {
-        return this.getStats().chargeDelay();
-    }
+    public abstract int getChargeDelay();
+
+    public abstract int getJabCooldown();
+
+    protected abstract double getChargeDamageMultiplier();
+
+    protected abstract int getChargeDamageDuration();
+
+    protected abstract int getChargeKnockbackDuration();
+
+    protected abstract int getChargeDismountDuration();
+
+    protected abstract double getChargeDismountSpeed();
 
     public boolean canDealChargeDamage(int ticksUsed, double relativeSpeed) {
-        SpearStats stats = this.getStats();
-        return ticksUsed >= stats.chargeDelay()
-                && ticksUsed <= stats.damageDuration()
+        return ticksUsed >= this.getChargeDelay()
+                && ticksUsed <= this.getChargeDamageDuration()
                 && relativeSpeed >= MIN_RELATIVE_SPEED;
     }
 
     public boolean canChargeKnockBack(int ticksUsed, double forwardSpeed) {
-        return ticksUsed >= this.getStats().chargeDelay()
-                && ticksUsed <= this.getStats().knockbackDuration()
+        return ticksUsed >= this.getChargeDelay()
+                && ticksUsed <= this.getChargeKnockbackDuration()
                 && forwardSpeed >= MIN_KNOCKBACK_SPEED;
     }
 
     public boolean canChargeDismount(int ticksUsed, double forwardSpeed) {
-        SpearStats stats = this.getStats();
-        return ticksUsed >= stats.chargeDelay()
-                && ticksUsed <= stats.dismountDuration()
-                && forwardSpeed >= stats.dismountSpeed();
+        return ticksUsed >= this.getChargeDelay()
+                && ticksUsed <= this.getChargeDismountDuration()
+                && forwardSpeed >= this.getChargeDismountSpeed();
     }
     
     public int getChargeDamage(double relativeSpeed) {
-        return this.getAttackDamage() + (int) Math.floor(relativeSpeed * this.getStats().damageMultiplier());
-    }
-
-    public int getAttackHitSound() {
-        return switch (this.getNamespaceId()) {
-            case WOODEN_SPEAR -> LevelSoundEventPacket.SOUND_WOODEN_SPEAR_ATTACK_HIT;
-            case STONE_SPEAR -> LevelSoundEventPacket.SOUND_STONE_SPEAR_ATTACK_HIT;
-            case COPPER_SPEAR -> LevelSoundEventPacket.SOUND_COPPER_SPEAR_ATTACK_HIT;
-            case IRON_SPEAR -> LevelSoundEventPacket.SOUND_IRON_SPEAR_ATTACK_HIT;
-            case GOLDEN_SPEAR -> LevelSoundEventPacket.SOUND_GOLDEN_SPEAR_ATTACK_HIT;
-            case DIAMOND_SPEAR -> LevelSoundEventPacket.SOUND_DIAMOND_SPEAR_ATTACK_HIT;
-            case NETHERITE_SPEAR -> LevelSoundEventPacket.SOUND_NETHERITE_SPEAR_ATTACK_HIT;
-            default -> LevelSoundEventPacket.SOUND_SPEAR_ATTACK_HIT;
-        };
-    }
-
-    public int getAttackMissSound() {
-        return switch (this.getNamespaceId()) {
-            case WOODEN_SPEAR -> LevelSoundEventPacket.SOUND_WOODEN_SPEAR_ATTACK_MISS;
-            case STONE_SPEAR -> LevelSoundEventPacket.SOUND_STONE_SPEAR_ATTACK_MISS;
-            case COPPER_SPEAR -> LevelSoundEventPacket.SOUND_COPPER_SPEAR_ATTACK_MISS;
-            case IRON_SPEAR -> LevelSoundEventPacket.SOUND_IRON_SPEAR_ATTACK_MISS;
-            case GOLDEN_SPEAR -> LevelSoundEventPacket.SOUND_GOLDEN_SPEAR_ATTACK_MISS;
-            case DIAMOND_SPEAR -> LevelSoundEventPacket.SOUND_DIAMOND_SPEAR_ATTACK_MISS;
-            case NETHERITE_SPEAR -> LevelSoundEventPacket.SOUND_NETHERITE_SPEAR_ATTACK_MISS;
-            default -> LevelSoundEventPacket.SOUND_SPEAR_ATTACK_MISS;
-        };
+        return this.getAttackDamage() + (int) Math.floor(relativeSpeed * this.getChargeDamageMultiplier());
     }
 
     public int attackInView(Player player, boolean kinetic) {
@@ -150,7 +113,7 @@ public abstract class ItemSpear extends StringItemToolBase {
             }
 
             double distance = start.distance(collision.hitVector);
-            if (distance < this.getMinimumReach() || distance > maximumReach) {
+            if (distance < MIN_REACH || distance > maximumReach) {
                 continue;
             }
 
@@ -202,35 +165,43 @@ public abstract class ItemSpear extends StringItemToolBase {
         return hitCount;
     }
 
+    public int getAttackHitSound() {
+        return switch (this.getTier()) {
+            case ItemTool.TIER_WOODEN -> LevelSoundEventPacket.SOUND_WOODEN_SPEAR_ATTACK_HIT;
+            case ItemTool.TIER_STONE -> LevelSoundEventPacket.SOUND_STONE_SPEAR_ATTACK_HIT;
+            case ItemTool.TIER_COPPER -> LevelSoundEventPacket.SOUND_COPPER_SPEAR_ATTACK_HIT;
+            case ItemTool.TIER_IRON -> LevelSoundEventPacket.SOUND_IRON_SPEAR_ATTACK_HIT;
+            case ItemTool.TIER_GOLD -> LevelSoundEventPacket.SOUND_GOLDEN_SPEAR_ATTACK_HIT;
+            case ItemTool.TIER_DIAMOND -> LevelSoundEventPacket.SOUND_DIAMOND_SPEAR_ATTACK_HIT;
+            case ItemTool.TIER_NETHERITE -> LevelSoundEventPacket.SOUND_NETHERITE_SPEAR_ATTACK_HIT;
+            default -> LevelSoundEventPacket.SOUND_SPEAR_ATTACK_HIT;
+        };
+    }
+
+    public int getAttackMissSound() {
+        return switch (this.getTier()) {
+            case ItemTool.TIER_WOODEN -> LevelSoundEventPacket.SOUND_WOODEN_SPEAR_ATTACK_MISS;
+            case ItemTool.TIER_STONE -> LevelSoundEventPacket.SOUND_STONE_SPEAR_ATTACK_MISS;
+            case ItemTool.TIER_COPPER -> LevelSoundEventPacket.SOUND_COPPER_SPEAR_ATTACK_MISS;
+            case ItemTool.TIER_IRON -> LevelSoundEventPacket.SOUND_IRON_SPEAR_ATTACK_MISS;
+            case ItemTool.TIER_GOLD -> LevelSoundEventPacket.SOUND_GOLDEN_SPEAR_ATTACK_MISS;
+            case ItemTool.TIER_DIAMOND -> LevelSoundEventPacket.SOUND_DIAMOND_SPEAR_ATTACK_MISS;
+            case ItemTool.TIER_NETHERITE -> LevelSoundEventPacket.SOUND_NETHERITE_SPEAR_ATTACK_MISS;
+            default -> LevelSoundEventPacket.SOUND_SPEAR_ATTACK_MISS;
+        };
+    }
+
     private int getUseSound() {
-        return switch (this.getNamespaceId()) {
-            case WOODEN_SPEAR -> LevelSoundEventPacket.SOUND_WOODEN_SPEAR_USE;
-            case STONE_SPEAR -> LevelSoundEventPacket.SOUND_STONE_SPEAR_USE;
-            case COPPER_SPEAR -> LevelSoundEventPacket.SOUND_COPPER_SPEAR_USE;
-            case IRON_SPEAR -> LevelSoundEventPacket.SOUND_IRON_SPEAR_USE;
-            case GOLDEN_SPEAR -> LevelSoundEventPacket.SOUND_GOLDEN_SPEAR_USE;
-            case DIAMOND_SPEAR -> LevelSoundEventPacket.SOUND_DIAMOND_SPEAR_USE;
-            case NETHERITE_SPEAR -> LevelSoundEventPacket.SOUND_NETHERITE_SPEAR_USE;
+        return switch (this.getTier()) {
+            case ItemTool.TIER_WOODEN -> LevelSoundEventPacket.SOUND_WOODEN_SPEAR_USE;
+            case ItemTool.TIER_STONE -> LevelSoundEventPacket.SOUND_STONE_SPEAR_USE;
+            case ItemTool.TIER_COPPER -> LevelSoundEventPacket.SOUND_COPPER_SPEAR_USE;
+            case ItemTool.TIER_IRON -> LevelSoundEventPacket.SOUND_IRON_SPEAR_USE;
+            case ItemTool.TIER_GOLD -> LevelSoundEventPacket.SOUND_GOLDEN_SPEAR_USE;
+            case ItemTool.TIER_DIAMOND -> LevelSoundEventPacket.SOUND_DIAMOND_SPEAR_USE;
+            case ItemTool.TIER_NETHERITE -> LevelSoundEventPacket.SOUND_NETHERITE_SPEAR_USE;
             default -> LevelSoundEventPacket.SOUND_SPEAR_USE;
         };
-    }
-
-    private SpearStats getStats() {
-        return switch (this.getNamespaceId()) {
-            case WOODEN_SPEAR -> new SpearStats(1, 60, ItemTool.TIER_WOODEN, 13, 15, 0.70, 300, 200, 100, 14.0);
-            case STONE_SPEAR -> new SpearStats(2, 130, ItemTool.TIER_STONE, 15, 14, 0.82, 275, 180, 90, 13.0);
-            case COPPER_SPEAR -> new SpearStats(2, 190, ItemTool.TIER_COPPER, 17, 13, 0.82, 250, 165, 80, 12.0);
-            case IRON_SPEAR -> new SpearStats(3, 250, ItemTool.TIER_IRON, 19, 12, 0.95, 225, 135, 50, 11.0);
-            case GOLDEN_SPEAR -> new SpearStats(1, 30, ItemTool.TIER_GOLD, 19, 14, 0.70, 275, 170, 70, 13.0);
-            case DIAMOND_SPEAR -> new SpearStats(4, 1560, ItemTool.TIER_DIAMOND, 21, 10, 1.075, 200, 130, 60, 10.0);
-            case NETHERITE_SPEAR -> new SpearStats(5, 2030, ItemTool.TIER_NETHERITE, 23, 8, 1.20, 175, 110, 50, 9.0);
-            default -> throw new IllegalStateException("Unknown spear type: " + this.getNamespaceId());
-        };
-    }
-
-    private record SpearStats(int damage, int durability, int tier, int jabCooldown, int chargeDelay,
-                              double damageMultiplier, int damageDuration, int knockbackDuration,
-                              int dismountDuration, double dismountSpeed) {
     }
 
     @Override
