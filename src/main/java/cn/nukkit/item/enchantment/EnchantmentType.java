@@ -22,7 +22,8 @@ public enum EnchantmentType {
     WEARABLE,
     TRIDENT,
     CROSSBOW,
-    MACE;
+    MACE,
+    SPEAR;
 
     public boolean canEnchantItem(Item item) {
         if (this == ALL) {

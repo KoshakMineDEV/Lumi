@@ -5,6 +5,7 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentID;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.MovingObjectPosition;
 import cn.nukkit.math.AxisAlignedBB;
@@ -20,8 +21,9 @@ public abstract class ItemSpear extends StringItemToolBase {
     private static final double MIN_REACH = 2.0;
     private static final double MAX_REACH = 4.5;
     private static final double CREATIVE_MAX_REACH = 7.5;
-    private static final double MIN_RELATIVE_SPEED = 4.6;
+    private static final double MIN_RELATIVE_SPEED = 5.6;
     private static final double MIN_KNOCKBACK_SPEED = 5.1;
+    public int MINIMUM_LUNGE_FOOD = 7;
 
     public ItemSpear(String id, String name) {
         super(id, name);
@@ -96,7 +98,14 @@ public abstract class ItemSpear extends StringItemToolBase {
         int ticksUsed = kinetic ? player.getServer().getTick() - player.getStartActionTick() : 0;
         int hitCount = 0;
 
-        for (Entity target : player.getLevel().getEntities()) {
+        if(!kinetic && canLunge(player)) {
+            applyLunge(player);
+        }
+
+        double maxReach = getMaximumReach(player.isCreative());
+        AxisAlignedBB searchBox = player.getBoundingBox().grow(maxReach, maxReach, maxReach);
+
+        for (Entity target : player.getLevel().getNearbyEntities(searchBox, player)) {
             if (target == player || !target.isAlive()) {
                 continue;
             }
@@ -140,6 +149,7 @@ public abstract class ItemSpear extends StringItemToolBase {
             EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
                     player, target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, modifiers, knockBack, enchantments
             );
+            event.setAttackCooldown(0);
             event.setBreakShield(this.canBreakShield());
 
             if (!target.attack(event)) {
@@ -163,6 +173,39 @@ public abstract class ItemSpear extends StringItemToolBase {
         }
 
         return hitCount;
+    }
+
+    public void applyLunge(Player player) {
+        int lungeLevel = getEnchantmentLevel(EnchantmentID.ID_LUNGE);
+        Vector3 dir = player.getDirectionVector();
+        dir.y = 0;
+
+        if (dir.lengthSquared() == 0) return;
+
+        dir = dir.normalize().multiply(0.5 + (lungeLevel * 0.4));
+
+        player.setMotion(player.getMotion().add(dir));
+        player.getLevel().addLevelSoundEvent(player, LevelSoundEventPacket.SOUND_LUNGE_3);
+        if(player.getGamemode() == Player.SURVIVAL || player.getGamemode() == Player.ADVENTURE) {
+            if(getDamage() < getMaxDurability()) {
+                setDamage(getDamage() + 1);
+            }
+            player.getFoodData().exhaust(lungeLevel);
+        }
+    }
+
+    public boolean canLunge(Player player) {
+        int playerGamemode = player.getGamemode();
+        int enchantmentLevel = getEnchantmentLevel(Enchantment.ID_LUNGE);
+
+        if (player.isGliding() || player.isSwimming() || player.isInsideOfWater()) {
+            return false;
+        }
+
+        if ((playerGamemode == Player.SURVIVAL || playerGamemode == Player.ADVENTURE) && player.getFoodData().getFood() < MINIMUM_LUNGE_FOOD) {
+            return false;
+        }
+        return enchantmentLevel > 0;
     }
 
     public int getAttackHitSound() {
