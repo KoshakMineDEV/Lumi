@@ -465,6 +465,9 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
         if (distSqr == 0.0
                 && packet.getYaw() % 360 == player.yaw
                 && packet.getPitch() % 360 == player.pitch) {
+            if (!ignoreCoordinateMove && handle.getRiding() == null) {
+                handle.setMovementVelocity(packet.getDelta().asVector3());
+            }
             return;
         }
 
@@ -514,6 +517,9 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
             handle.setRotation(yaw, pitch, headYaw);
 
             if (!ignoreCoordinateMove) {
+                if (handle.getRiding() == null) {
+                    handle.setMovementVelocity(packet.getDelta().asVector3());
+                }
                 handle.setNewPosition(clientPosition);
             }
 

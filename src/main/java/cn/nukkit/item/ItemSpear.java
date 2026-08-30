@@ -1,29 +1,44 @@
 package cn.nukkit.item;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.enchantment.Enchantment;
-import cn.nukkit.item.enchantment.EnchantmentID;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.MovingObjectPosition;
+import cn.nukkit.level.Sound;
+import cn.nukkit.level.particle.ItemBreakParticle;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 public abstract class ItemSpear extends StringItemToolBase {
 
     private static final double MIN_REACH = 2.0;
     private static final double MAX_REACH = 4.5;
     private static final double CREATIVE_MAX_REACH = 7.5;
-    private static final double MIN_RELATIVE_SPEED = 5.6;
+    private static final double TARGET_MARGIN = 0.125;
+    private static final double MIN_RELATIVE_SPEED = 4.6;
     private static final double MIN_KNOCKBACK_SPEED = 5.1;
-    public int MINIMUM_LUNGE_FOOD = 7;
+    private static final int MINIMUM_LUNGE_FOOD = 7;
+    private static final int CHARGE_CONTACT_COOLDOWN = 10;
+    private static final float BASE_CHARGE_DAMAGE = 1;
+    private static final float BASE_KNOCKBACK = 0.3f;
+    private static final float KNOCKBACK_PER_LEVEL = 0.1f;
+    private static final double LUNGE_IMPULSE_PER_LEVEL = 0.458;
+    private static final double LUNGE_EXHAUSTION_PER_LEVEL = 4;
+    private static final double NO_COLLISION_DISTANCE = -1;
+    private static final Map<Player, SpearAttackState> PLAYER_ATTACK_STATES = new WeakHashMap<>();
 
     public ItemSpear(String id, String name) {
         super(id, name);
@@ -69,60 +84,66 @@ public abstract class ItemSpear extends StringItemToolBase {
     protected abstract double getChargeDismountSpeed();
 
     public boolean canDealChargeDamage(int ticksUsed, double relativeSpeed) {
-        return ticksUsed >= this.getChargeDelay()
-                && ticksUsed <= this.getChargeDamageDuration()
+        int activeTicks = this.getActiveChargeTicks(ticksUsed);
+        return activeTicks >= 0
+                && activeTicks <= this.getChargeDamageDuration()
                 && relativeSpeed >= MIN_RELATIVE_SPEED;
     }
 
     public boolean canChargeKnockBack(int ticksUsed, double forwardSpeed) {
-        return ticksUsed >= this.getChargeDelay()
-                && ticksUsed <= this.getChargeKnockbackDuration()
+        int activeTicks = this.getActiveChargeTicks(ticksUsed);
+        return activeTicks >= 0
+                && activeTicks <= this.getChargeKnockbackDuration()
                 && forwardSpeed >= MIN_KNOCKBACK_SPEED;
     }
 
     public boolean canChargeDismount(int ticksUsed, double forwardSpeed) {
-        return ticksUsed >= this.getChargeDelay()
-                && ticksUsed <= this.getChargeDismountDuration()
+        int activeTicks = this.getActiveChargeTicks(ticksUsed);
+        return activeTicks >= 0
+                && activeTicks <= this.getChargeDismountDuration()
                 && forwardSpeed >= this.getChargeDismountSpeed();
     }
-    
-    public int getChargeDamage(double relativeSpeed) {
-        return this.getAttackDamage() + (int) Math.floor(relativeSpeed * this.getChargeDamageMultiplier());
+
+    private int getActiveChargeTicks(int ticksUsed) {
+        return ticksUsed - this.getChargeDelay();
     }
 
-    public int attackInView(Player player, boolean kinetic) {
-        Vector3 start = player.getEyePosition();
-        Vector3 direction = player.getDirectionVector();
-        double maximumReach = this.getMaximumReach(player.isCreative());
-        Vector3 end = start.add(direction.multiply(maximumReach));
-        int ticksUsed = kinetic ? player.getServer().getTick() - player.getStartActionTick() : 0;
-        int hitCount = 0;
+    public int getChargeDamage(double relativeSpeed) {
+        return (int) (BASE_CHARGE_DAMAGE + Math.floor(relativeSpeed * this.getChargeDamageMultiplier()));
+    }
 
-        if(!kinetic && canLunge(player)) {
-            applyLunge(player);
+    public int jabAttackInView(Player player) {
+        int currentTick = player.getServer().getTick();
+        SpearAttackState state = getAttackState(player);
+        if (!state.tryStartJab(currentTick, this.getJabCooldown())) {
+            return -1;
         }
 
-        double maxReach = getMaximumReach(player.isCreative());
-        AxisAlignedBB searchBox = player.getBoundingBox().grow(maxReach, maxReach, maxReach);
+        if (this.canLunge(player)) {
+            this.applyLunge(player);
+        }
 
-        for (Entity target : player.getLevel().getNearbyEntities(searchBox, player)) {
-            if (target == player || !target.isAlive()) {
-                continue;
+        int hitCount = 0;
+        for (Entity target : this.getTargetsInView(player)) {
+            if (this.attackTarget(player, target, this.getAttackDamage(player), AttackEffects.JAB, AttackType.JAB)) {
+                hitCount++;
             }
+        }
+        return hitCount;
+    }
 
-            if (target instanceof Player targetPlayer
-                    && (targetPlayer.isSpectator() || !player.getLevel().getGameRules().getBoolean(GameRule.PVP))) {
-                continue;
-            }
+    public int chargeAttackInView(Player player) {
+        int currentTick = player.getServer().getTick();
+        int ticksUsed = currentTick - player.getStartActionTick();
+        Vector3 direction = player.getDirectionVector();
+        double forwardSpeed = this.getForwardSpeedInBlocksPerSecond(player, direction);
+        SpearAttackState state = getAttackState(player);
+        state.removeExpiredChargeContacts(currentTick);
 
-            AxisAlignedBB hitbox = target.boundingBox.grow(0.25, 0.25, 0.25);
-            MovingObjectPosition collision = hitbox.calculateIntercept(start, end);
-            if (collision == null) {
-                continue;
-            }
 
-            double distance = start.distance(collision.hitVector);
-            if (distance < MIN_REACH || distance > maximumReach) {
+        int hitCount = 0;
+        for (Entity target : this.getTargetsInView(player)) {
+            if (state.hasRecentChargeContact(target, currentTick)) {
                 continue;
             }
 
@@ -130,82 +151,354 @@ public abstract class ItemSpear extends StringItemToolBase {
                     ? player.getMotion().multiply(20)
                     : player.speed.multiply(-20);
             Vector3 targetVelocity = target.getMotion().multiply(20);
-            double forwardSpeed = playerVelocity.dot(direction);
-            double relativeSpeed = playerVelocity.subtract(targetVelocity).dot(direction);
-            boolean chargedHit = kinetic && this.canDealChargeDamage(ticksUsed, relativeSpeed);
-            if (kinetic && !chargedHit) {
+
+            player.sendMessage(playerVelocity.dot(direction) + " " + playerVelocity.subtract(targetVelocity).dot(direction));
+
+            
+            double targetForwardSpeed = this.getForwardSpeedInBlocksPerSecond(target, direction);
+            double relativeSpeed = Math.max(0, forwardSpeed - targetForwardSpeed);
+            AttackEffects effects = this.getChargeEffects(ticksUsed, relativeSpeed, forwardSpeed);
+            if (!effects.hasAny()) {
                 continue;
             }
 
-            float damage = chargedHit ? this.getChargeDamage(relativeSpeed) : this.getAttackDamage(player);
-            Enchantment[] enchantments = this.getEnchantments();
-            for (Enchantment enchantment : enchantments) {
-                damage += (float) enchantment.getDamageBonus(target, player);
+            state.rememberChargeContact(target, currentTick);
+            player.sendMessage("relative speed" + relativeSpeed);
+            float damage = effects.dealsDamage() ? this.getChargeDamage(relativeSpeed) : 0;
+            if (this.attackTarget(player, target, damage, effects, AttackType.CHARGE)) {
+                hitCount++;
             }
-
-            Map<EntityDamageEvent.DamageModifier, Float> modifiers = new EnumMap<>(EntityDamageEvent.DamageModifier.class);
-            modifiers.put(EntityDamageEvent.DamageModifier.BASE, damage);
-            float knockBack = chargedHit && !this.canChargeKnockBack(ticksUsed, forwardSpeed) ? 0 : 0.3f;
-            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
-                    player, target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, modifiers, knockBack, enchantments
-            );
-            event.setAttackCooldown(0);
-            event.setBreakShield(this.canBreakShield());
-
-            if (!target.attack(event)) {
-                continue;
-            }
-
-            if (chargedHit && this.canChargeDismount(ticksUsed, forwardSpeed) && target.getRiding() != null) {
-                target.getRiding().dismountEntity(target);
-            }
-
-            player.getLevel().addLevelSoundEvent(target, this.getAttackHitSound());
-            for (Enchantment enchantment : enchantments) {
-                enchantment.doPostAttack(player, target);
-            }
-
-            if (!player.isCreative()) {
-                this.useOn(target);
-                player.getInventory().setItemInHand(this);
-            }
-            hitCount++;
         }
-
         return hitCount;
     }
 
-    public void applyLunge(Player player) {
-        int lungeLevel = getEnchantmentLevel(EnchantmentID.ID_LUNGE);
-        Vector3 dir = player.getDirectionVector();
-        dir.y = 0;
+    private AttackEffects getChargeEffects(int ticksUsed, double relativeSpeed, double forwardSpeed) {
+        return new AttackEffects(
+                this.canDealChargeDamage(ticksUsed, relativeSpeed),
+                this.canChargeKnockBack(ticksUsed, forwardSpeed),
+                this.canChargeDismount(ticksUsed, forwardSpeed)
+        );
+    }
 
-        if (dir.lengthSquared() == 0) return;
+    private List<Entity> getTargetsInView(Player player) {
+        Vector3 start = player.getEyePosition();
+        Vector3 direction = player.getDirectionVector();
+        double maximumReach = this.getMaximumReach(player.isCreative());
+        Vector3 end = start.add(direction.multiply(maximumReach));
+        double blockDistance = this.getFirstBlockingDistance(player, start, end, direction, maximumReach);
+        AxisAlignedBB searchBox = player.getBoundingBox().grow(maximumReach, maximumReach, maximumReach);
+        List<Entity> targets = new ArrayList<>();
 
-        dir = dir.normalize().multiply(0.5 + (lungeLevel * 0.4));
-
-        player.setMotion(player.getMotion().add(dir));
-        player.getLevel().addLevelSoundEvent(player, LevelSoundEventPacket.SOUND_LUNGE_3);
-        if(player.getGamemode() == Player.SURVIVAL || player.getGamemode() == Player.ADVENTURE) {
-            if(getDamage() < getMaxDurability()) {
-                setDamage(getDamage() + 1);
+        for (Entity target : player.getLevel().getNearbyEntities(searchBox, player)) {
+            if (!this.isValidTarget(player, target)) {
+                continue;
             }
-            player.getFoodData().exhaust(lungeLevel);
+
+            double hitDistance = this.getTargetHitDistance(target, start, end);
+            if (hitDistance < MIN_REACH || hitDistance > blockDistance) {
+                continue;
+            }
+
+            targets.add(target);
+        }
+
+        return targets;
+    }
+
+    private boolean isValidTarget(Player attacker, Entity target) {
+        if (target == attacker || !target.isAlive() || this.sharesVehicle(attacker, target)) {
+            return false;
+        }
+        return !(target instanceof Player player)
+                || (!player.isSpectator() && attacker.getLevel().getGameRules().getBoolean(GameRule.PVP));
+    }
+
+    private double getTargetHitDistance(Entity target, Vector3 start, Vector3 end) {
+        AxisAlignedBB hitbox = target.boundingBox.grow(TARGET_MARGIN, TARGET_MARGIN, TARGET_MARGIN);
+        MovingObjectPosition collision = hitbox.calculateIntercept(start, end);
+        return collision == null ? Double.POSITIVE_INFINITY : start.distance(collision.hitVector);
+    }
+
+    private double getFirstBlockingDistance(Player player, Vector3 start, Vector3 end,
+                                            Vector3 direction, double maximumReach) {
+        BlockRayTraversal ray = new BlockRayTraversal(start, direction);
+        while (ray.isWithin(maximumReach)) {
+            Block block = player.getLevel().getBlock(ray.blockX, ray.blockY, ray.blockZ);
+            double collisionDistance = this.getBlockCollisionDistance(block, start, end);
+            if (collisionDistance != NO_COLLISION_DISTANCE) {
+                return Math.min(maximumReach, collisionDistance);
+            }
+            ray.advance();
+        }
+        return maximumReach;
+    }
+
+    private double getBlockCollisionDistance(Block block, Vector3 start, Vector3 end) {
+        AxisAlignedBB collisionBox = block.getCollisionBoundingBox();
+        if (block.canPassThrough() || collisionBox == null) {
+            return NO_COLLISION_DISTANCE;
+        }
+        if (collisionBox.isVectorInside(start)) {
+            return 0;
+        }
+
+        MovingObjectPosition collision = collisionBox.calculateIntercept(start, end);
+        return collision == null ? NO_COLLISION_DISTANCE : start.distance(collision.hitVector);
+    }
+
+    private boolean sharesVehicle(Entity attacker, Entity target) {
+        Entity attackerRoot = this.getRootVehicle(attacker);
+        Entity targetRoot = this.getRootVehicle(target);
+        return attackerRoot == targetRoot && (attackerRoot != attacker || targetRoot != target);
+    }
+
+    private Entity getRootVehicle(Entity entity) {
+        Entity root = entity;
+        while (root.getRiding() != null) {
+            root = root.getRiding();
+        }
+        return root;
+    }
+
+    private double getForwardSpeedInBlocksPerSecond(Entity entity, Vector3 direction) {
+        Entity movingEntity = entity;
+        if (!(entity instanceof Player) && entity.getRiding() != null) {
+            movingEntity = this.getRootVehicle(entity);
+        }
+        Vector3 velocity = movingEntity instanceof Player movingPlayer
+                ? movingPlayer.getMovementVelocity()
+                : movingEntity.getMotion().multiply(20);
+        return velocity.dot(direction);
+    }
+
+    private boolean attackTarget(Player player, Entity target, float baseDamage,
+                                 AttackEffects effects, AttackType attackType) {
+        Enchantment[] enchantments = effects.dealsDamage() ? this.getEnchantments() : Enchantment.EMPTY_ARRAY;
+        float damage = this.addEnchantmentDamage(baseDamage, player, target, enchantments);
+        float knockBack = this.getKnockBack(effects.knocksBack());
+        Map<EntityDamageEvent.DamageModifier, Float> modifiers = new EnumMap<>(EntityDamageEvent.DamageModifier.class);
+        modifiers.put(EntityDamageEvent.DamageModifier.BASE, damage);
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                player, target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, modifiers, knockBack, enchantments
+        );
+        event.setAttackCooldown(0);
+        event.setBreakShield(this.canBreakShield());
+        event.setCriticalAllowed(false);
+
+        if (!target.attack(event)) {
+            return false;
+        }
+
+        if (effects.dismounts() && target.getRiding() != null) {
+            target.getRiding().dismountEntity(target);
+        }
+
+        this.playHitSound(player, target, attackType);
+        if (effects.dealsDamage()) {
+            for (Enchantment enchantment : enchantments) {
+                enchantment.doPostAttack(player, target);
+            }
+        }
+
+        player.sendMessage(event.getDamage() + "");
+
+        if (!player.isCreative()) {
+            this.damageSpear(player);
+        }
+        return true;
+    }
+
+    private float addEnchantmentDamage(float damage, Player player, Entity target,
+                                       Enchantment[] enchantments) {
+        for (Enchantment enchantment : enchantments) {
+            damage += (float) enchantment.getDamageBonus(target, player);
+        }
+        return damage;
+    }
+
+    private float getKnockBack(boolean knocksBack) {
+        if (!knocksBack) {
+            return 0;
+        }
+
+        Enchantment enchantment = this.getEnchantment(Enchantment.ID_KNOCKBACK);
+        return enchantment == null
+                ? BASE_KNOCKBACK
+                : BASE_KNOCKBACK + enchantment.getLevel() * KNOCKBACK_PER_LEVEL;
+    }
+
+    private void playHitSound(Player player, Entity target, AttackType attackType) {
+        if (attackType == AttackType.CHARGE) {
+            player.getLevel().addSoundToViewers(target, this.getChargeHitSound());
+        } else {
+            player.getLevel().addLevelSoundEvent(target, this.getAttackHitSound());
         }
     }
 
+    private void damageSpear(Player player) {
+        this.useOn((Entity) null);
+        if (this.getDamage() >= this.getMaxDurability()) {
+            player.getLevel().addSoundToViewers(player, Sound.RANDOM_BREAK);
+            player.getLevel().addParticle(new ItemBreakParticle(player, this));
+            player.getInventory().setItemInHand(Item.get(0));
+        } else {
+            player.getInventory().setItemInHand(this);
+        }
+    }
+
+    public void applyLunge(Player player) {
+        int lungeLevel = this.getEnchantmentLevel(Enchantment.ID_LUNGE);
+        Vector3 direction = player.getDirectionVector();
+        direction.y = 0;
+
+        if (direction.lengthSquared() == 0) {
+            return;
+        }
+
+        Vector3 impulse = direction.multiply(LUNGE_IMPULSE_PER_LEVEL * lungeLevel);
+        player.setMotion(player.getMotion().add(impulse));
+        player.getLevel().addLevelSoundEvent(player, getLungeSound(lungeLevel));
+
+        if (player.isSurvival() || player.isAdventure()) {
+            this.damageSpear(player);
+            player.getFoodData().exhaust(lungeLevel * LUNGE_EXHAUSTION_PER_LEVEL);
+        }
+    }
+
+    private static int getLungeSound(int lungeLevel) {
+        return switch (Math.min(lungeLevel, 3)) {
+            case 1 -> LevelSoundEventPacket.SOUND_LUNGE_1;
+            case 2 -> LevelSoundEventPacket.SOUND_LUNGE_2;
+            default -> LevelSoundEventPacket.SOUND_LUNGE_3;
+        };
+    }
+
     public boolean canLunge(Player player) {
-        int playerGamemode = player.getGamemode();
-        int enchantmentLevel = getEnchantmentLevel(Enchantment.ID_LUNGE);
-
-        if (player.isGliding() || player.isSwimming() || player.isInsideOfWater()) {
+        if (player.getRiding() != null || player.isGliding() || player.isSwimming() || player.isInsideOfWater()) {
             return false;
         }
 
-        if ((playerGamemode == Player.SURVIVAL || playerGamemode == Player.ADVENTURE) && player.getFoodData().getFood() < MINIMUM_LUNGE_FOOD) {
+        if ((player.isSurvival() || player.isAdventure())
+                && player.getFoodData().getFood() < MINIMUM_LUNGE_FOOD) {
             return false;
         }
-        return enchantmentLevel > 0;
+        return this.getEnchantmentLevel(Enchantment.ID_LUNGE) > 0;
+    }
+
+    private static SpearAttackState getAttackState(Player player) {
+        return PLAYER_ATTACK_STATES.computeIfAbsent(player, ignored -> new SpearAttackState());
+    }
+
+    private enum AttackType {
+        JAB,
+        CHARGE
+    }
+
+    private record AttackEffects(boolean dealsDamage, boolean knocksBack, boolean dismounts) {
+
+        private static final AttackEffects JAB = new AttackEffects(true, true, false);
+
+        private boolean hasAny() {
+            return this.dealsDamage || this.knocksBack || this.dismounts;
+        }
+    }
+
+    private static final class SpearAttackState {
+
+        private int jabCooldownUntil;
+        private final Map<Long, Integer> chargeContacts = new HashMap<>();
+
+        private boolean tryStartJab(int currentTick, int cooldown) {
+            if (currentTick < this.jabCooldownUntil) {
+                return false;
+            }
+            this.jabCooldownUntil = currentTick + cooldown;
+            return true;
+        }
+
+        private void removeExpiredChargeContacts(int currentTick) {
+            this.chargeContacts.values().removeIf(
+                    lastTick -> currentTick - lastTick >= CHARGE_CONTACT_COOLDOWN
+            );
+        }
+
+        private boolean hasRecentChargeContact(Entity target, int currentTick) {
+            Integer lastTick = this.chargeContacts.get(target.getId());
+            return lastTick != null && currentTick - lastTick < CHARGE_CONTACT_COOLDOWN;
+        }
+
+        private void rememberChargeContact(Entity target, int currentTick) {
+            this.chargeContacts.put(target.getId(), currentTick);
+        }
+    }
+
+    /** Safely walks through every voxel crossed by a ray. */
+    private static final class BlockRayTraversal {
+
+        private int blockX;
+        private int blockY;
+        private int blockZ;
+        private final int stepX;
+        private final int stepY;
+        private final int stepZ;
+        private final double deltaX;
+        private final double deltaY;
+        private final double deltaZ;
+        private double nextX;
+        private double nextY;
+        private double nextZ;
+        private double travelled;
+
+        private BlockRayTraversal(Vector3 start, Vector3 direction) {
+            this.blockX = start.getFloorX();
+            this.blockY = start.getFloorY();
+            this.blockZ = start.getFloorZ();
+            this.stepX = Double.compare(direction.x, 0);
+            this.stepY = Double.compare(direction.y, 0);
+            this.stepZ = Double.compare(direction.z, 0);
+            this.deltaX = getBoundaryInterval(direction.x, this.stepX);
+            this.deltaY = getBoundaryInterval(direction.y, this.stepY);
+            this.deltaZ = getBoundaryInterval(direction.z, this.stepZ);
+            this.nextX = getFirstBoundaryDistance(start.x, this.blockX, direction.x, this.stepX);
+            this.nextY = getFirstBoundaryDistance(start.y, this.blockY, direction.y, this.stepY);
+            this.nextZ = getFirstBoundaryDistance(start.z, this.blockZ, direction.z, this.stepZ);
+        }
+
+        private boolean isWithin(double maximumDistance) {
+            return this.travelled <= maximumDistance;
+        }
+
+        private void advance() {
+            double nextBoundary = Math.min(this.nextX, Math.min(this.nextY, this.nextZ));
+            if (this.nextX <= nextBoundary) {
+                this.blockX += this.stepX;
+                this.nextX += this.deltaX;
+            }
+            if (this.nextY <= nextBoundary) {
+                this.blockY += this.stepY;
+                this.nextY += this.deltaY;
+            }
+            if (this.nextZ <= nextBoundary) {
+                this.blockZ += this.stepZ;
+                this.nextZ += this.deltaZ;
+            }
+            this.travelled = nextBoundary;
+        }
+
+        private static double getBoundaryInterval(double direction, int step) {
+            return step == 0 ? Double.POSITIVE_INFINITY : Math.abs(1 / direction);
+        }
+
+        private static double getFirstBoundaryDistance(double coordinate, int blockCoordinate,
+                                                       double direction, int step) {
+            if (step > 0) {
+                return (blockCoordinate + 1 - coordinate) / direction;
+            }
+            if (step < 0) {
+                return (coordinate - blockCoordinate) / -direction;
+            }
+            return Double.POSITIVE_INFINITY;
+        }
     }
 
     public int getAttackHitSound() {
@@ -219,6 +512,10 @@ public abstract class ItemSpear extends StringItemToolBase {
             case ItemTool.TIER_NETHERITE -> LevelSoundEventPacket.SOUND_NETHERITE_SPEAR_ATTACK_HIT;
             default -> LevelSoundEventPacket.SOUND_SPEAR_ATTACK_HIT;
         };
+    }
+
+    private Sound getChargeHitSound() {
+        return this.getTier() == ItemTool.TIER_WOODEN ? Sound.ITEM_WOODEN_SPEAR_HIT : Sound.ITEM_SPEAR_HIT;
     }
 
     public int getAttackMissSound() {

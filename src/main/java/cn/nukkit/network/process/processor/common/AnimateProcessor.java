@@ -53,7 +53,7 @@ public class AnimateProcessor extends DataPacketProcessor<AnimatePacket> {
             handle.player.setNoShieldTicks(NO_SHIELD_DELAY);
 
             if (handle.player.getInventory().getItemInHand() instanceof ItemSpear spear) {
-                if (spear.attackInView(handle.player, false) == 0) {
+                if (spear.jabAttackInView(handle.player) == 0) {
                     handle.player.getLevel().addLevelSoundEvent(
                             handle.player, spear.getAttackMissSound(), new Player[]{handle.player}
                     );

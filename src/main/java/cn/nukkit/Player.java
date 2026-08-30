@@ -197,6 +197,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     protected int closingWindowId = Integer.MIN_VALUE;
 
     public Vector3 speed = null;
+    private final Vector3 movementVelocity = new Vector3();
+    private int movementVelocityTick = -1;
 
     public int craftingType = CRAFTING_SMALL;
 
@@ -439,6 +441,16 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     public int getStartActionTick() {
         return startAction;
+    }
+
+    /**
+     * Returns the latest observed movement velocity in blocks per second.
+     */
+    public Vector3 getMovementVelocity() {
+        if (this.movementVelocityTick < this.server.getTick() - 1) {
+            return this.getMotion().multiply(20.0);
+        }
+        return this.movementVelocity.clone();
     }
 
     public void startAction() {
@@ -1943,6 +1955,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
             if (this.speed == null) speed = new Vector3(0, 0, 0);
             else this.speed.setComponents(0, 0, 0);
+            this.resetMovementVelocity();
             return;
         }
 
@@ -2102,6 +2115,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             } else {
                 this.speed.setComponents(0, 0, 0);
             }
+            this.resetMovementVelocity();
         } else {
             this.forceMovement = null;
 
@@ -2110,7 +2124,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             } else {
                 this.speed.setComponents(from.x - to.x, from.y - to.y, from.z - to.z);
             }
-
             if (this.riding == null && this.inventory != null) {
                 if (this.getFoodData().isEnabled() && this.server.getDifficulty() != Difficulty.PEACEFUL && distanceSquared >= 0.05) {
                     double jump = 0;
@@ -2182,6 +2195,20 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.addMovementSpeedModifier(new EntityMovementSpeedModifier("minecraft:soul_speed_enchantment", soulSpeed, EntityMovementSpeedModifier.Operation.MULTIPLY));
             }
         }
+    }
+
+    void setMovementVelocity(Vector3 velocityPerTick) {
+        this.movementVelocity.setComponents(
+                velocityPerTick.x * 20.0,
+                velocityPerTick.y * 20.0,
+                velocityPerTick.z * 20.0
+        );
+        this.movementVelocityTick = this.server.getTick();
+    }
+
+    private void resetMovementVelocity() {
+        this.movementVelocity.setComponents(0, 0, 0);
+        this.movementVelocityTick = this.server.getTick();
     }
 
     protected void resetClientMovement() {
@@ -2496,7 +2523,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             }
 
             if (this.getInventory().getItemInHand() instanceof ItemSpear spear) {
-                spear.attackInView(this, true);
+                spear.chargeAttackInView(this);
             }
         } else {
             if (noShieldTicks > 0) {
