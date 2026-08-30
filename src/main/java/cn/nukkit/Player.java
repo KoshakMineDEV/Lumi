@@ -1943,6 +1943,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
             if (this.speed == null) speed = new Vector3(0, 0, 0);
             else this.speed.setComponents(0, 0, 0);
+            this.horizontalSpeed = 0.0;
             return;
         }
 
@@ -2102,6 +2103,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             } else {
                 this.speed.setComponents(0, 0, 0);
             }
+            this.horizontalSpeed = 0.0;
         } else {
             this.forceMovement = null;
 
@@ -2110,7 +2112,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             } else {
                 this.speed.setComponents(from.x - to.x, from.y - to.y, from.z - to.z);
             }
-
             if (this.riding == null && this.inventory != null) {
                 if (this.getFoodData().isEnabled() && this.server.getDifficulty() != Difficulty.PEACEFUL && distanceSquared >= 0.05) {
                     double jump = 0;
@@ -2228,6 +2229,14 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         }
 
         return false;
+    }
+
+    /**
+     * Set player's current horizontal speed
+     * @param horizontalSpeed horizontal speed
+     */
+    protected void setHorizontalSpeed(double horizontalSpeed) {
+        this.horizontalSpeed = horizontalSpeed;
     }
 
     /**
@@ -2493,6 +2502,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             if (noShieldTicks < NO_SHIELD_DELAY) {
                 noShieldTicks = NO_SHIELD_DELAY;
                 hasUpdated = true;
+            }
+
+            if (this.getInventory().getItemInHand() instanceof ItemSpear spear) {
+                spear.chargeAttackInView(this);
             }
         } else {
             if (noShieldTicks > 0) {

@@ -13,6 +13,7 @@ import cn.nukkit.entity.item.EntityMinecartAbstract;
 import cn.nukkit.event.player.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemID;
+import cn.nukkit.item.ItemSpear;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
@@ -89,15 +90,28 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
             }
 
             if (pmse.call()) {
+                Item heldItem = player.getInventory().getItemInHand();
                 level.addLevelSoundEvent(
                         player,
-                        LevelSoundEventPacket.SOUND_ATTACK_NODAMAGE,
+                        heldItem instanceof ItemSpear spear
+                                ? spear.getAttackMissSound()
+                                : LevelSoundEventPacket.SOUND_ATTACK_NODAMAGE,
                         -1,
-                        "minecraft:player",
+                        heldItem instanceof ItemSpear ? heldItem.getNamespaceId() : "minecraft:player",
                         false,
                         false
                 );
             }
+        }
+
+        if (packet.getItemUseTransaction() != null) {
+            InventoryTransactionProcessor.INSTANCE.handle(handle, packet.getItemUseTransaction());
+        }
+
+        if (packet.getInputData().contains(AuthInputAction.START_USING_ITEM)
+                && player.getInventory().getItemInHand() instanceof ItemSpear
+                && !player.isUsingItem()) {
+            player.setUsingItem(true);
         }
 
         if (handle.isLockMovementInput()) {
@@ -194,7 +208,9 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
                 player.setSprinting(true);
             }
 
-            player.setUsingItem(false);
+            if (!(player.getInventory().getItemInHand() instanceof ItemSpear)) {
+                player.setUsingItem(false);
+            }
         }
 
         if (packet.getInputData().contains(AuthInputAction.STOP_SPRINTING)) {
@@ -449,6 +465,7 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
         if (distSqr == 0.0
                 && packet.getYaw() % 360 == player.yaw
                 && packet.getPitch() % 360 == player.pitch) {
+            handle.setHorizontalSpeed(0.0);
             return;
         }
 
@@ -487,6 +504,7 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
                     packet.getPitch(),
                     MovePlayerPacket.MODE_RESET
             );
+            handle.setHorizontalSpeed(0.0);
         } else {
             float yaw = packet.getYaw() % 360;
             float headYaw = packet.getHeadYaw() % 360;
@@ -498,6 +516,15 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
             handle.setRotation(yaw, pitch, headYaw);
 
             if (!ignoreCoordinateMove) {
+                if (handle.getRiding() == null) {
+                    double dx = clientPosition.x - player.x;
+                    double dz = clientPosition.z - player.z;
+                    double horizontalSpeed = Math.sqrt(dx * dx + dz * dz);
+
+                    Vector3 dir = player.getDirectionVector();
+                    double forward = dx * dir.x + dz * dir.z;
+                    handle.setHorizontalSpeed(forward > 0 ? horizontalSpeed : -horizontalSpeed);
+                }
                 handle.setNewPosition(clientPosition);
             }
 
@@ -516,5 +543,3 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
         return PlayerAuthInputPacket.class;
     }
 }
-
-
