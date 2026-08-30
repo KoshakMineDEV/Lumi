@@ -96,8 +96,8 @@ public final class PlayerHandle {
         player.newPosition = newPosition;
     }
 
-    public void setMovementVelocity(Vector3 velocityPerTick) {
-        player.setMovementVelocity(velocityPerTick);
+    public void setHorizontalSpeed(double horizontalSpeed) {
+        player.setHorizontalSpeed(horizontalSpeed);
     }
 
     public int getChunkRadius() {

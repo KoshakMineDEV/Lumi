@@ -14,6 +14,7 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -135,40 +136,33 @@ public abstract class ItemSpear extends StringItemToolBase {
     public int chargeAttackInView(Player player) {
         int currentTick = player.getServer().getTick();
         int ticksUsed = currentTick - player.getStartActionTick();
-        Vector3 direction = player.getDirectionVector();
-        double forwardSpeed = this.getForwardSpeedInBlocksPerSecond(player, direction);
+        double forwardSpeed = player.getHorizontalSpeed() * 20.0; // convert to BPS
         SpearAttackState state = getAttackState(player);
         state.removeExpiredChargeContacts(currentTick);
 
-
         int hitCount = 0;
+
         for (Entity target : this.getTargetsInView(player)) {
             if (state.hasRecentChargeContact(target, currentTick)) {
                 continue;
             }
 
-            Vector3 playerVelocity = player.speed == null
-                    ? player.getMotion().multiply(20)
-                    : player.speed.multiply(-20);
-            Vector3 targetVelocity = target.getMotion().multiply(20);
+            double targetSpeed = target.getHorizontalSpeed() * 20.0; // convert to BPS
+            double relativeSpeed = forwardSpeed - targetSpeed;
 
-            player.sendMessage(playerVelocity.dot(direction) + " " + playerVelocity.subtract(targetVelocity).dot(direction));
-
-            
-            double targetForwardSpeed = this.getForwardSpeedInBlocksPerSecond(target, direction);
-            double relativeSpeed = Math.max(0, forwardSpeed - targetForwardSpeed);
             AttackEffects effects = this.getChargeEffects(ticksUsed, relativeSpeed, forwardSpeed);
+
             if (!effects.hasAny()) {
                 continue;
             }
 
             state.rememberChargeContact(target, currentTick);
-            player.sendMessage("relative speed" + relativeSpeed);
             float damage = effects.dealsDamage() ? this.getChargeDamage(relativeSpeed) : 0;
             if (this.attackTarget(player, target, damage, effects, AttackType.CHARGE)) {
                 hitCount++;
             }
         }
+
         return hitCount;
     }
 
@@ -258,17 +252,6 @@ public abstract class ItemSpear extends StringItemToolBase {
             root = root.getRiding();
         }
         return root;
-    }
-
-    private double getForwardSpeedInBlocksPerSecond(Entity entity, Vector3 direction) {
-        Entity movingEntity = entity;
-        if (!(entity instanceof Player) && entity.getRiding() != null) {
-            movingEntity = this.getRootVehicle(entity);
-        }
-        Vector3 velocity = movingEntity instanceof Player movingPlayer
-                ? movingPlayer.getMovementVelocity()
-                : movingEntity.getMotion().multiply(20);
-        return velocity.dot(direction);
     }
 
     private boolean attackTarget(Player player, Entity target, float baseDamage,

@@ -465,9 +465,7 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
         if (distSqr == 0.0
                 && packet.getYaw() % 360 == player.yaw
                 && packet.getPitch() % 360 == player.pitch) {
-            if (!ignoreCoordinateMove && handle.getRiding() == null) {
-                handle.setMovementVelocity(packet.getDelta().asVector3());
-            }
+            handle.setHorizontalSpeed(0.0);
             return;
         }
 
@@ -506,6 +504,7 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
                     packet.getPitch(),
                     MovePlayerPacket.MODE_RESET
             );
+            handle.setHorizontalSpeed(0.0);
         } else {
             float yaw = packet.getYaw() % 360;
             float headYaw = packet.getHeadYaw() % 360;
@@ -518,7 +517,13 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
 
             if (!ignoreCoordinateMove) {
                 if (handle.getRiding() == null) {
-                    handle.setMovementVelocity(packet.getDelta().asVector3());
+                    double dx = clientPosition.x - player.x;
+                    double dz = clientPosition.z - player.z;
+                    double horizontalSpeed = Math.sqrt(dx * dx + dz * dz);
+
+                    Vector3 dir = player.getDirectionVector();
+                    double forward = dx * dir.x + dz * dir.z;
+                    handle.setHorizontalSpeed(forward > 0 ? horizontalSpeed : -horizontalSpeed);
                 }
                 handle.setNewPosition(clientPosition);
             }
