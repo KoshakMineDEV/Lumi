@@ -5,6 +5,7 @@ import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.impl.PersistentDataContainerBlockEntity;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityRideable;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
@@ -34,6 +35,7 @@ import java.util.Map;
 public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     protected Long2ObjectNonBlockingMap<Entity> entities;
+    protected Long2ObjectNonBlockingMap<Entity> rideableEntities;
     protected Long2ObjectNonBlockingMap<Player> players = new Long2ObjectNonBlockingMap<>();
 
     protected Long2ObjectNonBlockingMap<BlockEntity> tiles;
@@ -121,6 +123,10 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
             chunk.tileList = this.tileList.clone();
         }
 
+        if (this.rideableEntities != null) {
+            chunk.rideableEntities = this.rideableEntities.clone();
+        }
+
         return chunk;
     }
 
@@ -138,6 +144,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         }
 
         chunk.entities = null;
+        chunk.rideableEntities = null;
         chunk.tileList = null;
         chunk.NBTentities = null;
         chunk.NBTtiles = null;
@@ -521,6 +528,13 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
         this.entities.put(entity.getId(), entity);
 
+        if (entity instanceof EntityRideable) {
+            if (this.rideableEntities == null) {
+                this.rideableEntities = new Long2ObjectNonBlockingMap<>();
+            }
+            this.rideableEntities.put(entity.getId(), entity);
+        }
+
         if (entity instanceof Player player) {
             this.players.put(entity.getId(), player);
         } else if (this.isInit) {
@@ -532,6 +546,10 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     public void removeEntity(Entity entity) {
         if (this.entities != null) {
             this.entities.remove(entity.getId());
+        }
+
+        if (entity instanceof EntityRideable && this.rideableEntities != null) {
+            this.rideableEntities.remove(entity.getId());
         }
 
         if (entity instanceof Player) {
@@ -589,6 +607,11 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     @Override
     public Map<Long, Entity> getEntities() {
         return entities == null ? Collections.emptyMap() : entities;
+    }
+
+    @Override
+    public Map<Long, Entity> getRideableEntities() {
+        return rideableEntities == null ? Collections.emptyMap() : rideableEntities;
     }
 
     @Override

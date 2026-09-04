@@ -2691,7 +2691,9 @@ public abstract class Entity extends Location implements Metadatable {
         boolean portal = false;
         boolean powderSnow = false;
 
-        for (Block block : this.getCollisionBlocks()) {
+        List<Block> collisionBlocks = this.getCollisionBlocks();
+        for (int i = 0, size = collisionBlocks.size(); i < size; i++) {
+            Block block = collisionBlocks.get(i);
             if (block.getId() == Block.NETHER_PORTAL) {
                 portal = true;
                 continue;

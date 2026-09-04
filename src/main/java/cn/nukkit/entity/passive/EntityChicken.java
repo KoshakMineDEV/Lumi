@@ -1,8 +1,24 @@
 package cn.nukkit.entity.passive;
 
 import cn.nukkit.Server;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityClimateVariant;
-import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.EntityIntelligent;
+import cn.nukkit.entity.ai.behavior.BehaviorImpl;
+import cn.nukkit.entity.ai.behaviorgroup.BehaviorGroupImpl;
+import cn.nukkit.entity.ai.controller.FluctuateController;
+import cn.nukkit.entity.ai.controller.LookController;
+import cn.nukkit.entity.ai.controller.WalkController;
+import cn.nukkit.entity.ai.evaluator.MemoryCheckNotEmptyEvaluator;
+import cn.nukkit.entity.ai.evaluator.ProbabilityEvaluator;
+import cn.nukkit.entity.ai.executor.FlatRandomRoamExecutor;
+import cn.nukkit.entity.ai.executor.FollowEntityExecutor;
+import cn.nukkit.entity.ai.executor.LookAtEntityExecutor;
+import cn.nukkit.entity.ai.memory.MemoryTypes;
+import cn.nukkit.entity.ai.route.finder.FlatAStarRouteFinder;
+import cn.nukkit.entity.ai.route.posevaluator.WalkingPosEvaluator;
+import cn.nukkit.entity.ai.sensor.NearestFeedingPlayerSensor;
+import cn.nukkit.entity.ai.sensor.NearestPlayerSensor;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemNamespaceId;
@@ -13,12 +29,15 @@ import cn.nukkit.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityChicken extends EntityCreature implements EntityClimateVariant {
+import static cn.nukkit.entity.ai.evaluator.LogicHelper.all;
+
+public class EntityChicken extends EntityIntelligent implements EntityClimateVariant {
 
     public static final int NETWORK_ID = 10;
 
     public EntityChicken(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
+        setBaseMovementSpeed(0.25F);
     }
 
     @Override
@@ -58,7 +77,44 @@ public class EntityChicken extends EntityCreature implements EntityClimateVarian
             setVariant(getBiomeVariant(getLevel().getBiomeId(getFloorX(), getFloorZ())));
         }
 
+        setBehaviorGroup(BehaviorGroupImpl.builder()
+                .sensor(new NearestFeedingPlayerSensor(8, 5, item -> item.getNamespaceId().equals(ItemNamespaceId.WHEAT_SEEDS)))
+                .sensor(new NearestPlayerSensor(8, 0, 20))
+                .behavior(BehaviorImpl.builder()
+                        .executor(new FollowEntityExecutor(MemoryTypes.NEAREST_FEEDING_PLAYER, 0.25f, 64, 2.25))
+                        .evaluator(new MemoryCheckNotEmptyEvaluator(MemoryTypes.NEAREST_FEEDING_PLAYER))
+                        .priority(4)
+                        .build())
+                .behavior(BehaviorImpl.builder()
+                        .executor(new LookAtEntityExecutor(MemoryTypes.NEAREST_PLAYER, 100))
+                        .evaluator(all(
+                                new MemoryCheckNotEmptyEvaluator(MemoryTypes.NEAREST_PLAYER),
+                                new ProbabilityEvaluator(2, 5)
+                        ))
+                        .priority(2)
+                        .period(100)
+                        .build())
+                .behavior(BehaviorImpl.builder()
+                        .executor(new FlatRandomRoamExecutor(0.25f, 12, 120, false, -1, true, 10))
+                        .evaluator(entity -> true)
+                        .priority(1)
+                        .build())
+                .controller(new WalkController())
+                .controller(new LookController(true, true))
+                .controller(new FluctuateController())
+                .routeFinder(new FlatAStarRouteFinder(new WalkingPosEvaluator()))
+                .build()
+        );
+
+        recalculateBoundingBox();
+
         this.noFallDamage = true;
+
+        this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_CAN_CLIMB, true);
+        this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_WALKER, true);
+        this.setDataFlag(Entity.DATA_FLAGS2, Entity.DATA_FLAG_BREATHING, true);
+        this.setDataFlag(Entity.DATA_FLAGS2, Entity.DATA_FLAG_HAS_COLLISION, true);
+        this.setDataFlag(Entity.DATA_FLAGS2, Entity.DATA_FLAG_GRAVITY, true);
     }
 
     private Item getEgg() {

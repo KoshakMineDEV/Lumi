@@ -193,6 +193,15 @@ public interface FullChunk extends Cloneable {
 
     Map<Long, Entity> getEntities();
 
+    /**
+     * Returns the rideable entities currently assigned to this chunk.
+     *
+     * @return a live map keyed by entity runtime ID, or an empty map
+     */
+    default Map<Long, Entity> getRideableEntities() {
+        return getEntities();
+    }
+
     Map<Long, Player> getPlayers();
 
     Map<Long, BlockEntity> getBlockEntities();

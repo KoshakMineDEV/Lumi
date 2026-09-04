@@ -63,7 +63,8 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
     protected int attackCooldown = 0;
     protected int knockBackTime = 0;
 
-    private float movementSpeed = 0.1f;
+    private float movementSpeed = DEFAULT_SPEED;
+    private float baseMovementSpeed = DEFAULT_SPEED;
     private final Map<String, EntityMovementSpeedModifier> movementSpeedModifiers = new HashMap<>();
 
     protected int turtleTicks = 0;
@@ -392,7 +393,7 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
             }
 
             if (this.riding == null && this.age % 2 == 1 && !this.closed && this.isAlive()) {
-                Entity[] e = level.getNearbyEntities(this.boundingBox.grow(0.20000000298023224, 0.0D, 0.20000000298023224), this);
+                Entity[] e = level.getNearbyRideableEntities(this.boundingBox.grow(0.20000000298023224, 0.0D, 0.20000000298023224), this);
                 for (Entity entity : e) {
                     if (entity instanceof EntityRideable && !entity.closed && entity.isAlive()) {
                         this.collidingWith(entity);
@@ -524,6 +525,14 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
         return false;
     }
 
+    public float getBaseMovementSpeed() {
+        return this.baseMovementSpeed;
+    }
+
+    public void setBaseMovementSpeed(float speed) {
+        this.baseMovementSpeed = speed;
+    }
+
     private void setMovementSpeed(float speed) {
         this.movementSpeed = speed;
     }
@@ -533,7 +542,7 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
     }
 
     public void recalculateMovementSpeed() {
-        float newMovementSpeed = DEFAULT_SPEED;
+        float newMovementSpeed = baseMovementSpeed;
         for (EntityMovementSpeedModifier modifier : this.movementSpeedModifiers.values()) {
             float value = modifier.getValue();
             if (modifier.getOperation() == EntityMovementSpeedModifier.Operation.MULTIPLY) {
