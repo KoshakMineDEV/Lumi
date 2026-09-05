@@ -62,6 +62,7 @@ public class GameRules {
         gameRules.gameRules.put(DO_LIMITED_CRAFTING, new Value<>(Type.BOOLEAN, false, 618));
         gameRules.gameRules.put(SHOW_RECIPE_MESSAGE, new Value<>(Type.BOOLEAN, true, ProtocolInfo.v1_20_50));
         gameRules.gameRules.put(PROJECTILES_CAN_BREAK_BLOCKS, new Value<>(Type.BOOLEAN, true, ProtocolInfo.v1_20_50));
+        gameRules.gameRules.put(PISTON_PUSH_LIMIT, new Value<>(Type.INTEGER, 12));
 
         return gameRules;
     }

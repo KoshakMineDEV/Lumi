@@ -13,6 +13,7 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.SimpleAxisAlignedBB;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.IntTag;
 import cn.nukkit.nbt.tag.ListTag;
@@ -189,6 +190,24 @@ public class BlockEntityPistonArm extends BlockEntitySpawnable {
             }
 
             this.level.updateAroundObserver(this);
+            // notify observers around all moved blocks (old and new positions) - needed for flying machines
+            for (BlockVector3 pos : this.attachedBlocks) {
+                BlockVector3 newPos = pos.getSide(pushDir);
+                this.level.updateAroundObserver(newPos.asVector3());
+                this.level.updateAroundObserver(pos.asVector3());
+                // also updateAround to ensure onNeighborChange via normal queue
+                this.level.updateAround(newPos.asVector3());
+                this.level.updateAround(pos.asVector3());
+            }
+            if (extending) {
+                Vector3 headPos = this.add(facing.getXOffset(), facing.getYOffset(), facing.getZOffset());
+                this.level.updateAroundObserver(headPos);
+                this.level.updateAround(headPos);
+            } else {
+                Vector3 headPos = this.add(facing.getXOffset(), facing.getYOffset(), facing.getZOffset());
+                this.level.updateAroundObserver(headPos);
+                this.level.updateAround(headPos);
+            }
 
             this.level.scheduleUpdate(this.getLevelBlock(), 1);
             this.attachedBlocks.clear();
