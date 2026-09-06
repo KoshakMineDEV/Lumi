@@ -9,6 +9,7 @@ import cn.nukkit.blockentity.impl.BlockEntityPistonArm;
 import cn.nukkit.event.block.BlockPistonEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
+import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.vibration.VanillaVibrationTypes;
@@ -131,9 +132,29 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
 
         BlockEntity blockEntity = this.level.getBlockEntity(this);
         if (blockEntity instanceof BlockEntityPistonArm arm) {
+            if (arm.state % 2 != 0) {
+                return type;
+            }
             boolean powered = this.isPowered();
-
-            if (arm.state % 2 == 0 && arm.powered != powered && this.checkState(powered)) {
+            boolean extended = this.isExtended();
+            if (powered != extended) {
+                boolean canChange = arm.powered != powered;
+                if (this.checkState(powered)) {
+                    if (canChange) {
+                        arm.powered = powered;
+                        if (arm.chunk != null) {
+                            arm.chunk.setChanged();
+                        }
+                    }
+                } else {
+                    // blocked due to limit or obstacle - retry next tick (vanilla MCBE behavior)
+                    // optimization: only schedule while mismatch persists
+                    this.level.scheduleUpdate(this, 1);
+                    // keep arm.powered in sync if needed for redstone? don't update on failure
+                }
+                return type;
+            }
+            if (arm.powered != powered) {
                 arm.powered = powered;
                 if (arm.chunk != null) {
                     arm.chunk.setChanged();
@@ -334,6 +355,40 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
             }
         }
 
+        private static boolean isSticky(Block block) {
+            int id = block.getId();
+            return id == SLIME_BLOCK || id == HONEY_BLOCK;
+        }
+
+        private static boolean canStick(Block a, Block b) {
+            int idA = a.getId();
+            int idB = b.getId();
+            if ((idA == HONEY_BLOCK && idB == SLIME_BLOCK) || (idA == SLIME_BLOCK && idB == HONEY_BLOCK)) {
+                return false;
+            }
+            return isSticky(a) || isSticky(b);
+        }
+
+        private int getPushLimit() {
+            Level lvl = BlockPistonBase.this.level;
+            if (lvl == null) {
+                try {
+                    lvl = BlockPistonBase.this.getLevel();
+                } catch (Exception ignored) {}
+            }
+            if (lvl != null && lvl.gameRules != null) {
+                try {
+                    if (lvl.gameRules.hasRule(GameRule.PISTON_PUSH_LIMIT)) {
+                        int v = lvl.gameRules.getInteger(GameRule.PISTON_PUSH_LIMIT);
+                        if (v == -1) return Integer.MAX_VALUE;
+                        if (v < 0) return 0;
+                        return v;
+                    }
+                } catch (Exception ignored) {}
+            }
+            return 12;
+        }
+
         public boolean canMove() {
             if (!sticky && !extending) {
                 return true;
@@ -342,6 +397,10 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
             this.toMove.clear();
             this.toDestroy.clear();
             Block block = this.blockToMove;
+
+            if (block == null) {
+                return true;
+            }
 
             if (!canPush(block, this.moveDirection, true, extending)) {
                 return false;
@@ -358,9 +417,9 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                 return false;
             }
 
-            for (Block b : new ArrayList<>(this.toMove)) {
-                int blockId = b.getId();
-                if ((blockId == SLIME_BLOCK) && !this.addBranchingBlocks(b)) {
+            for (int i = 0; i < this.toMove.size(); i++) {
+                Block b = this.toMove.get(i);
+                if (isSticky(b) && !this.addBranchingBlocks(b)) {
                     return false;
                 }
             }
@@ -386,7 +445,8 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                 return true;
             }
 
-            if (this.toMove.size() >= 12) {
+            int pushLimit = getPushLimit();
+            if (this.toMove.size() >= pushLimit) {
                 return false;
             }
 
@@ -394,24 +454,22 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
 
             int count = 1;
             List<Block> sticked = new ArrayList<>();
+            Block cur = block;
 
-            while (block.getId() == SLIME_BLOCK) {
-                block = origin.getSide(this.moveDirection.getOpposite(), count);
-
-                if (block.getId() == AIR || !canPush(block, this.moveDirection, false, extending) || block.equals(this.pistonPos)) {
+            while (isSticky(cur)) {
+                Block next = origin.getSide(this.moveDirection.getOpposite(), count);
+                if (next.getId() == AIR || !canStick(cur, next) || !canPush(next, this.moveDirection, false, extending) || next.equals(this.pistonPos)) {
                     break;
                 }
-
-                if (block.breaksWhenMoved() && block.sticksToPiston()) {
-                    this.toDestroy.add(block);
+                if (next.breaksWhenMoved() && next.sticksToPiston()) {
+                    this.toDestroy.add(next);
                     break;
                 }
-
-                if (++count + this.toMove.size() > 12) {
+                if (++count + this.toMove.size() > pushLimit) {
                     return false;
                 }
-
-                sticked.add(block);
+                sticked.add(next);
+                cur = next;
             }
 
             int stickedCount = sticked.size();
@@ -420,6 +478,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                 this.toMove.addAll(Lists.reverse(sticked));
             }
 
+            int blocksAdded = 1 + stickedCount;
             int step = 1;
 
             while (true) {
@@ -427,12 +486,12 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                 int index = this.toMove.indexOf(nextBlock);
 
                 if (index > -1) {
-                    this.reorderListAtCollision(stickedCount, index);
+                    this.reorderListAtCollision(blocksAdded, index);
 
-                    for (int i = 0; i <= index + stickedCount; ++i) {
+                    for (int i = 0; i <= index + blocksAdded; ++i) {
                         Block b = this.toMove.get(i);
-
-                        if (b.getId() == SLIME_BLOCK && !this.addBranchingBlocks(b)) {
+                        if (b == null) break;
+                        if (isSticky(b) && !this.addBranchingBlocks(b)) {
                             return false;
                         }
                     }
@@ -440,7 +499,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                     return true;
                 }
 
-                if (nextBlock.getId() == AIR || nextBlock.equals(armPos)) {
+                if (nextBlock.getId() == AIR || (armPos != null && nextBlock.equals(armPos))) {
                     return true;
                 }
 
@@ -453,11 +512,12 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                     return true;
                 }
 
-                if (this.toMove.size() >= 12) {
+                if (this.toMove.size() >= getPushLimit()) {
                     return false;
                 }
 
                 this.toMove.add(nextBlock);
+                ++blocksAdded;
                 ++stickedCount;
                 ++step;
             }
@@ -475,11 +535,13 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
 
         private boolean addBranchingBlocks(Block block) {
             for (BlockFace face : BlockFace.values()) {
-                if (face.getAxis() != this.moveDirection.getAxis() && !this.addBlockLine(block.getSide(face), face)) {
-                    return false;
+                if (face.getAxis() != this.moveDirection.getAxis()) {
+                    Block neighbor = block.getSide(face);
+                    if (canStick(neighbor, block) && !this.addBlockLine(neighbor, face)) {
+                        return false;
+                    }
                 }
             }
-
             return true;
         }
 
