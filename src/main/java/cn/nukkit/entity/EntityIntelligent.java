@@ -1,24 +1,18 @@
 package cn.nukkit.entity;
 
-import cn.nukkit.block.Block;
 import cn.nukkit.entity.ai.behaviorgroup.BehaviorGroup;
 import cn.nukkit.entity.ai.memory.MemoryStorage;
 import cn.nukkit.entity.ai.memory.MemoryTypes;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.AxisAlignedBB;
-import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 
 /**
  * Base class for living entities controlled by the Lumi AI system.
  */
-public abstract class EntityIntelligent extends EntityCreature {
-
-    private static final double AIR_DRAG = 0.91;
+public abstract class EntityIntelligent extends EntityPhysical {
 
     private BehaviorGroup behaviorGroup;
-    private double movementBlockFriction = Block.DEFAULT_FRICTION_FACTOR;
 
     public EntityIntelligent(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -111,10 +105,6 @@ public abstract class EntityIntelligent extends EntityCreature {
         return this;
     }
 
-    public AxisAlignedBB getAABB() {
-        return this.getBoundingBox();
-    }
-
     public long getRuntimeId() {
         return super.getId();
     }
@@ -123,67 +113,11 @@ public abstract class EntityIntelligent extends EntityCreature {
         return this.ticksLived;
     }
 
-    public final void addTmpMoveMotion(double x, double y, double z) {
-        this.motionX += x;
-        this.motionY += y;
-        this.motionZ += z;
-    }
-
-    public final void addTmpMoveMotionXZ(double x, double z) {
-        this.motionX += x;
-        this.motionZ += z;
-    }
-
-    /**
-     * Returns the friction of the block sampled for the current AI movement
-     * tick. The value is prepared once before controllers run and reused by
-     * both acceleration and post-movement damping.
-     */
-    public final double getMovementBlockFriction() {
-        return this.movementBlockFriction;
-    }
-
-    protected void prepareMovementBlockFriction(boolean grounded) {
-        if (!grounded) {
-            this.movementBlockFriction = 1.0;
-            return;
-        }
-
-        int blockX = NukkitMath.floorDouble(this.x);
-        int blockY = NukkitMath.floorDouble(this.y - 0.500001);
-        int blockZ = NukkitMath.floorDouble(this.z);
-        this.movementBlockFriction = this.level
-                .getBlock(this.chunk, blockX, blockY, blockZ, 0, false)
-                .getFrictionFactor();
-    }
-
-    protected static double getHorizontalMovementDrag(boolean grounded, double blockFriction) {
-        return grounded ? blockFriction * AIR_DRAG : AIR_DRAG;
-    }
-
     @Override
-    public boolean entityBaseTick(int tickDiff) {
-        boolean updated = super.entityBaseTick(tickDiff);
-        if (this.behaviorGroup != null && !this.isImmobile()) {
-            boolean groundedForMovement = this.onGround;
-            this.prepareMovementBlockFriction(groundedForMovement);
+    protected void prepareMotion(int tickDiff) {
+        super.prepareMotion(tickDiff);
+        if (this.behaviorGroup != null) {
             this.behaviorGroup.tick();
-            this.move(this.motionX, this.motionY, this.motionZ);
-            if (this.onGround && this.motionY < 0) {
-                this.motionY = 0;
-            } else if (!this.onGround) {
-                this.motionY -= this.getGravity();
-            }
-            double horizontalDrag = getHorizontalMovementDrag(
-                    groundedForMovement,
-                    this.movementBlockFriction
-            );
-            this.motionX *= horizontalDrag;
-            this.motionZ *= horizontalDrag;
-
-            updateMovement();
-            updated = true;
         }
-        return updated;
     }
 }

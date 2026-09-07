@@ -11,7 +11,8 @@ import cn.nukkit.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityPig extends EntityCreature implements EntityClimateVariant {
+//TODO: implement behavior and extend EntityIntelligent
+public class EntityPig extends EntityPhysical implements EntityClimateVariant {
 
     public static final int NETWORK_ID = 12;
 

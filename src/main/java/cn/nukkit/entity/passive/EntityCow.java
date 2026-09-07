@@ -1,7 +1,15 @@
 package cn.nukkit.entity.passive;
 
 import cn.nukkit.entity.EntityClimateVariant;
-import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.EntityIntelligent;
+import cn.nukkit.entity.ai.behavior.BehaviorImpl;
+import cn.nukkit.entity.ai.behaviorgroup.BehaviorGroupImpl;
+import cn.nukkit.entity.ai.controller.FluctuateController;
+import cn.nukkit.entity.ai.controller.LookController;
+import cn.nukkit.entity.ai.controller.WalkController;
+import cn.nukkit.entity.ai.executor.FlatRandomRoamExecutor;
+import cn.nukkit.entity.ai.route.finder.FlatAStarRouteFinder;
+import cn.nukkit.entity.ai.route.posevaluator.WalkingPosEvaluator;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -10,7 +18,7 @@ import cn.nukkit.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityCow extends EntityCreature implements EntityClimateVariant {
+public class EntityCow extends EntityIntelligent implements EntityClimateVariant {
     public static final int NETWORK_ID = 11;
 
     public EntityCow(FullChunk chunk, CompoundTag nbt) {
@@ -42,6 +50,20 @@ public class EntityCow extends EntityCreature implements EntityClimateVariant {
         } else {
             setVariant(getBiomeVariant(getLevel().getBiomeId(getFloorX(), getFloorZ())));
         }
+
+        //TODO: complete behavior
+        setBehaviorGroup(BehaviorGroupImpl.builder()
+                .behavior(BehaviorImpl.builder()
+                        .executor(new FlatRandomRoamExecutor(0.25f, 12, 120, false, -1, true, 10))
+                        .evaluator(entity -> true)
+                        .priority(1)
+                        .build())
+                .controller(new WalkController())
+                .controller(new LookController(true, true))
+                .controller(new FluctuateController())
+                .routeFinder(new FlatAStarRouteFinder(new WalkingPosEvaluator()))
+                .build()
+        );
     }
 
     @Override
