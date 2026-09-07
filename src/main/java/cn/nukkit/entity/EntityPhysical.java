@@ -90,6 +90,11 @@ public abstract class EntityPhysical extends EntityCreature {
         super.resetFallDistance();
     }
 
+    @Override
+    public boolean isSubmerged() {
+        return isSubmerged(true);
+    }
+
     /**
      * Prepares motion after friction has been sampled and before movement.
      * Subclasses can apply input or run their movement controllers here.

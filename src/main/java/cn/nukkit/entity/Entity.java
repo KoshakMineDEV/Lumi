@@ -575,7 +575,7 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public float getEyeHeight() {
-        return this.getHeight() / 2 + 0.1f;
+        return this.getHeight() * 0.9f;
     }
 
     public float getEyeY() {
@@ -2407,9 +2407,28 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public boolean isSubmerged() {
+        return isSubmerged(false);
+    }
+
+    public boolean isSubmerged(boolean tickCached) {
         double y = this.y + this.getEyeHeight();
-        Block block = this.level.getBlock(this.temporalVector.setComponents(NukkitMath.floorDouble(this.x), NukkitMath.floorDouble(y), NukkitMath.floorDouble(this.z)));
-        return block instanceof BlockWater || this.level.getBlock(block, 1) instanceof BlockWater;
+        Block block = tickCached ? this.level.getTickCachedBlock(this.temporalVector.setComponents(NukkitMath.floorDouble(this.x), NukkitMath.floorDouble(y), NukkitMath.floorDouble(this.z))) : this.level.getBlock(this.temporalVector.setComponents(NukkitMath.floorDouble(this.x), NukkitMath.floorDouble(y), NukkitMath.floorDouble(this.z)));
+        BlockWater waterBlock = null;
+
+        if (block instanceof BlockWater) {
+            waterBlock = (BlockWater) block;
+        } else {
+            Block blockAbove = this.level.getBlock(block, 1);
+            if (blockAbove instanceof BlockWater) {
+                waterBlock = (BlockWater) blockAbove;
+            }
+        }
+
+        if (waterBlock != null) {
+            double f = (block.y + 1) - (waterBlock.getFluidHeightPercent() - 0.1111111);
+            return y < f;
+        }
+        return false;
     }
 
     public boolean isInsideOfWater() {
