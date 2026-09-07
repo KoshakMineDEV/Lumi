@@ -163,6 +163,11 @@ public class BlockLava extends BlockLiquid {
     }
 
     @Override
+    public double getHorizontalDrag() {
+        return 0.13;
+    }
+
+    @Override
     public int getFlowDecayPerBlock() {
         if (this.level.getDimension() == Level.DIMENSION_NETHER) {
             return 1;

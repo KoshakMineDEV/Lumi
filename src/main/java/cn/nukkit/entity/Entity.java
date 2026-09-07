@@ -2621,6 +2621,10 @@ public abstract class Entity extends Location implements Metadatable {
         }
     }
 
+    public void requestHorizontalMovementDrag(double drag) {
+        // Do nothing for base entity class. Implemented in EntityPhysical
+    }
+
     protected void checkGroundState(double movX, double movY, double movZ, double dx, double dy, double dz) {
         if (this.noClip) {
             this.isCollidedVertically = false;

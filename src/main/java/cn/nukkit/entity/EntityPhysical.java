@@ -14,9 +14,11 @@ import cn.nukkit.nbt.tag.CompoundTag;
 public abstract class EntityPhysical extends EntityCreature {
 
     private static final double AIR_DRAG = 0.91;
+    private static final double GROUND_CONTACT_PROBE = -0.00001;
     private static final double MOTION_EPSILON = 0.00001;
 
     private double movementBlockFriction = Block.DEFAULT_FRICTION_FACTOR;
+    private double horizontalMovementDragOverride = Double.NaN;
     private int fallingTick;
 
     public EntityPhysical(FullChunk chunk, CompoundTag nbt) {
@@ -54,6 +56,28 @@ public abstract class EntityPhysical extends EntityCreature {
         return this.movementBlockFriction;
     }
 
+    /**
+     * Requests an environment-specific horizontal drag for the current physics tick.
+     * If several blocks request a drag, the strongest damping wins.
+     *
+     * @param drag velocity multiplier in the range {@code [0, 1]}
+     */
+    @Override
+    public void requestHorizontalMovementDrag(double drag) {
+        if (!Double.isFinite(drag) || drag < 0 || drag > 1) {
+            throw new IllegalArgumentException("Horizontal movement drag must be finite and in the range [0, 1]");
+        }
+
+        this.horizontalMovementDragOverride = selectHorizontalMovementDrag(
+                this.horizontalMovementDragOverride,
+                drag
+        );
+    }
+
+    static double selectHorizontalMovementDrag(double currentDrag, double requestedDrag) {
+        return Double.isNaN(currentDrag) || requestedDrag < currentDrag ? requestedDrag : currentDrag;
+    }
+
     protected void prepareMovementBlockFriction(boolean grounded) {
         if (!grounded) {
             this.movementBlockFriction = 1.0;
@@ -70,6 +94,14 @@ public abstract class EntityPhysical extends EntityCreature {
 
     protected static double getHorizontalMovementDrag(boolean grounded, double blockFriction) {
         return grounded ? blockFriction * AIR_DRAG : AIR_DRAG;
+    }
+
+    static double resolveHorizontalMovementDrag(boolean grounded, double blockFriction, double override) {
+        return Double.isNaN(override) ? getHorizontalMovementDrag(grounded, blockFriction) : override;
+    }
+
+    static double movementYWithGroundContactProbe(boolean grounded, double motionY) {
+        return grounded && motionY == 0 ? GROUND_CONTACT_PROBE : motionY;
     }
 
     protected static double getVerticalMovementDrag(float drag) {
@@ -104,12 +136,17 @@ public abstract class EntityPhysical extends EntityCreature {
 
     @Override
     public boolean entityBaseTick(int tickDiff) {
+        this.horizontalMovementDragOverride = Double.NaN;
         boolean updated = super.entityBaseTick(tickDiff);
         if (!this.isImmobile()) {
             boolean groundedForMovement = this.onGround;
             this.prepareMovementBlockFriction(groundedForMovement);
             this.prepareMotion(tickDiff);
-            this.move(this.motionX, this.motionY, this.motionZ);
+            this.move(
+                    this.motionX,
+                    movementYWithGroundContactProbe(groundedForMovement, this.motionY),
+                    this.motionZ
+            );
 
             float gravity = this.getGravity();
             if (gravity <= 0) {
@@ -133,9 +170,10 @@ public abstract class EntityPhysical extends EntityCreature {
 
             this.motionY *= getVerticalMovementDrag(this.getDrag());
 
-            double horizontalDrag = getHorizontalMovementDrag(
+            double horizontalDrag = resolveHorizontalMovementDrag(
                     groundedForMovement,
-                    this.movementBlockFriction
+                    this.movementBlockFriction,
+                    this.horizontalMovementDragOverride
             );
             this.motionX *= horizontalDrag;
             this.motionZ *= horizontalDrag;

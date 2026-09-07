@@ -1,6 +1,7 @@
 package cn.nukkit.block;
 
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityPhysical;
 import cn.nukkit.event.block.BlockFromToEvent;
 import cn.nukkit.event.block.LiquidFlowEvent;
 import cn.nukkit.item.Item;
@@ -26,6 +27,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
     protected static final byte CAN_FLOW_DOWN = 1;
     protected static final byte CAN_FLOW = 0;
     protected static final byte BLOCKED = -1;
+
     public int adjacentSources = 0;
     protected Vector3 flowVector = null;
     protected Long2ByteMap flowCostVisited = new Long2ByteOpenHashMap();
@@ -203,12 +205,20 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
 
     @Override
     public void addVelocityToEntity(Entity entity, Vector3 vector) {
+        entity.requestHorizontalMovementDrag(getHorizontalDrag());
+
         if (entity.canBeMovedByCurrents()) {
             Vector3 flow = this.getFlowVector();
-            vector.x += flow.x;
-            vector.y += flow.y;
-            vector.z += flow.z;
+            if (flow.lengthSquared() > 0) {
+                vector.x += flow.x;
+                vector.y += flow.y;
+                vector.z += flow.z;
+            }
         }
+    }
+
+    public double getHorizontalDrag() {
+        return 0.8;
     }
 
     public int getFlowDecayPerBlock() {
