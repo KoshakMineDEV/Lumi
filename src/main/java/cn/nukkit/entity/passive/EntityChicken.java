@@ -10,10 +10,13 @@ import cn.nukkit.entity.ai.controller.FluctuateController;
 import cn.nukkit.entity.ai.controller.LookController;
 import cn.nukkit.entity.ai.controller.WalkController;
 import cn.nukkit.entity.ai.evaluator.MemoryCheckNotEmptyEvaluator;
+import cn.nukkit.entity.ai.evaluator.PassByTimeEvaluator;
 import cn.nukkit.entity.ai.evaluator.ProbabilityEvaluator;
+import cn.nukkit.entity.ai.evaluator.RandomSoundEvaluator;
 import cn.nukkit.entity.ai.executor.FlatRandomRoamExecutor;
 import cn.nukkit.entity.ai.executor.FollowEntityExecutor;
 import cn.nukkit.entity.ai.executor.LookAtEntityExecutor;
+import cn.nukkit.entity.ai.executor.PlaySoundExecutor;
 import cn.nukkit.entity.ai.memory.MemoryTypes;
 import cn.nukkit.entity.ai.route.finder.FlatAStarRouteFinder;
 import cn.nukkit.entity.ai.route.posevaluator.WalkingPosEvaluator;
@@ -22,6 +25,7 @@ import cn.nukkit.entity.ai.sensor.NearestPlayerSensor;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemNamespaceId;
+import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Utils;
@@ -81,9 +85,19 @@ public class EntityChicken extends EntityIntelligent implements EntityClimateVar
                 .sensor(new NearestFeedingPlayerSensor(8, 5, item -> item.getNamespaceId().equals(ItemNamespaceId.WHEAT_SEEDS)))
                 .sensor(new NearestPlayerSensor(8, 0, 20))
                 .behavior(BehaviorImpl.builder()
+                        .executor(new PlaySoundExecutor(Sound.MOB_CHICKEN_SAY))
+                        .evaluator(new RandomSoundEvaluator())
+                        .priority(7)
+                        .build())
+                .behavior(BehaviorImpl.builder()
+                        .executor(new FlatRandomRoamExecutor(0.325f, 12, 40, true, 100, true, 10))
+                        .evaluator(new PassByTimeEvaluator(MemoryTypes.LAST_BE_ATTACKED_TIME, 0, 100))
+                        .priority(4)
+                        .build())
+                .behavior(BehaviorImpl.builder()
                         .executor(new FollowEntityExecutor(MemoryTypes.NEAREST_FEEDING_PLAYER, 0.25f, 64, 2.25))
                         .evaluator(new MemoryCheckNotEmptyEvaluator(MemoryTypes.NEAREST_FEEDING_PLAYER))
-                        .priority(4)
+                        .priority(3)
                         .build())
                 .behavior(BehaviorImpl.builder()
                         .executor(new LookAtEntityExecutor(MemoryTypes.NEAREST_PLAYER, 100))

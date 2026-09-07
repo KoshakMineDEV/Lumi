@@ -103,6 +103,12 @@ public final class MemoryTypes {
             new MemoryType<>(new Identifier("minecraft:nearest_player"));
 
     /**
+     * The last tick of the entity being attacked
+     */
+    public static final MemoryType<Long> LAST_BE_ATTACKED_TIME =
+            new MemoryType<>(new Identifier("minecraft:last_be_attacked_time"), () -> -65536L);
+
+    /**
      * Runtime ID of the entity this mob is currently retaliating against.
      */
     public static final MemoryType<Long> ATTACK_TARGET =

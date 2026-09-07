@@ -3,6 +3,7 @@ package cn.nukkit.entity;
 import cn.nukkit.entity.ai.behaviorgroup.BehaviorGroup;
 import cn.nukkit.entity.ai.memory.MemoryStorage;
 import cn.nukkit.entity.ai.memory.MemoryTypes;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -111,6 +112,17 @@ public abstract class EntityIntelligent extends EntityPhysical {
 
     public long getTick() {
         return this.ticksLived;
+    }
+
+    @Override
+    public boolean attack(EntityDamageEvent source) {
+        var result = super.attack(source);
+        var storage = getMemoryStorage();
+        if (storage != null) {
+            //TODO: uncomment: storage.put(MemoryTypes.BE_ATTACKED_EVENT, source);
+            storage.put(MemoryTypes.LAST_BE_ATTACKED_TIME, getTick());
+        }
+        return result;
     }
 
     @Override
