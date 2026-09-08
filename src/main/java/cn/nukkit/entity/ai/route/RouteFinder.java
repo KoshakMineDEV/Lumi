@@ -13,6 +13,14 @@ import java.util.List;
 public interface RouteFinder {
 
     /**
+     * Returns whether waypoint proximity must include the vertical axis.
+     * Ground route finders retain horizontal-only waypoint advancement.
+     */
+    default boolean usesThreeDimensionalWaypoints() {
+        return false;
+    }
+
+    /**
      * Search for a route from the entity's position to the target.
      *
      * @param entity the entity

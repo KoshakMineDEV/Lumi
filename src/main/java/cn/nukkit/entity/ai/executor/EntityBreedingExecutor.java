@@ -47,15 +47,16 @@ public class EntityBreedingExecutor implements BehaviorExecutor {
     public boolean execute(EntityIntelligent entity) {
         tickCounter++;
 
-        if (spouse == null || !spouse.isAlive()) {
+        if (!isValidSpouse(entity, spouse)) {
+            releaseSpouseReference(entity, spouse);
             spouse = null;
             // Check if another entity's executor already paired with us
-            var spouseId = entity.getMemoryStorage().get(MemoryTypes.ENTITY_SPOUSE);
-            if (spouseId != null) {
-                var resolved = entity.getLevel().getEntity(spouseId);
-                if (resolved != null && resolved.isAlive()) {
-                    spouse = resolved;
-                }
+            Entity storedSpouse = entity.getMemoryStorage().get(MemoryTypes.ENTITY_SPOUSE);
+            if (isValidSpouse(entity, storedSpouse)) {
+                spouse = storedSpouse;
+            } else if (storedSpouse != null) {
+                releaseSpouseReference(entity, storedSpouse);
+                entity.getMemoryStorage().clear(MemoryTypes.ENTITY_SPOUSE);
             }
 
             if (spouse == null) {
@@ -66,13 +67,13 @@ public class EntityBreedingExecutor implements BehaviorExecutor {
                 isInitiator = true;
                 if (spouse instanceof EntityIntelligent spouseIntelligent) {
                     // Atomically claim the spouse — if another entity already claimed it, retry next tick
-                    if (!spouseIntelligent.getMemoryStorage().putIfAbsent(MemoryTypes.ENTITY_SPOUSE, entity.getRuntimeId())) {
+                    if (!spouseIntelligent.getMemoryStorage().putIfAbsent(MemoryTypes.ENTITY_SPOUSE, entity)) {
                         spouse = null;
                         isInitiator = false;
                         return true;
                     }
                 }
-                entity.getMemoryStorage().put(MemoryTypes.ENTITY_SPOUSE, spouse.getId());
+                entity.getMemoryStorage().put(MemoryTypes.ENTITY_SPOUSE, spouse);
             }
         }
 
@@ -108,7 +109,9 @@ public class EntityBreedingExecutor implements BehaviorExecutor {
     public void onStop(EntityIntelligent entity) {
         clearEntityState(entity);
         if (spouse instanceof EntityIntelligent spouseIntelligent) {
-            clearEntityState(spouseIntelligent);
+            if (spouseIntelligent.getMemoryStorage().get(MemoryTypes.ENTITY_SPOUSE) == entity) {
+                clearEntityState(spouseIntelligent);
+            }
         }
         spouse = null;
         isInitiator = false;
@@ -138,7 +141,12 @@ public class EntityBreedingExecutor implements BehaviorExecutor {
             // Skip babies
             if (candidate instanceof EntityAgeable ageable && ageable.isBaby()) continue;
             // Skip already paired entities
-            if (candidateIntelligent.getMemoryStorage().get(MemoryTypes.ENTITY_SPOUSE) != null) continue;
+            Entity claimant = candidateIntelligent.getMemoryStorage().get(MemoryTypes.ENTITY_SPOUSE);
+            if (claimant != null) {
+                if (isValidSpouse(candidateIntelligent, claimant)) continue;
+                releaseSpouseReference(candidateIntelligent, claimant);
+                candidateIntelligent.getMemoryStorage().clear(MemoryTypes.ENTITY_SPOUSE);
+            }
 
             double distSq = entity.getLocation().distanceSquared(candidate.getLocation());
             if (distSq > FINDING_RANGE_SQUARED) continue;
@@ -149,6 +157,21 @@ public class EntityBreedingExecutor implements BehaviorExecutor {
         }
 
         return nearest;
+    }
+
+    protected boolean isValidSpouse(EntityIntelligent owner, Entity candidate) {
+        return candidate != null
+                && candidate != owner
+                && !candidate.closed
+                && candidate.isAlive()
+                && candidate.getLevel() == owner.getLevel();
+    }
+
+    private void releaseSpouseReference(EntityIntelligent owner, Entity oldSpouse) {
+        if (oldSpouse instanceof EntityIntelligent spouseIntelligent
+                && spouseIntelligent.getMemoryStorage().get(MemoryTypes.ENTITY_SPOUSE) == owner) {
+            spouseIntelligent.getMemoryStorage().clear(MemoryTypes.ENTITY_SPOUSE);
+        }
     }
 
     protected void spawnBaby(EntityIntelligent entity) {

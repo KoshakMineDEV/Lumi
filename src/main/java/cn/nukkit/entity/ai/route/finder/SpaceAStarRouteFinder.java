@@ -2,11 +2,11 @@ package cn.nukkit.entity.ai.route.finder;
 
 import cn.nukkit.entity.ai.route.Node;
 import cn.nukkit.entity.ai.route.posevaluator.SpacePosEvaluator;
-import cn.nukkit.math.Vector3;
 
 /**
- * 3D A* pathfinder for flying/swimming entities. Extends the flat A* pathfinder
- * to add vertical movement in all 26 directions.
+ * Three-dimensional A* pathfinder for flying and swimming entities. Neighbor
+ * clearance follows Java Edition's FlyNodeEvaluator rules: diagonal movement
+ * is only allowed when every required orthogonal intermediate cell is open.
  *
  * @author daoge_cmd
  */
@@ -14,18 +14,14 @@ public class SpaceAStarRouteFinder extends FlatAStarRouteFinder {
 
     protected static final double SQRT3_MINUS_SQRT2 = Math.sqrt(3) - Math.sqrt(2);
 
+    /** Java FlyNodeEvaluator neighbor order. */
     protected static final int[][] SPACE_NEIGHBORS = {
-            // Same level (8 directions)
-            {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1},
-            {1, 0, 1}, {1, 0, -1}, {-1, 0, 1}, {-1, 0, -1},
-            // Up (9 directions)
-            {0, 1, 0},
-            {1, 1, 0}, {-1, 1, 0}, {0, 1, 1}, {0, 1, -1},
-            {1, 1, 1}, {1, 1, -1}, {-1, 1, 1}, {-1, 1, -1},
-            // Down (9 directions)
-            {0, -1, 0},
-            {1, -1, 0}, {-1, -1, 0}, {0, -1, 1}, {0, -1, -1},
-            {1, -1, 1}, {1, -1, -1}, {-1, -1, 1}, {-1, -1, -1}
+            {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0},
+            {0, 1, 1}, {-1, 1, 0}, {1, 1, 0}, {0, 1, -1},
+            {0, -1, 1}, {-1, -1, 0}, {1, -1, 0}, {0, -1, -1},
+            {1, 0, -1}, {1, 0, 1}, {-1, 0, -1}, {-1, 0, 1},
+            {1, 1, -1}, {1, 1, 1}, {-1, 1, -1}, {-1, 1, 1},
+            {1, -1, -1}, {1, -1, 1}, {-1, -1, -1}, {-1, -1, 1}
     };
 
     protected final SpacePosEvaluator spacePosEvaluator;
@@ -40,28 +36,81 @@ public class SpaceAStarRouteFinder extends FlatAStarRouteFinder {
     }
 
     @Override
+    public boolean usesThreeDimensionalWaypoints() {
+        return true;
+    }
+
+    @Override
     protected void expandNeighbors(SearchSession session) {
-        int cx = session.currentX();
-        int cy = (int) Math.floor(session.currentY());
-        int cz = session.currentZ();
+        int currentX = session.currentX();
+        int currentY = (int) Math.floor(session.currentY());
+        int currentZ = session.currentZ();
+        long passabilityMask = 0;
 
-        for (var offset : SPACE_NEIGHBORS) {
-            int nx = cx + offset[0];
-            int ny = cy + offset[1];
-            int nz = cz + offset[2];
+        // Evaluate each candidate exactly once for this expansion. Checks from
+        // adjacent expanded nodes are served by the per-search cache.
+        for (int[] offset : SPACE_NEIGHBORS) {
+            int dx = offset[0];
+            int dy = offset[1];
+            int dz = offset[2];
+            if (session.isPositionPassable(currentX + dx, currentY + dy, currentZ + dz)) {
+                passabilityMask |= positionBit(dx, dy, dz);
+            }
+        }
 
-            if (session.isPositionPassable(nx, ny, nz)) {
-                session.offerNeighbor(nx, ny + 0.5, nz);
+        for (int[] offset : SPACE_NEIGHBORS) {
+            int dx = offset[0];
+            int dy = offset[1];
+            int dz = offset[2];
+            if (isPassable(passabilityMask, dx, dy, dz)
+                    && hasRequiredClearance(passabilityMask, dx, dy, dz)) {
+                session.offerNeighbor(currentX + dx, currentY + dy, currentZ + dz);
             }
         }
     }
 
+    static boolean hasRequiredClearance(long passabilityMask, int dx, int dy, int dz) {
+        if (dx != 0 && !isPassable(passabilityMask, dx, 0, 0)) {
+            return false;
+        }
+        if (dy != 0 && !isPassable(passabilityMask, 0, dy, 0)) {
+            return false;
+        }
+        if (dz != 0 && !isPassable(passabilityMask, 0, 0, dz)) {
+            return false;
+        }
+        if (dx != 0 && dy != 0 && dz != 0) {
+            return isPassable(passabilityMask, dx, dy, 0)
+                    && isPassable(passabilityMask, dx, 0, dz)
+                    && isPassable(passabilityMask, 0, dy, dz);
+        }
+        return true;
+    }
+
+    static long positionBit(int dx, int dy, int dz) {
+        return 1L << (((dy + 1) * 9) + ((dz + 1) * 3) + dx + 1);
+    }
+
+    static boolean isPassable(long passabilityMask, int dx, int dy, int dz) {
+        return (passabilityMask & positionBit(dx, dy, dz)) != 0;
+    }
+
     @Override
     protected boolean isPositionPassable(int x, int y, int z, SearchSession session) {
-        var block = session.dimension().getTickCachedBlock(x, y, z, false);
-        if (!block.canPassThrough()) return false;
+        byte cached = session.getCachedPassability(x, y, z);
+        if (cached != 0) {
+            return cached == 2;
+        }
 
-        return spacePosEvaluator.evaluate(session.entity(), new Vector3(x + 0.5, y + 0.5, z + 0.5));
+        boolean result = session.dimension().isYInRange(y)
+                && session.dimension().isChunkLoaded(x >> 4, z >> 4);
+        if (result) {
+            var block = session.dimension().getTickCachedBlock(x, y, z, false);
+            result = block.canPassThrough()
+                    && spacePosEvaluator.evaluate(session.entity(), x + 0.5, y, z + 0.5);
+        }
+        session.cachePassability(x, y, z, result);
+        return result;
     }
 
     @Override
@@ -75,26 +124,66 @@ public class SpaceAStarRouteFinder extends FlatAStarRouteFinder {
 
     @Override
     protected boolean hasBarrier(Node a, Node b, SearchSession session) {
-        int x1 = (int) Math.floor(a.getVector().x);
-        int y1 = (int) Math.floor(a.getVector().y);
-        int z1 = (int) Math.floor(a.getVector().z);
-        int x2 = (int) Math.floor(b.getVector().x);
-        int y2 = (int) Math.floor(b.getVector().y);
-        int z2 = (int) Math.floor(b.getVector().z);
+        int startX = (int) Math.floor(a.getVector().x);
+        int startY = (int) Math.floor(a.getVector().y);
+        int startZ = (int) Math.floor(a.getVector().z);
+        int endX = (int) Math.floor(b.getVector().x);
+        int endY = (int) Math.floor(b.getVector().y);
+        int endZ = (int) Math.floor(b.getVector().z);
 
-        if (x1 == x2 && y1 == y2 && z1 == z2) return false;
+        int deltaX = endX - startX;
+        int deltaY = endY - startY;
+        int deltaZ = endZ - startZ;
+        int steps = Math.max(Math.abs(deltaX), Math.max(Math.abs(deltaY), Math.abs(deltaZ)));
+        if (steps == 0) {
+            return false;
+        }
 
-        int steps = Math.max(Math.abs(x2 - x1), Math.max(Math.abs(y2 - y1), Math.abs(z2 - z1)));
-
-        for (int i = 1; i < steps; i++) {
-            double t = (double) i / steps;
-            int x = x1 + (int) Math.round(t * (x2 - x1));
-            int y = y1 + (int) Math.round(t * (y2 - y1));
-            int z = z1 + (int) Math.round(t * (z2 - z1));
-
-            if (!session.isPositionPassable(x, y, z)) return true;
+        int previousX = startX;
+        int previousY = startY;
+        int previousZ = startZ;
+        for (int step = 1; step <= steps; step++) {
+            int x = startX + (int) Math.round((double) deltaX * step / steps);
+            int y = startY + (int) Math.round((double) deltaY * step / steps);
+            int z = startZ + (int) Math.round((double) deltaZ * step / steps);
+            int stepX = x - previousX;
+            int stepY = y - previousY;
+            int stepZ = z - previousZ;
+            if (!isTransitionClear(previousX, previousY, previousZ,
+                    stepX, stepY, stepZ, session)) {
+                return true;
+            }
+            previousX = x;
+            previousY = y;
+            previousZ = z;
         }
         return false;
+    }
+
+    private static boolean isTransitionClear(int x, int y, int z,
+                                             int dx, int dy, int dz,
+                                             SearchSession session) {
+        if (dx == 0 && dy == 0 && dz == 0) {
+            return true;
+        }
+        if (!session.isPositionPassable(x + dx, y + dy, z + dz)) {
+            return false;
+        }
+        if (dx != 0 && !session.isPositionPassable(x + dx, y, z)) {
+            return false;
+        }
+        if (dy != 0 && !session.isPositionPassable(x, y + dy, z)) {
+            return false;
+        }
+        if (dz != 0 && !session.isPositionPassable(x, y, z + dz)) {
+            return false;
+        }
+        if (dx != 0 && dy != 0 && dz != 0) {
+            return session.isPositionPassable(x + dx, y + dy, z)
+                    && session.isPositionPassable(x + dx, y, z + dz)
+                    && session.isPositionPassable(x, y + dy, z + dz);
+        }
+        return true;
     }
 
     @Override

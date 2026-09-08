@@ -38,7 +38,8 @@ public class NearestFeedingPlayerSensor implements Sensor {
         double nearestDistSq = Double.MAX_VALUE;
 
         for (Player player : PlayerTickSnapshot.get(entity.getLevel())) {
-            if (!player.isAlive() || player.isSpectator()) continue;
+            if (player.closed || !player.isAlive() || !player.spawned
+                    || !player.isOnline() || player.isSpectator()) continue;
 
             double dx = entity.x - player.x;
             double dy = entity.y - player.y;
@@ -55,7 +56,7 @@ public class NearestFeedingPlayerSensor implements Sensor {
             }
         }
 
-        entity.getMemoryStorage().put(MemoryTypes.NEAREST_FEEDING_PLAYER, nearest != null ? nearest.getId() : null);
+        entity.getMemoryStorage().put(MemoryTypes.NEAREST_FEEDING_PLAYER, nearest);
     }
 
     @Override

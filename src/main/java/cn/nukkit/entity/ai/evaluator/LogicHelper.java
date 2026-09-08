@@ -31,4 +31,14 @@ public final class LogicHelper {
     public static BehaviorEvaluator any(BehaviorEvaluator... evaluators) {
         return new AnyMatchEvaluator(evaluators);
     }
+
+    /**
+     * Create an evaluator that returns {@code true} if no given evaluator returns {@code true}.
+     *
+     * @param evaluators the evaluators to compose
+     * @return the composite evaluator
+     */
+    public static BehaviorEvaluator no(BehaviorEvaluator... evaluators) {
+        return new NoMatchEvaluator(evaluators);
+    }
 }

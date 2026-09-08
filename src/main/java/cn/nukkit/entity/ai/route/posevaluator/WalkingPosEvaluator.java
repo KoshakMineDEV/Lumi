@@ -12,12 +12,23 @@ import cn.nukkit.entity.EntityIntelligent;
  */
 public class WalkingPosEvaluator implements GroundPosEvaluator {
 
+    private final boolean allowWater;
+
+    public WalkingPosEvaluator() {
+        this(true);
+    }
+
+    public WalkingPosEvaluator(boolean allowWater) {
+        this.allowWater = allowWater;
+    }
+
     @Override
     public boolean evaluate(EntityIntelligent entity, Block block) {
         int id = block.getId();
         if (id == Block.LAVA || id == Block.STILL_LAVA || id == Block.CACTUS) {
             return false;
         }
-        return block.isWater() || (block.isSolid() && block.getCollisionBoundingBox() != null);
+        return (allowWater && block.isWater())
+                || (block.isSolid() && block.getCollisionBoundingBox() != null);
     }
 }

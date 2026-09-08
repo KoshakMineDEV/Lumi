@@ -5,6 +5,7 @@ import cn.nukkit.entity.EntityIntelligent;
 import cn.nukkit.math.Vector3;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.random.RandomGenerator;
 
 import static cn.nukkit.entity.ai.executor.EntityControlHelper.setLookTarget;
 import static cn.nukkit.entity.ai.executor.EntityControlHelper.setRouteTarget;
@@ -41,6 +42,9 @@ public class FlatRandomRoamExecutor implements BehaviorExecutor {
     public FlatRandomRoamExecutor(float speed, int maxRoamRange, int frequency,
                                   boolean calNextTargetImmediately, int runningTime,
                                   boolean avoidWater, int maxRetryTime) {
+        if (maxRoamRange < 0) {
+            throw new IllegalArgumentException("maxRoamRange must be non-negative");
+        }
         this.speed = speed;
         this.maxRoamRange = maxRoamRange;
         this.frequency = frequency;
@@ -64,7 +68,7 @@ public class FlatRandomRoamExecutor implements BehaviorExecutor {
         hadMoveDirection = false;
         hasTarget = false;
         entity.setBaseMovementSpeed(speed);
-        entity.setPitchEnabled(false);
+        entity.setPitchEnabled(isPitchEnabledDuringRoam());
         findNewTarget(entity);
     }
 
@@ -76,9 +80,7 @@ public class FlatRandomRoamExecutor implements BehaviorExecutor {
         // Check if we've reached the target
         var moveTarget = entity.getMoveTarget();
         if (moveTarget != null) {
-            double dx = moveTarget.x - entity.x;
-            double dz = moveTarget.z - entity.z;
-            double distanceSquared = dx * dx + dz * dz;
+            double distanceSquared = distanceSquaredToTarget(entity, moveTarget.x, moveTarget.y, moveTarget.z);
             if (entity.hasMoveDirection()) {
                 hadMoveDirection = true;
             }
@@ -99,6 +101,14 @@ public class FlatRandomRoamExecutor implements BehaviorExecutor {
             } else if (++stuckTick >= MAX_STUCK_TICKS) {
                 abandonTarget(entity);
             }
+        } else if (hasTarget) {
+            // Another behavior may temporarily own and then remove MOVE_TARGET.
+            // Drop our stale bookkeeping so this core behavior can schedule a
+            // fresh roaming target after its normal frequency delay.
+            hasTarget = false;
+            stuckTick = 0;
+            bestDistanceSquared = Double.MAX_VALUE;
+            hadMoveDirection = false;
         }
 
         if (!hasTarget) {
@@ -129,36 +139,75 @@ public class FlatRandomRoamExecutor implements BehaviorExecutor {
             return;
         }
 
-        var random = ThreadLocalRandom.current();
-        double targetX = entity.x + random.nextInt(-maxRoamRange, maxRoamRange + 1);
-        double targetZ = entity.z + random.nextInt(-maxRoamRange, maxRoamRange + 1);
-        double targetY = entity.y;
-
-        if (avoidWater) {
-            var level = entity.getLevel();
-            var blockBelow = level.getBlock(
-                    (int) Math.floor(targetX),
-                    (int) Math.floor(targetY) - 1,
-                    (int) Math.floor(targetZ)
-            );
-            if (blockBelow.isWater()) {
-                retryCount++;
-                return;
-            }
+        Vector3 target = nextTarget(entity);
+        if (target == null) {
+            retryCount++;
+            return;
         }
 
-        var target = new Vector3(targetX, targetY, targetZ);
         setRouteTarget(entity, target);
         setLookTarget(entity, target);
         hasTarget = true;
         stuckTick = 0;
-        double dx = targetX - entity.x;
-        double dy = targetY - entity.y;
-        double dz = targetZ - entity.z;
-        bestDistanceSquared = dx * dx + dy * dy + dz * dz;
+        bestDistanceSquared = distanceSquaredToTarget(entity, target.x, target.y, target.z);
         hadMoveDirection = false;
         targetCalTick = 0;
         retryCount = 0;
+    }
+
+    /**
+     * Chooses the next roaming target. Subclasses can replace the target
+     * geometry without duplicating the executor lifecycle.
+     */
+    protected Vector3 nextTarget(EntityIntelligent entity) {
+        RandomGenerator random = random();
+        double targetX = entity.x + random.nextInt(-maxRoamRange, maxRoamRange + 1);
+        double targetZ = entity.z + random.nextInt(-maxRoamRange, maxRoamRange + 1);
+        double targetY = entity.y;
+
+        if (!isCandidateValid(entity, targetX, targetY, targetZ)) {
+            return null;
+        }
+        return new Vector3(targetX, targetY, targetZ);
+    }
+
+    /**
+     * Validates a generated target. The flat executor deliberately keeps its
+     * historic semantics and only rejects water beneath the target when
+     * water avoidance is enabled.
+     */
+    protected boolean isCandidateValid(EntityIntelligent entity, double x, double y, double z) {
+        if (!avoidWater) {
+            return true;
+        }
+        return !entity.getLevel().getBlock(
+                (int) Math.floor(x),
+                (int) Math.floor(y) - 1,
+                (int) Math.floor(z)
+        ).isWater();
+    }
+
+    /**
+     * Distance metric used for target completion and stuck detection.
+     */
+    protected double distanceSquaredToTarget(EntityIntelligent entity, double x, double y, double z) {
+        double dx = x - entity.x;
+        double dz = z - entity.z;
+        return dx * dx + dz * dz;
+    }
+
+    /**
+     * Whether look controllers may update pitch while this executor runs.
+     */
+    protected boolean isPitchEnabledDuringRoam() {
+        return false;
+    }
+
+    /**
+     * Random source hook used by specialised executors and deterministic tests.
+     */
+    protected RandomGenerator random() {
+        return ThreadLocalRandom.current();
     }
 
     protected void abandonTarget(EntityIntelligent entity) {

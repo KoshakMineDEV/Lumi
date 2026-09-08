@@ -1,7 +1,9 @@
 package cn.nukkit.entity.ai.memory;
 
-import cn.nukkit.utils.Identifier;
+import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.Identifier;
 
 /**
  * Core memory types used by the AI framework.
@@ -89,17 +91,17 @@ public final class MemoryTypes {
             new MemoryType<>(new Identifier("minecraft:entity_spawn_time"), () -> 0L);
 
     /**
-     * Runtime ID of the nearest player holding a breeding item.
+     * Nearest player holding a breeding item.
      * Written by {@code NearestFeedingPlayerSensor}.
      */
-    public static final MemoryType<Long> NEAREST_FEEDING_PLAYER =
+    public static final MemoryType<Player> NEAREST_FEEDING_PLAYER =
             new MemoryType<>(new Identifier("minecraft:nearest_feeding_player"));
 
     /**
-     * Runtime ID of the nearest player.
+     * Nearest player.
      * Written by {@code NearestPlayerSensor}.
      */
-    public static final MemoryType<Long> NEAREST_PLAYER =
+    public static final MemoryType<Player> NEAREST_PLAYER =
             new MemoryType<>(new Identifier("minecraft:nearest_player"));
 
     /**
@@ -109,21 +111,33 @@ public final class MemoryTypes {
             new MemoryType<>(new Identifier("minecraft:last_be_attacked_time"), () -> -65536L);
 
     /**
-     * Runtime ID of the entity this mob is currently retaliating against.
+     * Entity this mob is currently targeting.
      */
-    public static final MemoryType<Long> ATTACK_TARGET =
+    public static final MemoryType<Entity> ATTACK_TARGET =
             new MemoryType<>(new Identifier("minecraft:attack_target"));
 
     /**
-     * Runtime ID of this entity's breeding spouse.
+     * The entity tick when this entity last completed an attack.
      */
-    public static final MemoryType<Long> ENTITY_SPOUSE =
+    public static final MemoryType<Long> LAST_ATTACK_TIME =
+            new MemoryType<>(new Identifier("minecraft:last_attack_time"), () -> -65536L);
+
+    /**
+     * Entity most recently attacked by this entity.
+     */
+    public static final MemoryType<Entity> LAST_ATTACK_ENTITY =
+            new MemoryType<>(new Identifier("minecraft:last_attack_entity"));
+
+    /**
+     * This entity's breeding spouse.
+     */
+    public static final MemoryType<Entity> ENTITY_SPOUSE =
             new MemoryType<>(new Identifier("minecraft:entity_spouse"));
 
     /**
-     * Runtime ID of the player who last fed this entity.
+     * Player who last fed this entity.
      */
-    public static final MemoryType<Long> LAST_FEED_PLAYER =
+    public static final MemoryType<Player> LAST_FEED_PLAYER =
             new MemoryType<>(new Identifier("minecraft:last_feed_player"));
 
     /**

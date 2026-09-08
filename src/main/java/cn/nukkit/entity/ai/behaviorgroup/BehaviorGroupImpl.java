@@ -330,13 +330,19 @@ public class BehaviorGroupImpl implements BehaviorGroup {
             var end = entity.getMoveDirectionEnd();
             if (end != null) {
                 double dx = end.x - entity.x;
+                double dy = end.y - entity.y;
                 double dz = end.z - entity.z;
-                double horizontalDistSq = dx * dx + dz * dz;
+                double waypointDistSq = waypointDistanceSquared(
+                        routeFinder != null && routeFinder.usesThreeDimensionalWaypoints(),
+                        dx,
+                        dy,
+                        dz
+                );
                 // Paper: maxDistanceToWaypoint = bbWidth > 0.75 ? bbWidth / 2 : 0.75 - bbWidth / 2
                 var aabb = entity.getAABB();
                 double bbWidth = aabb.getMaxX() - aabb.getMinX();
                 double maxDist = bbWidth > 0.75 ? bbWidth / 2.0 : 0.75 - bbWidth / 2.0;
-                if (horizontalDistSq < maxDist * maxDist) {
+                if (waypointDistSq < maxDist * maxDist) {
                     entity.setShouldUpdateMoveDirection(true);
                 }
             }
@@ -353,6 +359,11 @@ public class BehaviorGroupImpl implements BehaviorGroup {
                 entity.setShouldUpdateMoveDirection(false);
             }
         }
+    }
+
+    static double waypointDistanceSquared(boolean threeDimensional, double dx, double dy, double dz) {
+        double distanceSquared = dx * dx + dz * dz;
+        return threeDimensional ? distanceSquared + dy * dy : distanceSquared;
     }
 
     private void scheduleRouteSearch(EntityIntelligent entity, Vector3 moveTarget) {

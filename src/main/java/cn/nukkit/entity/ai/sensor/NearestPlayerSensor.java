@@ -1,9 +1,13 @@
 package cn.nukkit.entity.ai.sensor;
 
 import cn.nukkit.entity.ai.memory.MemoryTypes;
+import cn.nukkit.entity.ai.memory.MemoryType;
 import cn.nukkit.entity.ai.sensor.Sensor;
 import cn.nukkit.entity.EntityIntelligent;
 import cn.nukkit.Player;
+
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Scans for the nearest player within range and stores it in memory.
@@ -17,13 +21,23 @@ public class NearestPlayerSensor implements Sensor {
     protected final double rangeSquared;
     protected final double minRangeSquared;
     protected final int period;
+    protected final MemoryType<? super Player> resultMemory;
+    protected final Predicate<Player> predicate;
 
     public NearestPlayerSensor(double range, double minRange, int period) {
+        this(MemoryTypes.NEAREST_PLAYER, range, minRange, period, player -> true);
+    }
+
+    public NearestPlayerSensor(MemoryType<? super Player> resultMemory,
+                               double range, double minRange, int period,
+                               Predicate<Player> predicate) {
         this.range = range;
         this.minRange = minRange;
         this.rangeSquared = range * range;
         this.minRangeSquared = minRange * minRange;
         this.period = period;
+        this.resultMemory = Objects.requireNonNull(resultMemory, "resultMemory");
+        this.predicate = Objects.requireNonNull(predicate, "predicate");
     }
 
     public NearestPlayerSensor(double range) {
@@ -36,7 +50,9 @@ public class NearestPlayerSensor implements Sensor {
         double nearestDistSq = Double.MAX_VALUE;
 
         for (Player player : PlayerTickSnapshot.get(entity.getLevel())) {
-            if (!player.isAlive() || player.isSpectator()) continue;
+            if (player.closed || !player.isAlive() || !player.spawned
+                    || !player.isOnline() || player.isSpectator()) continue;
+            if (!predicate.test(player)) continue;
 
             double dx = entity.x - player.x;
             double dy = entity.y - player.y;
@@ -50,7 +66,7 @@ public class NearestPlayerSensor implements Sensor {
             }
         }
 
-        entity.getMemoryStorage().put(MemoryTypes.NEAREST_PLAYER, nearest != null ? nearest.getId() : null);
+        entity.getMemoryStorage().put(resultMemory, nearest);
     }
 
     @Override

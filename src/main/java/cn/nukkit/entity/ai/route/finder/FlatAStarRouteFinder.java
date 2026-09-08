@@ -224,12 +224,10 @@ public class FlatAStarRouteFinder implements RouteFinder {
     }
 
     protected boolean isPositionPassable(int x, int y, int z, SearchSession session) {
-        var key = packPos(x, y, z);
-        SearchContext context = session.context;
-        Long2ByteOpenHashMap walkableCache = context.walkableCache;
-        byte cached = walkableCache.get(key);
+        byte cached = session.getCachedPassability(x, y, z);
         if (cached != 0) return cached == 2;
 
+        SearchContext context = session.context;
         Level dimension = session.dimension;
         EntityIntelligent entity = session.entity;
         var groundBlock = dimension.getTickCachedBlock(x, y - 1, z, false);
@@ -246,7 +244,7 @@ public class FlatAStarRouteFinder implements RouteFinder {
             entityBox.setMaxZ(z + 0.5 + halfWidth);
             result = !dimension.hasTickCachedCollision(entity.getLivingEntity(), entityBox, false);
         }
-        walkableCache.put(key, result ? (byte) 2 : (byte) 1);
+        session.cachePassability(x, y, z, result);
         return result;
     }
 
@@ -418,6 +416,14 @@ public class FlatAStarRouteFinder implements RouteFinder {
 
         public boolean isPositionPassable(int x, int y, int z) {
             return owner.isPositionPassable(x, y, z, this);
+        }
+
+        public byte getCachedPassability(int x, int y, int z) {
+            return context.walkableCache.get(packPos(x, y, z));
+        }
+
+        public void cachePassability(int x, int y, int z, boolean passable) {
+            context.walkableCache.put(packPos(x, y, z), passable ? (byte) 2 : (byte) 1);
         }
 
         public double getNodeY(int x, int y, int z) {
