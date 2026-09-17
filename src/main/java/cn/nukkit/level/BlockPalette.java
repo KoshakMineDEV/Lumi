@@ -84,12 +84,13 @@ public class BlockPalette {
             return false;
         }
 
+        int hashId = state.getInt("hashId");
+
         CompoundTag vanillaState = state
                 .remove("id")
                 .remove("data")
-                .remove("runtimeId")
+                .remove("hashId")
                 .remove("stateOverload");
-        int hashId = Hash.hashBlock(vanillaState);
         CompoundTag previous = hashIdToState.putIfAbsent(hashId, vanillaState);
         if (previous != null && (!previous.getString("name").equals(vanillaState.getString("name")) ||
                 !previous.getCompound("states").equals(vanillaState.getCompound("states")))) {
