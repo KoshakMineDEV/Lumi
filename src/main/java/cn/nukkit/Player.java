@@ -4,6 +4,7 @@ import cn.nukkit.AdventureSettings.Type;
 import cn.nukkit.block.*;
 import cn.nukkit.block.customblock.CustomBlock;
 import cn.nukkit.block.material.tags.BlockInternalTags;
+import cn.nukkit.block.properties.VanillaBlockDefinition;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
 import cn.nukkit.blockentity.impl.BlockEntityCampfire;
@@ -62,6 +63,7 @@ import cn.nukkit.level.vibration.VanillaVibrationTypes;
 import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.*;
 import cn.nukkit.metadata.MetadataValue;
+import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.process.DataPacketManager;
@@ -74,6 +76,7 @@ import cn.nukkit.permission.PermissionAttachment;
 import cn.nukkit.permission.PermissionAttachmentInfo;
 import cn.nukkit.plugin.InternalPlugin;
 import cn.nukkit.plugin.Plugin;
+import cn.nukkit.registry.BlockRegistry;
 import cn.nukkit.registry.Registries;
 import cn.nukkit.resourcepacks.ResourcePack;
 import cn.nukkit.scheduler.AsyncTask;
@@ -105,7 +108,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
@@ -2798,6 +2803,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.forceDataPacket(dimensionDataPacket, null);
         }
 
+        if (this.protocol >= ProtocolInfo.v1_26_50) {
+            this.forceDataPacket(JigsawStructureDataPacket.getCachedPacket(), null);
+        }
+
         if (this.protocol >= ProtocolInfo.v1_26_20_26) {
             this.forceDataPacket(new VoxelShapesPacket(), null);
         }
@@ -2831,6 +2840,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         }
         startGamePacket.isMovementServerAuthoritative = this.isMovementServerAuthoritative();
         startGamePacket.isServerAuthoritativeBlockBreaking = this.isServerAuthoritativeBlockBreaking();
+        if (protocol >= ProtocolInfo.v1_26_50) {
+            startGamePacket.vanillaBlockDefinitions = Registries.BLOCK.getVanillaBlockDefinition(protocol);
+        }
         startGamePacket.playerPropertyData = EntityProperty.getPlayerPropertyCache();
         this.forceDataPacket(startGamePacket, null);
 

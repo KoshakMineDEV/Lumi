@@ -164,6 +164,10 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
                     if (this.protocol >= ProtocolInfo.v1_26_20_26) {
                         this.putBoolean(false);
                         this.putOptionalNull((Color) null, color -> this.putLInt(color.getRGB()));
+                        if (this.protocol >= ProtocolInfo.v1_26_50) {
+                            // line gap height added in v2192
+                            this.putLFloat(0);
+                        }
                         this.putBoolean(false);
                         this.putBoolean(true);
                         this.putBoolean(true);

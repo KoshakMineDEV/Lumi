@@ -21,7 +21,7 @@ public class NukkitLegacyMapper implements LegacyStateMapper {
         List<NbtMap> list = NukkitLegacyMapper.loadBlockPalette();
         for (int i = 0; i < list.size(); ++i) {
             NbtMap nbtMap = list.get(i);
-            //删除不属于原版的内容
+            // remove fields not related to vanilla
             if (nbtMap.containsKey("network_id") || nbtMap.containsKey("name_hash") || nbtMap.containsKey("block_id")) {
                 NbtMapBuilder builder = NbtMapBuilder.from(nbtMap);
                 builder.remove("network_id");

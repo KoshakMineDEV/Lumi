@@ -11,6 +11,10 @@ public class EnvironmentAttributeData {
     public CameraEase easing;
     public int localTransitionTicks;
     public boolean noiseTransition;
+    /**
+     * Trailing field added in v2192; unused server-side, written as default.
+     */
+    public NoiseAlignment noiseAlignment;
 
     public EnvironmentAttributeData(String attributeName, AttributeData from, AttributeData attribute, AttributeData to, int currentTransitionTicks, int totalTransitionTicks, CameraEase easing) {
         this(attributeName, from, attribute, to, currentTransitionTicks, totalTransitionTicks, easing, 0, false);
@@ -26,6 +30,16 @@ public class EnvironmentAttributeData {
         this.easing = easing;
         this.localTransitionTicks = localTransitionTicks;
         this.noiseTransition = noiseTransition;
+    }
+
+    /**
+     * noise alignment introduced in v2192 (single enum value for now)
+     */
+    public record NoiseAlignment(Type type, int value) {
+
+        public enum Type {
+            MIN_LOCAL_TRANSITION_END
+        }
     }
 
     public enum CameraEase {

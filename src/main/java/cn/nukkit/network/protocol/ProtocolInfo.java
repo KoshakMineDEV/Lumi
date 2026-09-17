@@ -49,14 +49,15 @@ public interface ProtocolInfo {
     int v1_26_40 = 2168;
     int v1_26_44 = 2169; // HACK: fake
     int v1_26_45 = 2170; // protocol version
+    int v1_26_50 = 2193;
 
-    int CURRENT_PROTOCOL = Utils.dynamic(v1_26_45);
+    int CURRENT_PROTOCOL = Utils.dynamic(v1_26_50);
 
     List<Integer> SUPPORTED_PROTOCOLS = Ints.asList(
             v1_20_0_23, v1_20_0, v1_20_10_21, v1_20_10, v1_20_30_24, v1_20_30, v1_20_40, v1_20_50, v1_20_60, v1_20_70, v1_20_80,
             v1_21_0, v1_21_2, v1_21_20, v1_21_30, v1_21_40, v1_21_50_26, v1_21_50, v1_21_60, v1_21_70_24, v1_21_70, v1_21_80, v1_21_90,
             v1_21_93, v1_21_100, v1_21_110_26, v1_21_111, v1_21_120, v1_21_124, v1_21_130, v1_26_0, v1_26_10, v1_26_20_26, v1_26_20,
-            v1_26_30, v1_26_40, v1_26_44, v1_26_45
+            v1_26_30, v1_26_40, v1_26_44, v1_26_45, v1_26_50
     );
 
     String MINECRAFT_VERSION_NETWORK = Utils.getVersionByProtocol(CURRENT_PROTOCOL);
@@ -383,6 +384,14 @@ public interface ProtocolInfo {
      * @since v1001
      */
     int PARTY_DESTINATION_COOKIE_RESPONSE_PACKET = 350;
+    /**
+     * @since v2192
+     */
+    int SET_PLAYER_FURNACE_OPTIONS_PACKET = 351;
+    /**
+     * @since v2192
+     */
+    int RECORD_STARTED_PACKET = 352;
 
     static int toNewProtocolID(byte oldProtocolID) {
         return oldProtocolID & 0xff;

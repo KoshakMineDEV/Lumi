@@ -3,6 +3,7 @@ package cn.nukkit.level;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
+import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -49,7 +50,8 @@ public class GlobalBlockPalette {
             ProtocolInfo.v1_26_10,
             ProtocolInfo.v1_26_20_26,
             ProtocolInfo.v1_26_30,
-            ProtocolInfo.v1_26_40
+            ProtocolInfo.v1_26_40,
+            ProtocolInfo.v1_26_50
     };
 
     static {
@@ -119,7 +121,7 @@ public class GlobalBlockPalette {
 
                         final int legacyIdMapping = function.map(json, id, meta);
 
-                        palette.registerState(id, meta, palette.getRuntimeId(legacyIdMapping >> Block.DATA_BITS, legacyIdMapping & Block.DATA_MASK));
+                        palette.registerState(id, meta, palette.getRuntimeId(legacyIdMapping >> Block.DATA_BITS, legacyIdMapping & Block.DATA_MASK), palette.getHashId(legacyIdMapping >> Block.DATA_BITS, legacyIdMapping & Block.DATA_MASK));
                     });
 
                     {
@@ -191,11 +193,62 @@ public class GlobalBlockPalette {
     }
 
     public static int getOrCreateRuntimeId(int protocol, int id, int meta) {
-        return getPaletteByProtocol(protocol).getRuntimeId(id, meta);
+        return getPaletteByProtocol(protocol).getHashId(id, meta);
     }
 
     public static int getOrCreateRuntimeId(int protocol, int legacyId) throws NoSuchElementException {
         return getOrCreateRuntimeId(protocol, legacyId >> Block.DATA_BITS, legacyId & Block.DATA_MASK);
+    }
+
+    /**
+     * Get full legacy block ID from hash ID
+     * <p>
+     * Used to convert hash ID used in newer protocols (1.19.80+) back to internal legacy block ID
+     *
+     * @param protocolId game version
+     * @param hashId hash ID of the block state
+     * @return full legacy block ID
+     * @throws IllegalArgumentException if protocol version is not supported
+     */
+    public static int getLegacyFullIdFromHashId(int protocolId, int hashId) {
+        BlockPalette blockPalette = getPaletteByProtocol(protocolId);
+        return blockPalette.getLegacyFullIdFromHashId(hashId);
+    }
+
+    public static int getLegacyFullId(int protocolId, CompoundTag blockState) {
+        BlockPalette blockPalette = getPaletteByProtocol(protocolId);
+        if (blockPalette != null) {
+            return blockPalette.getLegacyFullId(blockState);
+        }
+        throw new IllegalArgumentException("Tried to get legacyFullId for unsupported protocol version: " + protocolId);
+    }
+
+    /**
+     * Get or create hash ID of a block
+     * <p>
+     * Returns the block's hash ID if hashed block network IDs are enabled, otherwise returns -1
+     *
+     * @param gameVersion game version
+     * @param id block ID
+     * @param meta  block metadata value
+     * @return hash ID of the block, returns -1 if feature is not enabled
+     */
+    public static int getOrCreateHashId(int gameVersion, int id, int meta) {
+        return getPaletteByProtocol(gameVersion).getHashId(id, meta);
+    }
+
+    /**
+     * Get or create hash ID from legacy block ID
+     * <p>
+     * Returns the block's hash ID if hashed block network IDs are enabled, otherwise returns -1
+     *
+     * @param gameVersion game version
+     * @param legacyId (blockId << Block.DATA_BITS | meta) / full legacy block ID
+     * @return hash ID of the block, returns -1 if feature is not enabled
+     * @throws NoSuchElementException if block is not found
+     */
+    public static int getOrCreateHashId(int gameVersion, int legacyId) throws NoSuchElementException {
+        return getPaletteByProtocol(gameVersion).getHashId(legacyId >> Block.DATA_BITS, legacyId & Block.DATA_MASK);
     }
 
     public static int getLegacyFullId(int protocolId, int runtimeId) {
@@ -206,33 +259,6 @@ public class GlobalBlockPalette {
         final Int2ObjectMap<Item> set = DOWNGRADES.get(protocolId);
         if(set == null) return null;
         return set.get(id);
-    }
-
-    @Deprecated
-    public static int getOrCreateRuntimeId(int legacyId) throws NoSuchElementException {
-        Server.mvw("GlobalBlockPalette#getOrCreateRuntimeId(int)");
-        return getOrCreateRuntimeId(ProtocolInfo.CURRENT_PROTOCOL, legacyId >> 4, legacyId & 0xf);
-    }
-
-    @Deprecated
-    public static int getLegacyFullId(int runtimeId) {
-        Server.mvw("GlobalBlockPalette#getLegacyFullId(int)");
-        return getLegacyFullId(ProtocolInfo.CURRENT_PROTOCOL, runtimeId);
-    }
-
-    @SuppressWarnings("unused")
-    private static class TableEntry {
-        private int id;
-        private int data;
-        private String name;
-    }
-
-    @SuppressWarnings("unused")
-    private static class TableEntryOld {
-        private int id;
-        private int data;
-        private int runtimeID;
-        private String name;
     }
 
     private interface MappingFunction {

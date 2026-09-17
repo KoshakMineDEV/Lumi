@@ -1791,6 +1791,7 @@ public class BinaryStream {
     }
 
     protected ItemStackRequestAction readRequestActionData(int protocol, ItemStackRequestActionType type) {
+        boolean hasNumberOfCrafts = protocol >= ProtocolInfo.v1_21_20;
         return switch (type) {
             case CRAFT_REPAIR_AND_DISENCHANT -> {
                 int recipeId = protocol >= ProtocolInfo.v1_26_40 ? getLInt() : (int) getUnsignedVarInt();
@@ -1804,8 +1805,10 @@ public class BinaryStream {
             }
             case CRAFT_RECIPE_AUTO -> {
                 int recipeId = (int) getUnsignedVarInt();
-                if (protocol >= ProtocolInfo.v1_26_40) getByte(); // numberOfRequestedCrafts
-                int timesCrafted = getByte() & 0xff;
+                int numberOfRequestedCrafts = hasNumberOfCrafts ? (getByte() & 0xFF) : 0;
+                // No separate timesCrafted byte since v2168 (aligned with CB's reader since its 26.50
+                // commit removed the duplicated count byte): timesCrafted mirrors numberOfRequestedCrafts
+                int timesCrafted = protocol < ProtocolInfo.v1_26_40 ? (getByte() & 0xFF) : numberOfRequestedCrafts;
                 if (protocol >= ProtocolInfo.v1_26_40) {
                     int ingredientCount = (int) getUnsignedVarInt();
                     for (int i = 0; i < ingredientCount; i++) skipIngredientDescriptorV2168();

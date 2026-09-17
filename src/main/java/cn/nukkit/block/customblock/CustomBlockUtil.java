@@ -232,8 +232,9 @@ public class CustomBlockUtil {
 
                     IntSet legacyIds = state2Legacy.get(state);
                     if (legacyIds != null) {
+                        CompoundTag nukkitState = convertNbtMap(state);
                         for (Integer fullId : legacyIds) {
-                            palette.registerState(fullId >> Block.DATA_BITS, (fullId & Block.DATA_MASK), runtimeId);
+                            palette.registerState(fullId >> Block.DATA_BITS, (fullId & Block.DATA_MASK), runtimeId, nukkitState);
                         }
                     }
                 }

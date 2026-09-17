@@ -4977,7 +4977,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     private int getChunkProtocol(int protocol) {
-        if (protocol >= ProtocolInfo.v1_26_40) {
+        if (protocol >= ProtocolInfo.v1_26_50) {
+            return ProtocolInfo.v1_26_50;
+        } else if (protocol >= ProtocolInfo.v1_26_40) {
             return ProtocolInfo.v1_26_40;
         } else if (protocol >= ProtocolInfo.v1_26_30) {
             return ProtocolInfo.v1_26_30;
@@ -5059,7 +5061,8 @@ public class Level implements ChunkManager, Metadatable {
         if (chunk == ProtocolInfo.v1_26_10) if (player < ProtocolInfo.v1_26_20) return true;
         if (chunk == ProtocolInfo.v1_26_20) if (player < ProtocolInfo.v1_26_30) return true;
         if (chunk == ProtocolInfo.v1_26_30) return player >= ProtocolInfo.v1_26_30 && player < ProtocolInfo.v1_26_40;
-        if (chunk == ProtocolInfo.v1_26_40) return player >= ProtocolInfo.v1_26_40;
+        if (chunk == ProtocolInfo.v1_26_40) return player >= ProtocolInfo.v1_26_40 && player < ProtocolInfo.v1_26_50;
+        if (chunk == ProtocolInfo.v1_26_50) return player >= ProtocolInfo.v1_26_50;
         return false; //TODO Multiversion  Remember to update when block palette changes
     }
 

@@ -42,7 +42,8 @@ public class DimensionDataPacket extends DataPacket {
                 dimensionData.getMinHeight(),
                 getGeneratorType(dimension),
                 3, //force 3 because currently we don't support anything except overworld
-                new UUID(0, 0)
+                new UUID(0, 0),
+                null
         );
     }
 
@@ -66,13 +67,22 @@ public class DimensionDataPacket extends DataPacket {
         this.putUnsignedVarInt(definitions.size());
         for (DimensionDefinition definition : definitions) {
             this.putString(definition.getId());
-            this.putVarInt(definition.getMaximumHeight());
-            this.putVarInt(definition.getMinimumHeight());
+            if (this.protocol >= ProtocolInfo.v1_26_50) {
+                this.putVarInt(definition.getMinimumHeight());
+                this.putVarInt(definition.getMaximumHeight() - definition.getMinimumHeight());
+            } else {
+                this.putVarInt(definition.getMaximumHeight());
+                this.putVarInt(definition.getMinimumHeight());
+            }
             this.putVarInt(definition.getGeneratorType());
             if(protocol >= ProtocolInfo.v1_26_20_26) {
                 this.putVarInt(definition.getDimensionType());
                 if (protocol >= ProtocolInfo.v1_26_40) {
                     this.putUUID(definition.getPackId());
+                    if (this.protocol >= ProtocolInfo.v1_26_50) {
+                        // v2192 新增默认生物群系 / default biome added in v2192
+                        this.putString(definition.getDefaultBiome() != null ? definition.getDefaultBiome() : "");
+                    }
                 }
             }
         }

@@ -11,6 +11,7 @@ import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.customblock.properties.exception.InvalidBlockPropertyMetaException;
 import cn.nukkit.block.material.BlockTypes;
 import cn.nukkit.block.material.CustomBlockType;
+import cn.nukkit.block.properties.VanillaBlockDefinition;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.RuntimeItemMapping;
 import cn.nukkit.item.RuntimeItems;
@@ -18,17 +19,21 @@ import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.level.format.leveldb.LevelDBConstants;
 import cn.nukkit.level.format.leveldb.NukkitLegacyMapper;
+import cn.nukkit.nbt.NBTIO;
+import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import org.cloudburstmc.nbt.NbtType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -47,6 +52,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
     private static boolean[] DIFFUSES_SKY_LIGHT = new boolean[65536];
 
     private static final List<CustomBlockDefinition> CUSTOM_BLOCK_DEFINITIONS = new ArrayList<>();
+    private static final Int2ObjectOpenHashMap<List<VanillaBlockDefinition>> VANILLA_BLOCK_DEFINITIONS = new Int2ObjectOpenHashMap<>();
     private static final Int2ObjectMap<CustomBlock> ID_TO_CUSTOM_BLOCK = new Int2ObjectOpenHashMap<>();
     private static final ConcurrentHashMap<String, Integer> CUSTOM_BLOCK_ID_MAP = new ConcurrentHashMap<>();
     private static final Map<String, List<CustomBlockUtil.CustomBlockState>> LEGACY_2_CUSTOM_STATE = new HashMap<>();
@@ -1142,6 +1148,8 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                 }
             }
         });
+
+        loadVanillaBlockDefinitions();
     }
 
     public void initCustomBlocks() {
@@ -1283,6 +1291,29 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         }
     }
 
+    /**
+     * Data driven blocks have no class of their own: the client builds them from the properties we
+     * hand it on join, so all we do here is keep the dump around.
+     */
+    private void loadVanillaBlockDefinitions() {
+        for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
+           try (var stream = BlockRegistry.class.getClassLoader().getResourceAsStream("gamedata/block/vanilla_definition/block_definitions_" + protocol + ".nbt")) {
+               if (stream != null) {
+                   System.out.println("gamedata/block/vanilla_definition/block_definitions_" + protocol + ".nbt");
+                   List<VanillaBlockDefinition> blockDefinitions = new ArrayList<>();
+                   CompoundTag root = NBTIO.readNetworkCompressed(stream, ByteOrder.BIG_ENDIAN);
+
+                   for (CompoundTag property : root.getList("properties", CompoundTag.class).getAll()) {
+                       blockDefinitions.add(new VanillaBlockDefinition(property.getString("name"), property.getCompound("properties")));
+                   }
+                   VANILLA_BLOCK_DEFINITIONS.put(protocol, blockDefinitions);
+               }
+           } catch (IOException e) {
+               // Do nothing. 1.26.50+ only
+           }
+        }
+    }
+
     @Override
     public Block get(Integer key) {
         return FULL_LIST[key];
@@ -1326,6 +1357,10 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
     public int getFullListSize() {
         return FULL_LIST.length;
+    }
+
+    public List<VanillaBlockDefinition> getVanillaBlockDefinition(int protocol) {
+        return Collections.unmodifiableList(VANILLA_BLOCK_DEFINITIONS.get(protocol));
     }
 
     public List<CustomBlockDefinition> getCustomBlockDefinitionList() {

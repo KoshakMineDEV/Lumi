@@ -7,7 +7,7 @@
 Lumi is a server software which was made to introduce modern Minecraft new features and different improvements. Hard-forked from [Nukkit-MOT](https://github.com/MemoriesOfTime/Nukkit-MOT/).  
 
 ### What's new in Lumi?
-1. Support for 1.20.0 – 1.26.44 version (you can set the minimum protocol in the config)
+1. Support for 1.20.0 – 1.26.50 version (you can set the minimum protocol in the config)
 2. More vanilla features
 3. Custom Blocks support
 4. Custom Enchantments support

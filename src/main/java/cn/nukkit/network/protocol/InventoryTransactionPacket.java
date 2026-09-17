@@ -111,11 +111,11 @@ public class InventoryTransactionPacket extends DataPacket {
             //TODO
         }
 
-        if (this.protocol >= ProtocolInfo.v1_26_30) {
+        if (this.protocol >= ProtocolInfo.v1_26_30 && this.protocol < ProtocolInfo.v1_26_50) {
             this.putBoolean(true);
         }
         this.putUnsignedVarInt(this.transactionType);
-        if (this.protocol >= ProtocolInfo.v1_26_30) {
+        if (this.protocol >= ProtocolInfo.v1_26_30 && this.protocol < ProtocolInfo.v1_26_50) {
             this.putBoolean(true);
         }
         this.putUnsignedVarInt(this.actions.length);
@@ -146,6 +146,9 @@ public class InventoryTransactionPacket extends DataPacket {
                     this.putBlockFace(useItemData.face);
                 }
                 this.putVarInt(useItemData.hotbarSlot);
+                if (this.protocol >= ProtocolInfo.v1_26_50) {
+                    this.putByte((byte) 0); // main hand, single byte
+                }
                 if (this.protocol >= ProtocolInfo.v1_26_30) {
                     this.putNetworkItemStackDescriptor(protocol, useItemData.itemInHand);
                 } else {
@@ -207,13 +210,13 @@ public class InventoryTransactionPacket extends DataPacket {
             this.readLegacySlots();
         }
 
-        if (this.protocol >= ProtocolInfo.v1_26_30 && !this.getBoolean()) {
+        if (this.protocol >= ProtocolInfo.v1_26_30 && this.protocol < ProtocolInfo.v1_26_50 && !this.getBoolean()) {
             throw new IllegalStateException("Expected InventoryTransactionType");
         }
 
         this.transactionType = (int) this.getUnsignedVarInt();
 
-        if (this.protocol >= ProtocolInfo.v1_26_30 && !this.getBoolean()) {
+        if (this.protocol >= ProtocolInfo.v1_26_30 && this.protocol < ProtocolInfo.v1_26_50 && !this.getBoolean()) {
             throw new IllegalStateException("Expected InventoryActionData");
         }
 
@@ -237,6 +240,10 @@ public class InventoryTransactionPacket extends DataPacket {
                 itemData.blockPos = this.getBlockVector3();
                 itemData.face = this.protocol >= ProtocolInfo.v1_26_30 ? BlockFace.fromIndex(this.getByte() & 0xff) : this.getBlockFace();
                 itemData.hotbarSlot = this.getVarInt();
+                if (this.protocol >= ProtocolInfo.v1_26_50) {
+                    // hand (main/off-hand) added in v2192, single byte (corrected by CB #355, not VarUInt)
+                    itemData.hand = this.getByte();
+                }
                 itemData.itemInHand = this.protocol >= ProtocolInfo.v1_26_30 ? this.getNetworkItemStackDescriptor(this.protocol) : this.getSlot(this.protocol);
                 itemData.playerPos = this.getVector3f().asVector3();
                 itemData.clickPos = this.getVector3f();

@@ -482,6 +482,7 @@ public class Utils {
             case ProtocolInfo.v1_26_40 -> "1.26.40";
             case ProtocolInfo.v1_26_44 -> "1.26.44";
             case ProtocolInfo.v1_26_45 -> "1.26.45";
+            case ProtocolInfo.v1_26_50 -> "1.26.50";
             default -> throw new IllegalStateException("Invalid protocol: " + protocol);
         };
     }
