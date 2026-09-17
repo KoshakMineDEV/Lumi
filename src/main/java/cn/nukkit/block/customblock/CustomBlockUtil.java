@@ -15,6 +15,7 @@ import cn.nukkit.level.format.leveldb.LevelDBConstants;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.registry.Registries;
+import cn.nukkit.utils.Hash;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -158,8 +159,7 @@ public class CustomBlockUtil {
         int paletteVersion = -1;
         String lastName = null;
         List<NbtMap> group = new ObjectArrayList<>();
-        int runtimeId = 0;
-        Int2ObjectMap<NbtMap> runtimeId2State = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<NbtMap> hashId2State = new Int2ObjectOpenHashMap<>();
         for (NbtMap state : vanillaPalette) {
             //删除不属于原版的内容
             if (state.containsKey("network_id") || state.containsKey("name_hash") || state.containsKey("block_id")) {
@@ -181,7 +181,11 @@ public class CustomBlockUtil {
                 group = new ObjectArrayList<>();
             }
             group.add(state);
-            runtimeId2State.put(runtimeId++, state);
+            int hashId = Hash.hashBlock(state);
+            NbtMap previous = hashId2State.putIfAbsent(hashId, state);
+            if (previous != null && !previous.equals(state)) {
+                throw new IllegalStateException("Block state hash collision for " + hashId + ": " + previous + " and " + state);
+            }
             lastName = name;
         }
         if (lastName != null) {
@@ -190,11 +194,11 @@ public class CustomBlockUtil {
 
         Object2ObjectMap<NbtMap, IntSet> state2Legacy = new Object2ObjectLinkedOpenHashMap<>();
 
-        for (Int2IntMap.Entry entry : palette.getLegacyToRuntimeIdMap().int2IntEntrySet()) {
-            int rid = entry.getIntValue();
-            NbtMap state = runtimeId2State.get(rid);
+        for (Int2IntMap.Entry entry : palette.getLegacyToHashIdMap().int2IntEntrySet()) {
+            int hashId = entry.getIntValue();
+            NbtMap state = hashId2State.get(hashId);
             if (state == null) {
-                log.info("Unknown runtime ID {}! protocol={}", rid, palette.getProtocol());
+                log.info("Unknown block-state hash {}! protocol={}", hashId, palette.getProtocol());
                 continue;
             }
             IntSet legacyIds = state2Legacy.computeIfAbsent(state, s -> new IntOpenHashSet());
@@ -204,6 +208,13 @@ public class CustomBlockUtil {
         for(List<CustomBlockState> variants : Registries.BLOCK.getLegacy2CustomState().values()) {
             for (CustomBlockState definition : variants) {
                 NbtMap state = definition.getBlockState();
+
+                int hashId = Hash.hashBlock(state);
+                NbtMap previous = hashId2State.putIfAbsent(hashId, state);
+                if (previous != null && (!previous.getString("name").equals(state.getString("name")) ||
+                        !previous.getCompound("states").equals(state.getCompound("states")))) {
+                    throw new IllegalStateException("Block state hash collision for " + hashId + ": " + previous + " and " + state);
+                }
 
                 final List<NbtMap> states = vanillaPaletteList.computeIfAbsent(state.getString("name"), (k) -> new ObjectArrayList<>());
 
@@ -222,27 +233,25 @@ public class CustomBlockUtil {
             BlockStateMapping.get().clearMapping();
         }
 
-        runtimeId = 0;
         for (List<NbtMap> states : vanillaPaletteList.values()) {
             for (NbtMap state : states) {
+                int hashId = Hash.hashBlock(state);
                 if (!levelDb || !BlockStateMapping.get().containsState(state)) {
                     if (levelDb) {
-                        BlockStateMapping.get().registerState(runtimeId, state);
+                        BlockStateMapping.get().registerState(hashId, state);
                     }
 
                     IntSet legacyIds = state2Legacy.get(state);
                     if (legacyIds != null) {
-                        CompoundTag nukkitState = convertNbtMap(state);
                         for (Integer fullId : legacyIds) {
-                            palette.registerState(fullId >> Block.DATA_BITS, (fullId & Block.DATA_MASK), runtimeId, nukkitState);
+                            palette.registerState(fullId >> Block.DATA_BITS, (fullId & Block.DATA_MASK), hashId);
                         }
                     }
                 }
-                runtimeId++;
             }
         }
 
-        palette.setInfoUpdate(palette.getLegacyToRuntimeIdMap().get(BlockID.INFO_UPDATE << Block.DATA_BITS));
+        palette.setInfoUpdateHashId(palette.getLegacyToHashIdMap().get(BlockID.INFO_UPDATE << Block.DATA_BITS));
     }
 
     @Data

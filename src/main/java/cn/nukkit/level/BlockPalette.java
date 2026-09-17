@@ -10,6 +10,8 @@ import cn.nukkit.utils.Hash;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -26,26 +28,22 @@ import java.util.zip.GZIPInputStream;
 public class BlockPalette {
 
     private final int protocol;
-    private final Int2IntMap legacyToRuntimeId = new Int2IntOpenHashMap();
-    private final Int2IntMap runtimeIdToLegacy = new Int2IntOpenHashMap();
     private final Int2IntMap legacyToHashId = new Int2IntOpenHashMap();
     private final Int2IntMap hashIdToLegacy = new Int2IntOpenHashMap();
 
     @ApiStatus.Internal
     @Setter
-    private int infoUpdate;
+    private int infoUpdateHashId;
     private volatile boolean locked;
 
     public BlockPalette(int protocol) {
         this.protocol = protocol;
-        legacyToRuntimeId.defaultReturnValue(-1);
-        runtimeIdToLegacy.defaultReturnValue(-1);
         legacyToHashId.defaultReturnValue(-1);
         hashIdToLegacy.defaultReturnValue(-1);
 
         loadBlockStates(paletteFor(protocol));
 
-        this.infoUpdate = legacyToRuntimeId.get(BlockID.INFO_UPDATE << Block.DATA_BITS);
+        this.infoUpdateHashId = legacyToHashId.get(BlockID.INFO_UPDATE << Block.DATA_BITS);
     }
 
     private ListTag<CompoundTag> paletteFor(int protocol) {
@@ -64,22 +62,22 @@ public class BlockPalette {
 
     private void loadBlockStates(ListTag<CompoundTag> blockStates) {
         List<CompoundTag> stateOverloads = new ObjectArrayList<>();
+        Int2ObjectMap<CompoundTag> hashIdToState = new Int2ObjectOpenHashMap<>();
         for (CompoundTag state : blockStates.getAll()) {
-            if (!this.registerBlockState(state, false)) {
+            if (!this.registerBlockState(state, false, hashIdToState)) {
                 stateOverloads.add(state);
             }
         }
 
         for (CompoundTag state : stateOverloads) {
             log.debug("[{}] Registering block palette overload: {}", this.getProtocol(), state.getString("name"));
-            this.registerBlockState(state, true);
+            this.registerBlockState(state, true, hashIdToState);
         }
     }
 
-    private boolean registerBlockState(CompoundTag state, boolean force) {
+    private boolean registerBlockState(CompoundTag state, boolean force, Int2ObjectMap<CompoundTag> hashIdToState) {
         int id = state.getInt("id");
         int data = state.getShort("data");
-        int runtimeId = state.getInt("runtimeId");
         boolean stateOverload = state.getBoolean("stateOverload");
 
         if (stateOverload && !force) {
@@ -91,7 +89,13 @@ public class BlockPalette {
                 .remove("data")
                 .remove("runtimeId")
                 .remove("stateOverload");
-        this.registerState(id, data, runtimeId, vanillaState);
+        int hashId = Hash.hashBlock(vanillaState);
+        CompoundTag previous = hashIdToState.putIfAbsent(hashId, vanillaState);
+        if (previous != null && (!previous.getString("name").equals(vanillaState.getString("name")) ||
+                !previous.getCompound("states").equals(vanillaState.getCompound("states")))) {
+            throw new IllegalStateException("Block state hash collision for " + hashId + ": " + previous + " and " + vanillaState);
+        }
+        this.registerState(id, data, hashId);
         return true;
     }
 
@@ -99,32 +103,40 @@ public class BlockPalette {
         return this.protocol;
     }
 
+    public Int2IntMap getLegacyToHashIdMap() {
+        return Int2IntMaps.unmodifiable(this.legacyToHashId);
+    }
+
     public Int2IntMap getLegacyToRuntimeIdMap() {
-        return Int2IntMaps.unmodifiable(this.legacyToRuntimeId);
+        return this.getLegacyToHashIdMap();
     }
 
     public void clearStates() {
         this.locked = false;
-        this.legacyToRuntimeId.clear();
-        this.runtimeIdToLegacy.clear();
         this.legacyToHashId.clear();
         this.hashIdToLegacy.clear();
     }
 
-    public void registerState(int blockId, int data, int runtimeId, CompoundTag blockState) {
-        registerState(blockId, data, runtimeId, Hash.hashBlock(blockState));
+    public void registerState(int blockId, int data, CompoundTag blockState) {
+        registerState(blockId, data, Hash.hashBlock(blockState));
     }
 
-    public void registerState(int blockId, int data, int runtimeId, int stateHash) {
+    public void registerState(int blockId, int data, int runtimeId, CompoundTag blockState) {
+        this.registerState(blockId, data, blockState);
+    }
+
+    public void registerState(int blockId, int data, int runtimeId, int hashId) {
+        this.registerState(blockId, data, hashId);
+    }
+
+    public void registerState(int blockId, int data, int hashId) {
         if (this.locked) {
             throw new IllegalStateException("Block palette is already locked!");
         }
 
         int legacyId = blockId << Block.DATA_BITS | data;
-        this.legacyToRuntimeId.put(legacyId, runtimeId);
-        this.runtimeIdToLegacy.putIfAbsent(runtimeId, legacyId);
-        this.legacyToHashId.putIfAbsent(legacyId, stateHash);
-        this.hashIdToLegacy.putIfAbsent(stateHash, legacyId);
+        this.legacyToHashId.put(legacyId, hashId);
+        this.hashIdToLegacy.putIfAbsent(hashId, legacyId);
     }
 
     /**
@@ -168,7 +180,7 @@ public class BlockPalette {
         if (hashId == -1) {
             hashId = legacyToHashId.get(id << Block.DATA_BITS);
             if (hashId == -1) {
-                hashId = legacyToHashId.get(BlockID.INFO_UPDATE << Block.DATA_BITS);
+                hashId = this.infoUpdateHashId;
             }
         }
         return hashId;
@@ -178,23 +190,16 @@ public class BlockPalette {
         this.locked = true;
     }
 
-    public int getRuntimeId(int id, int meta) {
-        int legacyId = id << Block.DATA_BITS | meta;
-        int runtimeId;
-        runtimeId = legacyToRuntimeId.get(legacyId);
-        if (runtimeId == -1) {
-            runtimeId = legacyToRuntimeId.get(id << Block.DATA_BITS);
-            if (runtimeId == -1) {
-                Server.getInstance().getLogger().debug("(" + protocol + ") Missing block runtime id mappings for " + id + ':' + meta);
-                runtimeId = infoUpdate;
-                legacyToRuntimeId.put(legacyId, runtimeId);
-            }
-        }
-        return runtimeId;
+    public void setInfoUpdate(int hashId) {
+        this.setInfoUpdateHashId(hashId);
     }
 
-    public int getLegacyFullId(int runtimeId) {
-        return runtimeIdToLegacy.get(runtimeId);
+    public int getRuntimeId(int id, int meta) {
+        return this.getHashId(id, meta);
+    }
+
+    public int getLegacyFullId(int hashId) {
+        return this.getLegacyFullIdFromHashId(hashId);
     }
 
 }

@@ -157,7 +157,7 @@ public class StateBlockStorage {
                             chunkBuilder.dirty();
                         }
 
-                        if (Nukkit.DEBUG > 1 && blockState.getRuntimeId() == BlockStateMapping.get().getDefaultRuntimeId()) {
+                        if (Nukkit.DEBUG > 1 && blockState.getHashId() == BlockStateMapping.get().getDefaultHashId()) {
                             log.info("[{}] Chunk contains unknown block {}  => {}", chunkBuilder.debugString(), state, updatedState);
                         }
                     }

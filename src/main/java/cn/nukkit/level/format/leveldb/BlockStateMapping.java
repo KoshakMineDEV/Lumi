@@ -2,7 +2,6 @@ package cn.nukkit.level.format.leveldb;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.level.format.leveldb.structure.BlockStateSnapshot;
-import cn.nukkit.level.format.leveldb.updater.BlockStateUpdaterChunker;
 import cn.nukkit.level.format.leveldb.updater.BlockStateUpdaterVanilla;
 import cn.nukkit.level.format.leveldb.updater.BlockStateUpdater_1_21_110;
 import it.unimi.dsi.fastutil.Hash;
@@ -36,7 +35,7 @@ public class BlockStateMapping {
 
     private LegacyStateMapper legacyMapper;
 
-    private int defaultRuntimeId = -1;
+    private int defaultHashId = -1;
     private BlockStateSnapshot defaultState;
 
     private static final ExpiringMap<NbtMap, NbtMap> BLOCK_UPDATE_CACHE = ExpiringMap.builder()
@@ -44,7 +43,7 @@ public class BlockStateMapping {
             .expiration(60L, TimeUnit.SECONDS)
             .expirationPolicy(ExpirationPolicy.ACCESSED)
             .build();
-    private final Int2ObjectMap<BlockStateSnapshot> runtime2State = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<BlockStateSnapshot> hash2State = new Int2ObjectOpenHashMap<>();
     private final Object2ObjectMap<NbtMap, BlockStateSnapshot> paletteMap = new Object2ObjectOpenCustomHashMap<>(new Hash.Strategy<>() {
         @Override
         public int hashCode(NbtMap nbtMap) {
@@ -98,19 +97,14 @@ public class BlockStateMapping {
         blockStateUpdaters.add(BlockStateUpdater_1_20_70.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_20_80.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_21_0.INSTANCE);
-
-        // TODO 检查BlockStateUpdaterChunker是否可以移除
-        if (Boolean.parseBoolean(System.getProperty("leveldb-chunker"))) {
-            blockStateUpdaters.add(BlockStateUpdaterChunker.INSTANCE);
-            log.warn("Enabled chunker.app LevelDB updater. This may impact chunk loading performance!");
-        }
-
         blockStateUpdaters.add(BlockStateUpdater_1_21_10.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_21_20.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_21_30.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_21_40.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_21_60.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_21_110.INSTANCE);
+
+        //blockStateUpdaters.add(BlockStateUpdater_1_26_50.INSTANCE);
 
         blockStateUpdaters.add(BlockStateUpdaterVanilla.INSTANCE);
 
@@ -137,24 +131,29 @@ public class BlockStateMapping {
         return paletteMap.containsKey(state);
     }
 
-    public void registerState(int runtimeId, NbtMap state) {
-        Preconditions.checkArgument(!this.runtime2State.containsKey(runtimeId),
-                "Mapping for runtimeId " + runtimeId + " is already created!");
+    public void registerState(int hashId, NbtMap state) {
+        BlockStateSnapshot hashState = this.hash2State.get(hashId);
+        Preconditions.checkArgument(hashState == null || Objects.equals(hashState.getVanillaState(), state),
+                "Block state hash collision for " + hashId + ": " +
+                        (hashState == null ? null : hashState.getVanillaState()) + " and " + state);
         Preconditions.checkArgument(!this.paletteMap.containsKey(state),
                 "Mapping for state is already created: " + state);
 
         BlockStateSnapshot blockState = BlockStateSnapshot.builder()
                 .version(this.version)
                 .vanillaState(state)
-                .runtimeId(runtimeId)
+                .hashId(hashId)
                 .build();
-        this.runtime2State.put(runtimeId, blockState);
+        this.hash2State.put(hashId, blockState);
         this.paletteMap.put(state, blockState);
     }
 
     public void clearMapping() {
-        this.runtime2State.clear();
+        this.hash2State.clear();
         this.paletteMap.clear();
+        this.customCacheMap.clear();
+        this.defaultHashId = -1;
+        this.defaultState = null;
     }
 
     public void setLegacyMapper(LegacyStateMapper legacyStateMapper) {
@@ -174,18 +173,18 @@ public class BlockStateMapping {
     }
 
     public BlockStateSnapshot getState(int legacyId, int data) {
-        int runtimeId = this.legacyMapper.legacyToRuntime(legacyId, data);
-        if (runtimeId == -1) {
-            log.warn("Can not find state! No legacy2runtime mapping for " + legacyId + ":" + data);
+        int hashId = this.legacyMapper.legacyToHashId(legacyId, data);
+        if (hashId == -1) {
+            log.warn("Can not find state! No legacy-to-hash mapping for {}:{}", legacyId, data);
             return this.getDefaultState();
         }
-        return this.getState(runtimeId);
+        return this.getState(hashId);
     }
 
-    public BlockStateSnapshot getState(int runtimeId) {
-        BlockStateSnapshot blockStateSnapshot = this.runtime2State.get(runtimeId);
+    public BlockStateSnapshot getState(int hashId) {
+        BlockStateSnapshot blockStateSnapshot = this.hash2State.get(hashId);
         if (blockStateSnapshot == null) {
-            log.warn("Can not find state! No runtime2State mapping for {}", runtimeId);
+            log.warn("Can not find state! No hash-to-state mapping for {}", hashId);
             return this.getDefaultState();
         }
         return blockStateSnapshot;
@@ -210,62 +209,71 @@ public class BlockStateMapping {
             return blockStateSnapshot;
         }
         log.debug("Unknown block state: " + tag);
-        return BlockStateSnapshot.builder().vanillaState(tag).runtimeId(this.getDefaultState().getRuntimeId()).version(this.version).custom(true).build();
+        return BlockStateSnapshot.builder().vanillaState(tag).hashId(this.getDefaultState().getHashId()).version(this.version).custom(true).build();
+    }
+
+    public int getHashId(int legacyId, int data) {
+        int hashId = this.legacyMapper.legacyToHashId(legacyId, data);
+        if (hashId == -1) {
+            log.warn("Can not find hashId! No legacy-to-hash mapping for {}:{}", legacyId, data);
+            return this.getDefaultHashId();
+        }
+        return hashId;
     }
 
     public int getRuntimeId(int legacyId, int data) {
-        int runtimeId = this.legacyMapper.legacyToRuntime(legacyId, data);
-        if (runtimeId == -1) {
-            log.warn("Can not find runtimeId! No legacy2runtime mapping for {}:{}", legacyId, data);
-            return this.getDefaultRuntimeId();
-        }
-        return runtimeId;
+        return this.getHashId(legacyId, data);
     }
 
-    public int getFullId(int runtimeId) {
-        int fullId = this.legacyMapper.runtimeToFullId(runtimeId);
+    public int getFullId(int hashId) {
+        int fullId = this.legacyMapper.hashIdToFullId(hashId);
         if (fullId == -1) {
-            log.warn("Can not find legacyId! No runtime2FullId mapping for {}", runtimeId);
-            fullId = this.legacyMapper.runtimeToFullId(this.getDefaultRuntimeId());
-            Preconditions.checkArgument(fullId != -1, "Can not find fullId for default runtimeId: " + this.getDefaultRuntimeId());
+            log.warn("Can not find legacyId! No hash-to-fullId mapping for {}", hashId);
+            fullId = this.legacyMapper.hashIdToFullId(this.getDefaultHashId());
+            Preconditions.checkArgument(fullId != -1, "Can not find fullId for default hashId: " + this.getDefaultHashId());
         }
         return fullId;
     }
 
-    public int getLegacyId(int runtimeId) {
-        int legacyId = this.legacyMapper.runtimeToLegacyId(runtimeId);
+    public int getLegacyId(int hashId) {
+        int legacyId = this.legacyMapper.hashIdToLegacyId(hashId);
         if (legacyId == -1) {
-            log.warn("Can not find legacyId! No runtime2legacy mapping for " + runtimeId);
-            legacyId = this.legacyMapper.runtimeToLegacyId(this.getDefaultRuntimeId());
-            Preconditions.checkArgument(legacyId != -1, "Can not find legacyId for default runtimeId: " + this.getDefaultRuntimeId());
+            log.warn("Can not find legacyId! No hash-to-legacy mapping for {}", hashId);
+            legacyId = this.legacyMapper.hashIdToLegacyId(this.getDefaultHashId());
+            Preconditions.checkArgument(legacyId != -1, "Can not find legacyId for default hashId: " + this.getDefaultHashId());
         }
         return legacyId;
     }
 
-    public int getLegacyData(int runtimeId) {
-        int data = this.legacyMapper.runtimeToLegacyData(runtimeId);
+    public int getLegacyData(int hashId) {
+        int data = this.legacyMapper.hashIdToLegacyData(hashId);
         if (data == -1) {
-            log.warn("Can not find legacyId! No runtime2legacy mapping for " + runtimeId);
-            data = this.legacyMapper.runtimeToLegacyData(this.getDefaultRuntimeId());
-            Preconditions.checkArgument(data != -1, "Can not find legacyData for default runtimeId: " + this.getDefaultRuntimeId());        }
+            log.warn("Can not find legacy data! No hash-to-legacy mapping for {}", hashId);
+            data = this.legacyMapper.hashIdToLegacyData(this.getDefaultHashId());
+            Preconditions.checkArgument(data != -1, "Can not find legacyData for default hashId: " + this.getDefaultHashId());
+        }
         return data;
     }
 
     public void setDefaultBlock(int legacyId, int legacyData) {
-        int runtimeId = this.legacyMapper.legacyToRuntime(legacyId, legacyData);
-        Preconditions.checkArgument(runtimeId != -1, "Can not find runtimeId mapping for default block: " + legacyId + ":" + legacyData);
-        this.defaultRuntimeId = runtimeId;
+        int hashId = this.legacyMapper.legacyToHashId(legacyId, legacyData);
+        Preconditions.checkArgument(hashId != -1, "Can not find hashId mapping for default block: " + legacyId + ":" + legacyData);
+        this.defaultHashId = hashId;
 
-        BlockStateSnapshot state = this.runtime2State.get(runtimeId);
+        BlockStateSnapshot state = this.hash2State.get(hashId);
         Preconditions.checkNotNull(state, "Can not find state for default block: " + legacyId + ":" + legacyData);
         this.defaultState = state;
     }
 
-    public int getDefaultRuntimeId() {
-        if (this.defaultRuntimeId == -1) {
+    public int getDefaultHashId() {
+        if (this.defaultHashId == -1) {
             this.setDefaultBlock(Block.INFO_UPDATE, 0);
         }
-        return this.defaultRuntimeId;
+        return this.defaultHashId;
+    }
+
+    public int getDefaultRuntimeId() {
+        return this.getDefaultHashId();
     }
 
     public BlockStateSnapshot getDefaultState() {
@@ -321,7 +329,7 @@ public class BlockStateMapping {
 
         blockState = BlockStateSnapshot.builder()
                 .vanillaState(state)
-                .runtimeId(this.getDefaultState().getRuntimeId())
+                .hashId(this.getDefaultState().getHashId())
                 .version(this.version)
                 .custom(true)
                 .build();

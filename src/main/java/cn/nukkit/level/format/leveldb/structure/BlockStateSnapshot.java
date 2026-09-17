@@ -13,7 +13,7 @@ import org.cloudburstmc.nbt.NbtMap;
 public class BlockStateSnapshot {
 
     private final NbtMap vanillaState;
-    private final int runtimeId;
+    private final int hashId;
     private final int version;
 
     @Builder.Default
@@ -29,7 +29,7 @@ public class BlockStateSnapshot {
             return this.legacyId;
         }
 
-        int id = BlockStateMapping.get().getLegacyId(this.runtimeId);
+        int id = BlockStateMapping.get().getLegacyId(this.hashId);
         if (this.version == BlockStateMapping.get().getVersion()) {
             this.legacyId = id;
         }
@@ -41,7 +41,7 @@ public class BlockStateSnapshot {
             return this.legacyData;
         }
 
-        int meta = BlockStateMapping.get().getLegacyData(this.runtimeId);
+        int meta = BlockStateMapping.get().getLegacyData(this.hashId);
         if (this.version == BlockStateMapping.get().getVersion()) {
             this.legacyData = meta;
         }
@@ -51,5 +51,16 @@ public class BlockStateSnapshot {
     @Deprecated
     public Block getBlock() {
         return Block.get(this.getLegacyId(), this.getLegacyData());
+    }
+
+    public int getRuntimeId() {
+        return this.hashId;
+    }
+
+    public static class BlockStateSnapshotBuilder {
+        public BlockStateSnapshotBuilder runtimeId(int runtimeId) {
+            this.hashId = runtimeId;
+            return this;
+        }
     }
 }

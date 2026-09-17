@@ -2,7 +2,11 @@ package cn.nukkit.utils;
 
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
+import org.cloudburstmc.nbt.NBTOutputStream;
+import org.cloudburstmc.nbt.NbtMap;
+import org.cloudburstmc.nbt.NbtUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -98,6 +102,24 @@ public class Hash {
             return fnv1a_32(NBTIO.write(new CompoundTag(new LinkedHashMap<>())
                     .putString("name", name)
                     .putCompound("states", new CompoundTag(new TreeMap<>(block.getCompound("states").getTags()))), ByteOrder.LITTLE_ENDIAN));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Calculate the network hash of a Cloudburst block-state tag.
+     *
+     * @param block NBT map containing block name and states
+     * @return 32-bit FNV-1a hash of the canonical block state
+     */
+    public static int hashBlock(NbtMap block) {
+        try {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            try (NBTOutputStream output = NbtUtils.createWriter(stream)) {
+                output.writeTag(block);
+            }
+            return hashBlock(NBTIO.read(stream.toByteArray(), ByteOrder.BIG_ENDIAN, false));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

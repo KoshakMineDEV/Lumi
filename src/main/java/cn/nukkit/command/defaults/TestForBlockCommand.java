@@ -10,6 +10,7 @@ import cn.nukkit.command.utils.CommandLogger;
 import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
+import cn.nukkit.network.protocol.ProtocolInfo;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -42,7 +43,7 @@ public class TestForBlockCommand extends VanillaCommand {
             dataValue = list.getResult(2);
         }
         try {
-            GlobalBlockPalette.getOrCreateRuntimeId(tileId, dataValue);
+            GlobalBlockPalette.getOrCreateHashId(ProtocolInfo.CURRENT_PROTOCOL, tileId, dataValue);
         } catch (NoSuchElementException e) {
             log.addError("commands.give.block.notFound", String.valueOf(tileId)).output();
             return 0;

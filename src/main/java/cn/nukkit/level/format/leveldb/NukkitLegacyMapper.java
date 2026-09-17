@@ -4,6 +4,7 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.GlobalBlockPalette;
+import cn.nukkit.utils.Hash;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtType;
@@ -19,8 +20,8 @@ public class NukkitLegacyMapper implements LegacyStateMapper {
 
     public static void registerStates(BlockStateMapping blockStateMapping) {
         List<NbtMap> list = NukkitLegacyMapper.loadBlockPalette();
-        for (int i = 0; i < list.size(); ++i) {
-            NbtMap nbtMap = list.get(i);
+        for (NbtMap paletteState : list) {
+            NbtMap nbtMap = paletteState;
             // remove fields not related to vanilla
             if (nbtMap.containsKey("network_id") || nbtMap.containsKey("name_hash") || nbtMap.containsKey("block_id")) {
                 NbtMapBuilder builder = NbtMapBuilder.from(nbtMap);
@@ -31,7 +32,7 @@ public class NukkitLegacyMapper implements LegacyStateMapper {
             }
             //noinspection ResultOfMethodCallIgnored
             nbtMap.hashCode(); // cache hashCode
-            blockStateMapping.registerState(i, nbtMap);
+            blockStateMapping.registerState(Hash.hashBlock(nbtMap), nbtMap);
         }
     }
 
@@ -48,25 +49,45 @@ public class NukkitLegacyMapper implements LegacyStateMapper {
     private final BlockPalette blockPalette = GlobalBlockPalette.getPaletteByProtocol(PALETTE_VERSION);
 
     @Override
-    public int legacyToRuntime(int legacyId, int meta) {
-        return blockPalette.getRuntimeId(legacyId, meta);
+    public int legacyToHashId(int legacyId, int meta) {
+        return blockPalette.getHashId(legacyId, meta);
     }
 
     @Override
-    public int runtimeToFullId(int runtimeId) {
-        return blockPalette.getLegacyFullId(runtimeId);
+    public int hashIdToFullId(int hashId) {
+        return blockPalette.getLegacyFullIdFromHashId(hashId);
     }
 
     @Override
-    public int runtimeToLegacyId(int runtimeId) {
-        int fullId = this.runtimeToFullId(runtimeId);
+    public int hashIdToLegacyId(int hashId) {
+        int fullId = this.hashIdToFullId(hashId);
         return fullId == -1 ? -1 : fullId >> Block.DATA_BITS;
     }
 
     @Override
-    public int runtimeToLegacyData(int runtimeId) {
-        int fullId = this.runtimeToFullId(runtimeId);
+    public int hashIdToLegacyData(int hashId) {
+        int fullId = this.hashIdToFullId(hashId);
         return fullId == -1 ? -1 : fullId & Block.DATA_MASK;
+    }
+
+    @Override
+    public int legacyToRuntime(int legacyId, int meta) {
+        return this.legacyToHashId(legacyId, meta);
+    }
+
+    @Override
+    public int runtimeToFullId(int runtimeId) {
+        return this.hashIdToFullId(runtimeId);
+    }
+
+    @Override
+    public int runtimeToLegacyId(int runtimeId) {
+        return this.hashIdToLegacyId(runtimeId);
+    }
+
+    @Override
+    public int runtimeToLegacyData(int runtimeId) {
+        return this.hashIdToLegacyData(runtimeId);
     }
 
 }

@@ -1,6 +1,5 @@
 package cn.nukkit.level;
 
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -19,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
 public class GlobalBlockPalette {
@@ -99,7 +97,7 @@ public class GlobalBlockPalette {
 
                 for (BlockPalette palette : paletteList) {
                     final int legacyId = getLegacyId(namespace);
-                    if (palette.getLegacyToRuntimeIdMap().containsKey(legacyId)) {
+                    if (palette.getLegacyToHashIdMap().containsKey(legacyId)) {
                         break;
                     }
 
@@ -121,7 +119,7 @@ public class GlobalBlockPalette {
 
                         final int legacyIdMapping = function.map(json, id, meta);
 
-                        palette.registerState(id, meta, palette.getRuntimeId(legacyIdMapping >> Block.DATA_BITS, legacyIdMapping & Block.DATA_MASK), palette.getHashId(legacyIdMapping >> Block.DATA_BITS, legacyIdMapping & Block.DATA_MASK));
+                        palette.registerState(id, meta, palette.getHashId(legacyIdMapping >> Block.DATA_BITS, legacyIdMapping & Block.DATA_MASK));
                     });
 
                     {
@@ -144,8 +142,8 @@ public class GlobalBlockPalette {
     }
 
     private static Map<String, IntList> getAllNoneBlocks(Function<String, Boolean> has) {
-        final Int2IntMap firstMap = GlobalBlockPalette.getPaletteByProtocol(ProtocolInfo.v1_20_0).getLegacyToRuntimeIdMap();
-        final Int2IntMap lastMap = GlobalBlockPalette.getPaletteByProtocol(ProtocolInfo.CURRENT_PROTOCOL).getLegacyToRuntimeIdMap();
+        final Int2IntMap firstMap = GlobalBlockPalette.getPaletteByProtocol(ProtocolInfo.v1_20_0).getLegacyToHashIdMap();
+        final Int2IntMap lastMap = GlobalBlockPalette.getPaletteByProtocol(ProtocolInfo.CURRENT_PROTOCOL).getLegacyToHashIdMap();
         final IntList noneBlocks = new IntArrayList();
         final Map<String, IntList> ids = new HashMap<>();
 
@@ -193,11 +191,11 @@ public class GlobalBlockPalette {
     }
 
     public static int getOrCreateRuntimeId(int protocol, int id, int meta) {
-        return getPaletteByProtocol(protocol).getHashId(id, meta);
+        return getOrCreateHashId(protocol, id, meta);
     }
 
     public static int getOrCreateRuntimeId(int protocol, int legacyId) throws NoSuchElementException {
-        return getOrCreateRuntimeId(protocol, legacyId >> Block.DATA_BITS, legacyId & Block.DATA_MASK);
+        return getOrCreateHashId(protocol, legacyId);
     }
 
     /**
@@ -251,8 +249,8 @@ public class GlobalBlockPalette {
         return getPaletteByProtocol(gameVersion).getHashId(legacyId >> Block.DATA_BITS, legacyId & Block.DATA_MASK);
     }
 
-    public static int getLegacyFullId(int protocolId, int runtimeId) {
-        return getPaletteByProtocol(protocolId).getLegacyFullId(runtimeId);
+    public static int getLegacyFullId(int protocolId, int hashId) {
+        return getLegacyFullIdFromHashId(protocolId, hashId);
     }
 
     public static Item getDowngradedItemBlock(int protocolId, int id) {
