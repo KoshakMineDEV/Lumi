@@ -492,6 +492,9 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         }
 
         if (blockType == null) {
+            if(getId() == 2048) {
+                System.out.println(this.getClass().getSimpleName());
+            }
             log.warn("Failed to initialize block type {}: {}:{}", this.getName(), this.getId(), this.getDamage());
             blockType = BlockTypes.AIR;
         }
