@@ -4,9 +4,12 @@ import cn.nukkit.block.Block;
 import cn.nukkit.level.format.leveldb.structure.BlockStateSnapshot;
 import cn.nukkit.level.format.leveldb.updater.BlockStateUpdaterVanilla;
 import cn.nukkit.level.format.leveldb.updater.BlockStateUpdater_1_21_110;
+import cn.nukkit.level.format.leveldb.updater.BlockStateUpdater_1_26_50;
 import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import lombok.extern.log4j.Log4j2;
@@ -104,7 +107,7 @@ public class BlockStateMapping {
         blockStateUpdaters.add(BlockStateUpdater_1_21_60.INSTANCE);
         blockStateUpdaters.add(BlockStateUpdater_1_21_110.INSTANCE);
 
-        //blockStateUpdaters.add(BlockStateUpdater_1_26_50.INSTANCE);
+        blockStateUpdaters.add(BlockStateUpdater_1_26_50.INSTANCE);
 
         blockStateUpdaters.add(BlockStateUpdaterVanilla.INSTANCE);
 
@@ -132,6 +135,23 @@ public class BlockStateMapping {
     }
 
     public void registerState(int hashId, NbtMap state) {
+        this.registerState(hashId, state, false);
+    }
+
+    public void registerCustomState(int hashId, NbtMap state) {
+        BlockStateSnapshot existing = this.hash2State.get(hashId);
+        Preconditions.checkArgument(existing == null || existing.isCustom(),
+                "Custom block state hash " + hashId + " conflicts with a vanilla state: " +
+                        (existing == null ? null : existing.getVanillaState()));
+        if (existing != null) {
+            Preconditions.checkArgument(Objects.equals(existing.getVanillaState(), state),
+                    "Block state hash collision for " + hashId + ": " + existing.getVanillaState() + " and " + state);
+            return;
+        }
+        this.registerState(hashId, state, true);
+    }
+
+    private void registerState(int hashId, NbtMap state, boolean custom) {
         BlockStateSnapshot hashState = this.hash2State.get(hashId);
         Preconditions.checkArgument(hashState == null || Objects.equals(hashState.getVanillaState(), state),
                 "Block state hash collision for " + hashId + ": " +
@@ -143,6 +163,7 @@ public class BlockStateMapping {
                 .version(this.version)
                 .vanillaState(state)
                 .hashId(hashId)
+                .custom(custom)
                 .build();
         this.hash2State.put(hashId, blockState);
         this.paletteMap.put(state, blockState);
@@ -154,6 +175,20 @@ public class BlockStateMapping {
         this.customCacheMap.clear();
         this.defaultHashId = -1;
         this.defaultState = null;
+    }
+
+    public void clearCustomStates() {
+        IntList customHashIds = new IntArrayList();
+        for (Int2ObjectMap.Entry<BlockStateSnapshot> entry : this.hash2State.int2ObjectEntrySet()) {
+            if (entry.getValue().isCustom()) {
+                customHashIds.add(entry.getIntKey());
+            }
+        }
+        for (int hashId : customHashIds) {
+            BlockStateSnapshot state = this.hash2State.remove(hashId);
+            this.paletteMap.remove(state.getVanillaState());
+        }
+        this.customCacheMap.clear();
     }
 
     public void setLegacyMapper(LegacyStateMapper legacyStateMapper) {

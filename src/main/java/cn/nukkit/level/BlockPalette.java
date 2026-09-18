@@ -12,6 +12,8 @@ import it.unimi.dsi.fastutil.ints.Int2IntMaps;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -138,6 +140,51 @@ public class BlockPalette {
         int legacyId = blockId << Block.DATA_BITS | data;
         this.legacyToHashId.put(legacyId, hashId);
         this.hashIdToLegacy.putIfAbsent(hashId, legacyId);
+    }
+
+    public void registerCustomState(int blockId, int data, int hashId) {
+        if (this.locked) {
+            throw new IllegalStateException("Block palette is already locked!");
+        }
+        if (blockId < Block.LOWEST_CUSTOM_BLOCK_ID) {
+            throw new IllegalArgumentException("Custom block ID must be at least " + Block.LOWEST_CUSTOM_BLOCK_ID +
+                    ", got " + blockId);
+        }
+
+        int legacyId = blockId << Block.DATA_BITS | data;
+        int previousHashId = this.legacyToHashId.get(legacyId);
+        if (previousHashId != -1 && previousHashId != hashId) {
+            throw new IllegalStateException("Custom block state conflicts with vanilla legacy ID " + legacyId +
+                    " in protocol " + this.protocol);
+        }
+
+        int previousLegacyId = this.hashIdToLegacy.get(hashId);
+        if (previousLegacyId != -1 && previousLegacyId >> Block.DATA_BITS < Block.LOWEST_CUSTOM_BLOCK_ID) {
+            throw new IllegalStateException("Custom block state hash " + hashId +
+                    " conflicts with a vanilla state in protocol " + this.protocol);
+        }
+
+        this.legacyToHashId.put(legacyId, hashId);
+        this.hashIdToLegacy.putIfAbsent(hashId, legacyId);
+    }
+
+    public void clearCustomStates() {
+        if (this.locked) {
+            throw new IllegalStateException("Block palette is already locked!");
+        }
+
+        IntList customLegacyIds = new IntArrayList();
+        for (Int2IntMap.Entry entry : this.legacyToHashId.int2IntEntrySet()) {
+            if (entry.getIntKey() >> Block.DATA_BITS >= Block.LOWEST_CUSTOM_BLOCK_ID) {
+                customLegacyIds.add(entry.getIntKey());
+            }
+        }
+        for (int legacyId : customLegacyIds) {
+            int hashId = this.legacyToHashId.remove(legacyId);
+            if (this.hashIdToLegacy.get(hashId) == legacyId) {
+                this.hashIdToLegacy.remove(hashId);
+            }
+        }
     }
 
     /**

@@ -1,9 +1,6 @@
 package cn.nukkit.block.customblock;
 
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockID;
-import cn.nukkit.block.customblock.comparator.HashedPaletteComparator;
 import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.customblock.properties.BlockProperty;
 import cn.nukkit.block.customblock.properties.EnumBlockProperty;
@@ -16,38 +13,30 @@ import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Hash;
-import it.unimi.dsi.fastutil.ints.*;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.Data;
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.cloudburstmc.nbt.*;
+import org.cloudburstmc.nbt.NBTOutputStream;
+import org.cloudburstmc.nbt.NbtMap;
+import org.cloudburstmc.nbt.NbtMapBuilder;
+import org.cloudburstmc.nbt.NbtUtils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-@Slf4j
 @UtilityClass
 public class CustomBlockUtil {
-
-    public static final Path VANILLA_PALETTES_PATH = Paths.get("vanilla_palettes/");
-
-    public static Path getVanillaPalettesPath() {
-        return Paths.get(Server.getInstance().getDataPath()).resolve(VANILLA_PALETTES_PATH);
-    }
-
-    public static Path getVanillaPalettePath(int protocol) {
-        return CustomBlockUtil.getVanillaPalettesPath().resolve("vanilla_palette_" + protocol + ".nbt");
-    }
 
     private static Serializable getDefaultValue(BlockProperties properties, String name) {
         AtomicReference<Serializable> value = new AtomicReference<>();
@@ -117,141 +106,44 @@ public class CustomBlockUtil {
         return new CustomBlockState(identifier, legacyId, state, block);
     }
 
-    public static List<NbtMap> loadVanillaPalette(int version) throws FileNotFoundException {
-        Path path = CustomBlockUtil.getVanillaPalettePath(version);
-        if (!Files.exists(path)) {
-            throw new FileNotFoundException("Missing vanilla palette for version " + version);
+    public static void recreateBlockPalette(BlockPalette palette) {
+        List<CustomBlockState> states = new ArrayList<>();
+        for (List<CustomBlockState> variants : Registries.BLOCK.getLegacy2CustomState().values()) {
+            states.addAll(variants);
         }
-
-        try (InputStream stream = Files.newInputStream(path)) {
-            return ((NbtMap) NbtUtils.createGZIPReader(stream).readTag()).getList("blocks", NbtType.COMPOUND);
-        } catch (Exception e) {
-            throw new AssertionError("Error while loading vanilla palette", e);
-        }
+        recreateBlockPalette(palette, states);
     }
 
-    private static int convertLegacyToFullId(int legacyId) {
-        int blockId = legacyId >> Block.DATA_BITS;
-        int meta = legacyId & Block.DATA_MASK;
-        return (blockId << Block.DATA_BITS) | meta;
-    }
-
-    public static CompoundTag convertNbtMap(NbtMap nbt) {
-        try {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            try (stream; NBTOutputStream nbtOutputStream = NbtUtils.createWriter(stream)) {
-                nbtOutputStream.writeTag(nbt);
-            }
-            return NBTIO.read(stream.toByteArray(), ByteOrder.BIG_ENDIAN, false);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to convert NbtMap: " + nbt, e);
-        }
-    }
-
-    public static void recreateBlockPalette(BlockPalette palette) throws IOException {
-        List<NbtMap> vanillaPalette = new ObjectArrayList<>(loadVanillaPalette(palette.getProtocol()));
-        recreateBlockPalette(palette, vanillaPalette);
-    }
-
-    public static void recreateBlockPalette(BlockPalette palette, List<NbtMap> vanillaPalette) {
-        Map<String, List<NbtMap>> vanillaPaletteList = new Object2ObjectRBTreeMap<>(HashedPaletteComparator.INSTANCE);
-
-        int paletteVersion = -1;
-        String lastName = null;
-        List<NbtMap> group = new ObjectArrayList<>();
+    static void recreateBlockPalette(BlockPalette palette, Iterable<CustomBlockState> customStates) {
         Int2ObjectMap<NbtMap> hashId2State = new Int2ObjectOpenHashMap<>();
-        for (NbtMap state : vanillaPalette) {
-            //删除不属于原版的内容
-            if (state.containsKey("network_id") || state.containsKey("name_hash") || state.containsKey("block_id")) {
-                NbtMapBuilder builder = NbtMapBuilder.from(state);
-                builder.remove("network_id");
-                builder.remove("name_hash");
-                builder.remove("block_id");
-                state = builder.build();
-            }
-
-            int version = state.getInt("version");
-            if (version != paletteVersion) {
-                paletteVersion = version;
-            }
-
-            String name = state.getString("name");
-            if (lastName != null && !name.equals(lastName)) {
-                vanillaPaletteList.put(lastName, group);
-                group = new ObjectArrayList<>();
-            }
-            group.add(state);
+        List<CustomBlockState> definitions = new ArrayList<>();
+        IntList hashIds = new IntArrayList();
+        for (CustomBlockState definition : customStates) {
+            definitions.add(definition);
+            NbtMap state = definition.getBlockState();
             int hashId = Hash.hashBlock(state);
+            hashIds.add(hashId);
             NbtMap previous = hashId2State.putIfAbsent(hashId, state);
-            if (previous != null && !previous.equals(state)) {
+            if (previous != null && (!previous.getString("name").equals(state.getString("name")) ||
+                    !previous.getCompound("states").equals(state.getCompound("states")))) {
                 throw new IllegalStateException("Block state hash collision for " + hashId + ": " + previous + " and " + state);
             }
-            lastName = name;
-        }
-        if (lastName != null) {
-            vanillaPaletteList.put(lastName, group);
         }
 
-        Object2ObjectMap<NbtMap, IntSet> state2Legacy = new Object2ObjectLinkedOpenHashMap<>();
-
-        for (Int2IntMap.Entry entry : palette.getLegacyToHashIdMap().int2IntEntrySet()) {
-            int hashId = entry.getIntValue();
-            NbtMap state = hashId2State.get(hashId);
-            if (state == null) {
-                log.info("Unknown block-state hash {}! protocol={}", hashId, palette.getProtocol());
-                continue;
-            }
-            IntSet legacyIds = state2Legacy.computeIfAbsent(state, s -> new IntOpenHashSet());
-            legacyIds.add(entry.getIntKey());
-        }
-
-        for(List<CustomBlockState> variants : Registries.BLOCK.getLegacy2CustomState().values()) {
-            for (CustomBlockState definition : variants) {
-                NbtMap state = definition.getBlockState();
-
-                int hashId = Hash.hashBlock(state);
-                NbtMap previous = hashId2State.putIfAbsent(hashId, state);
-                if (previous != null && (!previous.getString("name").equals(state.getString("name")) ||
-                        !previous.getCompound("states").equals(state.getCompound("states")))) {
-                    throw new IllegalStateException("Block state hash collision for " + hashId + ": " + previous + " and " + state);
-                }
-
-                final List<NbtMap> states = vanillaPaletteList.computeIfAbsent(state.getString("name"), (k) -> new ObjectArrayList<>());
-
-                if (state.getInt("version") != paletteVersion) {
-                    state = state.toBuilder().putInt("version", paletteVersion).build();
-                }
-
-                states.add(state);
-                state2Legacy.computeIfAbsent(state, s -> new IntOpenHashSet()).add(convertLegacyToFullId(definition.getLegacyId()));
-            }
-        }
-
-        palette.clearStates();
-        boolean levelDb = palette.getProtocol() == GlobalBlockPalette.getPaletteByProtocol(LevelDBConstants.PALETTE_VERSION).getProtocol(); //防止小版本不相等问题
+        palette.clearCustomStates();
+        boolean levelDb = palette.getProtocol() == GlobalBlockPalette.getPaletteByProtocol(LevelDBConstants.PALETTE_VERSION).getProtocol();
         if (levelDb) {
-            BlockStateMapping.get().clearMapping();
-        }
-
-        for (List<NbtMap> states : vanillaPaletteList.values()) {
-            for (NbtMap state : states) {
-                int hashId = Hash.hashBlock(state);
-                if (!levelDb || !BlockStateMapping.get().containsState(state)) {
-                    if (levelDb) {
-                        BlockStateMapping.get().registerState(hashId, state);
-                    }
-
-                    IntSet legacyIds = state2Legacy.get(state);
-                    if (legacyIds != null) {
-                        for (Integer fullId : legacyIds) {
-                            palette.registerState(fullId >> Block.DATA_BITS, (fullId & Block.DATA_MASK), hashId);
-                        }
-                    }
-                }
+            BlockStateMapping.get().clearCustomStates();
+            for (Int2ObjectMap.Entry<NbtMap> entry : hashId2State.int2ObjectEntrySet()) {
+                BlockStateMapping.get().registerCustomState(entry.getIntKey(), entry.getValue());
             }
         }
 
-        palette.setInfoUpdateHashId(palette.getLegacyToHashIdMap().get(BlockID.INFO_UPDATE << Block.DATA_BITS));
+        for (int i = 0; i < definitions.size(); i++) {
+            CustomBlockState definition = definitions.get(i);
+            int fullId = definition.getLegacyId();
+            palette.registerCustomState(fullId >> Block.DATA_BITS, fullId & Block.DATA_MASK, hashIds.getInt(i));
+        }
     }
 
     @Data

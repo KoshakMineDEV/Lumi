@@ -5,7 +5,6 @@ import cn.nukkit.block.*;
 import cn.nukkit.block.customblock.CustomBlock;
 import cn.nukkit.block.customblock.CustomBlockDefinition;
 import cn.nukkit.block.customblock.CustomBlockUtil;
-import cn.nukkit.block.customblock.VanillaPaletteUpdater;
 import cn.nukkit.block.customblock.comparator.HashedPaletteComparator;
 import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.customblock.properties.exception.InvalidBlockPropertyMetaException;
@@ -17,14 +16,11 @@ import cn.nukkit.item.RuntimeItemMapping;
 import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.GlobalBlockPalette;
-import cn.nukkit.level.format.leveldb.LevelDBConstants;
-import cn.nukkit.level.format.leveldb.NukkitLegacyMapper;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.cloudburstmc.nbt.NbtType;
@@ -34,8 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -1154,8 +1148,6 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
     public void initCustomBlocks() {
         if (!HASHED_SORTED_CUSTOM_BLOCK.isEmpty()) {
-            VanillaPaletteUpdater.updateAllProtocols();
-
             for (var entry : HASHED_SORTED_CUSTOM_BLOCK.entrySet()) {
                 final CustomBlock customBlock = entry.getValue();
                 final BlockProperties properties = customBlock.getBlockProperties();
@@ -1193,7 +1185,6 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                         });
             }
 
-            final BlockPalette storagePalette = GlobalBlockPalette.getPaletteByProtocol(LevelDBConstants.PALETTE_VERSION);
             final ObjectSet<BlockPalette> set = new ObjectArraySet<>();
 
             for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
@@ -1207,20 +1198,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                 }
                 set.add(palette);
 
-                if (palette.getProtocol() == storagePalette.getProtocol()) {
-                    CustomBlockUtil.recreateBlockPalette(palette, new ObjectArrayList<>(NukkitLegacyMapper.loadBlockPalette()));
-                } else {
-                    Path path = CustomBlockUtil.getVanillaPalettePath(palette.getProtocol());
-                    if (!Files.exists(path)) {
-                        //log.warn("No vanilla palette found for {}.", Utils.getVersionByProtocol(palette.getProtocol()));
-                        continue;
-                    }
-                    try {
-                        CustomBlockUtil.recreateBlockPalette(palette);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                CustomBlockUtil.recreateBlockPalette(palette);
             }
 
             ID_TO_CUSTOM_BLOCK.forEach((id, block) -> {
