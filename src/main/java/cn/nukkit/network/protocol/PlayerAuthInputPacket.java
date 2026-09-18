@@ -82,14 +82,13 @@ public class PlayerAuthInputPacket extends DataPacket {
         boolean v2168 = this.protocol >= ProtocolInfo.v1_26_40;
         boolean v2192 = this.protocol >= ProtocolInfo.v1_26_50;
         if (v2168) {
-            if (!v2192) {
-                this.getBoolean(); // outer true, discarded; removed in v2192
-            }
-            int count = (int) this.getUnsignedVarInt();
-            for (int i = 0; i < Math.min(count, 256); i++) {
-                int ordinal = this.getVarInt();
-                if (ordinal >= 0 && ordinal < AuthInputAction.size()) {
-                    this.inputData.add(AuthInputAction.from(ordinal));
+            if((protocol == ProtocolInfo.v1_26_40 && this.getBoolean()) || v2192) {
+                int count = (int) this.getUnsignedVarInt();
+                for (int i = 0; i < Math.min(count, 256); i++) {
+                    int ordinal = this.getVarInt();
+                    if (ordinal >= 0 && ordinal < AuthInputAction.size()) {
+                        this.inputData.add(AuthInputAction.from(ordinal));
+                    }
                 }
             }
         } else {
