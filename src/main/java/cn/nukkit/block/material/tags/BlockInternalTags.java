@@ -276,4 +276,33 @@ public interface BlockInternalTags {
             BlockTypes.WITHER_SKELETON_SKULL,
             BlockTypes.CARVED_PUMPKIN
     ));
+
+    BlockTag THIN_BLOCK = BlockTags.register("lumi:thin_block", new SimpleBlockTag(
+           BlockTypes.GLASS_PANE,
+            BlockTypes.WHITE_STAINED_GLASS_PANE,
+            BlockTypes.LIGHT_GRAY_STAINED_GLASS_PANE,
+            BlockTypes.GRAY_STAINED_GLASS_PANE,
+            BlockTypes.BLACK_STAINED_GLASS_PANE,
+            BlockTypes.BROWN_STAINED_GLASS_PANE,
+            BlockTypes.RED_STAINED_GLASS_PANE,
+            BlockTypes.ORANGE_STAINED_GLASS_PANE,
+            BlockTypes.YELLOW_STAINED_GLASS_PANE,
+            BlockTypes.LIME_STAINED_GLASS_PANE,
+            BlockTypes.GREEN_STAINED_GLASS_PANE,
+            BlockTypes.CYAN_STAINED_GLASS_PANE,
+            BlockTypes.LIGHT_BLUE_STAINED_GLASS_PANE,
+            BlockTypes.BLUE_STAINED_GLASS_PANE,
+            BlockTypes.PURPLE_STAINED_GLASS_PANE,
+            BlockTypes.MAGENTA_STAINED_GLASS_PANE,
+            BlockTypes.PINK_STAINED_GLASS_PANE,
+            BlockTypes.IRON_BARS,
+            BlockTypes.COPPER_BARS,
+            BlockTypes.EXPOSED_COPPER_BARS,
+            BlockTypes.OXIDIZED_COPPER_BARS,
+            BlockTypes.WEATHERED_COPPER_BARS,
+            BlockTypes.WAXED_COPPER_BARS,
+            BlockTypes.WAXED_EXPOSED_COPPER_BARS,
+            BlockTypes.WAXED_OXIDIZED_COPPER_BARS,
+            BlockTypes.WAXED_WEATHERED_COPPER_BARS
+    ));
 }

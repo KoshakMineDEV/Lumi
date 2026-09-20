@@ -1,7 +1,12 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.customblock.properties.BlockProperties;
+import cn.nukkit.block.properties.BlockPropertiesHelper;
+import cn.nukkit.block.properties.VanillaProperties;
+import cn.nukkit.block.properties.enums.Corner;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.Level;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.SimpleAxisAlignedBB;
@@ -11,9 +16,9 @@ import cn.nukkit.block.data.Faceable;
  * @author MagicDroidX
  * Nukkit Project
  */
-public abstract class BlockStairs extends BlockSolidMeta implements Faceable {
+public abstract class BlockStairs extends BlockSolidMeta implements Faceable, BlockPropertiesHelper {
 
-    private static final short[] faces = new short[]{2, 1, 3, 0};
+    private static final BlockProperties PROPERTIES = new BlockProperties(VanillaProperties.CORNER, VanillaProperties.UPSIDE_DOWN_BIT, VanillaProperties.WEIRDO_DIRECTION);
 
     protected BlockStairs(int meta) {
         super(meta);
@@ -43,19 +48,81 @@ public abstract class BlockStairs extends BlockSolidMeta implements Faceable {
     }
 
     @Override
+    public BlockProperties getBlockProperties() {
+        return PROPERTIES;
+    }
+
+    @Override
     public WaterloggingType getWaterloggingType() {
         return WaterloggingType.WHEN_PLACED_IN_WATER;
     }
 
     @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
-        this.setDamage(faces[player != null ? player.getDirection().getHorizontalIndex() : 0]);
-        if ((fy > 0.5 && face != BlockFace.UP) || face == BlockFace.DOWN) {
-            this.setDamage(this.getDamage() | 0x04); //Upside-down stairs
+        if (player != null) {
+            setBlockFace(player.getDirection());
         }
+
+        if ((fy > 0.5 && face != BlockFace.UP) || face == BlockFace.DOWN) {
+            setUpsideDown(true);
+        }
+        autoConfigureState();
         this.getLevel().setBlock(block, this, true, true);
 
         return true;
+    }
+
+    @Override
+    public int onUpdate(int type) {
+        if (type == Level.BLOCK_UPDATE_NORMAL) {
+            if (autoConfigureState()) {
+                level.setBlock(this, this, true);
+            }
+            return type;
+        }
+        return super.onUpdate(type);
+    }
+
+    public boolean autoConfigureState() {
+        final int previous = this.getDamage();
+        setPropertyValue(VanillaProperties.CORNER, computeCorner());
+        return this.getDamage() != previous;
+    }
+
+    private Corner computeCorner() {
+        final BlockFace facing = getBlockFace();
+
+        final BlockFace ahead = adjoiningStairsFacing(facing);
+        if (ahead != null && canTakeShape(ahead.getOpposite())) {
+            return ahead == facing.rotateYCCW() ? Corner.OUTER_LEFT : Corner.OUTER_RIGHT;
+        }
+
+        final BlockFace behind = adjoiningStairsFacing(facing.getOpposite());
+        if (behind != null && canTakeShape(behind)) {
+            return behind == facing.rotateYCCW() ? Corner.INNER_LEFT : Corner.INNER_RIGHT;
+        }
+
+        return Corner.NONE;
+    }
+
+    private BlockStairs neighbourStairs(BlockFace side) {
+        return getSideAtLayer(0, side) instanceof BlockStairs neighbour ? neighbour : null;
+    }
+
+    private BlockFace adjoiningStairsFacing(BlockFace side) {
+        final BlockStairs neighbour = neighbourStairs(side);
+        if (neighbour == null || neighbour.isUpsideDown() != isUpsideDown()) {
+            return null;
+        }
+        final BlockFace neighbourFacing = neighbour.getBlockFace();
+        return neighbourFacing.getAxis() == getBlockFace().getAxis() ? null : neighbourFacing;
+    }
+
+    private boolean canTakeShape(BlockFace side) {
+        final BlockStairs neighbour = neighbourStairs(side);
+        return neighbour == null
+                || neighbour.getBlockFace() != getBlockFace()
+                || neighbour.isUpsideDown() != isUpsideDown();
     }
 
     @Override
@@ -133,8 +200,22 @@ public abstract class BlockStairs extends BlockSolidMeta implements Faceable {
         return false;
     }
 
+
+    public void setUpsideDown(boolean upsideDown) {
+        setPropertyValue(VanillaProperties.UPSIDE_DOWN_BIT, upsideDown);
+    }
+
+    public boolean isUpsideDown() {
+        return getPropertyValue(VanillaProperties.UPSIDE_DOWN_BIT);
+    }
+
     @Override
     public BlockFace getBlockFace() {
-        return BlockFace.fromHorizontalIndex(this.getDamage() & 0x7);
+        return getPropertyValue(VanillaProperties.WEIRDO_DIRECTION);
+    }
+
+    @Override
+    public void setBlockFace(BlockFace face) {
+        this.setPropertyValue(VanillaProperties.WEIRDO_DIRECTION, face);
     }
 }
