@@ -44,7 +44,7 @@ val log4j2Version = "2.25.3"
 val jlineVersion = "3.30.8"
 val leveldbMcpeJavaVersion = "1.1.0"
 val leveldbMcpeJniVersion = "0.0.10"
-val blockStateUpdaterVersion = "1.21.110-SNAPSHOT"
+val blockStateUpdaterVersion = "1.26.50-SNAPSHOT"
 val fastutilMapsVersion = "8.5.15"
 
 dependencies {
