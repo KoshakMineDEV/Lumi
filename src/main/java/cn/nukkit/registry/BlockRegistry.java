@@ -218,7 +218,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(OAK_DOUBLE_SLAB, BlockOakDoubleSlab.class); //157
         register(OAK_SLAB, BlockOakSlab.class); //158
         register(STAINED_TERRACOTTA, BlockTerracottaStained.class); //159
-        register(STAINED_GLASS_PANE, BlockGlassPaneStained.class); //160
+        register(WHITE_STAINED_GLASS_PANE, BlockGlassPaneStainedWhite.class); //160
         register(LEAVES2, BlockLeaves2.class); //161
         register(ACACIA_LOG, BlockAcaciaLog.class); //162
         register(ACACIA_WOOD_STAIRS, BlockStairsAcacia.class); //163
@@ -758,6 +758,22 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(SNIFFER_EGG, BlockSnifferEgg.class); //851
 
         register(PITCHER_PLANT, BlockPitcherPlant.class); //867
+
+        register(ORANGE_STAINED_GLASS_PANE, BlockGlassPaneStainedOrange.class); //898
+        register(MAGENTA_STAINED_GLASS_PANE, BlockGlassPaneStainedMagenta.class); //899
+        register(LIGHT_BLUE_STAINED_GLASS_PANE, BlockGlassPaneStainedLightBlue.class); //900
+        register(YELLOW_STAINED_GLASS_PANE, BlockGlassPaneStainedYellow.class); //901
+        register(LIME_STAINED_GLASS_PANE, BlockGlassPaneStainedLime.class); //902
+        register(PINK_STAINED_GLASS_PANE, BlockGlassPaneStainedPink.class); //903
+        register(GRAY_STAINED_GLASS_PANE, BlockGlassPaneStainedGray.class); //904
+        register(LIGHT_GRAY_STAINED_GLASS_PANE, BlockGlassPaneStainedLightGray.class); //905
+        register(CYAN_STAINED_GLASS_PANE, BlockGlassPaneStainedCyan.class); //906
+        register(PURPLE_STAINED_GLASS_PANE, BlockGlassPaneStainedPurple.class); //907
+        register(BLUE_STAINED_GLASS_PANE, BlockGlassPaneStainedBlue.class); //908
+        register(BROWN_STAINED_GLASS_PANE, BlockGlassPaneStainedBrown.class); //909
+        register(GREEN_STAINED_GLASS_PANE, BlockGlassPaneStainedGreen.class); //910
+        register(RED_STAINED_GLASS_PANE, BlockGlassPaneStainedRed.class); //911
+        register(BLACK_STAINED_GLASS_PANE, BlockGlassPaneStainedBlack.class); //912
 
         register(SPRUCE_PLANKS, BlockSprucePlanks.class); //994
         register(BIRCH_PLANKS, BlockBirchPlanks.class); ///995

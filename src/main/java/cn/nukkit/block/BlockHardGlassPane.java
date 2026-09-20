@@ -1,5 +1,6 @@
 package cn.nukkit.block;
 
+import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.item.Item;
 import cn.nukkit.block.data.BlockColor;
 
@@ -7,6 +8,18 @@ import cn.nukkit.block.data.BlockColor;
  * Created by PetteriM1
  */
 public class BlockHardGlassPane extends BlockThin {
+
+    private static final BlockProperties PROPERTIES = new BlockProperties();
+
+    @Override
+    public BlockProperties getBlockProperties() {
+        return PROPERTIES;
+    }
+
+    @Override
+    public boolean updateConnections() {
+        return false;
+    }
 
     @Override
     public String getName() {

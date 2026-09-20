@@ -86,7 +86,12 @@ public class BlockNoteblock extends BlockSolid implements BlockEntityHolder<Bloc
     }
 
     public Instrument getInstrument() {
-        switch (this.down().getId()) {
+        Block instrumentBlock = this.down();
+        if (instrumentBlock instanceof BlockGlassPaneStained) {
+            return Instrument.STICKS;
+        }
+
+        switch (instrumentBlock.getId()) {
             case GOLD_BLOCK:
                 return Instrument.GLOCKENSPIEL;
             case CLAY_BLOCK:
@@ -168,7 +173,6 @@ public class BlockNoteblock extends BlockSolid implements BlockEntityHolder<Bloc
                 return Instrument.DRUM;
             case GLASS:
             case GLASS_PANEL:
-            case STAINED_GLASS_PANE:
             case STAINED_GLASS:
             case BEACON:
             case SEA_LANTERN:

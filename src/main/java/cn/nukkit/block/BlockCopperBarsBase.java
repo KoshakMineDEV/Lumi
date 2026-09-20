@@ -9,7 +9,11 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class BlockCopperBarsBase extends BlockThin implements Oxidizable, Waxable {
     public BlockCopperBarsBase() {
-        // Does nothing
+        this(0);
+    }
+
+    public BlockCopperBarsBase(int meta) {
+        super(meta);
     }
 
     @Override
@@ -34,7 +38,9 @@ public abstract class BlockCopperBarsBase extends BlockThin implements Oxidizabl
 
     @Override
     public int onUpdate(int type) {
-        return Oxidizable.super.onUpdate(type);
+        int connectionUpdate = super.onUpdate(type);
+        int oxidationUpdate = Oxidizable.super.onUpdate(type);
+        return connectionUpdate != 0 ? connectionUpdate : oxidationUpdate;
     }
 
     @Override
@@ -50,7 +56,7 @@ public abstract class BlockCopperBarsBase extends BlockThin implements Oxidizabl
 
     @Override
     public Block getStateWithOxidizationLevel(@NotNull OxidizationLevel oxidizationLevel) {
-        return Block.get((getCopperId(isWaxed(), oxidizationLevel)));
+        return Block.get(getCopperId(isWaxed(), oxidizationLevel), this.getDamage());
     }
 
     @Override
@@ -66,7 +72,7 @@ public abstract class BlockCopperBarsBase extends BlockThin implements Oxidizabl
         if (isWaxed() == waxed) {
             return true;
         }
-        return getValidLevel().setBlock(this, Block.get(getCopperId(waxed, getOxidizationLevel())));
+        return getValidLevel().setBlock(this, Block.get(getCopperId(waxed, getOxidizationLevel()), this.getDamage()));
     }
 
     @Override
