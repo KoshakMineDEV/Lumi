@@ -1293,7 +1293,6 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
            try (var stream = BlockRegistry.class.getClassLoader().getResourceAsStream("gamedata/block/vanilla_definition/block_definitions_" + protocol + ".nbt")) {
                if (stream != null) {
-                   System.out.println("gamedata/block/vanilla_definition/block_definitions_" + protocol + ".nbt");
                    List<VanillaBlockDefinition> blockDefinitions = new ArrayList<>();
                    CompoundTag root = NBTIO.readNetworkCompressed(stream, ByteOrder.BIG_ENDIAN);
 

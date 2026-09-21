@@ -116,7 +116,6 @@ public class BlockStateMapping {
         blockStateUpdaters.forEach(updater -> updater.registerUpdaters(context));
         CONTEXT = context;
         LATEST_UPDATER_VERSION = context.getLatestVersion();
-        System.out.println(LATEST_UPDATER_VERSION);
     }
 
     public static BlockStateMapping get() {

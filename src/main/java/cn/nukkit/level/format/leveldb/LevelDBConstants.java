@@ -17,9 +17,9 @@ public final class LevelDBConstants {
     public static final byte FINALISATION_NEEDS_POPULATION = 1;
     public static final byte FINALISATION_DONE = 2;
 
-    public static final byte CURRENT_STORAGE_VERSION = 8;
+    public static final byte CURRENT_STORAGE_VERSION = 9;
     public static final byte CURRENT_LEVEL_CHUNK_VERSION = 41; // 1.21.40
-    public static final byte CURRENT_LEVEL_SUBCHUNK_VERSION = 8;
+    public static final byte CURRENT_LEVEL_SUBCHUNK_VERSION = 9;
 
     private static final byte LATEST_STORAGE_VERSION = 10; // 1.19.40
     private static final byte LATEST_LEVEL_CHUNK_VERSION = 41; // 1.21.40
@@ -30,21 +30,21 @@ public final class LevelDBConstants {
 
     public static final byte[] CHUNK_VERSION_SAVE_DATA = new byte[]{CURRENT_LEVEL_CHUNK_VERSION};
 
-
     /**
      * This is protocol version if block palette used in storage
      */
     public static final int PALETTE_VERSION = ProtocolInfo.v1_26_50;
 
     public static final int STATE_MAYOR_VERSION = 1;
-    public static final int STATE_MINOR_VERSION = 21;
-    public static final int STATE_PATCH_VERSION = 60;
+    public static final int STATE_MINOR_VERSION = 26;
+    public static final int STATE_PATCH_VERSION = 50;
 
-    public static final int STATE_VERSION = makeVersion(STATE_MAYOR_VERSION, STATE_MINOR_VERSION, STATE_PATCH_VERSION) + 33; //33 update
+    public static final int STATE_VERSION = makeVersion(STATE_MAYOR_VERSION, STATE_MINOR_VERSION, STATE_PATCH_VERSION);
+
     public static final List<IntTag> CURRENT_LEVEL_VERSION = Collections.unmodifiableList(ObjectArrayList.of(
             new IntTag("", STATE_MAYOR_VERSION), // major
             new IntTag("", STATE_MINOR_VERSION), // minor
-            new IntTag("", 33), // patch
+            new IntTag("", STATE_PATCH_VERSION), // patch
             new IntTag("", 0), // revision
             new IntTag("", 0))); // beta
 
