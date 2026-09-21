@@ -4,7 +4,11 @@ import cn.nukkit.block.data.BlockColor;
 
 public class BlockDarkOakFence extends BlockFence {
     public BlockDarkOakFence() {
-        super();
+        this(0);
+    }
+
+    public BlockDarkOakFence(int meta) {
+        super(meta);
     }
 
     @Override

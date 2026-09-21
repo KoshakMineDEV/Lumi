@@ -7,7 +7,11 @@ import cn.nukkit.block.data.BlockColor;
 public class BlockFenceCrimson extends BlockFence {
 
     public BlockFenceCrimson() {
-        super();
+        this(0);
+    }
+
+    public BlockFenceCrimson(int meta) {
+        super(meta);
     }
 
     @Override
