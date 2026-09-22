@@ -4,9 +4,11 @@ import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
+import lombok.experimental.SuperBuilder;
 
 import java.awt.Color;
 
+@SuperBuilder(toBuilder = true)
 public class DebugShapeArrow extends DebugShape {
 
     /**
@@ -131,11 +133,11 @@ public class DebugShapeArrow extends DebugShape {
 
     @Override
     public ScriptDebugShape toNetworkData() {
-        return new ScriptDebugShape(
-                id, getType(), position, null,
-                null, null, null, color,
-                null, dimensionId, null, null, null,
-                arrowHeadLength, arrowHeadRadius, arrowHeadSegments
-        );
+        return commonNetworkData()
+                .lineEndPosition(endPosition)
+                .arrowHeadLength(arrowHeadLength)
+                .arrowHeadRadius(arrowHeadRadius)
+                .segments(arrowHeadSegments)
+                .build();
     }
 }

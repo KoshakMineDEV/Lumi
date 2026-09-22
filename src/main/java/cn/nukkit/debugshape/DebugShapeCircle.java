@@ -3,9 +3,11 @@ package cn.nukkit.debugshape;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
+import lombok.experimental.SuperBuilder;
 
 import java.awt.Color;
 
+@SuperBuilder(toBuilder = true)
 public class DebugShapeCircle extends DebugShape {
 
     /**
@@ -78,11 +80,9 @@ public class DebugShapeCircle extends DebugShape {
 
     @Override
     public ScriptDebugShape toNetworkData() {
-        return new ScriptDebugShape(
-                id, getType(), position, scale,
-                null, null, null, color,
-                null, dimensionId, null, null, null,
-                null, null, segments
-        );
+        return commonNetworkData()
+                .scale(scale)
+                .segments(segments)
+                .build();
     }
 }

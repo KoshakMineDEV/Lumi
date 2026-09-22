@@ -31,27 +31,8 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
 
     @Override
     public void decode() {
-        long shapeCount = getUnsignedVarInt();
-        if (protocol >= ProtocolInfo.v1_21_120) {
-            for (int i = 0; i < shapeCount; i++) {
-                    ScriptDebugShape shape = new ScriptDebugShape(
-                    getUnsignedVarLong(), getOptional(null, BinaryStream::getScriptDebugShapeType),
-                    getOptional(null, BinaryStream::getVector3f), getOptional(null, BinaryStream::getLFloat),
-                    getOptional(null, BinaryStream::getVector3f),  getOptional(null, BinaryStream::getLFloat),
-                    getOptional(null, BinaryStream::getLFloat), getOptional(null, BinaryStream::getColor),
-                    null /* 1.26.0+ */, 0 /* 1.21.120+ */, getOptional(null, BinaryStream::getString),
-                    getOptional(null, BinaryStream::getVector3f), getOptional(null, BinaryStream::getVector3f),
-                    getOptional(null, BinaryStream::getLFloat), getOptional(null, BinaryStream::getLFloat),
-                    getOptional(null, BinaryStream::getByte)
-                );
-
-                shapes.add(shape);
-            }
-        } else {
-            for (int i = 0; i < shapeCount; i++) {
-                shapes.add(readShapeNew());
-            }
-        }
+        // client never sends this btw
+        this.decodeUnsupported();
     }
 
     @Override
@@ -162,15 +143,14 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
                         this.putString(shape.getText());
                     }
                     if (this.protocol >= ProtocolInfo.v1_26_20_26) {
-                        this.putBoolean(false);
-                        this.putOptionalNull((Color) null, color -> this.putLInt(color.getRGB()));
+                        this.putBoolean(shape.getUseRotation() != null ? shape.getUseRotation() : false);
+                        this.putOptionalNull(shape.getBackgroundColor(), (buffer, color) -> buffer.putLInt(color.getRGB()));
                         if (this.protocol >= ProtocolInfo.v1_26_50) {
-                            // line gap height added in v2192
-                            this.putLFloat(0);
+                            this.putLFloat(shape.getLineGapHeight() != null ? shape.getLineGapHeight() : 0f);
                         }
-                        this.putBoolean(false);
-                        this.putBoolean(true);
-                        this.putBoolean(true);
+                        this.putBoolean(shape.getDepthTest() != null ? shape.getDepthTest() : false);
+                        this.putBoolean(shape.getShowBackface() != null ? shape.getShowBackface() : true);
+                        this.putBoolean(shape.getShowTextBackface() != null ? shape.getShowTextBackface() : true);
                     }
                     break;
 
@@ -198,90 +178,5 @@ public class ServerScriptDebugDrawerPacket extends DataPacket {
                     break;
             }
         }
-    }
-
-    private ScriptDebugShape readShapeNew() {
-        long id = getUnsignedVarLong();
-
-        ScriptDebugShapeType type = null;
-        Integer typeOrdinal = getOptional(null, BinaryStream::getByte);
-        if (typeOrdinal != null && typeOrdinal >= 0) {
-            ScriptDebugShapeType[] values = ScriptDebugShapeType.values();
-            if (typeOrdinal < values.length) {
-                type = values[typeOrdinal];
-            }
-        }
-
-        Vector3f position = getOptional(null, BinaryStream::getVector3f);
-        Float scale = getOptional(null, BinaryStream::getLFloat);
-        Vector3f rotation = getOptional(null, BinaryStream::getVector3f);
-        Float totalTimeLeft = getOptional(null, BinaryStream::getLFloat);
-        Float maximumRenderDistance = getOptional(null, BinaryStream::getLFloat);
-
-        Color color = null;
-        Integer argb = getOptional(null, BinaryStream::getLInt);
-        if (argb != null) {
-            int alpha = (argb >> 24) & 0xFF;
-            int red = (argb >> 16) & 0xFF;
-            int green = (argb >> 8) & 0xFF;
-            int blue = argb & 0xFF;
-            color = new Color(red, green, blue, alpha);
-        }
-
-        int dimensionId = this.getVarInt();
-
-        long payloadType = getUnsignedVarInt();
-
-        if (type != null && payloadType != type.getPayloadType() && payloadType != ScriptDebugShapeType.PAYLOAD_TYPE_NONE) {
-            throw new IllegalStateException("Unexpected payload type " + payloadType +
-                    " for provided shape type " + type.name());
-        }
-        if (type == null && payloadType != ScriptDebugShapeType.PAYLOAD_TYPE_NONE) {
-            throw new IllegalStateException("Unexpected payload type " + payloadType + " when shape type is not set");
-        }
-
-        String text = null;
-        Vector3f boxBounds = null;
-        Vector3f lineEndPosition = null;
-        Float arrowHeadLength = null;
-        Float arrowHeadRadius = null;
-        Integer segments = null;
-
-        switch ((int) payloadType) {
-            case ScriptDebugShapeType.PAYLOAD_TYPE_NONE:
-                break;
-
-            case ScriptDebugShapeType.PAYLOAD_TYPE_ARROW:
-                lineEndPosition = getOptional(null, BinaryStream::getVector3f);
-                arrowHeadLength = getOptional(null, BinaryStream::getLFloat);
-                arrowHeadRadius = getOptional(null, BinaryStream::getLFloat);
-                segments = getOptional(null, BinaryStream::getByte);
-                break;
-
-            case ScriptDebugShapeType.PAYLOAD_TYPE_TEXT:
-                text = this.getString();
-                break;
-
-            case ScriptDebugShapeType.PAYLOAD_TYPE_BOX:
-                boxBounds = this.getVector3f();
-                break;
-
-            case ScriptDebugShapeType.PAYLOAD_TYPE_LINE:
-                lineEndPosition = this.getVector3f();
-                break;
-
-            case ScriptDebugShapeType.PAYLOAD_TYPE_CIRCLE_OR_SPHERE:
-                segments = this.getByte();
-                break;
-
-            default:
-                throw new IllegalStateException("Unexpected shape payload type " + payloadType);
-        }
-
-        return new ScriptDebugShape(
-                id, type, position, scale, rotation, totalTimeLeft, maximumRenderDistance,
-                color, null, dimensionId, text, boxBounds, lineEndPosition,
-                arrowHeadLength, arrowHeadRadius, segments
-        );
     }
 }

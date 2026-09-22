@@ -6,6 +6,7 @@ import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.awt.*;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author AllayMC, Koshak_Mine
  */
 @Getter
+@SuperBuilder(toBuilder = true)
 public abstract class DebugShape {
     protected static final AtomicLong DEBUG_SHAPE_ID_COUNTER = new AtomicLong(0);
     protected static final Vector3f ZERO_VECTOR = new Vector3f(0, 0, 0);
@@ -112,12 +114,10 @@ public abstract class DebugShape {
      * @return a removal notice for this debug shape.
      */
     public ScriptDebugShape createRemovalNotice() {
-        return new ScriptDebugShape(
-                this.id, null, null, null,
-                null, null, null,
-                null, null, dimensionId,null, null,
-                null, null, null, null
-        );
+        return ScriptDebugShape.builder()
+                .id(this.id)
+                .dimensionId(this.dimensionId)
+                .build();
     }
 
     /**
@@ -127,4 +127,12 @@ public abstract class DebugShape {
      */
     public abstract ScriptDebugShape toNetworkData();
 
+    protected ScriptDebugShape.ScriptDebugShapeBuilder commonNetworkData() {
+        return ScriptDebugShape.builder()
+                .id(this.id)
+                .type(getType())
+                .position(this.position)
+                .color(this.color)
+                .dimensionId(this.dimensionId);
+    }
 }
