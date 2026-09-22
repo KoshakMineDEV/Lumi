@@ -3,9 +3,11 @@ package cn.nukkit.debugshape;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
+import lombok.experimental.SuperBuilder;
 
 import java.awt.*;
 
+@SuperBuilder(toBuilder = true)
 public class DebugShapeBox extends DebugShape {
 
     protected static final Vector3f DEFAULT_BOX_BOUNDS = new Vector3f(1, 1, 1);
@@ -80,11 +82,9 @@ public class DebugShapeBox extends DebugShape {
 
     @Override
     public ScriptDebugShape toNetworkData() {
-        return new ScriptDebugShape(
-                id, getType(), position, scale,
-                null, null, null, color,
-                null, dimensionId,null, boxBounds, null,
-                null, null, null
-        );
+        return commonNetworkData()
+                .scale(scale)
+                .boxBounds(boxBounds)
+                .build();
     }
 }
