@@ -9,19 +9,19 @@ import cn.nukkit.block.data.BlockColor;
  * Created on 2015/11/25 by xtypr.
  * Package cn.nukkit.block in project Nukkit .
  */
-public class BlockStairsWood extends BlockStairs {
+public class BlockStairsOak extends BlockStairs {
 
-    public BlockStairsWood() {
+    public BlockStairsOak() {
         this(0);
     }
 
-    public BlockStairsWood(int meta) {
+    public BlockStairsOak(int meta) {
         super(meta);
     }
 
     @Override
     public int getId() {
-        return WOOD_STAIRS;
+        return OAK_STAIRS;
     }
 
     @Override

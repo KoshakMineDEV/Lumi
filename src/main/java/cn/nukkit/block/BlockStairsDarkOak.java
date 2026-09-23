@@ -6,7 +6,7 @@ import cn.nukkit.block.data.BlockColor;
  * Created on 2015/11/25 by xtypr.
  * Package cn.nukkit.block in project Nukkit .
  */
-public class BlockStairsDarkOak extends BlockStairsWood {
+public class BlockStairsDarkOak extends BlockStairsOak {
 
     public BlockStairsDarkOak() {
         this(0);

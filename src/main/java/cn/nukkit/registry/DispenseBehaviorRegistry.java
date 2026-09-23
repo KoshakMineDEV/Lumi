@@ -33,6 +33,7 @@ public class DispenseBehaviorRegistry implements IRegistry<String, DispenseBehav
         register(ItemNamespaceId.MANGROVE_BOAT, new BoatDispenseBehavior());
         register(ItemNamespaceId.CHERRY_BOAT, new BoatDispenseBehavior());
         register(ItemNamespaceId.PALE_OAK_BOAT, new BoatDispenseBehavior());
+        register(ItemNamespaceId.POPLAR_BOAT, new BoatDispenseBehavior());
         register(ItemNamespaceId.BAMBOO_RAFT, new BoatDispenseBehavior());
 
         register(ItemNamespaceId.BUCKET, new BucketDispenseBehavior());
@@ -74,6 +75,7 @@ public class DispenseBehaviorRegistry implements IRegistry<String, DispenseBehav
         register(ItemNamespaceId.SPRUCE_CHEST_BOAT, new ChestBoatDispenseBehavior());
         register(ItemNamespaceId.OAK_CHEST_BOAT, new ChestBoatDispenseBehavior());
         register(ItemNamespaceId.CHERRY_CHEST_BOAT, new ChestBoatDispenseBehavior());
+        register(ItemNamespaceId.POPLAR_CHEST_BOAT, new ChestBoatDispenseBehavior());
         register(ItemNamespaceId.BAMBOO_CHEST_RAFT, new ChestBoatDispenseBehavior());
 
         register(ItemNamespaceId.MINECART, new MinecartDispenseBehavior());

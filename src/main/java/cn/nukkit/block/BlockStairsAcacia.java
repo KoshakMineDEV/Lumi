@@ -6,7 +6,7 @@ import cn.nukkit.block.data.BlockColor;
  * @author MagicDroidX
  * Nukkit Project
  */
-public class BlockStairsAcacia extends BlockStairsWood {
+public class BlockStairsAcacia extends BlockStairsOak {
 
     public BlockStairsAcacia() {
         this(0);

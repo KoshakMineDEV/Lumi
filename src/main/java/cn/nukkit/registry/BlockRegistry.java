@@ -23,7 +23,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
-import org.cloudburstmc.nbt.NbtType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -111,7 +110,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(TORCH, BlockTorch.class); //50
         register(FIRE, BlockFire.class); //51
         register(MONSTER_SPAWNER, BlockMobSpawner.class); //52
-        register(WOOD_STAIRS, BlockStairsWood.class); //53
+        register(OAK_STAIRS, BlockStairsOak.class); //53
         register(CHEST, BlockChest.class); //54
         register(REDSTONE_WIRE, BlockRedstoneWire.class); //55
         register(DIAMOND_ORE, BlockOreDiamond.class); //56
@@ -1089,6 +1088,132 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(CINNABAR_BRICK_WALL, BlockWallCinnabarBrick.class); //1378
         register(CHISELED_CINNABAR, BlockCinnabarChiseled.class); //1379
         register(SULFUR_SPIKE, BlockSulfurSpike.class); //1380
+
+        register(POPLAR_BUTTON, BlockButtonPoplar.class); //1381
+        register(POPLAR_DOOR, BlockDoorPoplar.class); //1382
+        register(POPLAR_FENCE, BlockPoplarFence.class); //1383
+        register(POPLAR_FENCE_GATE, BlockFenceGatePoplar.class); //1384
+        register(POPLAR_HANGING_SIGN, BlockPoplarHangingSign.class); //1385
+        register(STRIPPED_POPLAR_LOG, BlockStrippedPoplarLog.class); //1386
+        register(POPLAR_LOG, BlockPoplarLog.class); //1387
+        register(POPLAR_PLANKS, BlockPoplarPlanks.class); //1388
+        register(POPLAR_PRESSURE_PLATE, BlockPressurePlatePoplar.class); //1389
+        register(POPLAR_SLAB, BlockPoplarSlab.class); //1390
+        register(POPLAR_DOUBLE_SLAB, BlockPoplarDoubleSlab.class); //1391
+        register(POPLAR_STAIRS, BlockStairsPoplar.class); //1392
+        register(POPLAR_STANDING_SIGN, BlockPoplarSignPost.class); //1393
+        register(POPLAR_TRAPDOOR, BlockTrapdoorPoplar.class); //1394
+        register(POPLAR_WALL_SIGN, BlockPoplarWallSign.class); //1395
+        register(STRIPPED_POPLAR_WOOD, BlockStrippedPoplarWood.class); //1396
+        register(POPLAR_WOOD, BlockPoplarWood.class); //1397
+        register(POPLAR_SAPLING, BlockPoplarSapling.class); //1398
+        register(ORANGE_POPLAR_LEAVES, BlockOrangePoplarLeaves.class); //1399
+        register(RED_POPLAR_LEAVES, BlockRedPoplarLeaves.class); //1400
+        register(YELLOW_POPLAR_LEAVES, BlockYellowPoplarLeaves.class); //1401
+        register(POPLAR_SHELF, BlockPoplarShelf.class); //1402
+        register(RED_SHRUB, BlockRedShrub.class); //1403
+
+        register(RED_WOOL_STAIRS, BlockWoolStairsRed.class); //1404
+        register(WHITE_WOOL_STAIRS, BlockWoolStairsWhite.class); //1405
+        register(BLUE_WOOL_STAIRS, BlockWoolStairsBlue.class); //1406
+        register(ORANGE_WOOL_STAIRS, BlockWoolStairsOrange.class); //1407
+        register(MAGENTA_WOOL_STAIRS, BlockWoolStairsMagenta.class); //1408
+        register(LIGHT_BLUE_WOOL_STAIRS, BlockWoolStairsLightBlue.class); //1409
+        register(YELLOW_WOOL_STAIRS, BlockWoolStairsYellow.class); //1410
+        register(LIME_WOOL_STAIRS, BlockWoolStairsLime.class); //1411
+        register(PINK_WOOL_STAIRS, BlockWoolStairsPink.class); //1412
+        register(GRAY_WOOL_STAIRS, BlockWoolStairsGray.class); //1413
+        register(LIGHT_GRAY_WOOL_STAIRS, BlockWoolStairsLightGray.class); //1414
+        register(CYAN_WOOL_STAIRS, BlockWoolStairsCyan.class); //1415
+        register(PURPLE_WOOL_STAIRS, BlockWoolStairsPurple.class); //1416
+        register(GREEN_WOOL_STAIRS, BlockWoolStairsGreen.class); //1417
+        register(BROWN_WOOL_STAIRS, BlockWoolStairsBrown.class); //1418
+        register(BLACK_WOOL_STAIRS, BlockWoolStairsBlack.class); //1419
+
+        register(WHITE_WOOL_SLAB, BlockWoolSlabWhite.class); //1420
+        register(LIGHT_GRAY_WOOL_SLAB, BlockWoolSlabLightGray.class); //1421
+        register(GRAY_WOOL_SLAB, BlockWoolSlabGray.class); //1422
+        register(BLACK_WOOL_SLAB, BlockWoolSlabBlack.class); //1423
+        register(BROWN_WOOL_SLAB, BlockWoolSlabBrown.class); //1424
+        register(RED_WOOL_SLAB, BlockWoolSlabRed.class); //1425
+        register(ORANGE_WOOL_SLAB, BlockWoolSlabOrange.class); //1426
+        register(YELLOW_WOOL_SLAB, BlockWoolSlabYellow.class); //1427
+        register(LIME_WOOL_SLAB, BlockWoolSlabLime.class); //1428
+        register(GREEN_WOOL_SLAB, BlockWoolSlabGreen.class); //1429
+        register(CYAN_WOOL_SLAB, BlockWoolSlabCyan.class); //1430
+        register(LIGHT_BLUE_WOOL_SLAB, BlockWoolSlabLightBlue.class); //1431
+        register(BLUE_WOOL_SLAB, BlockWoolSlabBlue.class); //1432
+        register(PURPLE_WOOL_SLAB, BlockWoolSlabPurple.class); //1433
+        register(MAGENTA_WOOL_SLAB, BlockWoolSlabMagenta.class); //1434
+        register(PINK_WOOL_SLAB, BlockWoolSlabPink.class); //1435
+
+        register(WHITE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabWhite.class); //1436
+        register(LIGHT_GRAY_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabLightGray.class); //1437
+        register(GRAY_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabGray.class); //1438
+        register(BLACK_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabBlack.class); //1439
+        register(BROWN_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabBrown.class); //1440
+        register(RED_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabRed.class); //1441
+        register(ORANGE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabOrange.class); //1442
+        register(YELLOW_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabYellow.class); //1443
+        register(LIME_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabLime.class); //1444
+        register(GREEN_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabGreen.class); //1445
+        register(CYAN_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabCyan.class); //1446
+        register(LIGHT_BLUE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabLightBlue.class); //1447
+        register(BLUE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabBlue.class); //1448
+        register(PURPLE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabPurple.class); //1449
+        register(MAGENTA_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabMagenta.class); //1450
+        register(PINK_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabPink.class); //1451
+
+        register(RED_CONCRETE_STAIRS, BlockConcreteStairsRed.class); //1454
+        register(WHITE_CONCRETE_STAIRS, BlockConcreteStairsWhite.class); //1455
+        register(BLUE_CONCRETE_STAIRS, BlockConcreteStairsBlue.class); //1456
+        register(ORANGE_CONCRETE_STAIRS, BlockConcreteStairsOrange.class); //1457
+        register(MAGENTA_CONCRETE_STAIRS, BlockConcreteStairsMagenta.class); //1458
+        register(LIGHT_BLUE_CONCRETE_STAIRS, BlockConcreteStairsLightBlue.class); //1459
+        register(YELLOW_CONCRETE_STAIRS, BlockConcreteStairsYellow.class); //1460
+        register(LIME_CONCRETE_STAIRS, BlockConcreteStairsLime.class); //1461
+        register(PINK_CONCRETE_STAIRS, BlockConcreteStairsPink.class); //1462
+        register(GRAY_CONCRETE_STAIRS, BlockConcreteStairsGray.class); //1463
+        register(LIGHT_GRAY_CONCRETE_STAIRS, BlockConcreteStairsLightGray.class); //1464
+        register(CYAN_CONCRETE_STAIRS, BlockConcreteStairsCyan.class); //1465
+        register(PURPLE_CONCRETE_STAIRS, BlockConcreteStairsPurple.class); //1466
+        register(GREEN_CONCRETE_STAIRS, BlockConcreteStairsGreen.class); //1467
+        register(BROWN_CONCRETE_STAIRS, BlockConcreteStairsBrown.class); //1468
+        register(BLACK_CONCRETE_STAIRS, BlockConcreteStairsBlack.class); //1469
+
+        register(WHITE_CONCRETE_SLAB, BlockConcreteSlabWhite.class); //1470
+        register(LIGHT_GRAY_CONCRETE_SLAB, BlockConcreteSlabLightGray.class); //1471
+        register(GRAY_CONCRETE_SLAB, BlockConcreteSlabGray.class); //1472
+        register(BLACK_CONCRETE_SLAB, BlockConcreteSlabBlack.class); //1473
+        register(BROWN_CONCRETE_SLAB, BlockConcreteSlabBrown.class); //1474
+        register(RED_CONCRETE_SLAB, BlockConcreteSlabRed.class); //1475
+        register(ORANGE_CONCRETE_SLAB, BlockConcreteSlabOrange.class); //1476
+        register(YELLOW_CONCRETE_SLAB, BlockConcreteSlabYellow.class); //1477
+        register(LIME_CONCRETE_SLAB, BlockConcreteSlabLime.class); //1478
+        register(GREEN_CONCRETE_SLAB, BlockConcreteSlabGreen.class); //1479
+        register(CYAN_CONCRETE_SLAB, BlockConcreteSlabCyan.class); //1480
+        register(LIGHT_BLUE_CONCRETE_SLAB, BlockConcreteSlabLightBlue.class); //1481
+        register(BLUE_CONCRETE_SLAB, BlockConcreteSlabBlue.class); //1482
+        register(PURPLE_CONCRETE_SLAB, BlockConcreteSlabPurple.class); //1483
+        register(MAGENTA_CONCRETE_SLAB, BlockConcreteSlabMagenta.class); //1484
+        register(PINK_CONCRETE_SLAB, BlockConcreteSlabPink.class); //1485
+
+        register(WHITE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabWhite.class); //1486
+        register(LIGHT_GRAY_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabLightGray.class); //1487
+        register(GRAY_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabGray.class); //1488
+        register(BLACK_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabBlack.class); //1489
+        register(BROWN_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabBrown.class); //1490
+        register(RED_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabRed.class); //1491
+        register(ORANGE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabOrange.class); //1492
+        register(YELLOW_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabYellow.class); //1493
+        register(LIME_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabLime.class); //1494
+        register(GREEN_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabGreen.class); //1495
+        register(CYAN_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabCyan.class); //1496
+        register(LIGHT_BLUE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabLightBlue.class); //1497
+        register(BLUE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabBlue.class); //1498
+        register(PURPLE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabPurple.class); //1499
+        register(MAGENTA_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabMagenta.class); //1500
+        register(PINK_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabPink.class); //1501
 
         IntStream idStream = IntStream.range(0, Block.MAX_BLOCK_ID);
         idStream.parallel().forEach(id -> {
