@@ -5,8 +5,6 @@ import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
 import lombok.experimental.SuperBuilder;
 
-import java.awt.*;
-
 @SuperBuilder(toBuilder = true)
 public class DebugShapeBox extends DebugShape {
 
@@ -24,20 +22,6 @@ public class DebugShapeBox extends DebugShape {
      * Can be {@code null}, and in that case that the boxBounds will be set to (1, 1, 1) client-side.
      */
     protected Vector3f boxBounds;
-
-    /**
-     * Creates a new DebugShapeBox with the default position, color, scale and box bounds.
-     *
-     * @param position  the position of the box in the world.
-     * @param color     the color of the box.
-     * @param scale     the scale of the box, which is a multiplier for the size of the box.
-     * @param boxBounds the bounds of the box, which is a vector representing the size of the box in each dimension (x, y and z).
-     */
-    public DebugShapeBox(Vector3f position, Color color, int dimensionId, Float scale, Vector3f boxBounds) {
-        super(position, color, dimensionId);
-        this.scale = scale;
-        this.boxBounds = boxBounds;
-    }
 
     /**
      * Gets the scale of the box.

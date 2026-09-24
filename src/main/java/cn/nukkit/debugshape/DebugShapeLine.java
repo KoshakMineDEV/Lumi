@@ -18,18 +18,6 @@ public class DebugShapeLine extends DebugShape {
     protected Vector3f endPosition;
 
     /**
-     * Creates a new DebugLine with the specified position, color, and end position.
-     *
-     * @param position    the starting position of the line.
-     * @param color       the color of the line.
-     * @param endPosition the end position of the line.
-     */
-    public DebugShapeLine(Vector3f position, Color color, int dimensionId, Vector3f endPosition) {
-        super(position, color, dimensionId);
-        this.endPosition = endPosition;
-    }
-
-    /**
      * Gets the end position of the line.
      *
      * @return the end position of the line.
