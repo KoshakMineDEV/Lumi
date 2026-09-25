@@ -27,7 +27,8 @@ public enum LevelDBKey {
     FLAGS('f'),
     VERSION_OLD('v'),
     NUKKIT_BLOCK_LIGHT((char) 1000),
-    NUKKIT_SKY_LIGHT((char) 1001);
+    NUKKIT_SKY_LIGHT((char) 1001),
+    LUMI_CONNECTION_FIX_STATE((char) 1003);
 
     private final byte encoded;
 

@@ -1163,6 +1163,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(PURPLE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabPurple.class); //1449
         register(MAGENTA_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabMagenta.class); //1450
         register(PINK_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabPink.class); //1451
+        register(SHELF_MUSHROOM, BlockShelfMushroom.class); //1452
 
         register(RED_CONCRETE_STAIRS, BlockConcreteStairsRed.class); //1454
         register(WHITE_CONCRETE_STAIRS, BlockConcreteStairsWhite.class); //1455

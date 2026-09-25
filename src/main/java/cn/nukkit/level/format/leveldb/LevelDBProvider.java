@@ -59,6 +59,8 @@ import static cn.nukkit.level.format.leveldb.LevelDBKey.*;
 public class LevelDBProvider implements LevelProvider {
 
     private static final DBProvider JAVA_LDB_PROVIDER = (DBProvider) FeatureBuilder.create(LevelDBProvider.class).addJava("net.daporkchop.ldbjni.java.JavaDBProvider").build();
+    private static final byte[] CONNECTION_FIX_PENDING = {0};
+    private static final byte[] CONNECTION_FIX_COMPLETE = {1};
 
     protected final Long2ObjectMap<BaseFullChunk> chunks = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 
@@ -431,6 +433,10 @@ public class LevelDBProvider implements LevelProvider {
 
         ChunkBuilder chunkBuilder = new ChunkBuilder(chunkX, chunkZ, this);
 
+        // A missing marker also covers worlds saved before this migration was introduced.
+        byte[] connectionFixState = this.db.get(LUMI_CONNECTION_FIX_STATE.getKey(chunkX, chunkZ, this.level.getDimensionData().getDimensionId()));
+        chunkBuilder.connectionStateRefreshPending(connectionFixState == null || connectionFixState.length == 0 || connectionFixState[0] == 0);
+
         byte[] finalized = this.db.get(STATE_FINALIZATION.getKey(chunkX, chunkZ, this.level.getDimensionData().getDimensionId()));
         if (finalized == null) {
             chunkBuilder.state(ChunkState.FINISHED);
@@ -556,6 +562,8 @@ public class LevelDBProvider implements LevelProvider {
 
         writeBatch.put(LevelDBKey.VERSION.getKey(chunkX, chunkZ, this.level.getDimension()), CHUNK_VERSION_SAVE_DATA);
         writeBatch.put(STATE_FINALIZATION.getKey(chunkX, chunkZ, this.level.getDimensionData().getDimensionId()), Binary.writeLInt(chunk.getState().ordinal()));
+        writeBatch.put(LUMI_CONNECTION_FIX_STATE.getKey(chunkX, chunkZ, this.level.getDimensionData().getDimensionId()),
+                chunk.isConnectionStateRefreshPending() ? CONNECTION_FIX_PENDING : CONNECTION_FIX_COMPLETE);
 
         BlockEntitySerializer.saveBlockEntities(writeBatch, chunk);
         EntitySerializer.saveEntities(writeBatch, chunk);
