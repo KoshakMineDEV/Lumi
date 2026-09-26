@@ -246,7 +246,13 @@ public interface ItemNamespaceId {
 
     String BLACK_CONCRETE = "minecraft:black_concrete";
 
+    String BLACK_CONCRETE_DOUBLE_SLAB = "minecraft:black_concrete_double_slab";
+
     String BLACK_CONCRETE_POWDER = "minecraft:black_concrete_powder";
+
+    String BLACK_CONCRETE_SLAB = "minecraft:black_concrete_slab";
+
+    String BLACK_CONCRETE_STAIRS = "minecraft:black_concrete_stairs";
 
     String BLACK_CUSHION = "minecraft:black_cushion";
 
@@ -265,6 +271,12 @@ public interface ItemNamespaceId {
     String BLACK_TERRACOTTA = "minecraft:black_terracotta";
 
     String BLACK_WOOL = "minecraft:black_wool";
+
+    String BLACK_WOOL_DOUBLE_SLAB = "minecraft:black_wool_double_slab";
+
+    String BLACK_WOOL_SLAB = "minecraft:black_wool_slab";
+
+    String BLACK_WOOL_STAIRS = "minecraft:black_wool_stairs";
 
     String BLACKSTONE = "minecraft:blackstone";
 
@@ -298,7 +310,13 @@ public interface ItemNamespaceId {
 
     String BLUE_CONCRETE = "minecraft:blue_concrete";
 
+    String BLUE_CONCRETE_DOUBLE_SLAB = "minecraft:blue_concrete_double_slab";
+
     String BLUE_CONCRETE_POWDER = "minecraft:blue_concrete_powder";
+
+    String BLUE_CONCRETE_SLAB = "minecraft:blue_concrete_slab";
+
+    String BLUE_CONCRETE_STAIRS = "minecraft:blue_concrete_stairs";
 
     String BLUE_CUSHION = "minecraft:blue_cushion";
 
@@ -323,6 +341,12 @@ public interface ItemNamespaceId {
     String BLUE_TERRACOTTA = "minecraft:blue_terracotta";
 
     String BLUE_WOOL = "minecraft:blue_wool";
+
+    String BLUE_WOOL_DOUBLE_SLAB = "minecraft:blue_wool_double_slab";
+
+    String BLUE_WOOL_SLAB = "minecraft:blue_wool_slab";
+
+    String BLUE_WOOL_STAIRS = "minecraft:blue_wool_stairs";
 
     String BOARD = "minecraft:board";
 
@@ -390,7 +414,13 @@ public interface ItemNamespaceId {
 
     String BROWN_CONCRETE = "minecraft:brown_concrete";
 
+    String BROWN_CONCRETE_DOUBLE_SLAB = "minecraft:brown_concrete_double_slab";
+
     String BROWN_CONCRETE_POWDER = "minecraft:brown_concrete_powder";
+
+    String BROWN_CONCRETE_SLAB = "minecraft:brown_concrete_slab";
+
+    String BROWN_CONCRETE_STAIRS = "minecraft:brown_concrete_stairs";
 
     String BROWN_CUSHION = "minecraft:brown_cushion";
 
@@ -415,6 +445,12 @@ public interface ItemNamespaceId {
     String BROWN_TERRACOTTA = "minecraft:brown_terracotta";
 
     String BROWN_WOOL = "minecraft:brown_wool";
+
+    String BROWN_WOOL_DOUBLE_SLAB = "minecraft:brown_wool_double_slab";
+
+    String BROWN_WOOL_SLAB = "minecraft:brown_wool_slab";
+
+    String BROWN_WOOL_STAIRS = "minecraft:brown_wool_stairs";
 
     String BRUSH = "minecraft:brush";
 
@@ -868,7 +904,13 @@ public interface ItemNamespaceId {
 
     String CYAN_CONCRETE = "minecraft:cyan_concrete";
 
+    String CYAN_CONCRETE_DOUBLE_SLAB = "minecraft:cyan_concrete_double_slab";
+
     String CYAN_CONCRETE_POWDER = "minecraft:cyan_concrete_powder";
+
+    String CYAN_CONCRETE_SLAB = "minecraft:cyan_concrete_slab";
+
+    String CYAN_CONCRETE_STAIRS = "minecraft:cyan_concrete_stairs";
 
     String CYAN_CUSHION = "minecraft:cyan_cushion";
 
@@ -887,6 +929,12 @@ public interface ItemNamespaceId {
     String CYAN_TERRACOTTA = "minecraft:cyan_terracotta";
 
     String CYAN_WOOL = "minecraft:cyan_wool";
+
+    String CYAN_WOOL_DOUBLE_SLAB = "minecraft:cyan_wool_double_slab";
+
+    String CYAN_WOOL_SLAB = "minecraft:cyan_wool_slab";
+
+    String CYAN_WOOL_STAIRS = "minecraft:cyan_wool_stairs";
 
     String DAMAGED_ANVIL = "minecraft:damaged_anvil";
 
@@ -1638,7 +1686,13 @@ public interface ItemNamespaceId {
 
     String GRAY_CONCRETE = "minecraft:gray_concrete";
 
+    String GRAY_CONCRETE_DOUBLE_SLAB = "minecraft:gray_concrete_double_slab";
+
     String GRAY_CONCRETE_POWDER = "minecraft:gray_concrete_powder";
+
+    String GRAY_CONCRETE_SLAB = "minecraft:gray_concrete_slab";
+
+    String GRAY_CONCRETE_STAIRS = "minecraft:gray_concrete_stairs";
 
     String GRAY_CUSHION = "minecraft:gray_cushion";
 
@@ -1658,6 +1712,12 @@ public interface ItemNamespaceId {
 
     String GRAY_WOOL = "minecraft:gray_wool";
 
+    String GRAY_WOOL_DOUBLE_SLAB = "minecraft:gray_wool_double_slab";
+
+    String GRAY_WOOL_SLAB = "minecraft:gray_wool_slab";
+
+    String GRAY_WOOL_STAIRS = "minecraft:gray_wool_stairs";
+
     String GREEN_BUNDLE = "minecraft:green_bundle";
 
     String GREEN_CANDLE = "minecraft:green_candle";
@@ -1668,7 +1728,13 @@ public interface ItemNamespaceId {
 
     String GREEN_CONCRETE = "minecraft:green_concrete";
 
+    String GREEN_CONCRETE_DOUBLE_SLAB = "minecraft:green_concrete_double_slab";
+
     String GREEN_CONCRETE_POWDER = "minecraft:green_concrete_powder";
+
+    String GREEN_CONCRETE_SLAB = "minecraft:green_concrete_slab";
+
+    String GREEN_CONCRETE_STAIRS = "minecraft:green_concrete_stairs";
 
     String GREEN_CUSHION = "minecraft:green_cushion";
 
@@ -1687,6 +1753,12 @@ public interface ItemNamespaceId {
     String GREEN_TERRACOTTA = "minecraft:green_terracotta";
 
     String GREEN_WOOL = "minecraft:green_wool";
+
+    String GREEN_WOOL_DOUBLE_SLAB = "minecraft:green_wool_double_slab";
+
+    String GREEN_WOOL_SLAB = "minecraft:green_wool_slab";
+
+    String GREEN_WOOL_STAIRS = "minecraft:green_wool_stairs";
 
     String GRINDSTONE = "minecraft:grindstone";
 
@@ -2022,7 +2094,13 @@ public interface ItemNamespaceId {
 
     String LIGHT_BLUE_CONCRETE = "minecraft:light_blue_concrete";
 
+    String LIGHT_BLUE_CONCRETE_DOUBLE_SLAB = "minecraft:light_blue_concrete_double_slab";
+
     String LIGHT_BLUE_CONCRETE_POWDER = "minecraft:light_blue_concrete_powder";
+
+    String LIGHT_BLUE_CONCRETE_SLAB = "minecraft:light_blue_concrete_slab";
+
+    String LIGHT_BLUE_CONCRETE_STAIRS = "minecraft:light_blue_concrete_stairs";
 
     String LIGHT_BLUE_CUSHION = "minecraft:light_blue_cushion";
 
@@ -2042,6 +2120,12 @@ public interface ItemNamespaceId {
 
     String LIGHT_BLUE_WOOL = "minecraft:light_blue_wool";
 
+    String LIGHT_BLUE_WOOL_DOUBLE_SLAB = "minecraft:light_blue_wool_double_slab";
+
+    String LIGHT_BLUE_WOOL_SLAB = "minecraft:light_blue_wool_slab";
+
+    String LIGHT_BLUE_WOOL_STAIRS = "minecraft:light_blue_wool_stairs";
+
     String LIGHT_GRAY_BUNDLE = "minecraft:light_gray_bundle";
 
     String LIGHT_GRAY_CANDLE = "minecraft:light_gray_candle";
@@ -2052,7 +2136,13 @@ public interface ItemNamespaceId {
 
     String LIGHT_GRAY_CONCRETE = "minecraft:light_gray_concrete";
 
+    String LIGHT_GRAY_CONCRETE_DOUBLE_SLAB = "minecraft:light_gray_concrete_double_slab";
+
     String LIGHT_GRAY_CONCRETE_POWDER = "minecraft:light_gray_concrete_powder";
+
+    String LIGHT_GRAY_CONCRETE_SLAB = "minecraft:light_gray_concrete_slab";
+
+    String LIGHT_GRAY_CONCRETE_STAIRS = "minecraft:light_gray_concrete_stairs";
 
     String LIGHT_GRAY_CUSHION = "minecraft:light_gray_cushion";
 
@@ -2069,6 +2159,12 @@ public interface ItemNamespaceId {
     String LIGHT_GRAY_TERRACOTTA = "minecraft:light_gray_terracotta";
 
     String LIGHT_GRAY_WOOL = "minecraft:light_gray_wool";
+
+    String LIGHT_GRAY_WOOL_DOUBLE_SLAB = "minecraft:light_gray_wool_double_slab";
+
+    String LIGHT_GRAY_WOOL_SLAB = "minecraft:light_gray_wool_slab";
+
+    String LIGHT_GRAY_WOOL_STAIRS = "minecraft:light_gray_wool_stairs";
 
     String LIGHT_WEIGHTED_PRESSURE_PLATE = "minecraft:light_weighted_pressure_plate";
 
@@ -2088,7 +2184,13 @@ public interface ItemNamespaceId {
 
     String LIME_CONCRETE = "minecraft:lime_concrete";
 
+    String LIME_CONCRETE_DOUBLE_SLAB = "minecraft:lime_concrete_double_slab";
+
     String LIME_CONCRETE_POWDER = "minecraft:lime_concrete_powder";
+
+    String LIME_CONCRETE_SLAB = "minecraft:lime_concrete_slab";
+
+    String LIME_CONCRETE_STAIRS = "minecraft:lime_concrete_stairs";
 
     String LIME_CUSHION = "minecraft:lime_cushion";
 
@@ -2107,6 +2209,12 @@ public interface ItemNamespaceId {
     String LIME_TERRACOTTA = "minecraft:lime_terracotta";
 
     String LIME_WOOL = "minecraft:lime_wool";
+
+    String LIME_WOOL_DOUBLE_SLAB = "minecraft:lime_wool_double_slab";
+
+    String LIME_WOOL_SLAB = "minecraft:lime_wool_slab";
+
+    String LIME_WOOL_STAIRS = "minecraft:lime_wool_stairs";
 
     String LINGERING_POTION = "minecraft:lingering_potion";
 
@@ -2148,7 +2256,13 @@ public interface ItemNamespaceId {
 
     String MAGENTA_CONCRETE = "minecraft:magenta_concrete";
 
+    String MAGENTA_CONCRETE_DOUBLE_SLAB = "minecraft:magenta_concrete_double_slab";
+
     String MAGENTA_CONCRETE_POWDER = "minecraft:magenta_concrete_powder";
+
+    String MAGENTA_CONCRETE_SLAB = "minecraft:magenta_concrete_slab";
+
+    String MAGENTA_CONCRETE_STAIRS = "minecraft:magenta_concrete_stairs";
 
     String MAGENTA_CUSHION = "minecraft:magenta_cushion";
 
@@ -2167,6 +2281,12 @@ public interface ItemNamespaceId {
     String MAGENTA_TERRACOTTA = "minecraft:magenta_terracotta";
 
     String MAGENTA_WOOL = "minecraft:magenta_wool";
+
+    String MAGENTA_WOOL_DOUBLE_SLAB = "minecraft:magenta_wool_double_slab";
+
+    String MAGENTA_WOOL_SLAB = "minecraft:magenta_wool_slab";
+
+    String MAGENTA_WOOL_STAIRS = "minecraft:magenta_wool_stairs";
 
     String MAGMA = "minecraft:magma";
 
@@ -2470,7 +2590,13 @@ public interface ItemNamespaceId {
 
     String ORANGE_CONCRETE = "minecraft:orange_concrete";
 
+    String ORANGE_CONCRETE_DOUBLE_SLAB = "minecraft:orange_concrete_double_slab";
+
     String ORANGE_CONCRETE_POWDER = "minecraft:orange_concrete_powder";
+
+    String ORANGE_CONCRETE_SLAB = "minecraft:orange_concrete_slab";
+
+    String ORANGE_CONCRETE_STAIRS = "minecraft:orange_concrete_stairs";
 
     String ORANGE_CUSHION = "minecraft:orange_cushion";
 
@@ -2493,6 +2619,12 @@ public interface ItemNamespaceId {
     String ORANGE_TULIP = "minecraft:orange_tulip";
 
     String ORANGE_WOOL = "minecraft:orange_wool";
+
+    String ORANGE_WOOL_DOUBLE_SLAB = "minecraft:orange_wool_double_slab";
+
+    String ORANGE_WOOL_SLAB = "minecraft:orange_wool_slab";
+
+    String ORANGE_WOOL_STAIRS = "minecraft:orange_wool_stairs";
 
     String OXEYE_DAISY = "minecraft:oxeye_daisy";
 
@@ -2602,6 +2734,8 @@ public interface ItemNamespaceId {
 
     String PHANTOM_SPAWN_EGG = "minecraft:phantom_spawn_egg";
 
+    String PHOTO_ITEM = "minecraft:photo_item";
+
     String PIG_SPAWN_EGG = "minecraft:pig_spawn_egg";
 
     String PIGLIN_BANNER_PATTERN = "minecraft:piglin_banner_pattern";
@@ -2624,7 +2758,13 @@ public interface ItemNamespaceId {
 
     String PINK_CONCRETE = "minecraft:pink_concrete";
 
+    String PINK_CONCRETE_DOUBLE_SLAB = "minecraft:pink_concrete_double_slab";
+
     String PINK_CONCRETE_POWDER = "minecraft:pink_concrete_powder";
+
+    String PINK_CONCRETE_SLAB = "minecraft:pink_concrete_slab";
+
+    String PINK_CONCRETE_STAIRS = "minecraft:pink_concrete_stairs";
 
     String PINK_CUSHION = "minecraft:pink_cushion";
 
@@ -2647,6 +2787,12 @@ public interface ItemNamespaceId {
     String PINK_TULIP = "minecraft:pink_tulip";
 
     String PINK_WOOL = "minecraft:pink_wool";
+
+    String PINK_WOOL_DOUBLE_SLAB = "minecraft:pink_wool_double_slab";
+
+    String PINK_WOOL_SLAB = "minecraft:pink_wool_slab";
+
+    String PINK_WOOL_STAIRS = "minecraft:pink_wool_stairs";
 
     String PISTON = "minecraft:piston";
 
@@ -2810,6 +2956,8 @@ public interface ItemNamespaceId {
 
     String PORTAL = "minecraft:portal";
 
+    String PORTFOLIO = "minecraft:portfolio";
+
     String POTATO = "minecraft:potato";
 
     String POTATOES = "minecraft:potatoes";
@@ -2874,7 +3022,13 @@ public interface ItemNamespaceId {
 
     String PURPLE_CONCRETE = "minecraft:purple_concrete";
 
+    String PURPLE_CONCRETE_DOUBLE_SLAB = "minecraft:purple_concrete_double_slab";
+
     String PURPLE_CONCRETE_POWDER = "minecraft:purple_concrete_powder";
+
+    String PURPLE_CONCRETE_SLAB = "minecraft:purple_concrete_slab";
+
+    String PURPLE_CONCRETE_STAIRS = "minecraft:purple_concrete_stairs";
 
     String PURPLE_CUSHION = "minecraft:purple_cushion";
 
@@ -2893,6 +3047,12 @@ public interface ItemNamespaceId {
     String PURPLE_TERRACOTTA = "minecraft:purple_terracotta";
 
     String PURPLE_WOOL = "minecraft:purple_wool";
+
+    String PURPLE_WOOL_DOUBLE_SLAB = "minecraft:purple_wool_double_slab";
+
+    String PURPLE_WOOL_SLAB = "minecraft:purple_wool_slab";
+
+    String PURPLE_WOOL_STAIRS = "minecraft:purple_wool_stairs";
 
     String PURPUR_BLOCK = "minecraft:purpur_block";
 
@@ -2962,7 +3122,13 @@ public interface ItemNamespaceId {
 
     String RED_CONCRETE = "minecraft:red_concrete";
 
+    String RED_CONCRETE_DOUBLE_SLAB = "minecraft:red_concrete_double_slab";
+
     String RED_CONCRETE_POWDER = "minecraft:red_concrete_powder";
+
+    String RED_CONCRETE_SLAB = "minecraft:red_concrete_slab";
+
+    String RED_CONCRETE_STAIRS = "minecraft:red_concrete_stairs";
 
     String RED_CUSHION = "minecraft:red_cushion";
 
@@ -3002,6 +3168,8 @@ public interface ItemNamespaceId {
 
     String RED_SANDSTONE_WALL = "minecraft:red_sandstone_wall";
 
+    String RED_SHRUB = "minecraft:red_shrub";
+
     String RED_SHULKER_BOX = "minecraft:red_shulker_box";
 
     String RED_STAINED_GLASS = "minecraft:red_stained_glass";
@@ -3013,6 +3181,12 @@ public interface ItemNamespaceId {
     String RED_TULIP = "minecraft:red_tulip";
 
     String RED_WOOL = "minecraft:red_wool";
+
+    String RED_WOOL_DOUBLE_SLAB = "minecraft:red_wool_double_slab";
+
+    String RED_WOOL_SLAB = "minecraft:red_wool_slab";
+
+    String RED_WOOL_STAIRS = "minecraft:red_wool_stairs";
 
     String REDSTONE = "minecraft:redstone";
 
@@ -3109,6 +3283,8 @@ public interface ItemNamespaceId {
     String SHEARS = "minecraft:shears";
 
     String SHEEP_SPAWN_EGG = "minecraft:sheep_spawn_egg";
+
+    String SHELF_MUSHROOM = "minecraft:shelf_mushroom";
 
     String SHELTER_POTTERY_SHERD = "minecraft:shelter_pottery_sherd";
 
@@ -3804,7 +3980,13 @@ public interface ItemNamespaceId {
 
     String WHITE_CONCRETE = "minecraft:white_concrete";
 
+    String WHITE_CONCRETE_DOUBLE_SLAB = "minecraft:white_concrete_double_slab";
+
     String WHITE_CONCRETE_POWDER = "minecraft:white_concrete_powder";
+
+    String WHITE_CONCRETE_SLAB = "minecraft:white_concrete_slab";
+
+    String WHITE_CONCRETE_STAIRS = "minecraft:white_concrete_stairs";
 
     String WHITE_CUSHION = "minecraft:white_cushion";
 
@@ -3825,6 +4007,12 @@ public interface ItemNamespaceId {
     String WHITE_TULIP = "minecraft:white_tulip";
 
     String WHITE_WOOL = "minecraft:white_wool";
+
+    String WHITE_WOOL_DOUBLE_SLAB = "minecraft:white_wool_double_slab";
+
+    String WHITE_WOOL_SLAB = "minecraft:white_wool_slab";
+
+    String WHITE_WOOL_STAIRS = "minecraft:white_wool_stairs";
 
     String WILD_ARMOR_TRIM_SMITHING_TEMPLATE = "minecraft:wild_armor_trim_smithing_template";
 
@@ -3884,7 +4072,13 @@ public interface ItemNamespaceId {
 
     String YELLOW_CONCRETE = "minecraft:yellow_concrete";
 
+    String YELLOW_CONCRETE_DOUBLE_SLAB = "minecraft:yellow_concrete_double_slab";
+
     String YELLOW_CONCRETE_POWDER = "minecraft:yellow_concrete_powder";
+
+    String YELLOW_CONCRETE_SLAB = "minecraft:yellow_concrete_slab";
+
+    String YELLOW_CONCRETE_STAIRS = "minecraft:yellow_concrete_stairs";
 
     String YELLOW_CUSHION = "minecraft:yellow_cushion";
 
@@ -3905,6 +4099,12 @@ public interface ItemNamespaceId {
     String YELLOW_TERRACOTTA = "minecraft:yellow_terracotta";
 
     String YELLOW_WOOL = "minecraft:yellow_wool";
+
+    String YELLOW_WOOL_DOUBLE_SLAB = "minecraft:yellow_wool_double_slab";
+
+    String YELLOW_WOOL_SLAB = "minecraft:yellow_wool_slab";
+
+    String YELLOW_WOOL_STAIRS = "minecraft:yellow_wool_stairs";
 
     String ZOGLIN_SPAWN_EGG = "minecraft:zoglin_spawn_egg";
 
