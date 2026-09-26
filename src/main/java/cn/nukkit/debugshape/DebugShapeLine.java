@@ -3,9 +3,11 @@ package cn.nukkit.debugshape;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
+import lombok.experimental.SuperBuilder;
 
 import java.awt.Color;
 
+@SuperBuilder(toBuilder = true)
 public class DebugShapeLine extends DebugShape {
 
     /**
@@ -14,18 +16,6 @@ public class DebugShapeLine extends DebugShape {
      * Can be {@code null}, and in that case that the position will be set to (0, 0, 0) client-side.
      */
     protected Vector3f endPosition;
-
-    /**
-     * Creates a new DebugLine with the specified position, color, and end position.
-     *
-     * @param position    the starting position of the line.
-     * @param color       the color of the line.
-     * @param endPosition the end position of the line.
-     */
-    public DebugShapeLine(Vector3f position, Color color, int dimensionId, Vector3f endPosition) {
-        super(position, color, dimensionId);
-        this.endPosition = endPosition;
-    }
 
     /**
      * Gets the end position of the line.
@@ -52,11 +42,8 @@ public class DebugShapeLine extends DebugShape {
 
     @Override
     public ScriptDebugShape toNetworkData() {
-        return new ScriptDebugShape(
-                id, getType(), position, null,
-                null, null, null, color,
-                null, dimensionId,null, null, endPosition,
-                null, null, null
-        );
+        return commonNetworkData()
+                .lineEndPosition(endPosition)
+                .build();
     }
 }

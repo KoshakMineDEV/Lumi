@@ -1,11 +1,10 @@
 package cn.nukkit.debugshape;
 
-import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
+import lombok.experimental.SuperBuilder;
 
-import java.awt.Color;
-
+@SuperBuilder(toBuilder = true)
 public class DebugShapeCircle extends DebugShape {
 
     /**
@@ -20,20 +19,6 @@ public class DebugShapeCircle extends DebugShape {
      * Can be {@code null}, and in that case that the segments will be set to 20 client-side.
      */
     protected Integer segments;
-
-    /**
-     * Creates a new DebugCircle with the specified position, color, scale and segments.
-     *
-     * @param position the position of the circle in the world.
-     * @param color    the color of the circle.
-     * @param scale    the scale of the circle, which is a multiplier for the size of the circle.
-     * @param segments the segments of the circle, which determines how many segments the circle will be divided into.
-     */
-    public DebugShapeCircle(Vector3f position, Color color, int dimensionId, Float scale, Integer segments) {
-        super(position, color, dimensionId);
-        this.scale = scale;
-        this.segments = segments;
-    }
 
     /**
      * Gets the scale of the circle.
@@ -78,11 +63,9 @@ public class DebugShapeCircle extends DebugShape {
 
     @Override
     public ScriptDebugShape toNetworkData() {
-        return new ScriptDebugShape(
-                id, getType(), position, scale,
-                null, null, null, color,
-                null, dimensionId, null, null, null,
-                null, null, segments
-        );
+        return commonNetworkData()
+                .scale(scale)
+                .segments(segments)
+                .build();
     }
 }

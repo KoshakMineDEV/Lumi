@@ -3616,13 +3616,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public void removeDebugShape(int... ids) {
         List<ScriptDebugShape> scriptDebugShapes = new ArrayList<>();
         for(int id : ids) {
-             scriptDebugShapes.add(new ScriptDebugShape(
-                     id, null, null, null,
-                     null, null, null,
-                     null, null, 0, null,
-                     null, null, null, null,
-                     null
-             ));
+            // removal notice
+             scriptDebugShapes.add(ScriptDebugShape.builder()
+                     .id(id)
+                     .dimensionId(this.getLevel().getDimension())
+                     .build());
         }
 
         ServerScriptDebugDrawerPacket packet = new ServerScriptDebugDrawerPacket();

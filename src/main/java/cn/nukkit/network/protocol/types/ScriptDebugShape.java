@@ -1,12 +1,14 @@
 package cn.nukkit.network.protocol.types;
 
 import cn.nukkit.math.Vector3f;
+import lombok.Builder;
 import lombok.Value;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.Color;
 
 @Value
+@Builder(toBuilder = true)
 public class ScriptDebugShape {
     long id;
     @Nullable
@@ -38,4 +40,16 @@ public class ScriptDebugShape {
     Float arrowHeadRadius;
     @Nullable
     Integer segments;
+    @Nullable
+    Boolean useRotation;
+    @Nullable
+    Color backgroundColor;
+    @Nullable
+    Float lineGapHeight;
+    @Nullable
+    Boolean depthTest;
+    @Nullable
+    Boolean showBackface;
+    @Nullable
+    Boolean showTextBackface;
 }

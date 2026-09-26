@@ -6,6 +6,7 @@ import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.awt.*;
 import java.util.Map;
@@ -15,20 +16,22 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author AllayMC, Koshak_Mine
  */
 @Getter
+@SuperBuilder(toBuilder = true)
 public abstract class DebugShape {
-    protected static final AtomicLong DEBUG_SHAPE_ID_COUNTER = new AtomicLong(0);
+    protected static final AtomicLong DEBUG_SHAPE_ID_COUNTER = new AtomicLong(1);
     protected static final Vector3f ZERO_VECTOR = new Vector3f(0, 0, 0);
 
     /**
      * The id of this debug shape.
      */
-    @Getter
-    protected final long id;
+    @lombok.Builder.Default
+    protected long id = DEBUG_SHAPE_ID_COUNTER.getAndIncrement();
     /**
      * The viewers of this debug shape.
      */
     @Getter
-    protected final Map<Long, Player> viewers;
+    @lombok.Builder.Default
+    protected final Map<Long, Player> viewers = new Long2ObjectOpenHashMap<>();
     /**
      * The position of the shape. For most shapes this is the centre of the shape, except
      * {@link DebugShapeLine} and {@link DebugShapeArrow} where this represents the start point of the line.
@@ -46,21 +49,7 @@ public abstract class DebugShape {
      * The id of this debug shape.
      */
     @Getter
-    protected final int dimensionId;
-
-    /**
-     * Creates a new debug shape with the specified position, rotation, color, and scale.
-     *
-     * @param position The position of the shape.
-     * @param color    the color of the shape.
-     */
-    public DebugShape(Vector3f position, Color color, int dimensionId) {
-        this.id = DEBUG_SHAPE_ID_COUNTER.getAndIncrement();
-        this.viewers = new Long2ObjectOpenHashMap<>();
-        this.position = position;
-        this.color = color;
-        this.dimensionId = dimensionId;
-    }
+    protected int dimensionId;
 
     /**
      * Gets the position of this debug shape.
@@ -72,30 +61,12 @@ public abstract class DebugShape {
     }
 
     /**
-     * Sets the position of this debug shape.
-     *
-     * @param position the new position of this debug shape.
-     */
-    public void setPosition(Vector3f position) {
-        this.position = position;
-    }
-
-    /**
      * Gets the color of this debug shape.
      *
      * @return the color of this debug shape.
      */
     public Color getColor() {
         return this.color != null ? this.color : Color.WHITE;
-    }
-
-    /**
-     * Sets the color of this debug shape.
-     *
-     * @param color the new color of this debug shape.
-     */
-    public void setColor(Color color) {
-        this.color = color;
     }
 
     /**
@@ -112,12 +83,10 @@ public abstract class DebugShape {
      * @return a removal notice for this debug shape.
      */
     public ScriptDebugShape createRemovalNotice() {
-        return new ScriptDebugShape(
-                this.id, null, null, null,
-                null, null, null,
-                null, null, dimensionId,null, null,
-                null, null, null, null
-        );
+        return ScriptDebugShape.builder()
+                .id(this.id)
+                .dimensionId(this.dimensionId)
+                .build();
     }
 
     /**
@@ -127,4 +96,12 @@ public abstract class DebugShape {
      */
     public abstract ScriptDebugShape toNetworkData();
 
+    protected ScriptDebugShape.ScriptDebugShapeBuilder commonNetworkData() {
+        return ScriptDebugShape.builder()
+                .id(this.id)
+                .type(this.getType())
+                .position(this.position)
+                .color(this.color)
+                .dimensionId(this.dimensionId);
+    }
 }

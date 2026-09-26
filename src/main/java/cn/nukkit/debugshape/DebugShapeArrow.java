@@ -1,12 +1,11 @@
 package cn.nukkit.debugshape;
 
-import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.network.protocol.types.ScriptDebugShape;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
+import lombok.experimental.SuperBuilder;
 
-import java.awt.Color;
-
+@SuperBuilder(toBuilder = true)
 public class DebugShapeArrow extends DebugShape {
 
     /**
@@ -33,24 +32,6 @@ public class DebugShapeArrow extends DebugShape {
      * Can be {@code null}, and in that case that the segments will be set to 4 client-side.
      */
     protected Integer arrowHeadSegments;
-
-    /**
-     * Creates a new DebugShapeArrow instance with the specified parameters.
-     *
-     * @param position          the starting position of the arrow.
-     * @param color             the color of the arrow.
-     * @param endPosition       the end position of the arrow.
-     * @param arrowHeadLength   the length of the arrow head.
-     * @param arrowHeadRadius   the radius of the arrow head.
-     * @param arrowHeadSegments the number of segments in the arrow head.
-     */
-    public DebugShapeArrow(Vector3f position, Color color, int dimensionId, Vector3f endPosition, Float arrowHeadLength, Float arrowHeadRadius, Integer arrowHeadSegments) {
-        super(position, color, dimensionId);
-        this.endPosition = endPosition;
-        this.arrowHeadLength = arrowHeadLength;
-        this.arrowHeadRadius = arrowHeadRadius;
-        this.arrowHeadSegments = arrowHeadSegments;
-    }
 
     /**
      * Gets the end position of the arrow.
@@ -131,11 +112,11 @@ public class DebugShapeArrow extends DebugShape {
 
     @Override
     public ScriptDebugShape toNetworkData() {
-        return new ScriptDebugShape(
-                id, getType(), position, null,
-                null, null, null, color,
-                null, dimensionId, null, null, null,
-                arrowHeadLength, arrowHeadRadius, arrowHeadSegments
-        );
+        return commonNetworkData()
+                .lineEndPosition(endPosition)
+                .arrowHeadLength(arrowHeadLength)
+                .arrowHeadRadius(arrowHeadRadius)
+                .segments(arrowHeadSegments)
+                .build();
     }
 }
