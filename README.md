@@ -19,7 +19,7 @@ Lumi is a server software which was made to introduce modern Minecraft new featu
 ### How to install?
 1. Install java 21 or higher (recommended is Azul Zulu 21)
 2. Download the .jar file from [Lumi Downloads](https://dl.lumi.su)
-3. Write a command to run: `java -jar Lumi-1.6.8.jar`
+3. Write a command to run: `java -jar Lumi-1.6.9.jar`
 
 ### Plugin Development
 To develop your own plugin we recommend to check this [template](https://github.com/LuminiaDev/ExamplePlugin)
@@ -43,7 +43,7 @@ Adding dependency:
 <dependency>
     <groupId>com.koshakmine</groupId>
     <artifactId>Lumi</artifactId>
-    <version>1.6.8-SNAPSHOT</version>
+    <version>1.6.9-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -58,7 +58,7 @@ maven {
 
 Adding dependency:
 ```kts
-compileOnly("com.koshakmine:Lumi:1.6.8-SNAPSHOT")
+compileOnly("com.koshakmine:Lumi:1.6.9-SNAPSHOT")
 ```
 
 ## Credits
