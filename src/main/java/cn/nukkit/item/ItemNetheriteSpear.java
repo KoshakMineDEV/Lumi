@@ -8,7 +8,7 @@ public class ItemNetheriteSpear extends ItemSpear {
 
     @Override
     public int getMaxDurability() {
-        return ItemTool.DURABILITY_NETHERITE;
+        return ItemTool.DURABILITY_NETHERITE_SPEAR;
     }
 
     @Override

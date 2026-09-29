@@ -8,7 +8,7 @@ public class ItemDiamondSpear extends ItemSpear {
 
     @Override
     public int getMaxDurability() {
-        return ItemTool.DURABILITY_DIAMOND;
+        return ItemTool.DURABILITY_DIAMOND_SPEAR;
     }
 
     @Override
