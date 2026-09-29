@@ -100,6 +100,10 @@ public final class PlayerHandle {
         player.setHorizontalSpeed(horizontalSpeed);
     }
 
+    public void setMovementVelocity(Vector3 movementVelocity) {
+        player.setMovementVelocity(movementVelocity);
+    }
+
     public int getChunkRadius() {
         return player.chunkRadius;
     }
