@@ -197,6 +197,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     protected int closingWindowId = Integer.MIN_VALUE;
 
     public Vector3 speed = null;
+    private final Vector3 movementVelocity = new Vector3();
+    private int movementVelocityTick = -1;
 
     public int craftingType = CRAFTING_SMALL;
 
@@ -439,6 +441,27 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     public int getStartActionTick() {
         return startAction;
+    }
+
+    /**
+     * Kinetic weapons need the complete vector because vanilla projects it
+     * onto the attacker's view direction.
+     */
+    public Vector3 getMovementVelocity() {
+        if (this.movementVelocityTick < this.server.getTick() - 1) {
+            return this.getMotion().multiply(20.0);
+        }
+        return this.movementVelocity.clone();
+    }
+
+    protected void setMovementVelocity(Vector3 velocity) {
+        this.movementVelocity.setComponents(velocity.x, velocity.y, velocity.z);
+        this.movementVelocityTick = this.server.getTick();
+    }
+
+    private void resetMovementVelocity() {
+        this.movementVelocity.setComponents(0, 0, 0);
+        this.movementVelocityTick = this.server.getTick();
     }
 
     public void startAction() {
@@ -1944,6 +1967,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             if (this.speed == null) speed = new Vector3(0, 0, 0);
             else this.speed.setComponents(0, 0, 0);
             this.horizontalSpeed = 0.0;
+            this.resetMovementVelocity();
             return;
         }
 
@@ -2104,6 +2128,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.speed.setComponents(0, 0, 0);
             }
             this.horizontalSpeed = 0.0;
+            this.resetMovementVelocity();
         } else {
             this.forceMovement = null;
 
@@ -2112,6 +2137,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             } else {
                 this.speed.setComponents(from.x - to.x, from.y - to.y, from.z - to.z);
             }
+            double ticksPerSecond = 20.0 / Math.max(1, tickDiff);
+            this.setMovementVelocity(new Vector3(
+                    (to.x - from.x) * ticksPerSecond,
+                    (to.y - from.y) * ticksPerSecond,
+                    (to.z - from.z) * ticksPerSecond
+            ));
             if (this.riding == null && this.inventory != null) {
                 if (this.getFoodData().isEnabled() && this.server.getDifficulty() != Difficulty.PEACEFUL && distanceSquared >= 0.05) {
                     double jump = 0;

@@ -14,7 +14,6 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.LevelSoundEventPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -28,7 +27,7 @@ public abstract class ItemSpear extends StringItemToolBase {
     private static final double MIN_REACH = 2.0;
     private static final double MAX_REACH = 4.5;
     private static final double CREATIVE_MAX_REACH = 7.5;
-    private static final double TARGET_MARGIN = 0.125;
+    private static final double TARGET_MARGIN = 0.25;
     private static final double MIN_RELATIVE_SPEED = 4.6;
     private static final double MIN_KNOCKBACK_SPEED = 5.1;
     private static final int MINIMUM_LUNGE_FOOD = 7;
@@ -136,7 +135,8 @@ public abstract class ItemSpear extends StringItemToolBase {
     public int chargeAttackInView(Player player) {
         int currentTick = player.getServer().getTick();
         int ticksUsed = currentTick - player.getStartActionTick();
-        double forwardSpeed = player.getHorizontalSpeed() * 20.0; // convert to BPS
+        Vector3 direction = player.getDirectionVector();
+        double forwardSpeed = getProjectedSpeed(this.getKineticVelocity(player), direction);
         SpearAttackState state = getAttackState(player);
         state.removeExpiredChargeContacts(currentTick);
 
@@ -147,7 +147,7 @@ public abstract class ItemSpear extends StringItemToolBase {
                 continue;
             }
 
-            double targetSpeed = target.getHorizontalSpeed() * 20.0; // convert to BPS
+            double targetSpeed = getProjectedSpeed(this.getKineticVelocity(target), direction);
             double relativeSpeed = forwardSpeed - targetSpeed;
 
             AttackEffects effects = this.getChargeEffects(ticksUsed, relativeSpeed, forwardSpeed);
@@ -254,6 +254,17 @@ public abstract class ItemSpear extends StringItemToolBase {
         return root;
     }
 
+    private Vector3 getKineticVelocity(Entity entity) {
+        Entity movingEntity = entity.getRiding() == null ? entity : this.getRootVehicle(entity);
+        return movingEntity instanceof Player movingPlayer
+                ? movingPlayer.getMovementVelocity()
+                : movingEntity.getMotion().multiply(20.0);
+    }
+
+    static double getProjectedSpeed(Vector3 velocity, Vector3 direction) {
+        return velocity.dot(direction);
+    }
+
     private boolean attackTarget(Player player, Entity target, float baseDamage,
                                  AttackEffects effects, AttackType attackType) {
         Enchantment[] enchantments = effects.dealsDamage() ? this.getEnchantments() : Enchantment.EMPTY_ARRAY;
@@ -282,8 +293,6 @@ public abstract class ItemSpear extends StringItemToolBase {
                 enchantment.doPostAttack(player, target);
             }
         }
-
-        player.sendMessage(event.getDamage() + "");
 
         if (!player.isCreative()) {
             this.damageSpear(player);
