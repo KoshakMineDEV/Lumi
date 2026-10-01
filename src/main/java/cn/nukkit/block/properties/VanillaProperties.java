@@ -14,6 +14,14 @@ public interface VanillaProperties {
 
     BooleanBlockProperty UPSIDE_DOWN_BIT = new BooleanBlockProperty("upside_down_bit", false);
 
+    BooleanBlockProperty POWERED_BIT = new BooleanBlockProperty("powered_bit", false);
+
+    BooleanBlockProperty SUSPENDED_BIT = new BooleanBlockProperty("suspended_bit", false);
+
+    BooleanBlockProperty ATTACHED_BIT = new BooleanBlockProperty("attached_bit", false);
+
+    BooleanBlockProperty DISARMED_BIT = new BooleanBlockProperty("disarmed_bit", false);
+
     BooleanBlockProperty CONNECTION_WEST = new BooleanBlockProperty("minecraft:connection_west", false);
 
     BooleanBlockProperty CONNECTION_SOUTH = new BooleanBlockProperty("minecraft:connection_south", false);

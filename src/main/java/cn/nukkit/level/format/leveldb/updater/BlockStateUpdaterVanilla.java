@@ -25,9 +25,9 @@ public class BlockStateUpdaterVanilla implements BlockStateUpdater {
     private static final Set<String> STAIRS = Arrays.stream(BlockStateUpdater_1_26_50.STAIRS)
             .map(name -> "minecraft:" + name)
             .collect(Collectors.toUnmodifiableSet());
-    // These blocks still use legacy layouts in Lumi and cannot be reconstructed from four connection bits.
+    // Hard glass panes still use legacy layouts in Lumi.
     private static final Set<String> CONNECTABLES = Arrays.stream(BlockStateUpdater_1_26_50.CONNECTABLES)
-            .filter(name -> !name.equals("trip_wire") && !name.startsWith("hard_"))
+            .filter(name -> !name.startsWith("hard_"))
             .map(name -> "minecraft:" + name)
             .collect(Collectors.toUnmodifiableSet());
 

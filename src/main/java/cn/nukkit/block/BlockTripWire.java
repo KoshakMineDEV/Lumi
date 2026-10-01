@@ -1,6 +1,9 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.customblock.properties.BlockProperties;
+import cn.nukkit.block.properties.BlockPropertiesHelper;
+import cn.nukkit.block.properties.VanillaProperties;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemString;
@@ -14,7 +17,13 @@ import cn.nukkit.math.SimpleAxisAlignedBB;
 /**
  * @author CreeperFace
  */
-public class BlockTripWire extends BlockFlowable {
+public class BlockTripWire extends BlockFlowable implements BlockPropertiesHelper {
+
+    private static final BlockProperties PROPERTIES = new BlockProperties(
+            VanillaProperties.POWERED_BIT, VanillaProperties.SUSPENDED_BIT,
+            VanillaProperties.ATTACHED_BIT, VanillaProperties.DISARMED_BIT,
+            VanillaProperties.CONNECTION_WEST, VanillaProperties.CONNECTION_SOUTH,
+            VanillaProperties.CONNECTION_NORTH, VanillaProperties.CONNECTION_EAST);
 
     public BlockTripWire(int meta) {
         super(meta);
@@ -35,6 +44,11 @@ public class BlockTripWire extends BlockFlowable {
     }
 
     @Override
+    public BlockProperties getBlockProperties() {
+        return PROPERTIES;
+    }
+
+    @Override
     public AxisAlignedBB getBoundingBox() {
         return null;
     }
@@ -45,33 +59,49 @@ public class BlockTripWire extends BlockFlowable {
     }
 
     public boolean isPowered() {
-        return (this.getDamage() & 1) > 0;
+        return this.getBooleanValue(VanillaProperties.POWERED_BIT);
+    }
+
+    public boolean isSuspended() {
+        return this.getBooleanValue(VanillaProperties.SUSPENDED_BIT);
     }
 
     public boolean isAttached() {
-        return (this.getDamage() & 4) > 0;
+        return this.getBooleanValue(VanillaProperties.ATTACHED_BIT);
     }
 
     public boolean isDisarmed() {
-        return (this.getDamage() & 8) > 0;
+        return this.getBooleanValue(VanillaProperties.DISARMED_BIT);
     }
 
     public void setPowered(boolean value) {
-        if (value ^ this.isPowered()) {
-            this.setDamage(this.getDamage() ^ 0x01);
-        }
+        this.setBooleanValue(VanillaProperties.POWERED_BIT, value);
+    }
+
+    public void setSuspended(boolean value) {
+        this.setBooleanValue(VanillaProperties.SUSPENDED_BIT, value);
     }
 
     public void setAttached(boolean value) {
-        if (value ^ this.isAttached()) {
-            this.setDamage(this.getDamage() ^ 0x04);
-        }
+        this.setBooleanValue(VanillaProperties.ATTACHED_BIT, value);
     }
 
     public void setDisarmed(boolean value) {
-        if (value ^ this.isDisarmed()) {
-            this.setDamage(this.getDamage() ^ 0x08);
-        }
+        this.setBooleanValue(VanillaProperties.DISARMED_BIT, value);
+    }
+
+    public boolean updateConnections() {
+        int previous = this.getDamage();
+        this.setBooleanValue(VanillaProperties.CONNECTION_WEST, this.canConnect(this.west(), BlockFace.WEST));
+        this.setBooleanValue(VanillaProperties.CONNECTION_SOUTH, this.canConnect(this.south(), BlockFace.SOUTH));
+        this.setBooleanValue(VanillaProperties.CONNECTION_NORTH, this.canConnect(this.north(), BlockFace.NORTH));
+        this.setBooleanValue(VanillaProperties.CONNECTION_EAST, this.canConnect(this.east(), BlockFace.EAST));
+        return this.getDamage() != previous;
+    }
+
+    private boolean canConnect(Block block, BlockFace face) {
+        return block instanceof BlockTripWire
+                || block instanceof BlockTripWireHook hook && hook.getFacing() == face.getOpposite();
     }
 
     @Override
@@ -118,7 +148,12 @@ public class BlockTripWire extends BlockFlowable {
 
     @Override
     public int onUpdate(int type) {
-        if (type == Level.BLOCK_UPDATE_SCHEDULED) {
+        if (type == Level.BLOCK_UPDATE_NORMAL) {
+            if (this.updateConnections()) {
+                this.level.setBlock(this, this, true);
+            }
+            return type;
+        } else if (type == Level.BLOCK_UPDATE_SCHEDULED) {
             if (!isPowered()) {
                 return type;
             }
@@ -148,6 +183,7 @@ public class BlockTripWire extends BlockFlowable {
 
     @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
+        this.updateConnections();
         this.getLevel().setBlock(this, this, true, true);
         this.updateHook(false);
 

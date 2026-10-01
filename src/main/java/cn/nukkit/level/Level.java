@@ -3773,6 +3773,8 @@ public class Level implements ChunkManager, Metadatable {
                             changed = fence.updateConnections();
                         } else if (block instanceof BlockThin thin) {
                             changed = thin.updateConnections();
+                        } else if (block instanceof BlockTripWire tripWire) {
+                            changed = tripWire.updateConnections();
                         } else {
                             continue;
                         }
@@ -3793,6 +3795,7 @@ public class Level implements ChunkManager, Metadatable {
     private static boolean supportsConnectionStateRefresh(Class<? extends Block> type) {
         return type != null && (BlockStairs.class.isAssignableFrom(type)
                 || BlockFence.class.isAssignableFrom(type)
+                || BlockTripWire.class.isAssignableFrom(type)
                 || (BlockThin.class.isAssignableFrom(type)
                 && !BlockHardGlassPane.class.isAssignableFrom(type)));
     }
