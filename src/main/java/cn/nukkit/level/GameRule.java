@@ -42,7 +42,8 @@ public enum GameRule {
     RESPAWN_BLOCKS_EXPLODE("respawnBlocksExplode"),
     DO_LIMITED_CRAFTING("doLimitedCrafting"),
     SHOW_RECIPE_MESSAGE("showRecipeMessages"),
-    PROJECTILES_CAN_BREAK_BLOCKS("projectilesCanBreakBlocks");
+    PROJECTILES_CAN_BREAK_BLOCKS("projectilesCanBreakBlocks"),
+    PISTON_PUSH_LIMIT("pistonPushLimit");
 
     private final String name;
     private final String bedrockName;

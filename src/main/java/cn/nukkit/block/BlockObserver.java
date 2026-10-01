@@ -117,7 +117,7 @@ public class BlockObserver extends BlockSolidMeta implements Faceable {
 
     @Override
     public int getWeakPower(BlockFace blockFace) {
-        return this.getStrongPower(blockFace);
+        return this.isPowered() && blockFace == this.getBlockFace() ? 15 : 0;
     }
 
     @Override
