@@ -1,8 +1,8 @@
-package cn.nukkit.level.biome.impl.roofedforest;
+package cn.nukkit.level.biome.impl.darkforest;
 
-public class RoofedForestMBiome extends RoofedForestBiome {
+public class DarkForestMBiome extends DarkForestBiome {
 
-    public RoofedForestMBiome() {
+    public DarkForestMBiome() {
         super();
 
         this.setBaseHeight(0.2f);

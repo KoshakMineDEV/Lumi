@@ -141,9 +141,9 @@ public class BiomeSelector {
                             }
                         } else {
                             if (noiseOcean < 0f) {
-                                biome = EnumBiome.ROOFED_FOREST_M;
+                                biome = EnumBiome.DARK_FOREST_M;
                             } else {
-                                biome = EnumBiome.ROOFED_FOREST;
+                                biome = EnumBiome.DARK_FOREST;
                             }
                         }
                     }
@@ -356,9 +356,9 @@ public class BiomeSelector {
                             }
                         } else {
                             if (noiseOcean < 0f) {
-                                biome = EnumBiome.ROOFED_FOREST_M;
+                                biome = EnumBiome.DARK_FOREST_M;
                             } else {
-                                biome = EnumBiome.ROOFED_FOREST;
+                                biome = EnumBiome.DARK_FOREST;
                             }
                         }
                     }

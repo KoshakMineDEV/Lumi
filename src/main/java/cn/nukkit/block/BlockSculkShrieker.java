@@ -5,7 +5,11 @@ import cn.nukkit.item.ItemTool;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.block.data.BlockColor;
 
-public class BlockSculkShrieker extends BlockTransparent {
+public class BlockSculkShrieker extends BlockTransparentMeta {
+
+    public BlockSculkShrieker() { this(0); }
+
+    public BlockSculkShrieker(int meta) { super(meta); }
 
     @Override
     public int getId() {
@@ -61,6 +65,20 @@ public class BlockSculkShrieker extends BlockTransparent {
     public int getDropExp(Item item) {
         if(item.hasEnchantment(Enchantment.ID_SILK_TOUCH)) return 0;
         return 5;
+    }
+
+    public boolean canSummon() {
+        return false;
+    }
+
+    public void setCanSummon(boolean summon) { }
+
+    public boolean isShrieking() {
+        return false;
+    }
+
+    public void setShrieking(boolean shrieking) {
+
     }
 
     @Override

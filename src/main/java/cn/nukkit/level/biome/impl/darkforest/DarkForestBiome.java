@@ -1,15 +1,14 @@
-package cn.nukkit.level.biome.impl.roofedforest;
+package cn.nukkit.level.biome.impl.darkforest;
 
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockFlower;
 import cn.nukkit.level.biome.type.GrassyBiome;
 import cn.nukkit.level.generator.populator.impl.MushroomPopulator;
 import cn.nukkit.level.generator.populator.impl.PopulatorFlower;
 import cn.nukkit.level.generator.populator.impl.tree.DarkOakTreePopulator;
 
-public class RoofedForestBiome extends GrassyBiome {
+public class DarkForestBiome extends GrassyBiome {
 
-    public RoofedForestBiome() {
+    public DarkForestBiome() {
         super();
 
         DarkOakTreePopulator tree = new DarkOakTreePopulator();
