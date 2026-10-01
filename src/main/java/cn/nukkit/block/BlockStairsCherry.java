@@ -2,7 +2,7 @@ package cn.nukkit.block;
 
 import cn.nukkit.block.data.BlockColor;
 
-public class BlockStairsCherry extends BlockStairsWood {
+public class BlockStairsCherry extends BlockStairsOak {
 
     public BlockStairsCherry() {
         this(0);

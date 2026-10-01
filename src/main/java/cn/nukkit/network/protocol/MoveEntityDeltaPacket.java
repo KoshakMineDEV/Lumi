@@ -54,6 +54,10 @@ public class MoveEntityDeltaPacket extends DataPacket {
             if (this.forceMoveLocalEntity) this.flags |= FLAG_FORCE_MOVE_LOCAL_ENTITY;
             this.forceCompletion = this.getBoolean();
             if (this.forceCompletion) this.flags |= FLAG_FORCE_COMPLETION;
+            if (protocol >= ProtocolInfo.v1_26_50) {
+                // trailing ticks added in v2192
+                this.getUnsignedVarLong();
+            }
         } else {
             this.eid = this.getEntityRuntimeId();
             this.flags = this.getLShort();
@@ -81,6 +85,10 @@ public class MoveEntityDeltaPacket extends DataPacket {
             this.putBoolean(this.forceMove);
             this.putBoolean((this.flags & FLAG_FORCE_MOVE_LOCAL_ENTITY) != 0 || this.forceMoveLocalEntity);
             this.putBoolean((this.flags & FLAG_FORCE_COMPLETION) != 0 || this.forceCompletion);
+            if (protocol >= ProtocolInfo.v1_26_50) {
+                // trailing ticks added in v2192; always 0 while client-side prediction is unused
+                this.putUnsignedVarLong(0);
+            }
         } else {
             this.putLShort(this.flags);
             putCoordinate(FLAG_HAS_X, this.x);

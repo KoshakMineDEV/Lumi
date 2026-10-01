@@ -144,7 +144,7 @@ public class BlockTripWireHook extends BlockFlowable {
 
         canConnect = canConnect & distance > 1;
         nextPowered = nextPowered & canConnect;
-        BlockTripWireHook hook = (BlockTripWireHook) Block.get(TRIPWIRE_HOOK);
+        BlockTripWireHook hook = (BlockTripWireHook) Block.get(TRIPWIRE_HOOK, 0, this);
         hook.setAttached(canConnect);
         hook.setPowered(nextPowered);
 
@@ -176,12 +176,10 @@ public class BlockTripWireHook extends BlockFlowable {
                 Vector3 vc = v.getSide(facing, i);
                 block = blocks[i];
 
-                if (block != null && this.level.getBlockIdAt(vc.getFloorX(), vc.getFloorY(), vc.getFloorZ()) != Block.AIR) {
-                    if (canConnect ^ ((block.getDamage() & 0x04) > 0)) {
-                        block.setDamage(block.getDamage() ^ 0x04);
-                    }
-
-                    this.level.setBlock(vc, block, true, true);
+                if (block instanceof BlockTripWire wire
+                        && this.level.getBlockIdAt(vc.getFloorX(), vc.getFloorY(), vc.getFloorZ()) == TRIPWIRE) {
+                    wire.setAttached(canConnect);
+                    this.level.setBlock(vc, wire, true, true);
                 }
             }
         }

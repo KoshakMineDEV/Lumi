@@ -1,6 +1,8 @@
 package cn.nukkit.block;
 
 import cn.nukkit.block.data.BlockColor;
+import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.data.DyeColor;
 
 /**
@@ -8,19 +10,12 @@ import cn.nukkit.item.data.DyeColor;
  */
 public class BlockHardGlassPaneStained extends BlockHardGlassPane {
 
-    private int meta;
-
     public BlockHardGlassPaneStained() {
         this(0);
     }
 
     public BlockHardGlassPaneStained(int meta) {
-        this.meta = meta;
-    }
-
-    @Override
-    public int getFullId() {
-        return (3056) + meta;
+        setDamage(meta);
     }
 
     @Override
@@ -39,16 +34,11 @@ public class BlockHardGlassPaneStained extends BlockHardGlassPane {
     }
 
     public DyeColor getDyeColor() {
-        return DyeColor.getByWoolData(meta);
+        return DyeColor.getByWoolData(getDamage());
     }
 
     @Override
-    public final int getDamage() {
-        return this.meta;
-    }
-
-    @Override
-    public final void setDamage(int meta) {
-        this.meta = meta;
+    public Item toItem() {
+        return new ItemBlock(this, getDamage());
     }
 }

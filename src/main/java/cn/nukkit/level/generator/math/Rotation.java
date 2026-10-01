@@ -71,7 +71,7 @@ public enum Rotation {
                 break;
 
             case BlockID.RED_SANDSTONE_STAIRS:
-            case BlockID.WOOD_STAIRS:
+            case BlockID.OAK_STAIRS:
             case BlockID.COBBLESTONE_STAIRS:
             case BlockID.BRICK_STAIRS:
             case BlockID.STONE_BRICK_STAIRS:
@@ -502,7 +502,7 @@ public enum Rotation {
                 break;
 
             case BlockID.RED_SANDSTONE_STAIRS:
-            case BlockID.WOOD_STAIRS:
+            case BlockID.OAK_STAIRS:
             case BlockID.COBBLESTONE_STAIRS:
             case BlockID.BRICK_STAIRS:
             case BlockID.STONE_BRICK_STAIRS:
@@ -931,7 +931,7 @@ public enum Rotation {
 				break;
 
 			case BlockID.RED_SANDSTONE_STAIRS:
-			case BlockID.WOOD_STAIRS:
+			case BlockID.OAK_STAIRS:
 			case BlockID.COBBLESTONE_STAIRS:
 			case BlockID.BRICK_STAIRS:
 			case BlockID.STONE_BRICK_STAIRS:

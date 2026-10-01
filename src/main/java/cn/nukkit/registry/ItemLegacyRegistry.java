@@ -243,6 +243,7 @@ public class ItemLegacyRegistry implements IRegistry<Integer, Class<?>, Class<?>
         register(BAMBOO_CHEST_RAFT, ItemChestRaftBamboo.class); //648
         register(CHERRY_CHEST_BOAT, ItemChestBoatCherry.class); //649
         register(PALE_OAK_CHEST_BOAT, ItemChestBoatPaleOak.class); //650
+        register(POPLAR_CHEST_BOAT, ItemChestBoatPoplar.class); //651
         register(GLOW_BERRIES, ItemGlowBerries.class); //654
         register(RECORD_RELIC, ItemRecordRelic.class); //701
         register(CAMPFIRE, ItemCampfire.class); //720

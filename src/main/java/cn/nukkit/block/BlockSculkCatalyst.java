@@ -5,7 +5,11 @@ import cn.nukkit.item.ItemTool;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.block.data.BlockColor;
 
-public class BlockSculkCatalyst extends BlockSolid {
+public class BlockSculkCatalyst extends BlockSolidMeta {
+
+    public BlockSculkCatalyst() { this(0); }
+
+    public BlockSculkCatalyst(int meta) { super(meta); }
 
     @Override
     public int getId() {
@@ -66,5 +70,13 @@ public class BlockSculkCatalyst extends BlockSolid {
     public int getDropExp(Item item) {
         if(item.hasEnchantment(Enchantment.ID_SILK_TOUCH)) return 0;
         return 5;
+    }
+
+    public boolean isBlooming() {
+        return false;
+    }
+
+    public void setBlooming(boolean blooming) {
+
     }
 }

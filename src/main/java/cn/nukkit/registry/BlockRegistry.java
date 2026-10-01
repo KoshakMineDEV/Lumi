@@ -5,23 +5,22 @@ import cn.nukkit.block.*;
 import cn.nukkit.block.customblock.CustomBlock;
 import cn.nukkit.block.customblock.CustomBlockDefinition;
 import cn.nukkit.block.customblock.CustomBlockUtil;
-import cn.nukkit.block.customblock.VanillaPaletteUpdater;
 import cn.nukkit.block.customblock.comparator.HashedPaletteComparator;
 import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.block.customblock.properties.exception.InvalidBlockPropertyMetaException;
 import cn.nukkit.block.material.BlockTypes;
 import cn.nukkit.block.material.CustomBlockType;
+import cn.nukkit.block.properties.VanillaBlockDefinition;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.RuntimeItemMapping;
 import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.GlobalBlockPalette;
-import cn.nukkit.level.format.leveldb.LevelDBConstants;
-import cn.nukkit.level.format.leveldb.NukkitLegacyMapper;
+import cn.nukkit.nbt.NBTIO;
+import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.ByteOrder;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,6 +45,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
     private static boolean[] DIFFUSES_SKY_LIGHT = new boolean[65536];
 
     private static final List<CustomBlockDefinition> CUSTOM_BLOCK_DEFINITIONS = new ArrayList<>();
+    private static final Int2ObjectOpenHashMap<List<VanillaBlockDefinition>> VANILLA_BLOCK_DEFINITIONS = new Int2ObjectOpenHashMap<>();
     private static final Int2ObjectMap<CustomBlock> ID_TO_CUSTOM_BLOCK = new Int2ObjectOpenHashMap<>();
     private static final ConcurrentHashMap<String, Integer> CUSTOM_BLOCK_ID_MAP = new ConcurrentHashMap<>();
     private static final Map<String, List<CustomBlockUtil.CustomBlockState>> LEGACY_2_CUSTOM_STATE = new HashMap<>();
@@ -111,7 +110,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(TORCH, BlockTorch.class); //50
         register(FIRE, BlockFire.class); //51
         register(MONSTER_SPAWNER, BlockMobSpawner.class); //52
-        register(WOOD_STAIRS, BlockStairsWood.class); //53
+        register(OAK_STAIRS, BlockStairsOak.class); //53
         register(CHEST, BlockChest.class); //54
         register(REDSTONE_WIRE, BlockRedstoneWire.class); //55
         register(DIAMOND_ORE, BlockOreDiamond.class); //56
@@ -218,7 +217,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(OAK_DOUBLE_SLAB, BlockOakDoubleSlab.class); //157
         register(OAK_SLAB, BlockOakSlab.class); //158
         register(STAINED_TERRACOTTA, BlockTerracottaStained.class); //159
-        register(STAINED_GLASS_PANE, BlockGlassPaneStained.class); //160
+        register(WHITE_STAINED_GLASS_PANE, BlockGlassPaneStainedWhite.class); //160
         register(LEAVES2, BlockLeaves2.class); //161
         register(ACACIA_LOG, BlockAcaciaLog.class); //162
         register(ACACIA_WOOD_STAIRS, BlockStairsAcacia.class); //163
@@ -759,6 +758,22 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
         register(PITCHER_PLANT, BlockPitcherPlant.class); //867
 
+        register(ORANGE_STAINED_GLASS_PANE, BlockGlassPaneStainedOrange.class); //898
+        register(MAGENTA_STAINED_GLASS_PANE, BlockGlassPaneStainedMagenta.class); //899
+        register(LIGHT_BLUE_STAINED_GLASS_PANE, BlockGlassPaneStainedLightBlue.class); //900
+        register(YELLOW_STAINED_GLASS_PANE, BlockGlassPaneStainedYellow.class); //901
+        register(LIME_STAINED_GLASS_PANE, BlockGlassPaneStainedLime.class); //902
+        register(PINK_STAINED_GLASS_PANE, BlockGlassPaneStainedPink.class); //903
+        register(GRAY_STAINED_GLASS_PANE, BlockGlassPaneStainedGray.class); //904
+        register(LIGHT_GRAY_STAINED_GLASS_PANE, BlockGlassPaneStainedLightGray.class); //905
+        register(CYAN_STAINED_GLASS_PANE, BlockGlassPaneStainedCyan.class); //906
+        register(PURPLE_STAINED_GLASS_PANE, BlockGlassPaneStainedPurple.class); //907
+        register(BLUE_STAINED_GLASS_PANE, BlockGlassPaneStainedBlue.class); //908
+        register(BROWN_STAINED_GLASS_PANE, BlockGlassPaneStainedBrown.class); //909
+        register(GREEN_STAINED_GLASS_PANE, BlockGlassPaneStainedGreen.class); //910
+        register(RED_STAINED_GLASS_PANE, BlockGlassPaneStainedRed.class); //911
+        register(BLACK_STAINED_GLASS_PANE, BlockGlassPaneStainedBlack.class); //912
+
         register(SPRUCE_PLANKS, BlockSprucePlanks.class); //994
         register(BIRCH_PLANKS, BlockBirchPlanks.class); ///995
         register(JUNGLE_PLANKS, BlockJunglePlanks.class); //996
@@ -1074,6 +1089,133 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(CHISELED_CINNABAR, BlockCinnabarChiseled.class); //1379
         register(SULFUR_SPIKE, BlockSulfurSpike.class); //1380
 
+        register(POPLAR_BUTTON, BlockButtonPoplar.class); //1381
+        register(POPLAR_DOOR, BlockDoorPoplar.class); //1382
+        register(POPLAR_FENCE, BlockPoplarFence.class); //1383
+        register(POPLAR_FENCE_GATE, BlockFenceGatePoplar.class); //1384
+        register(POPLAR_HANGING_SIGN, BlockPoplarHangingSign.class); //1385
+        register(STRIPPED_POPLAR_LOG, BlockStrippedPoplarLog.class); //1386
+        register(POPLAR_LOG, BlockPoplarLog.class); //1387
+        register(POPLAR_PLANKS, BlockPoplarPlanks.class); //1388
+        register(POPLAR_PRESSURE_PLATE, BlockPressurePlatePoplar.class); //1389
+        register(POPLAR_SLAB, BlockPoplarSlab.class); //1390
+        register(POPLAR_DOUBLE_SLAB, BlockPoplarDoubleSlab.class); //1391
+        register(POPLAR_STAIRS, BlockStairsPoplar.class); //1392
+        register(POPLAR_STANDING_SIGN, BlockPoplarSignPost.class); //1393
+        register(POPLAR_TRAPDOOR, BlockTrapdoorPoplar.class); //1394
+        register(POPLAR_WALL_SIGN, BlockPoplarWallSign.class); //1395
+        register(STRIPPED_POPLAR_WOOD, BlockStrippedPoplarWood.class); //1396
+        register(POPLAR_WOOD, BlockPoplarWood.class); //1397
+        register(POPLAR_SAPLING, BlockPoplarSapling.class); //1398
+        register(ORANGE_POPLAR_LEAVES, BlockOrangePoplarLeaves.class); //1399
+        register(RED_POPLAR_LEAVES, BlockRedPoplarLeaves.class); //1400
+        register(YELLOW_POPLAR_LEAVES, BlockYellowPoplarLeaves.class); //1401
+        register(POPLAR_SHELF, BlockPoplarShelf.class); //1402
+        register(RED_SHRUB, BlockRedShrub.class); //1403
+
+        register(RED_WOOL_STAIRS, BlockWoolStairsRed.class); //1404
+        register(WHITE_WOOL_STAIRS, BlockWoolStairsWhite.class); //1405
+        register(BLUE_WOOL_STAIRS, BlockWoolStairsBlue.class); //1406
+        register(ORANGE_WOOL_STAIRS, BlockWoolStairsOrange.class); //1407
+        register(MAGENTA_WOOL_STAIRS, BlockWoolStairsMagenta.class); //1408
+        register(LIGHT_BLUE_WOOL_STAIRS, BlockWoolStairsLightBlue.class); //1409
+        register(YELLOW_WOOL_STAIRS, BlockWoolStairsYellow.class); //1410
+        register(LIME_WOOL_STAIRS, BlockWoolStairsLime.class); //1411
+        register(PINK_WOOL_STAIRS, BlockWoolStairsPink.class); //1412
+        register(GRAY_WOOL_STAIRS, BlockWoolStairsGray.class); //1413
+        register(LIGHT_GRAY_WOOL_STAIRS, BlockWoolStairsLightGray.class); //1414
+        register(CYAN_WOOL_STAIRS, BlockWoolStairsCyan.class); //1415
+        register(PURPLE_WOOL_STAIRS, BlockWoolStairsPurple.class); //1416
+        register(GREEN_WOOL_STAIRS, BlockWoolStairsGreen.class); //1417
+        register(BROWN_WOOL_STAIRS, BlockWoolStairsBrown.class); //1418
+        register(BLACK_WOOL_STAIRS, BlockWoolStairsBlack.class); //1419
+
+        register(WHITE_WOOL_SLAB, BlockWoolSlabWhite.class); //1420
+        register(LIGHT_GRAY_WOOL_SLAB, BlockWoolSlabLightGray.class); //1421
+        register(GRAY_WOOL_SLAB, BlockWoolSlabGray.class); //1422
+        register(BLACK_WOOL_SLAB, BlockWoolSlabBlack.class); //1423
+        register(BROWN_WOOL_SLAB, BlockWoolSlabBrown.class); //1424
+        register(RED_WOOL_SLAB, BlockWoolSlabRed.class); //1425
+        register(ORANGE_WOOL_SLAB, BlockWoolSlabOrange.class); //1426
+        register(YELLOW_WOOL_SLAB, BlockWoolSlabYellow.class); //1427
+        register(LIME_WOOL_SLAB, BlockWoolSlabLime.class); //1428
+        register(GREEN_WOOL_SLAB, BlockWoolSlabGreen.class); //1429
+        register(CYAN_WOOL_SLAB, BlockWoolSlabCyan.class); //1430
+        register(LIGHT_BLUE_WOOL_SLAB, BlockWoolSlabLightBlue.class); //1431
+        register(BLUE_WOOL_SLAB, BlockWoolSlabBlue.class); //1432
+        register(PURPLE_WOOL_SLAB, BlockWoolSlabPurple.class); //1433
+        register(MAGENTA_WOOL_SLAB, BlockWoolSlabMagenta.class); //1434
+        register(PINK_WOOL_SLAB, BlockWoolSlabPink.class); //1435
+
+        register(WHITE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabWhite.class); //1436
+        register(LIGHT_GRAY_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabLightGray.class); //1437
+        register(GRAY_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabGray.class); //1438
+        register(BLACK_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabBlack.class); //1439
+        register(BROWN_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabBrown.class); //1440
+        register(RED_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabRed.class); //1441
+        register(ORANGE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabOrange.class); //1442
+        register(YELLOW_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabYellow.class); //1443
+        register(LIME_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabLime.class); //1444
+        register(GREEN_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabGreen.class); //1445
+        register(CYAN_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabCyan.class); //1446
+        register(LIGHT_BLUE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabLightBlue.class); //1447
+        register(BLUE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabBlue.class); //1448
+        register(PURPLE_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabPurple.class); //1449
+        register(MAGENTA_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabMagenta.class); //1450
+        register(PINK_WOOL_DOUBLE_SLAB, BlockWoolDoubleSlabPink.class); //1451
+        register(SHELF_MUSHROOM, BlockShelfMushroom.class); //1452
+
+        register(RED_CONCRETE_STAIRS, BlockConcreteStairsRed.class); //1454
+        register(WHITE_CONCRETE_STAIRS, BlockConcreteStairsWhite.class); //1455
+        register(BLUE_CONCRETE_STAIRS, BlockConcreteStairsBlue.class); //1456
+        register(ORANGE_CONCRETE_STAIRS, BlockConcreteStairsOrange.class); //1457
+        register(MAGENTA_CONCRETE_STAIRS, BlockConcreteStairsMagenta.class); //1458
+        register(LIGHT_BLUE_CONCRETE_STAIRS, BlockConcreteStairsLightBlue.class); //1459
+        register(YELLOW_CONCRETE_STAIRS, BlockConcreteStairsYellow.class); //1460
+        register(LIME_CONCRETE_STAIRS, BlockConcreteStairsLime.class); //1461
+        register(PINK_CONCRETE_STAIRS, BlockConcreteStairsPink.class); //1462
+        register(GRAY_CONCRETE_STAIRS, BlockConcreteStairsGray.class); //1463
+        register(LIGHT_GRAY_CONCRETE_STAIRS, BlockConcreteStairsLightGray.class); //1464
+        register(CYAN_CONCRETE_STAIRS, BlockConcreteStairsCyan.class); //1465
+        register(PURPLE_CONCRETE_STAIRS, BlockConcreteStairsPurple.class); //1466
+        register(GREEN_CONCRETE_STAIRS, BlockConcreteStairsGreen.class); //1467
+        register(BROWN_CONCRETE_STAIRS, BlockConcreteStairsBrown.class); //1468
+        register(BLACK_CONCRETE_STAIRS, BlockConcreteStairsBlack.class); //1469
+
+        register(WHITE_CONCRETE_SLAB, BlockConcreteSlabWhite.class); //1470
+        register(LIGHT_GRAY_CONCRETE_SLAB, BlockConcreteSlabLightGray.class); //1471
+        register(GRAY_CONCRETE_SLAB, BlockConcreteSlabGray.class); //1472
+        register(BLACK_CONCRETE_SLAB, BlockConcreteSlabBlack.class); //1473
+        register(BROWN_CONCRETE_SLAB, BlockConcreteSlabBrown.class); //1474
+        register(RED_CONCRETE_SLAB, BlockConcreteSlabRed.class); //1475
+        register(ORANGE_CONCRETE_SLAB, BlockConcreteSlabOrange.class); //1476
+        register(YELLOW_CONCRETE_SLAB, BlockConcreteSlabYellow.class); //1477
+        register(LIME_CONCRETE_SLAB, BlockConcreteSlabLime.class); //1478
+        register(GREEN_CONCRETE_SLAB, BlockConcreteSlabGreen.class); //1479
+        register(CYAN_CONCRETE_SLAB, BlockConcreteSlabCyan.class); //1480
+        register(LIGHT_BLUE_CONCRETE_SLAB, BlockConcreteSlabLightBlue.class); //1481
+        register(BLUE_CONCRETE_SLAB, BlockConcreteSlabBlue.class); //1482
+        register(PURPLE_CONCRETE_SLAB, BlockConcreteSlabPurple.class); //1483
+        register(MAGENTA_CONCRETE_SLAB, BlockConcreteSlabMagenta.class); //1484
+        register(PINK_CONCRETE_SLAB, BlockConcreteSlabPink.class); //1485
+
+        register(WHITE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabWhite.class); //1486
+        register(LIGHT_GRAY_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabLightGray.class); //1487
+        register(GRAY_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabGray.class); //1488
+        register(BLACK_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabBlack.class); //1489
+        register(BROWN_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabBrown.class); //1490
+        register(RED_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabRed.class); //1491
+        register(ORANGE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabOrange.class); //1492
+        register(YELLOW_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabYellow.class); //1493
+        register(LIME_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabLime.class); //1494
+        register(GREEN_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabGreen.class); //1495
+        register(CYAN_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabCyan.class); //1496
+        register(LIGHT_BLUE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabLightBlue.class); //1497
+        register(BLUE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabBlue.class); //1498
+        register(PURPLE_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabPurple.class); //1499
+        register(MAGENTA_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabMagenta.class); //1500
+        register(PINK_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabPink.class); //1501
+
         IntStream idStream = IntStream.range(0, Block.MAX_BLOCK_ID);
         idStream.parallel().forEach(id -> {
             Class<?> c = LIST[id];
@@ -1142,12 +1284,12 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                 }
             }
         });
+
+        loadVanillaBlockDefinitions();
     }
 
     public void initCustomBlocks() {
         if (!HASHED_SORTED_CUSTOM_BLOCK.isEmpty()) {
-            VanillaPaletteUpdater.updateAllProtocols();
-
             for (var entry : HASHED_SORTED_CUSTOM_BLOCK.entrySet()) {
                 final CustomBlock customBlock = entry.getValue();
                 final BlockProperties properties = customBlock.getBlockProperties();
@@ -1185,7 +1327,6 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                         });
             }
 
-            final BlockPalette storagePalette = GlobalBlockPalette.getPaletteByProtocol(LevelDBConstants.PALETTE_VERSION);
             final ObjectSet<BlockPalette> set = new ObjectArraySet<>();
 
             for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
@@ -1199,20 +1340,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                 }
                 set.add(palette);
 
-                if (palette.getProtocol() == storagePalette.getProtocol()) {
-                    CustomBlockUtil.recreateBlockPalette(palette, new ObjectArrayList<>(NukkitLegacyMapper.loadBlockPalette()));
-                } else {
-                    Path path = CustomBlockUtil.getVanillaPalettePath(palette.getProtocol());
-                    if (!Files.exists(path)) {
-                        //log.warn("No vanilla palette found for {}.", Utils.getVersionByProtocol(palette.getProtocol()));
-                        continue;
-                    }
-                    try {
-                        CustomBlockUtil.recreateBlockPalette(palette);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                CustomBlockUtil.recreateBlockPalette(palette);
             }
 
             ID_TO_CUSTOM_BLOCK.forEach((id, block) -> {
@@ -1283,6 +1411,28 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         }
     }
 
+    /**
+     * Data driven blocks have no class of their own: the client builds them from the properties we
+     * hand it on join, so all we do here is keep the dump around.
+     */
+    private void loadVanillaBlockDefinitions() {
+        for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
+           try (var stream = BlockRegistry.class.getClassLoader().getResourceAsStream("gamedata/block/vanilla_definition/block_definitions_" + protocol + ".nbt")) {
+               if (stream != null) {
+                   List<VanillaBlockDefinition> blockDefinitions = new ArrayList<>();
+                   CompoundTag root = NBTIO.readNetworkCompressed(stream, ByteOrder.BIG_ENDIAN);
+
+                   for (CompoundTag property : root.getList("properties", CompoundTag.class).getAll()) {
+                       blockDefinitions.add(new VanillaBlockDefinition(property.getString("name"), property.getCompound("properties")));
+                   }
+                   VANILLA_BLOCK_DEFINITIONS.put(protocol, blockDefinitions);
+               }
+           } catch (IOException e) {
+               // Do nothing. 1.26.50+ only
+           }
+        }
+    }
+
     @Override
     public Block get(Integer key) {
         return FULL_LIST[key];
@@ -1326,6 +1476,10 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
     public int getFullListSize() {
         return FULL_LIST.length;
+    }
+
+    public List<VanillaBlockDefinition> getVanillaBlockDefinition(int protocol) {
+        return Collections.unmodifiableList(VANILLA_BLOCK_DEFINITIONS.get(protocol));
     }
 
     public List<CustomBlockDefinition> getCustomBlockDefinitionList() {
