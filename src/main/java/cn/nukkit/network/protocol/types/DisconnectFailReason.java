@@ -218,4 +218,12 @@ public enum DisconnectFailReason {
      * @since v1001
      */
     EDITOR_JOIN_INTENT_POLICY_FAILURE,
+    /**
+     * @since v2192
+     */
+    MISSING_STRUCTURE_DATA,
+    /**
+     * @since v2192
+     */
+    UNSUPPORTED_TRANSPORT,
 }

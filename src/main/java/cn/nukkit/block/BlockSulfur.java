@@ -4,8 +4,13 @@ import cn.nukkit.block.data.BlockColor;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemTool;
 
-public class BlockSulfur extends BlockSolid {
+public class BlockSulfur extends BlockSolidMeta {
     public BlockSulfur() {
+        this(0);
+    }
+
+    public BlockSulfur(int meta) {
+        super(meta);
     }
 
     @Override

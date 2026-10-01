@@ -56,6 +56,8 @@ public final class BlockTags {
 
     public static final BlockTag JUNGLE = register("minecraft:jungle", new LazyBlockTag("minecraft:jungle"));
 
+    public static final BlockTag LEAVES = register("minecraft:leaves", new LazyBlockTag("minecraft:leaves"));
+
     public static final BlockTag LOG = register("minecraft:log", new LazyBlockTag("minecraft:log"));
 
     public static final BlockTag METAL = register("minecraft:metal", new LazyBlockTag("minecraft:metal"));

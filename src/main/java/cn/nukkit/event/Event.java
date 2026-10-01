@@ -2,6 +2,7 @@ package cn.nukkit.event;
 
 import cn.nukkit.Server;
 import lombok.Getter;
+import org.densy.eventbus.api.CallResult;
 import org.densy.eventbus.api.EventBus;
 import org.densy.eventbus.api.exception.EventException;
 
@@ -29,7 +30,12 @@ public abstract class Event implements org.densy.eventbus.api.Event {
      * @return {@code true} if the event was not cancelled after handling, otherwise {@code false}
      */
     public boolean call(EventBus eventBus) {
-        eventBus.callParents(this);
+        CallResult result = eventBus.callParents(this);
+
+        for(Throwable ex : result.getExceptions().values()) {
+            Server.getInstance().getLogger().logException(ex);
+        }
+
         return !this.cancelled;
     }
 

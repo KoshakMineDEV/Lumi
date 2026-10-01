@@ -4,6 +4,7 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.customblock.CustomBlockDefinition;
 import cn.nukkit.block.customblock.serializer.CustomBlockDefinitionSerializer;
+import cn.nukkit.block.properties.VanillaBlockDefinition;
 import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.level.GameRules;
 import cn.nukkit.level.GlobalBlockPalette;
@@ -116,6 +117,7 @@ public class StartGamePacket extends DataPacket {
     public long currentTick;
     public int enchantmentSeed;
     public Collection<CustomBlockDefinition> blockDefinitions = Registries.BLOCK.getCustomBlockDefinitionList();
+    public Collection<VanillaBlockDefinition> vanillaBlockDefinitions;
     public String multiplayerCorrelationId = "";
     public boolean isDisablingPersonas;
     public boolean isDisablingCustomSkins;
@@ -136,7 +138,7 @@ public class StartGamePacket extends DataPacket {
      *
      * @since v582
      */
-    public boolean blockNetworkIdsHashed;
+    public boolean blockNetworkIdsHashed = true;
     /**
      * @since v582
      */
@@ -338,8 +340,26 @@ public class StartGamePacket extends DataPacket {
         this.putBoolean(this.isServerAuthoritativeBlockBreaking); // isServerAuthoritativeBlockBreaking
         this.putLLong(this.currentTick);
         this.putVarInt(this.enchantmentSeed);
+
+        int blockDefinitionListSize = 0;
+        if (protocol >= ProtocolInfo.v1_26_50) {
+            blockDefinitionListSize += vanillaBlockDefinitions.size();
+        }
+        blockDefinitionListSize += blockDefinitions.size();
+        this.putUnsignedVarInt(blockDefinitionListSize);
+
+        if (this.vanillaBlockDefinitions != null && !this.vanillaBlockDefinitions.isEmpty()) {
+            for (VanillaBlockDefinition definition : this.vanillaBlockDefinitions) {
+                this.putString(definition.getName());
+                try {
+                    this.put(NBTIO.write(definition.getProperties(), ByteOrder.LITTLE_ENDIAN, true));
+                } catch (Exception e) {
+                    log.error("Error while encoding NBT data of CustomBlockDefinition", e);
+                }
+            }
+        }
+
         if (this.blockDefinitions != null && !this.blockDefinitions.isEmpty()) {
-            this.putUnsignedVarInt(this.blockDefinitions.size());
             for (CustomBlockDefinition definition : this.blockDefinitions) {
                 this.putString(definition.identifier());
                 try {
@@ -348,9 +368,8 @@ public class StartGamePacket extends DataPacket {
                     log.error("Error while encoding NBT data of CustomBlockDefinition", e);
                 }
             }
-        } else {
-            this.putUnsignedVarInt(0); // No custom blocks
         }
+
         if (protocol < ProtocolInfo.v1_21_60) {
             this.put(RuntimeItems.getMapping(protocol).getItemPalette());
         }

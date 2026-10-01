@@ -5,12 +5,14 @@ import cn.nukkit.network.protocol.types.SubChunkRequestResult;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @ToString
 public class SubChunkPacket extends DataPacket {
 
     public static final byte NETWORK_ID = ProtocolInfo.SUB_CHUNK_PACKET;
+    private static final int HEIGHT_MAP_LENGTH = 256;
 
     public int dimension;
     public boolean cacheEnabled;
@@ -61,20 +63,35 @@ public class SubChunkPacket extends DataPacket {
             boolean hasHeightMap = subChunk.heightMapType == HeightMapDataType.HAS_DATA;
             this.putBoolean(hasHeightMap);
             if (hasHeightMap) {
-                this.put(subChunk.heightMapData);
+                this.putHeightMapData(subChunk.heightMapData);
             }
 
             this.putByte((byte) subChunk.renderHeightMapType.ordinal());
             boolean hasRenderHeightMap = subChunk.renderHeightMapType == HeightMapDataType.HAS_DATA;
             this.putBoolean(hasRenderHeightMap);
             if (hasRenderHeightMap) {
-                this.put(subChunk.renderHeightMapData);
+                this.putHeightMapData(subChunk.renderHeightMapData);
             }
 
             this.putBoolean(subChunk.hasBlobId);
             if (subChunk.hasBlobId) {
                 this.putLLong(subChunk.blobId);
             }
+        }
+    }
+
+    /**
+     * Since v2192 the height map is written in 16-byte segments prefixed with a uvarint length;
+     * previously it was one raw block.
+     */
+    private void putHeightMapData(byte[] heightMapData) {
+        if (this.protocol < ProtocolInfo.v1_26_50) {
+            this.put(heightMapData);
+            return;
+        }
+        for (int offset = 0; offset < HEIGHT_MAP_LENGTH; offset += 16) {
+            this.putUnsignedVarInt(16);
+            this.put(Arrays.copyOfRange(heightMapData, offset, offset + 16));
         }
     }
 
