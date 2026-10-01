@@ -80,13 +80,15 @@ public class PlayerAuthInputPacket extends DataPacket {
         this.headYaw = this.getLFloat();
 
         boolean v2168 = this.protocol >= ProtocolInfo.v1_26_40;
+        boolean v2192 = this.protocol >= ProtocolInfo.v1_26_50;
         if (v2168) {
-            this.getBoolean();
-            int count = (int) this.getUnsignedVarInt();
-            for (int i = 0; i < Math.min(count, 256); i++) {
-                int ordinal = this.getVarInt();
-                if (ordinal >= 0 && ordinal < AuthInputAction.size()) {
-                    this.inputData.add(AuthInputAction.from(ordinal));
+            if(v2192 || this.getBoolean()) {
+                int count = (int) this.getUnsignedVarInt();
+                for (int i = 0; i < Math.min(count, 256); i++) {
+                    int ordinal = this.getVarInt();
+                    if (ordinal >= 0 && ordinal < AuthInputAction.size()) {
+                        this.inputData.add(AuthInputAction.from(ordinal));
+                    }
                 }
             }
         } else {
@@ -109,15 +111,16 @@ public class PlayerAuthInputPacket extends DataPacket {
         this.delta = this.getVector3f();
 
         if (v2168) {
-            if (this.getBoolean() && this.getBoolean()) this.itemUseTransaction = this.readItemUseTransaction();
-            if (this.getBoolean() && this.getBoolean()) this.itemStackRequest = this.readItemStackRequest(this.protocol);
-            if (this.getBoolean() && this.getBoolean()) {
+            // Since v2192 each optional section has a single bool (v2168~v2169 used a constant outer + inner bool pair)
+            if (this.optSectionPresent(v2192)) this.itemUseTransaction = this.readItemUseTransaction();
+            if (this.optSectionPresent(v2192)) this.itemStackRequest = this.readItemStackRequest(this.protocol);
+            if (this.optSectionPresent(v2192)) {
                 int size = (int) this.getUnsignedVarInt();
                 if (size > 256) throw new IllegalArgumentException("PlayerAuthInputPacket block actions are too long: " + size);
                 this.decodeBlockActions(size);
             }
-            if (this.getBoolean() && this.getBoolean()) this.vehicleRotation = this.getVector2f();
-            if (this.getBoolean() && this.getBoolean()) this.predictedVehicle = this.getVarLong();
+            if (this.optSectionPresent(v2192)) this.vehicleRotation = this.getVector2f();
+            if (this.optSectionPresent(v2192)) this.predictedVehicle = this.getVarLong();
         } else {
             if (this.inputData.contains(AuthInputAction.PERFORM_ITEM_INTERACTION)) this.itemUseTransaction = this.readItemUseTransaction();
             if (this.inputData.contains(AuthInputAction.PERFORM_ITEM_STACK_REQUEST)) this.itemStackRequest = this.readItemStackRequest(this.protocol);
@@ -135,6 +138,14 @@ public class PlayerAuthInputPacket extends DataPacket {
         this.analogMoveVector = this.getVector2f();
         if (protocol >= ProtocolInfo.v1_21_40) this.cameraOrientation = this.getVector3f();
         if (protocol >= ProtocolInfo.v1_21_50) this.rawMoveVector = this.getVector2f();
+    }
+
+    /**
+     * Since v2192 an optional section carries a single presence bool; v2168~v2169 used a
+     * constant-true outer bool plus an inner bool.
+     */
+    private boolean optSectionPresent(boolean v2192) {
+        return v2192 ? this.getBoolean() : this.getBoolean() && this.getBoolean();
     }
 
     private void decodeBlockActions(int arraySize) {
@@ -157,6 +168,7 @@ public class PlayerAuthInputPacket extends DataPacket {
         packet.setOffset(this.getOffset());
 
         boolean v2168 = packet.protocol >= ProtocolInfo.v1_26_40;
+        boolean v2192 = packet.protocol >= ProtocolInfo.v1_26_50;
         packet.legacyRequestId = packet.getVarInt();
         boolean hasLegacySlots = v2168
                 ? packet.getBoolean() && packet.legacyRequestId < -1 && (packet.legacyRequestId & 1) == 0
@@ -168,8 +180,11 @@ public class PlayerAuthInputPacket extends DataPacket {
                 packet.get((int) packet.getUnsignedVarInt());
             }
         }
-        if (v2168 && !(packet.getBoolean() && packet.getBoolean())) {
-            throw new IllegalStateException("Expected InventoryActionData");
+        if (v2168 && !v2192) {
+            // double bool before actions, removed in v2192
+            if (!(packet.getBoolean() && packet.getBoolean())) {
+                throw new IllegalStateException("Expected InventoryActionData");
+            }
         }
 
         int actionCount = Math.min((int) packet.getUnsignedVarInt(), 4096);
@@ -184,6 +199,9 @@ public class PlayerAuthInputPacket extends DataPacket {
         itemData.blockPos = packet.getBlockVector3();
         itemData.face = v2168 ? BlockFace.fromIndex(packet.getByte() & 0xff) : packet.getBlockFace();
         itemData.hotbarSlot = packet.getVarInt();
+        if (packet.protocol >= ProtocolInfo.v1_26_50) {
+            itemData.hand = packet.getByte();
+        }
         itemData.itemInHand = v2168 ? packet.getNetworkItemStackDescriptor(packet.protocol) : packet.getSlot(packet.protocol);
         itemData.playerPos = packet.getVector3f().asVector3();
         itemData.clickPos = packet.getVector3f();

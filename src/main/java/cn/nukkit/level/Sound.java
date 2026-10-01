@@ -342,6 +342,22 @@ public enum Sound {
 
     BLOCK_PALE_HANGING_MOSS_AMBIENT("block.pale_hanging_moss.ambient"),
 
+    BLOCK_POPLAR_LEAVES_AMBIENT("block.poplar_leaves.ambient"),
+
+    BLOCK_POPLAR_LEAVES_BREAK("block.poplar_leaves.break"),
+
+    BLOCK_POPLAR_LEAVES_FALL("block.poplar_leaves.fall"),
+
+    BLOCK_POPLAR_LEAVES_HIT("block.poplar_leaves.hit"),
+
+    BLOCK_POPLAR_LEAVES_JUMP("block.poplar_leaves.jump"),
+
+    BLOCK_POPLAR_LEAVES_LAND("block.poplar_leaves.land"),
+
+    BLOCK_POPLAR_LEAVES_PLACE("block.poplar_leaves.place"),
+
+    BLOCK_POPLAR_LEAVES_STEP("block.poplar_leaves.step"),
+
     BLOCK_POTENT_SULFUR_AMBIENT("block.potent_sulfur.ambient"),
 
     BLOCK_POTENT_SULFUR_BREAK("block.potent_sulfur.break"),
@@ -361,6 +377,10 @@ public enum Sound {
     BLOCK_POTENT_SULFUR_PLACE("block.potent_sulfur.place"),
 
     BLOCK_POTENT_SULFUR_STEP("block.potent_sulfur.step"),
+
+    BLOCK_RED_SHRUB_BREAK("block.red_shrub.break"),
+
+    BLOCK_RED_SHRUB_PLACE("block.red_shrub.place"),
 
     BLOCK_RESIN_BREAK("block.resin.break"),
 
@@ -410,6 +430,16 @@ public enum Sound {
 
     BLOCK_SHELF_SINGLE_SWAP("block.shelf.single_swap"),
 
+    BLOCK_SHELF_MUSHROOM_BREAK("block.shelf_mushroom.break"),
+
+    BLOCK_SHELF_MUSHROOM_FALL("block.shelf_mushroom.fall"),
+
+    BLOCK_SHELF_MUSHROOM_LAND("block.shelf_mushroom.land"),
+
+    BLOCK_SHELF_MUSHROOM_PLACE("block.shelf_mushroom.place"),
+
+    BLOCK_SHELF_MUSHROOM_STEP("block.shelf_mushroom.step"),
+
     BLOCK_SIGN_WAXED_INTERACT_FAIL("block.sign.waxed_interact_fail"),
 
     BLOCK_SMOKER_SMOKE("block.smoker.smoke"),
@@ -419,6 +449,22 @@ public enum Sound {
     BLOCK_SNIFFER_EGG_HATCH("block.sniffer_egg.hatch"),
 
     BLOCK_STONECUTTER_USE("block.stonecutter.use"),
+
+    BLOCK_STRAW_BED_BREAK("block.straw_bed.break"),
+
+    BLOCK_STRAW_BED_BREAK_LEAVE("block.straw_bed.break_leave"),
+
+    BLOCK_STRAW_BED_FALL("block.straw_bed.fall"),
+
+    BLOCK_STRAW_BED_HIT("block.straw_bed.hit"),
+
+    BLOCK_STRAW_BED_JUMP("block.straw_bed.jump"),
+
+    BLOCK_STRAW_BED_LAND("block.straw_bed.land"),
+
+    BLOCK_STRAW_BED_PLACE("block.straw_bed.place"),
+
+    BLOCK_STRAW_BED_STEP("block.straw_bed.step"),
 
     BLOCK_SULFUR_BREAK("block.sulfur.break"),
 
@@ -823,6 +869,14 @@ public enum Sound {
     DRIP_WATER_POINTED_DRIPSTONE("drip.water.pointed_dripstone"),
 
     ELYTRA_LOOP("elytra.loop"),
+
+    ENTITY_CUSHION_BREAK("entity.cushion.break"),
+
+    ENTITY_CUSHION_GET_UP("entity.cushion.get_up"),
+
+    ENTITY_CUSHION_PLACE("entity.cushion.place"),
+
+    ENTITY_CUSHION_SIT("entity.cushion.sit"),
 
     ENTITY_FOX_TELEPORT("entity.fox.teleport"),
 

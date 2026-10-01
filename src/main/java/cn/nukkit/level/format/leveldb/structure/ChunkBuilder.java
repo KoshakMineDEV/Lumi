@@ -34,6 +34,7 @@ public class ChunkBuilder {
     private final List<ChunkDataLoader> chunkDataLoaders = new ObjectArrayList<>();
 
     private boolean dirty;
+    private boolean connectionStateRefreshPending;
 
     public ChunkBuilder(int chunkX, int chunkZ, LevelDBProvider levelDBProvider) {
         this.chunkX = chunkX;
@@ -64,6 +65,11 @@ public class ChunkBuilder {
 
     public ChunkBuilder dirty() {
         this.dirty = true;
+        return this;
+    }
+
+    public ChunkBuilder connectionStateRefreshPending(boolean pending) {
+        this.connectionStateRefreshPending = pending;
         return this;
     }
 
@@ -146,6 +152,8 @@ public class ChunkBuilder {
         );
 
         this.chunkDataLoaders.forEach(loader -> loader.initChunk(levelDBChunk, this.provider));
+
+        levelDBChunk.setConnectionStateRefreshPending(this.connectionStateRefreshPending);
 
         if (this.dirty) {
             levelDBChunk.setAllSubChunksDirty();

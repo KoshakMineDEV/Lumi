@@ -15,6 +15,11 @@ public class BlockSulfurPotent extends BlockSulfur implements BlockEntityHolder<
     public static final int ERUPTING = 3;
 
     public BlockSulfurPotent() {
+        this(0);
+    }
+
+    public BlockSulfurPotent(int meta) {
+        super(meta);
     }
 
     @Override

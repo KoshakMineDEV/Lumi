@@ -3452,6 +3452,9 @@ public class Level implements ChunkManager, Metadatable {
                 return;
             }
             long index = Level.chunkHash(x, z);
+            if (chunk != null) {
+                chunk.setConnectionStateRefreshPending(true);
+            }
             if (this.chunkPopulationQueue.containsKey(index)) {
                 FullChunk oldChunk = this.getChunk(x, z, false);
                 for (int xx = -1; xx <= 1; ++xx) {
@@ -3478,6 +3481,11 @@ public class Level implements ChunkManager, Metadatable {
             } else {
                 chunk.setProvider(levelProvider);
                 this.setChunk(x, z, chunk, false);
+            }
+            BaseFullChunk mounted = this.getChunkIfLoaded(x, z);
+            if (mounted != null && mounted.isPopulated()) {
+                this.refreshChunkConnectionStates(x, z, mounted);
+                this.retryPendingConnectionRefreshForNeighbours(x, z);
             }
         } finally {
             this.providerLock.readLock().unlock();
@@ -3930,6 +3938,86 @@ public class Level implements ChunkManager, Metadatable {
         this.chunkRequestInternal(chunkRequests);
     }
 
+    private void refreshChunkConnectionStates(int chunkX, int chunkZ, BaseFullChunk chunk) {
+        if (!chunk.isConnectionStateRefreshPending() || !chunk.isPopulated()
+                || !this.areHorizontalNeighboursPopulated(chunkX, chunkZ)) {
+            return;
+        }
+
+        try {
+            int baseX = chunkX << 4;
+            int baseZ = chunkZ << 4;
+            for (int y = this.getMinBlockY(); y <= this.getMaxBlockY(); y++) {
+                for (int x = 0; x < 16; x++) {
+                    for (int z = 0; z < 16; z++) {
+                        int id = chunk.getBlockId(x, y, z);
+                        if (id == BlockID.AIR || id >= Registries.BLOCK.getListSize()) {
+                            continue;
+                        }
+                        Class<? extends Block> type = Registries.BLOCK.getClass(id);
+                        if (!supportsConnectionStateRefresh(type)) {
+                            continue;
+                        }
+
+                        Block block = this.getBlock(baseX + x, y, baseZ + z, 0, false);
+                        boolean changed;
+                        if (block instanceof BlockStairs stairs) {
+                            changed = stairs.autoConfigureState();
+                        } else if (block instanceof BlockFence fence) {
+                            changed = fence.updateConnections();
+                        } else if (block instanceof BlockThin thin) {
+                            changed = thin.updateConnections();
+                        } else if (block instanceof BlockTripWire tripWire) {
+                            changed = tripWire.updateConnections();
+                        } else {
+                            continue;
+                        }
+                        if (changed) {
+                            this.setBlock(block, 0, block, true, false);
+                        }
+                    }
+                }
+            }
+            chunk.setConnectionStateRefreshPending(false);
+            chunk.setChanged();
+        } catch (Throwable error) {
+            this.server.getLogger().error("Failed to refresh connection states in chunk " + chunkX + ", " + chunkZ
+                    + " of level " + this.getFolderName(), error);
+        }
+    }
+
+    private static boolean supportsConnectionStateRefresh(Class<? extends Block> type) {
+        return type != null && (BlockStairs.class.isAssignableFrom(type)
+                || BlockFence.class.isAssignableFrom(type)
+                || BlockTripWire.class.isAssignableFrom(type)
+                || (BlockThin.class.isAssignableFrom(type)
+                && !BlockHardGlassPane.class.isAssignableFrom(type)));
+    }
+
+    private boolean areHorizontalNeighboursPopulated(int x, int z) {
+        return this.isChunkLoadedAndPopulated(x + 1, z) && this.isChunkLoadedAndPopulated(x - 1, z)
+                && this.isChunkLoadedAndPopulated(x, z + 1) && this.isChunkLoadedAndPopulated(x, z - 1);
+    }
+
+    private boolean isChunkLoadedAndPopulated(int x, int z) {
+        BaseFullChunk chunk = this.getChunkIfLoaded(x, z);
+        return chunk != null && chunk.isPopulated();
+    }
+
+    private void retryPendingConnectionRefreshForNeighbours(int x, int z) {
+        this.retryPendingConnectionRefresh(x + 1, z);
+        this.retryPendingConnectionRefresh(x - 1, z);
+        this.retryPendingConnectionRefresh(x, z + 1);
+        this.retryPendingConnectionRefresh(x, z - 1);
+    }
+
+    private void retryPendingConnectionRefresh(int x, int z) {
+        BaseFullChunk chunk = this.getChunkIfLoaded(x, z);
+        if (chunk != null && chunk.isConnectionStateRefreshPending()) {
+            this.refreshChunkConnectionStates(x, z, chunk);
+        }
+    }
+
     private void chunkRequestInternal(Long2ObjectMap<IntSet> chunkRequests) {
         for (long index : chunkRequests.keySet()) {
             IntSet protocols = new IntOpenHashSet(chunkRequests.get(index));
@@ -3939,6 +4027,7 @@ public class Level implements ChunkManager, Metadatable {
             for (int protocol : chunkRequests.get(index)) {
                 BaseFullChunk chunk = this.getChunk(x, z);
                 if (chunk != null) {
+                    this.refreshChunkConnectionStates(x, z, chunk);
                     BatchPacket packet = chunk.getChunkPacket(protocol);
                     if (packet != null) {
                         //this.sendChunk(x, z, index, packet);
@@ -4119,6 +4208,11 @@ public class Level implements ChunkManager, Metadatable {
             }
 
             chunk.initChunk();
+
+            this.refreshChunkConnectionStates(x, z, chunk);
+            if (chunk.isPopulated()) {
+                this.retryPendingConnectionRefreshForNeighbours(x, z);
+            }
 
             if (!chunk.isLightPopulated()
                     && chunk.isPopulated()
@@ -5177,7 +5271,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     private int getChunkProtocol(int protocol) {
-        if (protocol >= ProtocolInfo.v1_26_40) {
+        if (protocol >= ProtocolInfo.v1_26_50) {
+            return ProtocolInfo.v1_26_50;
+        } else if (protocol >= ProtocolInfo.v1_26_40) {
             return ProtocolInfo.v1_26_40;
         } else if (protocol >= ProtocolInfo.v1_26_30) {
             return ProtocolInfo.v1_26_30;
@@ -5259,7 +5355,8 @@ public class Level implements ChunkManager, Metadatable {
         if (chunk == ProtocolInfo.v1_26_10) if (player < ProtocolInfo.v1_26_20) return true;
         if (chunk == ProtocolInfo.v1_26_20) if (player < ProtocolInfo.v1_26_30) return true;
         if (chunk == ProtocolInfo.v1_26_30) return player >= ProtocolInfo.v1_26_30 && player < ProtocolInfo.v1_26_40;
-        if (chunk == ProtocolInfo.v1_26_40) return player >= ProtocolInfo.v1_26_40;
+        if (chunk == ProtocolInfo.v1_26_40) return player >= ProtocolInfo.v1_26_40 && player < ProtocolInfo.v1_26_50;
+        if (chunk == ProtocolInfo.v1_26_50) return player >= ProtocolInfo.v1_26_50;
         return false; //TODO Multiversion  Remember to update when block palette changes
     }
 

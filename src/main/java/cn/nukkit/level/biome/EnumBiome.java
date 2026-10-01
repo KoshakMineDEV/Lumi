@@ -1,8 +1,14 @@
 package cn.nukkit.level.biome;
 
-import cn.nukkit.level.biome.impl.EndBiome;
+import cn.nukkit.level.biome.impl.*;
 import cn.nukkit.level.biome.impl.beach.BeachBiome;
 import cn.nukkit.level.biome.impl.beach.ColdBeachBiome;
+import cn.nukkit.level.biome.impl.caves.DeepDarkBiome;
+import cn.nukkit.level.biome.impl.caves.DripstoneCavesBiome;
+import cn.nukkit.level.biome.impl.caves.LushCavesBiome;
+import cn.nukkit.level.biome.impl.caves.SulfurCavesBiome;
+import cn.nukkit.level.biome.impl.cherry.CherryGroveBiome;
+import cn.nukkit.level.biome.impl.dappled.DappledForestBiome;
 import cn.nukkit.level.biome.impl.desert.DesertBiome;
 import cn.nukkit.level.biome.impl.desert.DesertHillsBiome;
 import cn.nukkit.level.biome.impl.desert.DesertMBiome;
@@ -19,16 +25,21 @@ import cn.nukkit.level.biome.impl.mushroom.MushroomIslandBiome;
 import cn.nukkit.level.biome.impl.mushroom.MushroomIslandShoreBiome;
 import cn.nukkit.level.biome.impl.nether.*;
 import cn.nukkit.level.biome.impl.ocean.*;
+import cn.nukkit.level.biome.impl.pale.PaleGardenBiome;
+import cn.nukkit.level.biome.impl.peaks.FrozenPeaksBiome;
+import cn.nukkit.level.biome.impl.peaks.JaggedPeaksBiome;
+import cn.nukkit.level.biome.impl.peaks.StonyPeaksBiome;
 import cn.nukkit.level.biome.impl.plains.PlainsBiome;
 import cn.nukkit.level.biome.impl.plains.SunflowerPlainsBiome;
 import cn.nukkit.level.biome.impl.river.FrozenRiverBiome;
 import cn.nukkit.level.biome.impl.river.RiverBiome;
-import cn.nukkit.level.biome.impl.roofedforest.RoofedForestBiome;
-import cn.nukkit.level.biome.impl.roofedforest.RoofedForestMBiome;
+import cn.nukkit.level.biome.impl.darkforest.DarkForestBiome;
+import cn.nukkit.level.biome.impl.darkforest.DarkForestMBiome;
 import cn.nukkit.level.biome.impl.savanna.SavannaBiome;
 import cn.nukkit.level.biome.impl.savanna.SavannaMBiome;
 import cn.nukkit.level.biome.impl.savanna.SavannaPlateauBiome;
 import cn.nukkit.level.biome.impl.savanna.SavannaPlateauMBiome;
+import cn.nukkit.level.biome.impl.swamp.MangroveSwampBiome;
 import cn.nukkit.level.biome.impl.swamp.SwampBiome;
 import cn.nukkit.level.biome.impl.swamp.SwamplandMBiome;
 import cn.nukkit.level.biome.impl.taiga.*;
@@ -70,7 +81,7 @@ public enum EnumBiome {
     COLD_BEACH(26, new ColdBeachBiome()),
     BIRCH_FOREST(27, new ForestBiome(ForestBiome.TYPE_BIRCH)),
     BIRCH_FOREST_HILLS(28, new ForestHillsBiome(ForestHillsBiome.TYPE_BIRCH)),
-    ROOFED_FOREST(29, new RoofedForestBiome()),
+    DARK_FOREST(29, new DarkForestBiome()),
     COLD_TAIGA(30, new ColdTaigaBiome()),
     COLD_TAIGA_HILLS(31, new ColdTaigaHillsBiome()),
     MEGA_TAIGA(32, new MegaTaigaBiome()),
@@ -106,7 +117,7 @@ public enum EnumBiome {
     JUNGLE_EDGE_M(151, new JungleEdgeMBiome()),
     BIRCH_FOREST_M(155, new ForestBiome(ForestBiome.TYPE_BIRCH_TALL)),
     BIRCH_FOREST_HILLS_M(156, new ForestHillsBiome(ForestBiome.TYPE_BIRCH_TALL)),
-    ROOFED_FOREST_M(157, new RoofedForestMBiome()),
+    DARK_FOREST_M(157, new DarkForestMBiome()),
     COLD_TAIGA_M(158, new ColdTaigaMBiome()),
     MEGA_SPRUCE_TAIGA(160, new MegaSpruceTaigaBiome()),
     MEGA_SPRUCE_TAIGA_HILLS(161, new MegaSpruceTaigaHillsBiome()),
@@ -119,7 +130,21 @@ public enum EnumBiome {
     SOUL_SAND_VALLEY(178, new SoulSandValleyBiome()),
     CRIMSON_FOREST(179, new CrimsonForestBiome()),
     WARPED_FOREST(180, new WarpedForestBiome()),
-    BASALT_DELTAS(181, new BasaltDeltasBiome());
+    BASALT_DELTAS(181, new BasaltDeltasBiome()),
+    JAGGED_PEAKS(182, new JaggedPeaksBiome()),
+    FROZEN_PEAKS(183, new FrozenPeaksBiome()),
+    SNOWY_SLOPES(184, new SnowySlopesBiome()),
+    GROVE(185, new GroveBiome()),
+    MEADOW(186, new MeadowBIome()),
+    LUSH_CAVES(187, new LushCavesBiome()),
+    DRIPSTONE_CAVES(188, new DripstoneCavesBiome()),
+    STONY_PEAKS(189, new StonyPeaksBiome()),
+    DEEP_DARK(190, new DeepDarkBiome()),
+    MANGROVE_SWAMP(191, new MangroveSwampBiome()),
+    CHERRY_GROVE(192, new CherryGroveBiome()),
+    PALE_GARDEN(193, new PaleGardenBiome()),
+    SULFUR_CAVES(194, new SulfurCavesBiome()),
+    DAPPLED_FOREST(195, new DappledForestBiome());
 
     public final int id;
     public final Biome biome;

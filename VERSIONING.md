@@ -31,7 +31,7 @@ Patch releases are used for regular minor fixes and small updates:
 Minor releases are used for larger project-wide updates:
 
 ```text
-1.6.8 -> 1.7.0
+1.6.9 -> 1.7.0
 ```
 
 ### `dev`

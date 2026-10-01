@@ -1,6 +1,6 @@
 package cn.nukkit.block;
 
-public class BlockStairsPaleOak extends BlockStairsWood {
+public class BlockStairsPaleOak extends BlockStairsOak {
 
     public BlockStairsPaleOak() {
         this(0);

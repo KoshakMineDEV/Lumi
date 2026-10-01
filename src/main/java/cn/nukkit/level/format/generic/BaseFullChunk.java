@@ -78,6 +78,8 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
     protected boolean lightPopulated;
 
+    private boolean connectionStateRefreshPending;
+
     protected Map<Integer, BatchPacket> chunkPackets;
 
     private volatile boolean dirty = true;
@@ -771,6 +773,14 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     @Override
     public void setLightPopulated(boolean value) {
         this.lightPopulated = value;
+    }
+
+    public boolean isConnectionStateRefreshPending() {
+        return this.connectionStateRefreshPending;
+    }
+
+    public void setConnectionStateRefreshPending(boolean pending) {
+        this.connectionStateRefreshPending = pending;
     }
 
     @Override
