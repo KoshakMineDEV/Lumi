@@ -5,6 +5,7 @@ import cn.nukkit.PlayerHandle;
 import cn.nukkit.Server;
 import cn.nukkit.event.player.*;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemSpear;
 import cn.nukkit.level.Sound;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
@@ -135,6 +136,13 @@ public class PlayerActionProcessor extends DataPacketProcessor<PlayerActionPacke
                 PlayerMissedSwingEvent evt = new PlayerMissedSwingEvent(handle.player);
                 if (evt.call()) {
                     handle.player.level.addSound(handle.player, Sound.GAME_PLAYER_ATTACK_NODAMAGE);
+                }
+            }
+
+            case PlayerActionPacket.ACTION_START_USING_ITEM -> {
+                if (handle.player.getInventory().getItemInHand() instanceof ItemSpear) {
+                    handle.setUsingItem(true);
+                    return;
                 }
             }
         }

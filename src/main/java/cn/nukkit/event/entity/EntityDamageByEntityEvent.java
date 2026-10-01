@@ -18,6 +18,8 @@ public class EntityDamageByEntityEvent extends EntityDamageEvent {
 
     private Enchantment[] enchantments;
 
+    private boolean criticalAllowed = true;
+
     public EntityDamageByEntityEvent(Entity damager, Entity entity, DamageCause cause, float damage) {
         this(damager, entity, cause, damage, 0.3f);
     }
@@ -69,5 +71,13 @@ public class EntityDamageByEntityEvent extends EntityDamageEvent {
 
     public Enchantment[] getWeaponEnchantments() {
         return enchantments;
+    }
+
+    public boolean isCriticalAllowed() {
+        return criticalAllowed;
+    }
+
+    public void setCriticalAllowed(boolean criticalAllowed) {
+        this.criticalAllowed = criticalAllowed;
     }
 }
