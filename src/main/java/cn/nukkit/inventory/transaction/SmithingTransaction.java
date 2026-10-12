@@ -77,14 +77,14 @@ public class SmithingTransaction extends InventoryTransaction {
                     this.templateItem = action.getTargetItem();
             }
         } else if (action instanceof CreativeInventoryAction creativeAction && this.source.isCreative()) {
-            if (creativeAction.getActionType() == 0) {
-                switch (actions.size()) {
-                    case 7:
-                        this.equipmentItem = action.getTargetItem();
-                        break;
-                    case 8:
-                        this.outputItem = action.getSourceItem();
-                }
+            if (creativeAction.getActionType() == CreativeInventoryAction.TYPE_DELETE_ITEM
+                    && action.getSourceItem().isNull() && !action.getTargetItem().isNull()
+                    && action.getTargetItem().getCount() == 1) {
+                this.equipmentItem = action.getTargetItem();
+            } else if (creativeAction.getActionType() == CreativeInventoryAction.TYPE_CREATE_ITEM
+                    && action.getTargetItem().isNull() && !action.getSourceItem().isNull()
+                    && action.getSourceItem().getCount() == 1) {
+                this.outputItem = action.getSourceItem();
             }
         }
     }
