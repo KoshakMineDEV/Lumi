@@ -1309,12 +1309,6 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                                 meta = properties.setValue(meta, name, states.get(name));
                             }
 
-                            final int itemId = 255 - id;
-                            for (RuntimeItemMapping mapping : RuntimeItems.VALUES) {
-                                mapping.registerCustomBlockItem(customBlock.getIdentifier(), itemId, meta);
-                                Registries.ITEM.addToCustom(customBlock.getIdentifier(), Item.get(itemId, meta));
-                            }
-
                             CustomBlockUtil.CustomBlockState state;
                             try {
                                 state = CustomBlockUtil.createBlockState(identifier, (id << Block.DATA_BITS) | meta, properties, customBlock);
@@ -1325,6 +1319,16 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
                             BlockRegistry.LEGACY_2_CUSTOM_STATE.computeIfAbsent(identifier, (key) -> new ArrayList<>()).add(state);
                         });
+
+                final int itemId = 255 - id;
+                for (RuntimeItemMapping mapping : RuntimeItems.VALUES) {
+                    mapping.registerCustomBlockItem(customBlock.getIdentifier(), itemId, 0);
+                    Registries.ITEM.addToCustom(customBlock.getIdentifier(), Item.get(itemId, 0));
+                }
+            }
+
+            for (RuntimeItemMapping mapping : RuntimeItems.VALUES) {
+                mapping.generatePalette(); //OPTIMIZATION NOTE: moved palette regeneration here to avoid repeating calls when registering custom block item
             }
 
             final ObjectSet<BlockPalette> set = new ObjectArraySet<>();
@@ -1417,19 +1421,19 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
      */
     private void loadVanillaBlockDefinitions() {
         for (int protocol : ProtocolInfo.SUPPORTED_PROTOCOLS) {
-           try (var stream = BlockRegistry.class.getClassLoader().getResourceAsStream("gamedata/block/vanilla_definition/block_definitions_" + protocol + ".nbt")) {
-               if (stream != null) {
-                   List<VanillaBlockDefinition> blockDefinitions = new ArrayList<>();
-                   CompoundTag root = NBTIO.readNetworkCompressed(stream, ByteOrder.BIG_ENDIAN);
+            try (var stream = BlockRegistry.class.getClassLoader().getResourceAsStream("gamedata/block/vanilla_definition/block_definitions_" + protocol + ".nbt")) {
+                if (stream != null) {
+                    List<VanillaBlockDefinition> blockDefinitions = new ArrayList<>();
+                    CompoundTag root = NBTIO.readNetworkCompressed(stream, ByteOrder.BIG_ENDIAN);
 
-                   for (CompoundTag property : root.getList("properties", CompoundTag.class).getAll()) {
-                       blockDefinitions.add(new VanillaBlockDefinition(property.getString("name"), property.getCompound("properties")));
-                   }
-                   VANILLA_BLOCK_DEFINITIONS.put(protocol, blockDefinitions);
-               }
-           } catch (IOException e) {
-               // Do nothing. 1.26.50+ only
-           }
+                    for (CompoundTag property : root.getList("properties", CompoundTag.class).getAll()) {
+                        blockDefinitions.add(new VanillaBlockDefinition(property.getString("name"), property.getCompound("properties")));
+                    }
+                    VANILLA_BLOCK_DEFINITIONS.put(protocol, blockDefinitions);
+                }
+            } catch (IOException e) {
+                // Do nothing. 1.26.50+ only
+            }
         }
     }
 
