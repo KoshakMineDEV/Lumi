@@ -8,7 +8,7 @@ public class ItemWoodenSpear extends ItemSpear {
 
     @Override
     public int getMaxDurability() {
-        return ItemTool.DURABILITY_WOODEN;
+        return ItemTool.DURABILITY_WOODEN_SPEAR;
     }
 
     @Override
@@ -19,5 +19,40 @@ public class ItemWoodenSpear extends ItemSpear {
     @Override
     public int getAttackDamage() {
         return 2;
+    }
+
+    @Override
+    public int getChargeDelay() {
+        return 15;
+    }
+
+    @Override
+    public int getJabCooldown() {
+        return 13;
+    }
+
+    @Override
+    protected double getChargeDamageMultiplier() {
+        return 0.70;
+    }
+
+    @Override
+    protected int getChargeDamageDuration() {
+        return 300;
+    }
+
+    @Override
+    protected int getChargeKnockbackDuration() {
+        return 200;
+    }
+
+    @Override
+    protected int getChargeDismountDuration() {
+        return 100;
+    }
+
+    @Override
+    protected double getChargeDismountSpeed() {
+        return 14.0;
     }
 }

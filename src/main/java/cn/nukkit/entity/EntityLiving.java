@@ -136,7 +136,8 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
                 return false;
             }
 
-            if (damager.fallDistance < 0 && !damager.onGround && !damager.isInsideOfWater() && !damager.hasEffect(EffectType.BLINDNESS)) {
+            if (event.isCriticalAllowed() && damager.fallDistance < 0 && !damager.onGround
+                    && !damager.isInsideOfWater() && !damager.hasEffect(EffectType.BLINDNESS)) {
                 source.setDamage(source.getFinalDamage() / 2, EntityDamageEvent.DamageModifier.CRITICAL);
             }
         }

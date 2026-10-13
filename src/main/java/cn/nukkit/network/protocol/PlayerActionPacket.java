@@ -71,6 +71,10 @@ public class PlayerActionPacket extends DataPacket {
      * @since v622 1.20.40
      */
     public static final int ACTION_RECEIVED_SERVER_DATA = 36;
+    /**
+     * @since v748 1.21.130
+     */
+    public static final int ACTION_START_USING_ITEM = 37;
 
     public long entityId;
     public int action;
