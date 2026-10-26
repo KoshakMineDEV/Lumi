@@ -44,7 +44,7 @@ import static cn.nukkit.utils.Utils.dynamic;
 public abstract class Block extends Position implements Metadatable, Cloneable, AxisAlignedBB, BlockID {
 
     public static final int MAX_BLOCK_ID = dynamic(2048);
-    public static final int DATA_BITS = dynamic(9);
+    public static final int DATA_BITS = dynamic(16);
     public static final int ID_MASK = 0xfff; //max 4095
     public static final int DATA_SIZE = dynamic(1 << DATA_BITS);
     public static final int DATA_MASK = dynamic(DATA_SIZE - 1);
@@ -81,7 +81,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         int fullId = id << DATA_BITS;
         if (meta != null) {
             int iMeta = meta;
-            if (iMeta <= DATA_SIZE) {
+            if (iMeta < DATA_SIZE) {
                 fullId = fullId | meta;
                 if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                     log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, iMeta);
@@ -119,7 +119,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         int fullId = id << DATA_BITS;
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
             block = Registries.BLOCK.getCustom(id).toCustomBlock(meta);
-        } else if (meta != null && meta > DATA_SIZE) {
+        } else if (meta != null && meta >= DATA_SIZE) {
             if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
                 return new BlockUnknown(id, meta);
@@ -179,14 +179,14 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
     }
 
     public static Block get(int fullId, Level level, int x, int y, int z, int layer) {
-        int id = fullId << DATA_BITS;
+        int id = fullId >>> DATA_BITS;
 
         Block block;
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
-            block = Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_BITS);
+            block = Registries.BLOCK.getCustom(id).toCustomBlock(fullId & DATA_MASK);
         } else {
             if (fullId >= Registries.BLOCK.getFullListSize() || Registries.BLOCK.get(fullId) == null) {
-                int meta = fullId & DATA_BITS;
+                int meta = fullId & DATA_MASK;
                 log.warn("Found an unknown BlockId:Meta combination: {}:{}", id, meta);
                 return new BlockUnknown(id, meta);
             }
@@ -209,7 +209,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
         Block block;
         if (id >= LOWEST_CUSTOM_BLOCK_ID) {
             block = Registries.BLOCK.getCustom(id).toCustomBlock(meta);
-        } else if (meta <= DATA_SIZE) {
+        } else if (meta < DATA_SIZE) {
             block = Registries.BLOCK.get(id << DATA_BITS | meta).clone();
         } else {
             block = Registries.BLOCK.get(id << DATA_BITS).clone();

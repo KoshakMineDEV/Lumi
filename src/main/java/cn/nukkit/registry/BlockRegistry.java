@@ -19,6 +19,7 @@ import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import com.google.gson.JsonParser;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -26,9 +27,11 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,7 +40,7 @@ import java.util.stream.IntStream;
 public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends Block>>, BlockID {
 
     private static Class<? extends Block>[] LIST = new Class[Block.MAX_BLOCK_ID];
-    private static Block[] FULL_LIST = new Block[Block.MAX_BLOCK_ID * (1 << Block.DATA_BITS)];
+    private static Block[][] FULL_LIST = new Block[Block.MAX_BLOCK_ID][];
     private static int[] LIGHT = new int[65536];
     private static int[] LIGHT_FILTER = new int[65536];
     private static boolean[] SOLID = new boolean[65536];
@@ -1216,10 +1219,13 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
         register(MAGENTA_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabMagenta.class); //1500
         register(PINK_CONCRETE_DOUBLE_SLAB, BlockConcreteDoubleSlabPink.class); //1501
 
+        int[] maxMeta = loadMaxMeta();
         IntStream idStream = IntStream.range(0, Block.MAX_BLOCK_ID);
         idStream.parallel().forEach(id -> {
             Class<?> c = LIST[id];
             if (c != null) {
+                Block[] states = new Block[maxMeta[id] + 1];
+                FULL_LIST[id] = states;
                 Block block;
                 try {
                     block = (Block) c.getDeclaredConstructor().newInstance();
@@ -1227,8 +1233,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                         @SuppressWarnings("rawtypes")
                         Constructor constructor = c.getDeclaredConstructor(int.class);
                         constructor.setAccessible(true);
-                        for (int data = 0; data < (1 << Block.DATA_BITS); ++data) {
-                            int fullId = (id << Block.DATA_BITS) | data;
+                        for (int data = 0; data < states.length; ++data) {
                             Block b;
                             try {
                                 b = (Block) constructor.newInstance(data);
@@ -1239,19 +1244,14 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                                 Server.getInstance().getLogger().error("Error while registering " + c.getName(), e);
                                 b = BLOCK_UNKNOWN;
                             }
-                            FULL_LIST[fullId] = b;
+                            states[data] = b;
                         }
                     } catch (NoSuchMethodException ignore) {
-                        for (int data = 0; data < Block.DATA_SIZE; ++data) {
-                            int fullId = (id << Block.DATA_BITS) | data;
-                            FULL_LIST[fullId] = block;
-                        }
+                        Arrays.fill(states, block);
                     }
                 } catch (Exception e) {
                     Server.getInstance().getLogger().error("Error while registering " + c.getName(), e);
-                    for (int data = 0; data < Block.DATA_SIZE; ++data) {
-                        FULL_LIST[(id << Block.DATA_BITS) | data] = BLOCK_UNKNOWN;
-                    }
+                    Arrays.fill(states, BLOCK_UNKNOWN);
                     return;
                 }
 
@@ -1279,13 +1279,31 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                 }
             } else {
                 LIGHT_FILTER[id] = 1;
-                for (int data = 0; data < Block.DATA_SIZE; ++data) {
-                    FULL_LIST[(id << Block.DATA_BITS) | data] = BLOCK_UNKNOWN;
-                }
             }
         });
 
         loadVanillaBlockDefinitions();
+    }
+
+    private static int[] loadMaxMeta() {
+        int[] maxMeta = new int[Block.MAX_BLOCK_ID];
+        try (var stream = BlockRegistry.class.getClassLoader().getResourceAsStream("internal/block_max_meta.json")) {
+            if (stream == null) {
+                throw new IllegalStateException("Missing internal/block_max_meta.json");
+            }
+            var entries = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
+            for (var entry : entries.entrySet()) {
+                int id = Integer.parseInt(entry.getKey());
+                int meta = entry.getValue().getAsBigDecimal().intValueExact();
+                if (id < 0 || id >= maxMeta.length || meta < 0 || meta > Block.DATA_MASK) {
+                    throw new IllegalStateException("Invalid block ID/max meta in internal/block_max_meta.json: " + id + ":" + meta);
+                }
+                maxMeta[id] = meta;
+            }
+        } catch (IOException | RuntimeException e) {
+            throw new IllegalStateException("Failed to load internal/block_max_meta.json", e);
+        }
+        return maxMeta;
     }
 
     public void initCustomBlocks() {
@@ -1439,7 +1457,13 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
     @Override
     public Block get(Integer key) {
-        return FULL_LIST[key];
+        int id = key >>> Block.DATA_BITS;
+        if (id >= FULL_LIST.length) {
+            return null;
+        }
+        Block[] states = FULL_LIST[id];
+        int meta = key & Block.DATA_MASK;
+        return states != null && meta < states.length ? states[meta] : BLOCK_UNKNOWN;
     }
 
     public Class<? extends Block> getClass(int key) {
@@ -1479,7 +1503,8 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
     }
 
     public int getFullListSize() {
-        return FULL_LIST.length;
+        // Preserve the full-ID address range without allocating every possible state.
+        return FULL_LIST.length * Block.DATA_SIZE;
     }
 
     public List<VanillaBlockDefinition> getVanillaBlockDefinition(int protocol) {
@@ -1503,7 +1528,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
     public void reload() {
         isLoad.set(false);
         LIST = new Class[Block.MAX_BLOCK_ID];
-        FULL_LIST = new Block[Block.MAX_BLOCK_ID * (1 << Block.DATA_BITS)];
+        FULL_LIST = new Block[Block.MAX_BLOCK_ID][];
         LIGHT = new int[65536];
         LIGHT_FILTER = new int[65536];
         SOLID = new boolean[65536];
