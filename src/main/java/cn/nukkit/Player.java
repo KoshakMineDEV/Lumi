@@ -66,6 +66,7 @@ import cn.nukkit.metadata.MetadataValue;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
+import cn.nukkit.network.encryption.LoginChainVerifier;
 import cn.nukkit.network.process.DataPacketManager;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.*;
@@ -354,6 +355,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     protected Cache<String, FormWindowDialog> dialogWindows = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
 
+    private LoginChainVerifier.Verification pendingLoginVerification;
     protected AsyncTask preLoginEventTask = null;
     protected boolean shouldLogin = false;
     protected boolean shouldPack = false;
@@ -3673,6 +3675,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     public void close(TextContainer message, String reason, boolean notify) {
+        if (this.pendingLoginVerification != null) {
+            this.pendingLoginVerification.cancel();
+            this.pendingLoginVerification = null;
+        }
         if (this.connected && !this.closed) {
             if (notify && !reason.isEmpty()) {
                 DisconnectPacket pk = new DisconnectPacket();
@@ -5566,6 +5572,36 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     public NetworkPlayerSession getNetworkSession() {
         return this.networkSession;
+    }
+
+    protected void beginLoginVerification(LoginPacket packet, Consumer<ClientChainData> completion) {
+        if (this.pendingLoginVerification != null || this.closed || !this.connected) {
+            return;
+        }
+        this.pendingLoginVerification = LoginChainVerifier.shared().submit(packet.getBuffer(), (validated, failure) -> {
+            if (this.pendingLoginVerification == null) {
+                return;
+            }
+            this.pendingLoginVerification = null;
+            if (this.closed || !this.connected || !this.loginPacketReceived || this.loginVerified || this.loggedIn) {
+                return;
+            }
+            if (failure instanceof ClientChainData.TooBigSkinException) {
+                this.close("", "disconnectionScreen.invalidSkin");
+                return;
+            }
+            if (failure != null || validated == null || !validated.isAuthenticationCurrent()) {
+                this.server.getLogger().debug("Rejected login verification from " + this.getAddress()
+                        + " (" + (failure == null ? "expired or missing result" : failure.getClass().getSimpleName()) + ")");
+                this.close("", "disconnectionScreen.invalidName");
+                return;
+            }
+            completion.accept(validated);
+        });
+        if (this.pendingLoginVerification == null) {
+            this.sendPlayStatus(PlayStatusPacket.LOGIN_FAILED_SERVER_FULL, true);
+            this.close("", "disconnectionScreen.serverFull");
+        }
     }
 
     protected void processPreLogin() {

@@ -14,11 +14,13 @@ import cn.nukkit.level.Sound;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.network.protocol.LoginPacket;
 import cn.nukkit.network.protocol.types.ExperimentData;
 import cn.nukkit.network.protocol.types.PlayerBlockActionData;
 import cn.nukkit.network.session.NetworkPlayerSession;
 import cn.nukkit.resourcepacks.ResourcePack;
 import cn.nukkit.scheduler.AsyncTask;
+import cn.nukkit.utils.ClientChainData;
 import cn.nukkit.utils.LoginChainData;
 import com.google.common.cache.Cache;
 import com.google.common.collect.BiMap;
@@ -28,6 +30,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * A PlayerHandle is used to access a player's protected data.
@@ -141,6 +144,10 @@ public final class PlayerHandle {
 
     public void processPreLogin() {
         player.processPreLogin();
+    }
+
+    public void beginLoginVerification(LoginPacket packet, Consumer<ClientChainData> completion) {
+        player.beginLoginVerification(packet, completion);
     }
 
     public void doFirstSpawn() {

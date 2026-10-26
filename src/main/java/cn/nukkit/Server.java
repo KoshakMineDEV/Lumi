@@ -42,6 +42,7 @@ import cn.nukkit.network.Network;
 import cn.nukkit.network.NetherNetInterface;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
+import cn.nukkit.network.encryption.LoginChainVerifier;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.PlayerListPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
@@ -700,6 +701,7 @@ public class Server {
                 this.rcon.close();
             }
 
+            LoginChainVerifier.shared().shutdown();
             this.getLogger().debug("Disconnecting all players...");
             for (Player player : new ArrayList<>(this.players.values())) {
                 player.close(player.getLeaveMessage(), reason);
