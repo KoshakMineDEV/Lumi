@@ -35,3 +35,4 @@ resource_packs/*
 *.log
 /logs
 scoreboard.json
+/cache/auth/
