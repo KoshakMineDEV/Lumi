@@ -39,6 +39,7 @@ import cn.nukkit.nbt.tag.FloatTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.network.BatchingHelper;
 import cn.nukkit.network.Network;
+import cn.nukkit.network.NetherNetInterface;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
@@ -381,7 +382,20 @@ public class Server {
         this.network = new Network(this);
         this.network.setName(this.settings.general().motd());
         this.network.setSubName(this.settings.general().subMotd());
-        this.network.registerInterface(new RakNetInterface(this));
+        RakNetInterface rakNet = new RakNetInterface(this);
+        this.network.registerInterface(rakNet);
+        if (this.settings.network().nethernet().enabled()) {
+            try {
+                this.network.registerInterface(new NetherNetInterface(this, this.settings.network().nethernet(), rakNet));
+            } catch (Throwable t) {
+                Throwable cause = t;
+                while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
+                log.fatal(this.baseLang.translateString("nukkit.nethernet.startFailed", cause.toString()));
+                log.fatal(this.baseLang.translateString("nukkit.nethernet.startFailed.hint"));
+                rakNet.shutdown();
+                throw new IllegalStateException("NetherNet startup failed", t);
+            }
+        }
 
         this.pluginManager.loadInternalPlugin();
         if (loadPlugins) {
@@ -713,7 +727,7 @@ public class Server {
             this.batchingHelper.shutdown();
 
             this.getLogger().debug("Stopping network interfaces...");
-            for (SourceInterface interfaz : this.network.getInterfaces()) {
+            for (SourceInterface interfaz : new ArrayList<>(this.network.getInterfaces())) {
                 interfaz.shutdown();
                 this.network.unregisterInterface(interfaz);
             }

@@ -50,7 +50,19 @@ val fastutilMapsVersion = "8.5.15"
 dependencies {
     // Compile dependencies
     implementation("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT")
+    implementation(platform("io.netty:netty-bom:4.1.131.Final"))
     implementation("io.netty:netty-transport-native-epoll:4.1.131.Final")
+    implementation("io.netty:netty-codec-http:4.1.131.Final")
+    implementation("org.cloudburstmc.netty:netty-transport-nethernet:2.0.0.CR6-20261023.132252-11") {
+        exclude(group = "io.netty")
+        exclude(group = "org.cloudburstmc.netty", module = "netty-transport-common")
+        exclude(group = "dev.opencollab", module = "libdatachannel-java")
+    }
+    implementation("org.cloudburstmc.netty:netty-transport-common:2.0.0.CR6-20261023.132252-11")
+    implementation("dev.opencollab:libdatachannel-java:0.24.6.0-20261023.142230-9")
+    implementation("dev.opencollab:libdatachannel-java-arch-detect:0.24.6.0-20261023.142230-9") {
+        exclude(group = "dev.opencollab", module = "libdatachannel-java")
+    }
     implementation("com.nukkitx:natives:1.0.3")
     implementation("org.cloudburstmc.protocol:common:3.0.0.Beta3-SNAPSHOT") {
         exclude(group = "org.cloudburstmc.math", module = "immutable")

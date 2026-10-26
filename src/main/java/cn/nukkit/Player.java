@@ -70,6 +70,7 @@ import cn.nukkit.network.process.DataPacketManager;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.*;
 import cn.nukkit.network.session.NetworkPlayerSession;
+import cn.nukkit.network.session.NetherNetPlayerSession;
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.permission.PermissionAttachment;
@@ -2803,7 +2804,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.forceDataPacket(dimensionDataPacket, null);
         }
 
-        if (this.protocol >= ProtocolInfo.v1_26_50) {
+        if (this.protocol >= ProtocolInfo.v1_21_120) {
             this.forceDataPacket(JigsawStructureDataPacket.getCachedPacket(), null);
         }
 
@@ -5660,7 +5661,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     public boolean isEnableNetworkEncryption() {
-        return this.server.getSettings().network().encryption() /*&& loginChainData.isXboxAuthed()*/;
+        return !(this.networkSession instanceof NetherNetPlayerSession) && this.server.getSettings().network().encryption();
     }
 
     protected List<ExperimentData> getExperiments() {

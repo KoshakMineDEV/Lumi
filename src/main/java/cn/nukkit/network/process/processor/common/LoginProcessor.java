@@ -6,6 +6,7 @@ import cn.nukkit.entity.data.skin.Skin;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.network.encryption.PrepareEncryptionTask;
+import cn.nukkit.network.session.NetherNetPlayerSession;
 import cn.nukkit.network.process.DataPacketProcessor;
 import cn.nukkit.network.protocol.LoginPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
@@ -115,6 +116,15 @@ public class LoginProcessor extends DataPacketProcessor<LoginPacket> {
                 );
             }
             return;
+        }
+
+        if (handle.getNetworkSession() instanceof NetherNetPlayerSession session) {
+            String refusal = session.checkIdentityBinding(chainData.getIdentityPublicKey());
+            if (refusal != null) {
+                server.getLogger().warning("Refusing NetherNet login from " + p.getSocketAddress() + ": " + refusal);
+                handle.close("", "disconnectionScreen.notAuthenticated");
+                return;
+            }
         }
 
         if (server.getSettings().general().useWaterdog()

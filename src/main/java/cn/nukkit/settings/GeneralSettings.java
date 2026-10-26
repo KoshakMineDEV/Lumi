@@ -23,6 +23,10 @@ public class GeneralSettings extends OkaeriConfig {
     @CustomKey("server-port")
     private int serverPort = 19132;
 
+    @CustomKey("server-udp-ports")
+    @Comment("NetherNet media ports: server-port shares RakNet, 0 selects automatic ports; also accepts ranges and external:internal mappings")
+    private String serverUdpPorts = "19132";
+
     @CustomKey("server-ip")
     private String serverIp = "0.0.0.0";
 
