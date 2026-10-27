@@ -47,6 +47,8 @@ import cn.nukkit.utils.Identifier;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.Utils;
 import com.google.common.collect.Iterables;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.commons.math3.util.FastMath;
 import org.jetbrains.annotations.NotNull;
 
@@ -488,6 +490,9 @@ public abstract class Entity extends Location implements Metadatable {
     public double lastX;
     public double lastY;
     public double lastZ;
+
+    @Getter(AccessLevel.PUBLIC)
+    protected double horizontalSpeed;
 
     public boolean firstMove = true;
 
@@ -1905,6 +1910,24 @@ public abstract class Entity extends Location implements Metadatable {
 
         double diffMotion = (this.motionX - this.lastMotionX) * (this.motionX - this.lastMotionX) + (this.motionY - this.lastMotionY) * (this.motionY - this.lastMotionY) + (this.motionZ - this.lastMotionZ) * (this.motionZ - this.lastMotionZ);
 
+        if (diffPosition > 0.0001) {
+            double dx = this.x - this.lastX;
+            double dz = this.z - this.lastZ;
+            double speed = Math.sqrt(dx * dx + dz * dz);
+
+            // player horizontal speed calculates in packets
+            if (!this.isPlayer) {
+                Vector3 dir = this.getDirectionVector();
+                double forward = dx * dir.x + dz * dir.z;
+                this.horizontalSpeed = forward > 0 ? speed : -speed;
+            }
+        } else {
+            // player horizontal speed calculates in packets
+            if (!this.isPlayer) {
+                this.horizontalSpeed = 0;
+            }
+        }
+
         if (diffPosition > 0.0001 || diffRotation > 1.0) { //0.2 ** 2, 1.5 ** 2
             if (diffPosition > 0.0001) {
                 if (this.isOnGround()) {
@@ -1925,7 +1948,7 @@ public abstract class Entity extends Location implements Metadatable {
             this.lastHeadYaw = this.headYaw;
 
             this.positionChanged = true;
-        }else {
+        } else {
             this.positionChanged = false;
         }
 

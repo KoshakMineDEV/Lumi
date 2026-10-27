@@ -5,6 +5,7 @@ import cn.nukkit.PlayerHandle;
 import cn.nukkit.Server;
 import cn.nukkit.entity.item.EntityBoat;
 import cn.nukkit.event.player.PlayerAnimationEvent;
+import cn.nukkit.item.ItemSpear;
 import cn.nukkit.network.process.DataPacketProcessor;
 import cn.nukkit.network.protocol.AnimatePacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
@@ -50,6 +51,14 @@ public class AnimateProcessor extends DataPacketProcessor<AnimatePacket> {
 
         if (action == AnimatePacket.Action.SWING_ARM) {
             handle.player.setNoShieldTicks(NO_SHIELD_DELAY);
+
+            if (handle.player.getInventory().getItemInHand() instanceof ItemSpear spear) {
+                if (spear.jabAttackInView(handle.player) == 0) {
+                    handle.player.getLevel().addLevelSoundEvent(
+                            handle.player, spear.getAttackMissSound(), new Player[]{handle.player}
+                    );
+                }
+            }
         }
 
         packet.eid = handle.getId();
