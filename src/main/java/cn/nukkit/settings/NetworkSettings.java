@@ -16,6 +16,10 @@ import java.util.UUID;
 @Accessors(fluent = true)
 public class NetworkSettings extends OkaeriConfig {
 
+    @Setter(value = AccessLevel.NONE)
+    @Comment("NetherNet (WebRTC) transport, runs alongside RakNet")
+    private NetherNetSettings nethernet = new NetherNetSettings();
+
     @CustomKey("xbox-auth")
     @Comment("Enable authorization by Xbox (for Waterdog this parameter should be disabled)")
     private boolean xboxAuth = true;

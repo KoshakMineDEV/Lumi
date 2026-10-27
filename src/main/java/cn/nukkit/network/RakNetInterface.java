@@ -27,6 +27,7 @@ import org.cloudburstmc.netty.channel.raknet.RakChildChannel;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.cloudburstmc.netty.channel.raknet.config.RakServerCookieMode;
 import org.cloudburstmc.netty.handler.codec.raknet.server.RakServerRateLimiter;
+import org.cloudburstmc.netty.handler.codec.raknet.server.RakServerTailHandler;
 
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
@@ -49,6 +50,7 @@ public class RakNetInterface implements AdvancedSourceInterface {
     private Network network;
 
     private final Channel channel;
+    private final EventLoopGroup eventLoopGroup;
     private final Map<InetSocketAddress, RakNetPlayerSession> sessions = new HashMap<>();
     private final Queue<RakNetPlayerSession> sessionCreationQueue = PlatformDependent.newMpscQueue();
 
@@ -67,6 +69,7 @@ public class RakNetInterface implements AdvancedSourceInterface {
         }
 
         EventLoopGroup group = transport.eventLoopGroupFactory.apply(Runtime.getRuntime().availableProcessors());
+        this.eventLoopGroup = group;
 
         ServerBootstrap bootstrap = new ServerBootstrap()
                 .channelFactory(RakChannelFactory.server(transport.datagramChannel))
@@ -80,7 +83,7 @@ public class RakNetInterface implements AdvancedSourceInterface {
                     @Override
                     protected void initChannel(Channel channel) {
                         if (server.getSettings().network().enableQuery()) {
-                            channel.pipeline().addLast("query-handler", new SimpleChannelInboundHandler<DatagramPacket>() {
+                            channel.pipeline().addBefore(RakServerTailHandler.NAME, "query-handler", new SimpleChannelInboundHandler<DatagramPacket>() {
                                 @Override
                                 protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) {
                                     server.handlePacket(packet.sender(), packet.content());
@@ -109,6 +112,11 @@ public class RakNetInterface implements AdvancedSourceInterface {
         } catch (UnknownHostException e) {
             log.error("Failed to add localhost to exception list", e);
         }
+    }
+
+    /** Raw UDP listeners used to multiplex NetherNet media before RakNet decoding. */
+    public List<Channel> getDatagramChannels() {
+        return this.channel.parent() == null ? List.of() : List.of(this.channel.parent());
     }
 
     @Override
@@ -185,12 +193,14 @@ public class RakNetInterface implements AdvancedSourceInterface {
     public void shutdown() {
         this.sessions.values().forEach(session -> session.disconnect("Shutdown"));
         this.channel.close().awaitUninterruptibly();
+        this.eventLoopGroup.shutdownGracefully();
     }
 
     @Override
     public void emergencyShutdown() {
         this.sessions.values().forEach(session -> session.disconnect("Shutdown"));
         this.channel.close().awaitUninterruptibly();
+        this.eventLoopGroup.shutdownGracefully();
     }
 
     @Override
@@ -210,7 +220,7 @@ public class RakNetInterface implements AdvancedSourceInterface {
 
     @Override
     public void sendRawPacket(InetSocketAddress socketAddress, ByteBuf payload) {
-        this.channel.write(new DatagramPacket(payload, socketAddress));
+        this.channel.writeAndFlush(new DatagramPacket(payload, socketAddress));
     }
 
     @Override

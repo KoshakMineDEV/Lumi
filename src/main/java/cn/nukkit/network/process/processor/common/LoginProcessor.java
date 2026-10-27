@@ -6,6 +6,7 @@ import cn.nukkit.entity.data.skin.Skin;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.network.encryption.PrepareEncryptionTask;
+import cn.nukkit.network.session.NetherNetPlayerSession;
 import cn.nukkit.network.process.DataPacketProcessor;
 import cn.nukkit.network.protocol.LoginPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
@@ -94,13 +95,13 @@ public class LoginProcessor extends DataPacketProcessor<LoginPacket> {
             return;
         }
 
-        ClientChainData chainData;
-        try {
-            chainData = ClientChainData.read(packet);
-        } catch (ClientChainData.TooBigSkinException e) {
-            handle.close("", "disconnectionScreen.invalidSkin");
-            return;
-        }
+        LoginData login = new LoginData(packet.username, packet.clientUUID, packet.clientId, packet.skin);
+        handle.beginLoginVerification(packet, chainData -> continueVerifiedLogin(handle, login, chainData));
+    }
+
+    private void continueVerifiedLogin(PlayerHandle handle, LoginData login, ClientChainData chainData) {
+        Player p = handle.player;
+        Server server = p.getServer();
 
         handle.setLoginChainData(chainData);
 
@@ -115,6 +116,15 @@ public class LoginProcessor extends DataPacketProcessor<LoginPacket> {
                 );
             }
             return;
+        }
+
+        if (handle.getNetworkSession() instanceof NetherNetPlayerSession session) {
+            String refusal = session.checkIdentityBinding(chainData.getIdentityPublicKey());
+            if (refusal != null) {
+                server.getLogger().warning("Refusing NetherNet login from " + p.getSocketAddress() + ": " + refusal);
+                handle.close("", "disconnectionScreen.notAuthenticated");
+                return;
+            }
         }
 
         if (server.getSettings().general().useWaterdog()
@@ -133,9 +143,9 @@ public class LoginProcessor extends DataPacketProcessor<LoginPacket> {
         handle.setIusername(username.toLowerCase(Locale.ROOT));
         p.setDataProperty(new StringEntityData(DATA_NAMETAG, username), false);
 
-        handle.setRandomClientId(packet.clientId);
+        handle.setRandomClientId(login.clientId());
 
-        UUID loginUuid = packet.clientUUID;
+        UUID loginUuid = login.clientUuid();
         UUID finalUuid = server.lookupName(username).orElse(
                 chainData.isXboxAuthed()
                         ? loginUuid
@@ -146,7 +156,7 @@ public class LoginProcessor extends DataPacketProcessor<LoginPacket> {
         handle.setUuid(finalUuid);
         handle.setRawUUID(Binary.writeUUID(finalUuid));
 
-        Matcher matcher = PLAYER_NAME_PATTERN.matcher(packet.username);
+        Matcher matcher = PLAYER_NAME_PATTERN.matcher(login.username());
         if (!matcher.matches()
                 || Objects.equals(handle.getIusername(), "rcon")
                 || Objects.equals(handle.getIusername(), "console")) {
@@ -154,12 +164,12 @@ public class LoginProcessor extends DataPacketProcessor<LoginPacket> {
             return;
         }
 
-        if (!packet.skin.isValid()) {
+        if (!login.skin().isValid()) {
             handle.close("", "disconnectionScreen.invalidSkin");
             return;
         }
 
-        Skin skin = packet.skin;
+        Skin skin = login.skin();
         p.setSkin(
                 skin.isPersona()
                         && !server.getSettings().player().personaSkins()
@@ -210,6 +220,9 @@ public class LoginProcessor extends DataPacketProcessor<LoginPacket> {
         } else {
             handle.processPreLogin();
         }
+    }
+
+    private record LoginData(String username, UUID clientUuid, long clientId, Skin skin) {
     }
 
     @Override

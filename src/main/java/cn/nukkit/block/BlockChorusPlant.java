@@ -1,16 +1,56 @@
 package cn.nukkit.block;
 
 import cn.nukkit.Player;
+import cn.nukkit.block.customblock.properties.BlockProperties;
+import cn.nukkit.block.properties.BlockPropertiesHelper;
+import cn.nukkit.block.properties.VanillaProperties;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.ItemID;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.ChunkManager;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.block.data.BlockColor;
 import cn.nukkit.utils.Utils;
 
-public class BlockChorusPlant extends BlockTransparent {
+public class BlockChorusPlant extends BlockTransparentMeta implements BlockPropertiesHelper {
+
+    private static final BlockProperties PROPERTIES = new BlockProperties(
+            VanillaProperties.CONNECTION_WEST, VanillaProperties.CONNECTION_SOUTH,
+            VanillaProperties.CONNECTION_NORTH, VanillaProperties.CONNECTION_EAST,
+            VanillaProperties.CONNECTION_UP, VanillaProperties.CONNECTION_DOWN);
+
+    public BlockChorusPlant() {
+        this(0);
+    }
+
+    public BlockChorusPlant(int meta) {
+        super(meta);
+    }
+
+    @Override
+    public BlockProperties getBlockProperties() {
+        return PROPERTIES;
+    }
+
+    public boolean updateConnections() {
+        int previous = this.getDamage();
+        this.setDamage(connectionMeta(this.level, this.getFloorX(), this.getFloorY(), this.getFloorZ()));
+        return previous != this.getDamage();
+    }
+
+    public static int connectionMeta(ChunkManager level, int x, int y, int z) {
+        int meta = 0;
+        for (BlockFace face : BlockFace.values()) {
+            int id = level.getBlockIdAt(x + face.getXOffset(), y + face.getYOffset(), z + face.getZOffset());
+            boolean connected = id == CHORUS_PLANT || id == CHORUS_FLOWER
+                    || face == BlockFace.DOWN && id == END_STONE;
+            meta = PROPERTIES.setBooleanValue(meta, "minecraft:connection_" + face.getName(), connected);
+        }
+        return meta;
+    }
 
     @Override
     public int getId() {
@@ -54,6 +94,7 @@ public class BlockChorusPlant extends BlockTransparent {
             return false;
         }
 
+        this.updateConnections();
         this.level.setBlock(block, this, true, true);
         return true;
     }
@@ -69,6 +110,9 @@ public class BlockChorusPlant extends BlockTransparent {
                     !(this.west() instanceof BlockChorusPlant)) {
                 this.getLevel().useBreakOn(this, null, null, true);
                 return Level.BLOCK_UPDATE_NORMAL;
+            }
+            if (this.updateConnections()) {
+                this.level.setBlock(this, this, true, false);
             }
         }
 
@@ -96,5 +140,10 @@ public class BlockChorusPlant extends BlockTransparent {
     @Override
     public boolean diffusesSkyLight() {
         return true;
+    }
+
+    @Override
+    public Item toItem() {
+        return new ItemBlock(this, 0, 1);
     }
 }

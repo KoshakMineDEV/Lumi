@@ -4,12 +4,15 @@ import cn.nukkit.level.DimensionData;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.leveldb.LevelDBProvider;
+import cn.nukkit.level.format.leveldb.BlockStateMapping;
+import cn.nukkit.level.format.leveldb.ConnectionStateMigration;
 import cn.nukkit.level.format.leveldb.serializer.ChunkDataLoader;
 import cn.nukkit.level.util.PalettedBlockStorage;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
+import org.cloudburstmc.nbt.NbtMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +38,7 @@ public class ChunkBuilder {
 
     private boolean dirty;
     private boolean connectionStateRefreshPending;
+    private boolean detectLegacyConnectionStates;
 
     public ChunkBuilder(int chunkX, int chunkZ, LevelDBProvider levelDBProvider) {
         this.chunkX = chunkX;
@@ -71,6 +75,29 @@ public class ChunkBuilder {
     public ChunkBuilder connectionStateRefreshPending(boolean pending) {
         this.connectionStateRefreshPending = pending;
         return this;
+    }
+
+    /** Only disk loading opts into detection; a fresh builder starts complete. */
+    public ChunkBuilder connectionStateMigration(byte[] savedMarker) {
+        this.connectionStateRefreshPending = ConnectionStateMigration.persistedPending(savedMarker);
+        this.detectLegacyConnectionStates = ConnectionStateMigration.detectLegacyPalette(savedMarker);
+        return this;
+    }
+
+    public void observeConnectionState(NbtMap originalState) {
+        if (!this.connectionStateRefreshPending && this.detectLegacyConnectionStates
+                && ConnectionStateMigration.requiresLegacyRefresh(originalState)) {
+            this.connectionStateRefreshPending = true;
+        }
+    }
+
+    public void observeLegacyConnectionBlock(int blockId, int data) {
+        if (!this.connectionStateRefreshPending && this.detectLegacyConnectionStates) {
+            String name = BlockStateMapping.get().getState(blockId, data).getVanillaState().getString("name");
+            if (ConnectionStateMigration.requiresLegacyNumericRefresh(name)) {
+                this.connectionStateRefreshPending = true;
+            }
+        }
     }
 
     public ChunkBuilder levelProvider(LevelDBProvider levelProvider) {

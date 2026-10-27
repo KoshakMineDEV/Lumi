@@ -211,6 +211,10 @@ public class RuntimeItemMapping {
     }
 
     public void registerCustomBlockItem(String identifier, int legacyId, int damage) {
+        registerCustomBlockItem(identifier, legacyId, damage, legacyId);
+    }
+
+    public void registerCustomBlockItem(String identifier, int legacyId, int damage, int itemRuntimeId) {
         int fullId = this.getFullId(legacyId, damage);
         LegacyEntry legacyEntry = new LegacyEntry(legacyId, false, damage);
 
@@ -222,19 +226,20 @@ public class RuntimeItemMapping {
 
         this.customItems.add(identifier);
 
-        this.runtimeId2Name.put(legacyId, identifier);
-        this.name2RuntimeId.put(identifier, legacyId);
+        this.runtimeId2Name.put(itemRuntimeId, identifier);
+        this.name2RuntimeId.put(identifier, itemRuntimeId);
 
-        this.runtime2Legacy.put(legacyId, legacyEntry);
+        this.runtime2Legacy.put(itemRuntimeId, legacyEntry);
         this.identifier2Legacy.put(identifier, legacyEntry);
         if (this.legacy2Runtime.containsKey(fullId)) {
             log.debug("RuntimeItemMapping contains duplicated legacy item state runtimeId=" + legacyId + " identifier=" + identifier);
         } else {
-            RuntimeEntry runtimeEntry = new RuntimeEntry(identifier, legacyId, false, true);
+            RuntimeEntry runtimeEntry = new RuntimeEntry(identifier, itemRuntimeId, false, true);
             this.legacy2Runtime.put(fullId, runtimeEntry);
             this.itemPaletteEntries.add(runtimeEntry);
         }
-        this.generatePalette();
+        //NOTE: Call generatePalette manually when using registerCustomBlockItem!!!
+        //this.generatePalette();
     }
 
     public synchronized boolean registerCustomItem(CustomItem customItem) {
@@ -280,29 +285,32 @@ public class RuntimeItemMapping {
     }
 
     public void generatePalette() {
-        BinaryStream paletteBuffer = new BinaryStream();
-        int size = 0;
-        for (RuntimeEntry entry : this.itemPaletteEntries) {
-            if (entry.isCustomItem() && (!Server.getInstance().getSettings().features().enableExperimentMode())) {
-                break;
+        //OPTIMIZATION NOTE: do not generate this palette at all for versions 1.21.60+ cuz it's unused for them
+        if(protocolId < ProtocolInfo.v1_21_60) {
+            BinaryStream paletteBuffer = new BinaryStream();
+            int size = 0;
+            for (RuntimeEntry entry : this.itemPaletteEntries) {
+                if (entry.isCustomItem() && (!Server.getInstance().getSettings().features().enableExperimentMode())) {
+                    break;
+                }
+                size++;
             }
-            size++;
-        }
-        paletteBuffer.putUnsignedVarInt(size);
-        for (RuntimeEntry entry : this.itemPaletteEntries) {
-            if (entry.isCustomItem()) {
-                if (Server.getInstance().getSettings().features().enableExperimentMode()) {
+            paletteBuffer.putUnsignedVarInt(size);
+            for (RuntimeEntry entry : this.itemPaletteEntries) {
+                if (entry.isCustomItem()) {
+                    if (Server.getInstance().getSettings().features().enableExperimentMode()) {
+                        paletteBuffer.putString(entry.getIdentifier());
+                        paletteBuffer.putLShort(entry.getRuntimeId());
+                        paletteBuffer.putBoolean(true); // Component item
+                    }
+                } else {
                     paletteBuffer.putString(entry.getIdentifier());
                     paletteBuffer.putLShort(entry.getRuntimeId());
-                    paletteBuffer.putBoolean(true); // Component item
+                    paletteBuffer.putBoolean(false); // Component item
                 }
-            } else {
-                paletteBuffer.putString(entry.getIdentifier());
-                paletteBuffer.putLShort(entry.getRuntimeId());
-                paletteBuffer.putBoolean(false); // Component item
             }
+            this.itemPalette = paletteBuffer.getBuffer();
         }
-        this.itemPalette = paletteBuffer.getBuffer();
     }
 
     public LegacyEntry fromRuntime(int runtimeId) {

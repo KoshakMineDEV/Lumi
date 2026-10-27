@@ -1,5 +1,6 @@
 package cn.nukkit.network.encryption;
 
+import cn.nukkit.Nukkit;
 import cn.nukkit.network.protocol.types.auth.AuthPayload;
 import cn.nukkit.network.protocol.types.auth.AuthType;
 import cn.nukkit.network.protocol.types.auth.CertificateChainPayload;
@@ -84,8 +85,22 @@ public class EncryptionUtils {
         private static volatile Map<String, Object> OPENID_CONFIGURATION = null;
         private static volatile JwtConsumer MOJANG_CONSUMER = null;
         private static final Object LOCK = new Object();
+        private static volatile AuthCacheManager CACHE_MANAGER = null;
 
         private static final JwtConsumer OFFLINE_CONSUMER = EncryptionUtils.OFFLINE_CONSUMER;
+
+        private static AuthCacheManager getCacheManager() {
+            if (CACHE_MANAGER != null) {
+                return CACHE_MANAGER;
+            }
+
+            synchronized (LOCK) {
+                if (CACHE_MANAGER == null) {
+                    CACHE_MANAGER = new AuthCacheManager(Nukkit.DATA_PATH);
+                }
+                return CACHE_MANAGER;
+            }
+        }
 
         private static Map<String, Object> getDiscoveryData() {
             if (DISCOVERY_DATA != null) {
@@ -95,6 +110,14 @@ public class EncryptionUtils {
             synchronized (LOCK) {
                 if (DISCOVERY_DATA != null) {
                     return DISCOVERY_DATA;
+                }
+
+                AuthCacheManager cacheManager = getCacheManager();
+                Map<String, Object> cachedData = cacheManager.loadDiscoveryData();
+                if (cachedData != null) {
+                    DISCOVERY_DATA = cachedData;
+                    log.debug("Using cached discovery data from disk");
+                    return cachedData;
                 }
 
                 int maxRetries = 3;
@@ -117,6 +140,7 @@ public class EncryptionUtils {
                             //noinspection unchecked
                             Map<String, Object> data = (Map<String, Object>) JSON_PARSER.parse(reader);
                             DISCOVERY_DATA = data;
+                            cacheManager.saveDiscoveryData(data);
                             return data;
                         }
                     } catch (ParseException | IOException e) {
@@ -179,6 +203,14 @@ public class EncryptionUtils {
                     return OPENID_CONFIGURATION;
                 }
 
+                AuthCacheManager cacheManager = getCacheManager();
+                Map<String, Object> cachedConfig = cacheManager.loadOpenIdConfiguration();
+                if (cachedConfig != null) {
+                    OPENID_CONFIGURATION = cachedConfig;
+                    log.debug("Using cached OpenID configuration from disk");
+                    return cachedConfig;
+                }
+
                 String serviceUri = getServiceUri();
                 String openIdConfigUrl = serviceUri + "/.well-known/openid-configuration";
 
@@ -202,6 +234,7 @@ public class EncryptionUtils {
                             //noinspection unchecked
                             Map<String, Object> config = (Map<String, Object>) JSON_PARSER.parse(reader);
                             OPENID_CONFIGURATION = config;
+                            cacheManager.saveOpenIdConfiguration(config);
                             return config;
                         }
                     } catch (ParseException | IOException e) {

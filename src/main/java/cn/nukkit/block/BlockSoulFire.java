@@ -1,9 +1,15 @@
 package cn.nukkit.block;
 
+import cn.nukkit.block.customblock.properties.BlockProperties;
 import cn.nukkit.level.Level;
 import cn.nukkit.block.data.BlockColor;
 
 public class BlockSoulFire extends BlockFire {
+
+    @Override
+    public BlockProperties getBlockProperties() {
+        return AGE_PROPERTIES;
+    }
 
     public BlockSoulFire() {
         this(0);

@@ -35,16 +35,6 @@ import java.util.function.Supplier;
 @Log4j2
 public class Network {
 
-    public static final byte CHANNEL_NONE = 0;
-    public static final byte CHANNEL_PRIORITY = 1; //Priority channel, only to be used when it matters
-    public static final byte CHANNEL_WORLD_CHUNKS = 2; //Chunk sending
-    public static final byte CHANNEL_MOVEMENT = 3; //Movement sending
-    public static final byte CHANNEL_BLOCKS = 4; //Block updates or explosions
-    public static final byte CHANNEL_WORLD_EVENTS = 5; //Entity, level or blockentity entity events
-    public static final byte CHANNEL_ENTITY_SPAWNING = 6; //Entity spawn/despawn channel
-    public static final byte CHANNEL_TEXT = 7; //Chat and other text stuff
-    public static final byte CHANNEL_END = 31;
-
     private PacketPool packetPool;
     private PacketPool packetPoolCurrent;
 
@@ -212,6 +202,66 @@ public class Network {
 
     public List<NetworkIF> getHardWareNetworkInterfaces() {
         return hardWareNetworkInterfaces;
+    }
+
+    /** Decode a batch atomically and report work for NetherNet's bounded ingress queue. */
+    public BatchProcessResult processBatchMeasured(byte[] payload, Collection<DataPacket> packets, CompressionProvider compression,
+                                                   int raknetProtocol, Player player, boolean warnOnFailure) {
+        int maxSize = player != null && player.getSkin() == null ? 6291456 : 3145728;
+        byte[] data;
+        try {
+            data = compression.decompress(payload, maxSize);
+        } catch (Exception e) {
+            if (warnOnFailure) log.warn("Unable to decompress NetherNet batch", e);
+            return new BatchProcessResult(false, maxSize, 1300, e);
+        }
+        if (data.length > maxSize) {
+            return new BatchProcessResult(false, data.length, 0, new ProtocolException("Decompressed batch exceeds " + maxSize + " bytes"));
+        }
+        BinaryStream stream = new BinaryStream(data);
+        List<DataPacket> decoded = new ArrayList<>();
+        int count = 0;
+        try {
+            while (!stream.feof()) {
+                if (++count > 1300) throw new ProtocolException("Too many packets in batch");
+                long length = stream.getUnsignedVarInt();
+                if (length <= 0 || length > stream.getCount() - stream.getOffset()) {
+                    throw new ProtocolException("Invalid batch frame length: " + length);
+                }
+                byte[] buf = stream.get((int) length);
+                ByteArrayInputStream input = new ByteArrayInputStream(buf);
+                int packetId;
+                switch (raknetProtocol) {
+                    case 7 -> packetId = input.read();
+                    case 8 -> {
+                        packetId = input.read();
+                        if (input.skip(2L) != 2L) throw new ProtocolException("Truncated legacy packet header");
+                    }
+                    default -> packetId = (int) VarInt.readUnsignedVarInt(input) & 0x3ff;
+                }
+                int protocol = player == null ? ProtocolInfo.CURRENT_PROTOCOL : player.protocol;
+                DataPacket packet = this.getPacket(packetId, protocol);
+                if (packet == null) continue;
+                packet.protocol = player == null ? Integer.MAX_VALUE : player.protocol;
+                packet.setBuffer(buf, buf.length - input.available());
+                if (!new DataPacketDecodeEvent(player, packet).call()) {
+                    // Plugin cancellation is intentional, not a malformed batch.
+                    packets.addAll(decoded);
+                    return new BatchProcessResult(true, data.length, count, null);
+                }
+                packet.decode();
+                decoded.add(packet);
+            }
+            if (count == 0) throw new ProtocolException("Empty batch");
+            packets.addAll(decoded);
+            return new BatchProcessResult(true, data.length, count, null);
+        } catch (Exception e) {
+            if (warnOnFailure) log.warn("Unable to decode NetherNet batch", e);
+            return new BatchProcessResult(false, data.length, Math.min(count, 1300), e);
+        }
+    }
+
+    public record BatchProcessResult(boolean success, int decompressedBytes, int framedPackets, Throwable failure) {
     }
 
     public void processBatch(byte[] payload, Collection<DataPacket> packets, CompressionProvider compression, int raknetProtocol, Player player) {
@@ -555,6 +605,15 @@ public class Network {
                 .registerPacket(ProtocolInfo.CLIENTBOUND_UPDATE_SOUND_DATA_PACKET, ClientboundUpdateSoundDataPacket.class, ClientboundUpdateSoundDataPacket::new)
                 .registerPacket(ProtocolInfo.SEND_PARTY_DESTINATION_COOKIE_PACKET, SendPartyDestinationCookiePacket.class, SendPartyDestinationCookiePacket::new)
                 .registerPacket(ProtocolInfo.PARTY_DESTINATION_COOKIE_RESPONSE_PACKET, PartyDestinationCookieResponsePacket.class, PartyDestinationCookieResponsePacket::new)
+                // v2225 packets
+                .registerPacket(ProtocolInfo.CLIENTBOUND_MATCHMAKING_STATE_PACKET, ClientboundMatchmakingStatePacket.class, ClientboundMatchmakingStatePacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_STONECUTTER_SET_RECIPE_PACKET, ServerboundStonecutterSetRecipePacket.class, ServerboundStonecutterSetRecipePacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_STONECUTTER_SET_RECIPE_PACKET, ClientboundStonecutterSetRecipePacket.class, ClientboundStonecutterSetRecipePacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_MATCHMAKING_CANCEL_PACKET, ServerboundMatchmakingCancelPacket.class, ServerboundMatchmakingCancelPacket::new)
+                .registerPacket(ProtocolInfo.SET_PASSENGER_OF_BLOCK_PACKET, SetPassengerOfBlockPacket.class, SetPassengerOfBlockPacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_CURSOR_ITEM_DRAG_PACKET, ServerboundCursorItemDragPacket.class, ServerboundCursorItemDragPacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_PLAY_AUDIO_CONTENT_PACKET, ClientboundPlayAudioContentPacket.class, ClientboundPlayAudioContentPacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_REGISTER_AUDIO_CONTENT_PACKET, ServerboundRegisterAudioContentPacket.class, ServerboundRegisterAudioContentPacket::new)
                 .build();
 
         this.packetPoolCurrent = this.packetPool.toBuilder()

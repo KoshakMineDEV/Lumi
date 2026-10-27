@@ -7,6 +7,8 @@ import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.network.Network;
+import cn.nukkit.network.NetherNetInterface;
+import cn.nukkit.network.SourceInterface;
 import cn.nukkit.utils.TextFormat;
 import com.sun.jna.platform.win32.COM.WbemcliUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -251,6 +253,8 @@ public class StatusCommand extends VanillaCommand {
             sender.sendMessage(TextFormat.GOLD + "Players: " + playerColor + server.getOnlinePlayers().size() + TextFormat.GREEN + " online, " +
                     TextFormat.RED + server.getMaxPlayers() + TextFormat.GREEN + " max. ");
 
+            sendNetherNetStatus(sender, server, false);
+
             for (Level level : server.getLevels().values()) {
                 sender.sendMessage(
                         TextFormat.GOLD + "World \"" + level.getFolderName() + "\"" + (!Objects.equals(level.getFolderName(), level.getName()) ? " (" + level.getName() + ")" : "") + ": " +
@@ -344,6 +348,7 @@ public class StatusCommand extends VanillaCommand {
             } catch (Exception ignored) {
                 sender.sendMessage(TextFormat.RED + "    Failed to get network info.");
             }
+            sendNetherNetStatus(sender, server, true);
             // CPU信息
             {
                 CentralProcessor cpu = systemInfo.getHardware().getProcessor();
@@ -406,6 +411,14 @@ public class StatusCommand extends VanillaCommand {
 
 
         return true;
+    }
+
+    private static void sendNetherNetStatus(CommandSender sender, Server server, boolean full) {
+        for (SourceInterface source : server.getNetwork().getInterfaces()) {
+            if (source instanceof NetherNetInterface netherNet) {
+                for (String line : netherNet.buildStatusLines(10, full)) sender.sendMessage(line);
+            }
+        }
     }
 
     public enum ComputerSystemEntry {

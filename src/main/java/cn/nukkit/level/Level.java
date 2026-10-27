@@ -46,6 +46,7 @@ import cn.nukkit.level.particle.ItemBreakParticle;
 import cn.nukkit.level.particle.Particle;
 import cn.nukkit.level.persistence.PersistentDataContainer;
 import cn.nukkit.level.persistence.impl.DelegatePersistentDataContainer;
+import cn.nukkit.level.redstone.WireUpdateHandler;
 import cn.nukkit.level.sound.Sound;
 import cn.nukkit.level.util.BlockUpdateEntry;
 import cn.nukkit.level.util.PortalCreator;
@@ -286,6 +287,7 @@ public class Level implements ChunkManager, Metadatable {
     private final Int2ObjectOpenHashMap<Object> changeBlocksFullMap = new Int2ObjectOpenHashMap<>();
 
     private final BlockUpdateScheduler updateQueue;
+    private WireUpdateHandler wireUpdateHandler;
     private final Queue<QueuedUpdate> normalUpdateQueue = new ConcurrentLinkedDeque<>();
     private final Map<Long, Set<Integer>> lightQueue = new ConcurrentHashMap<>(8, 0.9f, 1);
 
@@ -1640,13 +1642,24 @@ public class Level implements ChunkManager, Metadatable {
         this.updateAroundRedstone(pos, null);
     }
 
+    public WireUpdateHandler getWireUpdateHandler() {
+        if (this.wireUpdateHandler == null) {
+            this.wireUpdateHandler = new WireUpdateHandler(this);
+        }
+        return this.wireUpdateHandler;
+    }
+
+    public void updateRedstoneBlock(@NotNull Block block) {
+        block.onUpdate(BLOCK_UPDATE_REDSTONE);
+    }
+
     public void updateAroundRedstone(@NotNull Vector3 pos, @Nullable BlockFace ignoredFace) {
         for (BlockFace side : BlockFace.values()) {
             if (ignoredFace != null && side == ignoredFace) {
                 continue;
             }
 
-            this.getBlock(pos.getSideVec(side)).onUpdate(BLOCK_UPDATE_REDSTONE);
+            this.updateRedstoneBlock(this.getBlock(pos.getSideVec(side)));
         }
     }
 
@@ -2083,7 +2096,7 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public Block getBlock(FullChunk chunk, int x, int y, int z, int layer, boolean load) {
-        int[] fullState;
+        int fullId = 0;
         if (isYInRange(y)) {
             int cx = x >> 4;
             int cz = z >> 4;
@@ -2095,15 +2108,18 @@ public class Level implements ChunkManager, Metadatable {
                 }
             }
             if (chunk != null) {
-                fullState = chunk.getBlockState(x & 0xF, y, z & 0xF, layer);
-            } else {
-                fullState = new int[]{0, 0};
+                fullId = chunk.getFullBlock(x & 0xF, y, z & 0xF, layer);
             }
-        } else {
-            fullState = new int[]{0, 0};
         }
 
-        Block block = Block.get(fullState[0], fullState[1]);
+        Block block;
+        if (fullId >= 0) {
+            block = Block.get(fullId >>> Block.DATA_BITS, fullId & Block.DATA_MASK);
+        } else {
+            // Preserve legacy/custom fallback handling for states outside the packed ID range.
+            int[] state = chunk.getBlockState(x & 0xF, y, z & 0xF, layer);
+            block = Block.get(state[0], state[1]);
+        }
         block.x = x;
         block.y = y;
         block.z = z;
@@ -2299,6 +2315,10 @@ public class Level implements ChunkManager, Metadatable {
         block.z = z;
         block.level = this;
         block.layer = layer;
+
+        if (layer == 0 && this.wireUpdateHandler != null) {
+            this.wireUpdateHandler.onBlockChanged(blockPrevious, block);
+        }
 
         try {
             for (Consumer<Block> callback : this.callbackBlockSet.values()) {
@@ -3106,6 +3126,7 @@ public class Level implements ChunkManager, Metadatable {
     public void setBlockIdAt(int x, int y, int z, int layer, int id) {
         BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
         chunk.setBlockId(x & 0x0f, ensureY(y), z & 0x0f, layer, id & Block.ID_MASK);
+        if (layer == 0 && this.wireUpdateHandler != null) this.wireUpdateHandler.onBlockChanged(x, ensureY(y), z);
         chunk.setDirty(true);
         addBlockChange(x, y, z);
         temporalVector.setComponents(x, y, z);
@@ -3126,6 +3147,7 @@ public class Level implements ChunkManager, Metadatable {
         boolean changed = chunk.setBlockAtLayer(x & 0x0f, ensureY(y), z & 0x0f, layer, id & Block.ID_MASK, data & Block.DATA_MASK);
         chunk.setBlockId(x & 0x0f, ensureY(y), z & 0x0f, id & Block.ID_MASK);
         chunk.setBlockData(x & 0x0f, ensureY(y), z & 0x0f, data & Block.DATA_MASK);
+        if (layer == 0 && this.wireUpdateHandler != null) this.wireUpdateHandler.onBlockChanged(x, ensureY(y), z);
         chunk.setDirty(true);
         addBlockChange(x, y, z);
         temporalVector.setComponents(x, y, z);
@@ -3166,6 +3188,7 @@ public class Level implements ChunkManager, Metadatable {
     public void setBlockDataAt(int x, int y, int z, int layer, int data) {
         BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
         chunk.setBlockData(x & 0x0f, ensureY(y), z & 0x0f, layer, data & Block.DATA_MASK);
+        if (layer == 0 && this.wireUpdateHandler != null) this.wireUpdateHandler.onBlockChanged(x, ensureY(y), z);
         chunk.setDirty(true);
         addBlockChange(x, y, z);
         temporalVector.setComponents(x, y, z);
@@ -3258,9 +3281,6 @@ public class Level implements ChunkManager, Metadatable {
                 return;
             }
             long index = Level.chunkHash(x, z);
-            if (chunk != null) {
-                chunk.setConnectionStateRefreshPending(true);
-            }
             if (this.chunkPopulationQueue.containsKey(index)) {
                 FullChunk oldChunk = this.getChunk(x, z, false);
                 for (int xx = -1; xx <= 1; ++xx) {
@@ -3775,6 +3795,12 @@ public class Level implements ChunkManager, Metadatable {
                             changed = thin.updateConnections();
                         } else if (block instanceof BlockTripWire tripWire) {
                             changed = tripWire.updateConnections();
+                        } else if (block instanceof BlockChorusPlant chorus) {
+                            changed = chorus.updateConnections();
+                        } else if (block instanceof BlockRedstoneWire wire) {
+                            changed = wire.updateConnections();
+                        } else if (block instanceof BlockFire fire) {
+                            changed = fire.updateConnections();
                         } else {
                             continue;
                         }
@@ -3796,6 +3822,9 @@ public class Level implements ChunkManager, Metadatable {
         return type != null && (BlockStairs.class.isAssignableFrom(type)
                 || BlockFence.class.isAssignableFrom(type)
                 || BlockTripWire.class.isAssignableFrom(type)
+                || BlockChorusPlant.class.isAssignableFrom(type)
+                || BlockRedstoneWire.class.isAssignableFrom(type)
+                || type == BlockFire.class
                 || (BlockThin.class.isAssignableFrom(type)
                 && !BlockHardGlassPane.class.isAssignableFrom(type)));
     }
@@ -5071,7 +5100,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     private int getChunkProtocol(int protocol) {
-        if (protocol >= ProtocolInfo.v1_26_50) {
+        if (protocol >= ProtocolInfo.v1_26_60) {
+            return ProtocolInfo.v1_26_60;
+        } else if (protocol >= ProtocolInfo.v1_26_50) {
             return ProtocolInfo.v1_26_50;
         } else if (protocol >= ProtocolInfo.v1_26_40) {
             return ProtocolInfo.v1_26_40;
@@ -5156,7 +5187,8 @@ public class Level implements ChunkManager, Metadatable {
         if (chunk == ProtocolInfo.v1_26_20) if (player < ProtocolInfo.v1_26_30) return true;
         if (chunk == ProtocolInfo.v1_26_30) return player >= ProtocolInfo.v1_26_30 && player < ProtocolInfo.v1_26_40;
         if (chunk == ProtocolInfo.v1_26_40) return player >= ProtocolInfo.v1_26_40 && player < ProtocolInfo.v1_26_50;
-        if (chunk == ProtocolInfo.v1_26_50) return player >= ProtocolInfo.v1_26_50;
+        if (chunk == ProtocolInfo.v1_26_50) return player >= ProtocolInfo.v1_26_50 && player < ProtocolInfo.v1_26_60;
+        if (chunk == ProtocolInfo.v1_26_60) return player >= ProtocolInfo.v1_26_60;
         return false; //TODO Multiversion  Remember to update when block palette changes
     }
 

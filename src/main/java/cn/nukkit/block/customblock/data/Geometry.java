@@ -52,10 +52,7 @@ public class Geometry implements NBTData {
     public CompoundTag toCompoundTag() {
         var boneVisibility = new CompoundTag();
         for (var entry : boneVisibilities.entrySet()) {
-            boneVisibility.putCompound(entry.getKey(), new CompoundTag()
-                    .putString("expression", entry.getValue())
-                    .putInt("version", 1)
-            );
+            boneVisibility.putString(entry.getKey(), entry.getValue());
         }
         CompoundTag compoundTag = new CompoundTag()
                 .putString("identifier", geometryName)
