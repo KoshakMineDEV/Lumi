@@ -38,6 +38,9 @@ public class PlayerListPacket extends DataPacket {
                     this.putEntityUniqueId(entry.entityId);
                     this.putString(entry.name);
                     this.putString(entry.xboxUserId);
+                    if (protocol >= ProtocolInfo.v1_26_60) {
+                        this.putString(entry.skin != null ? entry.skin.getPlayFabId() : "");
+                    }
                     this.putString(entry.platformChatId);
                     this.putLInt(entry.buildPlatform);
                     this.putSkin(protocol, entry.skin);

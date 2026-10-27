@@ -36,3 +36,4 @@ resource_packs/*
 /logs
 scoreboard.json
 /cache/auth/
+/keys

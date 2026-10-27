@@ -73,7 +73,23 @@ public class ClientboundUpdateSoundDataPacket extends DataPacket {
     @Override
     public void decode() {
         this.serverSoundHandle = this.getLLong();
-        if (this.protocol >= ProtocolInfo.v1_26_40) {
+        if (this.protocol >= ProtocolInfo.v1_26_60) {
+            SoundSlot slot = this.readSoundSlot();
+            switch (slot.type()) {
+                case SOUND_STOP -> this.stop = true;
+                case SOUND_SET_VOLUME -> this.volume = slot.first();
+                case SOUND_SET_PITCH -> this.pitch = slot.first();
+                case SOUND_FADE -> {
+                    this.fadeDuration = slot.first();
+                    this.fadeTargetVolume = slot.second();
+                }
+                case SOUND_SEEK_TO -> this.seekToSeconds = slot.first();
+                case SOUND_PAUSE -> this.pause = true;
+                case SOUND_RESUME -> this.resume = true;
+                default -> {
+                }
+            }
+        } else if (this.protocol >= ProtocolInfo.v1_26_40) {
             this.stop = this.readSoundSlot().type() == SOUND_STOP;
             SoundSlot slot = this.readSoundSlot();
             this.volume = slot.type() == SOUND_SET_VOLUME ? slot.first() : null;
@@ -95,7 +111,39 @@ public class ClientboundUpdateSoundDataPacket extends DataPacket {
     public void encode() {
         this.reset();
         this.putLLong(this.serverSoundHandle);
-        if (this.protocol >= ProtocolInfo.v1_26_40) {
+        if (this.protocol >= ProtocolInfo.v1_26_60) {
+            int tag = SOUND_STOP;
+            Float first = null;
+            Float second = null;
+            if (!this.stop) {
+                if (this.volume != null) {
+                    tag = SOUND_SET_VOLUME;
+                    first = this.volume;
+                } else if (this.pitch != null) {
+                    tag = SOUND_SET_PITCH;
+                    first = this.pitch;
+                } else if (this.fadeTargetVolume != null) {
+                    tag = SOUND_FADE;
+                    first = this.fadeDuration;
+                    second = this.fadeTargetVolume;
+                } else if (this.seekToSeconds != null) {
+                    tag = SOUND_SEEK_TO;
+                    first = this.seekToSeconds;
+                } else if (this.pause) {
+                    tag = SOUND_PAUSE;
+                } else if (this.resume) {
+                    tag = SOUND_RESUME;
+                }
+            }
+            this.putUnsignedVarInt(tag);
+            this.putByte((byte) tag);
+            if (first != null) {
+                this.putLFloat(first);
+            }
+            if (second != null) {
+                this.putLFloat(second);
+            }
+        } else if (this.protocol >= ProtocolInfo.v1_26_40) {
             this.putUnsignedVarInt(SOUND_STOP);
             if (this.volume != null) {
                 this.putUnsignedVarInt(SOUND_SET_VOLUME);
@@ -134,6 +182,9 @@ public class ClientboundUpdateSoundDataPacket extends DataPacket {
      */
     private SoundSlot readSoundSlot() {
         int type = (int) this.getUnsignedVarInt();
+        if (this.protocol >= ProtocolInfo.v1_26_60) {
+            this.getByte();
+        }
         return switch (type) {
             case SOUND_SET_VOLUME, SOUND_SET_PITCH, SOUND_SEEK_TO -> new SoundSlot(type, this.getLFloat(), 0);
             case SOUND_FADE -> new SoundSlot(type, this.getLFloat(), this.getLFloat());

@@ -23,7 +23,11 @@ public enum ItemStackRequestActionType {
     CRAFT_REPAIR_AND_DISENCHANT(16),
     CRAFT_LOOM(17),
     CRAFT_NON_IMPLEMENTED_DEPRECATED(18),
-    CRAFT_RESULTS_DEPRECATED(19);
+    CRAFT_RESULTS_DEPRECATED(19),
+    /**
+     * @since v2225
+     */
+    CRAFT_RESERVED(20);
     private final int id;
 
     private static final Int2ObjectArrayMap<ItemStackRequestActionType> VALUES = new Int2ObjectArrayMap<>();
@@ -47,6 +51,14 @@ public enum ItemStackRequestActionType {
     }
 
     public static ItemStackRequestActionType fromId(int id, int protocol) {
+        if (protocol >= ProtocolInfo.v1_26_60 && id >= 16) {
+            return switch (id) {
+                case 16 -> CRAFT_RESERVED;
+                case 17 -> CRAFT_NON_IMPLEMENTED_DEPRECATED;
+                case 18 -> CRAFT_RESULTS_DEPRECATED;
+                default -> null;
+            };
+        }
         if (protocol >= ProtocolInfo.v1_26_40) {
             return switch (id) {
                 case 0 -> TAKE;

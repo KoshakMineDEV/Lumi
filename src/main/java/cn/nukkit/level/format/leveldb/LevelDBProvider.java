@@ -59,9 +59,8 @@ import static cn.nukkit.level.format.leveldb.LevelDBKey.*;
 public class LevelDBProvider implements LevelProvider {
 
     private static final DBProvider JAVA_LDB_PROVIDER = (DBProvider) FeatureBuilder.create(LevelDBProvider.class).addJava("net.daporkchop.ldbjni.java.JavaDBProvider").build();
-    private static final byte CONNECTION_FIX_REVISION = 2;
     private static final byte[] CONNECTION_FIX_PENDING = {0};
-    private static final byte[] CONNECTION_FIX_COMPLETE = {CONNECTION_FIX_REVISION};
+    private static final byte[] CONNECTION_FIX_COMPLETE = {(byte) ConnectionStateMigration.REVISION};
 
     protected final Long2ObjectMap<BaseFullChunk> chunks = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 
@@ -434,10 +433,8 @@ public class LevelDBProvider implements LevelProvider {
 
         ChunkBuilder chunkBuilder = new ChunkBuilder(chunkX, chunkZ, this);
 
-        // Older completion markers need another pass to include tripwire connections.
         byte[] connectionFixState = this.db.get(LUMI_CONNECTION_FIX_STATE.getKey(chunkX, chunkZ, this.level.getDimensionData().getDimensionId()));
-        chunkBuilder.connectionStateRefreshPending(connectionFixState == null || connectionFixState.length != 1
-                || Byte.toUnsignedInt(connectionFixState[0]) < CONNECTION_FIX_REVISION);
+        chunkBuilder.connectionStateMigration(connectionFixState);
 
         byte[] finalized = this.db.get(STATE_FINALIZATION.getKey(chunkX, chunkZ, this.level.getDimensionData().getDimensionId()));
         if (finalized == null) {

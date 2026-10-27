@@ -1,5 +1,8 @@
 package cn.nukkit.block;
 
+import cn.nukkit.block.customblock.properties.BlockProperties;
+import cn.nukkit.block.properties.BlockPropertiesHelper;
+import cn.nukkit.block.properties.VanillaProperties;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.effect.EffectType;
 import cn.nukkit.entity.effect.PotionType;
@@ -26,7 +29,41 @@ import cn.nukkit.utils.Utils;
  * @author MagicDroidX
  * Nukkit Project
  */
-public class BlockFire extends BlockFlowable {
+public class BlockFire extends BlockFlowable implements BlockPropertiesHelper {
+
+    protected static final BlockProperties AGE_PROPERTIES = new BlockProperties(VanillaProperties.AGE);
+    private static final BlockProperties PROPERTIES = new BlockProperties(
+            VanillaProperties.AGE, VanillaProperties.CONNECTION_WEST, VanillaProperties.CONNECTION_SOUTH,
+            VanillaProperties.CONNECTION_NORTH, VanillaProperties.CONNECTION_EAST, VanillaProperties.CONNECTION_UP);
+
+    @Override
+    public BlockProperties getBlockProperties() {
+        return PROPERTIES;
+    }
+
+    public int getAge() {
+        return this.getIntValue(VanillaProperties.AGE);
+    }
+
+    public void setAge(int age) {
+        this.setIntValue(VanillaProperties.AGE, age);
+    }
+
+    public boolean updateConnections() {
+        if (this.getId() != FIRE) {
+            return false;
+        }
+        int previous = this.getDamage();
+        Block below = this.down();
+        boolean onFloor = this.isBlockTopFacingSurfaceSolid(below) || below.getBurnChance() > 0;
+        for (BlockFace face : BlockFace.values()) {
+            if (face != BlockFace.DOWN) {
+                this.setBooleanValue("minecraft:connection_" + face.getName(),
+                        !onFloor && this.getSide(face).getBurnChance() > 0);
+            }
+        }
+        return previous != this.getDamage();
+    }
 
     public BlockFire() {
         this(0);
@@ -100,6 +137,9 @@ public class BlockFire extends BlockFlowable {
     @Override
     public int onUpdate(int type) {
         if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_RANDOM) {
+            if (this.updateConnections()) {
+                this.level.setBlock(this, this, true, false);
+            }
             if (!this.isBlockTopFacingSurfaceSolid(this.down()) && !this.canNeighborBurn()) {
                 this.getLevel().setBlock(this, Block.get(BlockID.AIR), true);
             } else if (this.level.gameRules.getBoolean(GameRule.DO_FIRE_TICK) && !level.isUpdateScheduled(this, this)) {
@@ -126,14 +166,14 @@ public class BlockFire extends BlockFlowable {
                 return 0;
             }
 
-            int meta = this.getDamage();
+            int meta = this.getAge();
 
             if (meta < 15) {
                 int newMeta = meta + Utils.random.nextInt(3);
                 if (newMeta > 15) {
                     newMeta = 15;
                 }
-                this.setDamage(newMeta);
+                this.setAge(newMeta);
                 this.getLevel().setBlock(this, this, true);
             }
 
@@ -269,9 +309,9 @@ public class BlockFire extends BlockFlowable {
             if (block.isSolid()) {
                 return true;
             } else {
-                if (block instanceof BlockStairs && (block.getDamage() & 4) == 4) {
+                if (block instanceof BlockStairs stairs && stairs.isUpsideDown()) {
                     return true;
-                } else if (block instanceof BlockSlab && (block.getDamage() & 8) == 8) {
+                } else if (block instanceof BlockSlab slab && slab.hasTopBit()) {
                     return true;
                 } else {
                     return block instanceof BlockSnowLayer && (block.getDamage() & 7) == 7;

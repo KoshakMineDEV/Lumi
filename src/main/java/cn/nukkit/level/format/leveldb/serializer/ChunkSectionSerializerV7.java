@@ -1,6 +1,5 @@
 package cn.nukkit.level.format.leveldb.serializer;
 
-import cn.nukkit.block.Block;
 import cn.nukkit.level.util.NibbleArray;
 import cn.nukkit.level.format.leveldb.BlockStateMapping;
 import cn.nukkit.level.format.leveldb.structure.ChunkBuilder;
@@ -31,15 +30,18 @@ public class ChunkSectionSerializerV7 implements ChunkSectionSerializer {
         }
 
         StateBlockStorage[] storages = new StateBlockStorage[2];
-        storages[0] = ChunkSectionSerializerV7.deserialize(blocks, blockData);
+        storages[0] = ChunkSectionSerializerV7.deserialize(blocks, blockData, chunkBuilder);
         return storages;
     }
 
-    private static StateBlockStorage deserialize(byte[] blocks, byte[] blockDataArray) {
+    private static StateBlockStorage deserialize(byte[] blocks, byte[] blockDataArray, ChunkBuilder chunkBuilder) {
         NibbleArray blockData = new NibbleArray(blockDataArray);
         StateBlockStorage storage = new StateBlockStorage();
         for (int i = 0; i < SUB_CHUNK_SIZE; ++i) {
-            storage.set(i, BlockStateMapping.get().getState(blocks[i] << Block.DATA_BITS, blockData.get(i)));
+            int id = blocks[i] & 0xff;
+            int data = blockData.get(i);
+            chunkBuilder.observeLegacyConnectionBlock(id, data);
+            storage.set(i, BlockStateMapping.get().getState(id, data));
         }
         return storage;
     }

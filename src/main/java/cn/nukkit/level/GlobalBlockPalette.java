@@ -49,7 +49,8 @@ public class GlobalBlockPalette {
             ProtocolInfo.v1_26_20_26,
             ProtocolInfo.v1_26_30,
             ProtocolInfo.v1_26_40,
-            ProtocolInfo.v1_26_50
+            ProtocolInfo.v1_26_50,
+            ProtocolInfo.v1_26_60
     };
 
     static {

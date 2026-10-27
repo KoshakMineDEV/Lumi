@@ -176,7 +176,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
             }
 
             Block b = this.getSide(side);
-            if (b.getId() == Block.REDSTONE_WIRE && b.getDamage() > 0) {
+            if (b instanceof BlockRedstoneWire wire && wire.getSignal() > 0) {
                 return true;
             }
 

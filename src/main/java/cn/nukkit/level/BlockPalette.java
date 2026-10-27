@@ -79,7 +79,7 @@ public class BlockPalette {
 
     private boolean registerBlockState(CompoundTag state, boolean force, Int2ObjectMap<CompoundTag> hashIdToState) {
         int id = state.getInt("id");
-        int data = state.getShort("data");
+        int data = state.getShort("data") & 0xffff;
         boolean stateOverload = state.getBoolean("stateOverload");
 
         if (stateOverload && !force) {

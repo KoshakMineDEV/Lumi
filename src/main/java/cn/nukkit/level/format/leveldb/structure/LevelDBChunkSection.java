@@ -2,12 +2,10 @@ package cn.nukkit.level.format.leveldb.structure;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
-import cn.nukkit.block.properties.BlockPropertiesHelper;
 import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.ChunkSection;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
-import cn.nukkit.level.format.leveldb.BlockStateMapping;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Binary;
 import cn.nukkit.utils.BinaryStream;
@@ -311,8 +309,7 @@ public class LevelDBChunkSection implements ChunkSection {
 
     @Override
     public Block getAndSetBlock(int x, int y, int z, int layer, Block block) {
-        int fullId;
-        BlockStateSnapshot state = null;
+        int fullId = block.getFullId();
         int previous;
         try {
             this.writeLock.lock();
@@ -327,32 +324,16 @@ public class LevelDBChunkSection implements ChunkSection {
                 this.createLayerUnsafe(layer);
 
                 storage = this.storages[layer];
-
-                if (block instanceof BlockPropertiesHelper container) {
-                    state = BlockStateMapping.get().getStateUnsafe(container.getStateNbt());
-                }
-
-                fullId = block.getFullId();
             } else {
                 storage = this.storages[layer];
                 previous = storage.get(x, y, z);
-
-                if (block instanceof BlockPropertiesHelper container) {
-                    state = BlockStateMapping.get().getStateUnsafe(container.getStateNbt());
-                }
-
-                fullId = block.getFullId();
 
                 if (previous == fullId) {
                     return Block.fromFullId(previous);
                 }
             }
 
-            if (state != null) {
-                storage.set(x, y, z, state);
-            } else {
-                storage.set(x, y, z, fullId);
-            }
+            storage.set(x, y, z, fullId);
 
             dirty = true;
             parent.get().onSubChunkBlockChanged(this, x, y, z, layer, previous, fullId);

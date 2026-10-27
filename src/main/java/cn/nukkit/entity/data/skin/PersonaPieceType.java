@@ -40,6 +40,7 @@ public enum PersonaPieceType {
     CAPES("capes", "persona_capes"),
     CLASSIC_SKIN("classicskin", "persona_classic_skin"),
     EMOTE("emote", "persona_emote"),
+    COCO("coco", "persona_coco"),
     UNSUPPORTED("unsupported", "unsupported");
 
     private static final Map<String, PersonaPieceType> BY_NAME = new HashMap<>(values().length * 2, 1);
