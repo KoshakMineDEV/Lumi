@@ -131,7 +131,7 @@ public abstract class BlockRedstoneDiode extends BlockFlowable implements Faceab
             return power;
         } else {
             Block block = this.level.getBlock(pos);
-            return Math.max(power, block.getId() == Block.REDSTONE_WIRE ? block.getDamage() : 0);
+            return Math.max(power, block instanceof BlockRedstoneWire wire ? wire.getSignal() : 0);
         }
     }
 
@@ -146,7 +146,7 @@ public abstract class BlockRedstoneDiode extends BlockFlowable implements Faceab
 
     protected int getPowerOnSide(Vector3 pos, BlockFace side) {
         Block block = this.level.getBlock(pos);
-        return isAlternateInput(block) ? (block.getId() == Block.REDSTONE_BLOCK ? 15 : (block.getId() == Block.REDSTONE_WIRE ? block.getDamage() : this.level.getStrongPower(pos, side))) : 0;
+        return isAlternateInput(block) ? (block.getId() == Block.REDSTONE_BLOCK ? 15 : (block instanceof BlockRedstoneWire wire ? wire.getSignal() : this.level.getStrongPower(pos, side))) : 0;
     }
 
     @Override

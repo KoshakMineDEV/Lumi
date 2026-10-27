@@ -3258,9 +3258,6 @@ public class Level implements ChunkManager, Metadatable {
                 return;
             }
             long index = Level.chunkHash(x, z);
-            if (chunk != null) {
-                chunk.setConnectionStateRefreshPending(true);
-            }
             if (this.chunkPopulationQueue.containsKey(index)) {
                 FullChunk oldChunk = this.getChunk(x, z, false);
                 for (int xx = -1; xx <= 1; ++xx) {
@@ -3775,6 +3772,12 @@ public class Level implements ChunkManager, Metadatable {
                             changed = thin.updateConnections();
                         } else if (block instanceof BlockTripWire tripWire) {
                             changed = tripWire.updateConnections();
+                        } else if (block instanceof BlockChorusPlant chorus) {
+                            changed = chorus.updateConnections();
+                        } else if (block instanceof BlockRedstoneWire wire) {
+                            changed = wire.updateConnections();
+                        } else if (block instanceof BlockFire fire) {
+                            changed = fire.updateConnections();
                         } else {
                             continue;
                         }
@@ -3796,6 +3799,9 @@ public class Level implements ChunkManager, Metadatable {
         return type != null && (BlockStairs.class.isAssignableFrom(type)
                 || BlockFence.class.isAssignableFrom(type)
                 || BlockTripWire.class.isAssignableFrom(type)
+                || BlockChorusPlant.class.isAssignableFrom(type)
+                || BlockRedstoneWire.class.isAssignableFrom(type)
+                || type == BlockFire.class
                 || (BlockThin.class.isAssignableFrom(type)
                 && !BlockHardGlassPane.class.isAssignableFrom(type)));
     }

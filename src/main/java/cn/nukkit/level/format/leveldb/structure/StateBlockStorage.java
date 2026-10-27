@@ -6,7 +6,6 @@ import cn.nukkit.block.BlockID;
 import cn.nukkit.level.BlockPalette;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.leveldb.BlockStateMapping;
-import cn.nukkit.level.format.leveldb.updater.BlockStateUpdaterVanilla;
 import cn.nukkit.level.util.BitArray;
 import cn.nukkit.level.util.BitArrayVersion;
 import cn.nukkit.level.util.PalettedBlockStorage;
@@ -147,11 +146,9 @@ public class StateBlockStorage {
                     //noinspection ResultOfMethodCallIgnored
                     state.hashCode(); // cache hashCode
 
+                    chunkBuilder.observeConnectionState(state);
                     BlockStateSnapshot blockState = BlockStateMapping.get().getStateUnsafe(state);
                     if (blockState == null) {
-                        if (BlockStateUpdaterVanilla.requiresConnectionStateRefresh(state)) {
-                            chunkBuilder.connectionStateRefreshPending(true);
-                        }
                         NbtMap updatedState = BlockStateMapping.get().updateVanillaState(state);
                         blockState = BlockStateMapping.get().getUpdatedOrCustom(state, updatedState);
                         if (!blockState.isCustom()) {
