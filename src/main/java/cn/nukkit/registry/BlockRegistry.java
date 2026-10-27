@@ -1457,6 +1457,10 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
     @Override
     public Block get(Integer key) {
+        return this.get(key.intValue());
+    }
+
+    public Block get(int key) {
         int id = key >>> Block.DATA_BITS;
         if (id >= FULL_LIST.length) {
             return null;
