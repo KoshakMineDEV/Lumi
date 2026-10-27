@@ -29,6 +29,10 @@ public class AnimatePacket extends DataPacket {
      * @since 898
      */
     public SwingSource swingSource = SwingSource.NONE;
+    /**
+     * @since v2225
+     */
+    public int hand;
 
     @Override
     public void decode() {
@@ -51,6 +55,9 @@ public class AnimatePacket extends DataPacket {
 
         if (protocol >= ProtocolInfo.v1_21_130) {
             this.swingSource = this.getOptional(SwingSource.NONE, (stream) -> SwingSource.from(stream.getString()));
+        }
+        if (protocol >= ProtocolInfo.v1_26_60) {
+            this.hand = this.getByte() & 0xff;
         }
     }
 
@@ -77,6 +84,9 @@ public class AnimatePacket extends DataPacket {
 
         if (protocol >= ProtocolInfo.v1_21_130) {
             this.putOptional((swing) -> swing != null && swing != SwingSource.NONE, this.swingSource, (stream, source) -> stream.putString(source.getName()));
+        }
+        if (protocol >= ProtocolInfo.v1_26_60) {
+            this.putByte((byte) this.hand);
         }
     }
 

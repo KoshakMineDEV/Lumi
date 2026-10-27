@@ -73,7 +73,20 @@ public enum ContainerSlotType {
     /**
      * @since v712
      */
-    DYNAMIC_CONTAINER(63);
+    DYNAMIC_CONTAINER(63),
+    /**
+     * @since v944
+     */
+    RECIPE_FOOD_CONTAINER(64),
+    RECIPE_BLOCKS_CONTAINER(65),
+    RECIPE_FURNACE_ITEMS_CONTAINER(66),
+    /**
+     * @since v2225
+     */
+    RESERVED_CONTAINER_A(67),
+    RESERVED_CONTAINER_B(68),
+    RESERVED_CONTAINER_C(69),
+    RESERVED_CONTAINER_D(70);
 
     private final int id;
     private static final Int2ObjectArrayMap<ContainerSlotType> VALUES = new Int2ObjectArrayMap<>();

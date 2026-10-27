@@ -174,6 +174,9 @@ public class InventoryTransactionPacket extends DataPacket {
                 this.putEntityRuntimeId(useItemOnEntityData.entityRuntimeId);
                 this.putTransactionActionType(useItemOnEntityData.actionType);
                 this.putVarInt(useItemOnEntityData.hotbarSlot);
+                if (this.protocol >= ProtocolInfo.v1_26_60) {
+                    this.putByte((byte) useItemOnEntityData.hand);
+                }
                 if (this.protocol >= ProtocolInfo.v1_26_30) {
                     this.putNetworkItemStackDescriptor(protocol, useItemOnEntityData.itemInHand);
                 } else {
@@ -193,6 +196,9 @@ public class InventoryTransactionPacket extends DataPacket {
                     this.putSlot(protocol, releaseItemData.itemInHand);
                 }
                 this.putVector3f(releaseItemData.headRot.asVector3f());
+                if (this.protocol >= ProtocolInfo.v1_26_60) {
+                    this.putByte((byte) releaseItemData.hand);
+                }
                 break;
             default:
                 throw new RuntimeException("Unknown transaction type " + this.transactionType);
@@ -263,6 +269,9 @@ public class InventoryTransactionPacket extends DataPacket {
                 useItemOnEntityData.entityRuntimeId = this.getEntityRuntimeId();
                 useItemOnEntityData.actionType = this.getTransactionActionType();
                 useItemOnEntityData.hotbarSlot = this.getVarInt();
+                if (this.protocol >= ProtocolInfo.v1_26_60) {
+                    useItemOnEntityData.hand = this.getByte() & 0xff;
+                }
                 useItemOnEntityData.itemInHand = this.protocol >= ProtocolInfo.v1_26_30 ? this.getNetworkItemStackDescriptor(this.protocol) : this.getSlot(this.protocol);
                 useItemOnEntityData.playerPos = this.getVector3f().asVector3();
                 useItemOnEntityData.clickPos = this.getVector3f().asVector3();
@@ -276,6 +285,9 @@ public class InventoryTransactionPacket extends DataPacket {
                 releaseItemData.hotbarSlot = getVarInt();
                 releaseItemData.itemInHand = this.protocol >= ProtocolInfo.v1_26_30 ? this.getNetworkItemStackDescriptor(this.protocol) : this.getSlot(this.protocol);
                 releaseItemData.headRot = this.getVector3f().asVector3();
+                if (this.protocol >= ProtocolInfo.v1_26_60) {
+                    releaseItemData.hand = this.getByte() & 0xff;
+                }
 
                 this.transactionData = releaseItemData;
                 break;

@@ -605,6 +605,15 @@ public class Network {
                 .registerPacket(ProtocolInfo.CLIENTBOUND_UPDATE_SOUND_DATA_PACKET, ClientboundUpdateSoundDataPacket.class, ClientboundUpdateSoundDataPacket::new)
                 .registerPacket(ProtocolInfo.SEND_PARTY_DESTINATION_COOKIE_PACKET, SendPartyDestinationCookiePacket.class, SendPartyDestinationCookiePacket::new)
                 .registerPacket(ProtocolInfo.PARTY_DESTINATION_COOKIE_RESPONSE_PACKET, PartyDestinationCookieResponsePacket.class, PartyDestinationCookieResponsePacket::new)
+                // v2225 packets
+                .registerPacket(ProtocolInfo.CLIENTBOUND_MATCHMAKING_STATE_PACKET, ClientboundMatchmakingStatePacket.class, ClientboundMatchmakingStatePacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_STONECUTTER_SET_RECIPE_PACKET, ServerboundStonecutterSetRecipePacket.class, ServerboundStonecutterSetRecipePacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_STONECUTTER_SET_RECIPE_PACKET, ClientboundStonecutterSetRecipePacket.class, ClientboundStonecutterSetRecipePacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_MATCHMAKING_CANCEL_PACKET, ServerboundMatchmakingCancelPacket.class, ServerboundMatchmakingCancelPacket::new)
+                .registerPacket(ProtocolInfo.SET_PASSENGER_OF_BLOCK_PACKET, SetPassengerOfBlockPacket.class, SetPassengerOfBlockPacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_CURSOR_ITEM_DRAG_PACKET, ServerboundCursorItemDragPacket.class, ServerboundCursorItemDragPacket::new)
+                .registerPacket(ProtocolInfo.CLIENTBOUND_PLAY_AUDIO_CONTENT_PACKET, ClientboundPlayAudioContentPacket.class, ClientboundPlayAudioContentPacket::new)
+                .registerPacket(ProtocolInfo.SERVERBOUND_REGISTER_AUDIO_CONTENT_PACKET, ServerboundRegisterAudioContentPacket.class, ServerboundRegisterAudioContentPacket::new)
                 .build();
 
         this.packetPoolCurrent = this.packetPool.toBuilder()
