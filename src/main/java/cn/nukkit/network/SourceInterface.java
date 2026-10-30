@@ -41,7 +41,14 @@ public interface SourceInterface {
 
     void setName(String name);
 
-    boolean process();
+    default boolean process() {
+        this.processMaintenance();
+        return true;
+    }
+
+    /** Transport maintenance invoked once per server tick. */
+    default void processMaintenance() {
+    }
 
     void shutdown();
 

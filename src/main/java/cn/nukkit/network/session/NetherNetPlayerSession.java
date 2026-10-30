@@ -5,6 +5,8 @@ import cn.nukkit.Server;
 import cn.nukkit.network.CompressionProvider;
 import cn.nukkit.network.NetherNetInterface;
 import cn.nukkit.network.Network;
+import cn.nukkit.network.NetworkEventQueue;
+import cn.nukkit.network.NetworkPacketBudget;
 import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.DisconnectPacket;
@@ -86,6 +88,20 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
     private final Queue<DataPacket> outbound = PlatformDependent.newMpscQueue();
     private final ScheduledFuture<?> tickFuture;
     private final AtomicBoolean queuedForPlayerCreation = new AtomicBoolean();
+    private final NetworkPacketBudget inboundBudget = new NetworkPacketBudget(
+            MAX_INBOUND_PACKETS_PER_SERVER_TICK, MAX_INBOUND_BYTES_PER_SERVER_TICK);
+    private volatile boolean processingClosed;
+    private final NetworkEventQueue.Task pendingTask = new NetworkEventQueue.Task() {
+        @Override
+        public NetworkEventQueue.Result process(long deadlineNanos) {
+            return processingClosed ? NetworkEventQueue.Result.DONE : server.processSession(NetherNetPlayerSession.this, deadlineNanos);
+        }
+
+        @Override
+        public boolean hasWork() {
+            return !processingClosed && player != null && (disconnectReason != null || !inbound.isEmpty());
+        }
+    };
     private final long acceptedAtNanos = System.nanoTime();
     private volatile long lastLoginActivityNanos = this.acceptedAtNanos;
     private volatile long resourcePackStartedNanos;
@@ -189,6 +205,7 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
         }
 
         this.disconnectReason = reason;
+        this.server.getNetwork().events().signal(this.pendingTask);
         this.inboundBacklog.close();
         if (this.tickFuture != null) {
             this.tickFuture.cancel(false);
@@ -279,20 +296,46 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
     }
 
     public NetherNetPlayerSession.InboundDrain serverTick(int packetBudget, long byteBudget) {
+        return this.drainInbound(packetBudget, byteBudget, Long.MAX_VALUE, null);
+    }
+
+    public void stopProcessing() {
+        this.processingClosed = true;
+        this.inbound.clear();
+    }
+
+    public NetworkEventQueue.Result processInbound(long deadlineNanos, NetworkPacketBudget transportBudget) {
+        this.drainInbound(32, MAX_INBOUND_BYTES_PER_SERVER_TICK, deadlineNanos, transportBudget);
+        DataPacket next = this.inbound.peek();
+        if (this.disconnectReason != null) return NetworkEventQueue.Result.MORE;
+        if (next == null) return NetworkEventQueue.Result.DONE;
+        int tick = this.server.getNetwork().events().tick();
+        return !this.inboundBudget.allows(tick, packetBytes(next)) || !transportBudget.allows(tick, packetBytes(next))
+                ? NetworkEventQueue.Result.NEXT_TICK : NetworkEventQueue.Result.MORE;
+    }
+
+    private InboundDrain drainInbound(int packetBudget, long byteBudget, long deadlineNanos, NetworkPacketBudget transportBudget) {
         DataPacket packet;
         int handled = 0;
         long handledBytes = 0L;
+        int tick = this.server.getNetwork().events().tick();
         int allowedPackets = Math.min(NetherNetPlayerSession.MAX_INBOUND_PACKETS_PER_SERVER_TICK, Math.max(packetBudget, 0));
         long allowedBytes = Math.min(NetherNetPlayerSession.MAX_INBOUND_BYTES_PER_SERVER_TICK, Math.max(byteBudget, 0L));
-        while (this.disconnectReason == null && handled < allowedPackets
+        while (this.disconnectReason == null && handled < allowedPackets && System.nanoTime() < deadlineNanos
                 && (packet = this.inbound.peek()) != null
                 && handledBytes + packetBytes(packet) <= allowedBytes) {
+            if (transportBudget != null && (!this.inboundBudget.allows(tick, packetBytes(packet))
+                    || !transportBudget.allows(tick, packetBytes(packet)))) break;
             this.inbound.poll();
             this.queuedInboundPackets.decrementAndGet();
             int packetBytes = packetBytes(packet);
             this.queuedInboundBytes.addAndGet(-packetBytes);
             handled++;
             handledBytes += packetBytes;
+            if (transportBudget != null) {
+                this.inboundBudget.record(packetBytes);
+                transportBudget.record(packetBytes);
+            }
             try {
                 if (packet instanceof LoginPacket) this.loginReceived = true;
                 if (packet instanceof LoginPacket || packet instanceof RequestNetworkSettingsPacket
@@ -309,6 +352,7 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
                 && this.queuedInboundPackets.get() <= NetherNetPlayerSession.INBOUND_LOW_WATER_PACKETS
                 && this.queuedInboundBytes.get() <= NetherNetPlayerSession.INBOUND_LOW_WATER_BYTES) {
             this.inboundThrottled = false;
+            this.resumeDeferredInbound();
         }
         return new NetherNetPlayerSession.InboundDrain(handled, handledBytes);
     }
@@ -373,6 +417,8 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
         Preconditions.checkArgument(this.player == null && player != null);
         this.player = player;
         this.lastLoginActivityNanos = System.nanoTime();
+        this.server.getNetwork().events().signal(this.pendingTask);
+        this.resumeDeferredInbound();
     }
 
     public boolean markQueuedForPlayerCreation() {
@@ -496,6 +542,7 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
                 || queuedBytes + batchBytes >= NetherNetPlayerSession.MAX_QUEUED_INBOUND_BYTES) {
             this.inboundThrottled = true;
         }
+        this.server.getNetwork().events().signal(this.pendingTask);
         return true;
     }
 
@@ -554,6 +601,15 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
 
     private static int packetBytes(DataPacket packet) {
         return Math.max(packet.getCount(), 1);
+    }
+
+    /** Resume decoding promptly when main-thread consumption frees queue capacity. */
+    private void resumeDeferredInbound() {
+        try {
+            this.channel.eventLoop().execute(this::drainDeferredInbound);
+        } catch (RejectedExecutionException ignored) {
+            // Event loop shutdown owns the remaining backlog.
+        }
     }
 
     /** Called only on the event loop. Never decrypt retained payloads a second time. */

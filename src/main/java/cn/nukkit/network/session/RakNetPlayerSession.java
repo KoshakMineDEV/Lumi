@@ -5,6 +5,8 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.network.CompressionProvider;
 import cn.nukkit.network.RakNetInterface;
+import cn.nukkit.network.NetworkEventQueue;
+import cn.nukkit.network.NetworkPacketBudget;
 import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.DisconnectPacket;
@@ -27,6 +29,7 @@ import org.apache.logging.log4j.message.FormattedMessage;
 import org.cloudburstmc.netty.channel.raknet.RakChildChannel;
 import org.cloudburstmc.netty.channel.raknet.packet.RakMessage;
 import org.cloudburstmc.netty.handler.codec.raknet.common.RakSessionCodec;
+import org.jctools.queues.SpscUnboundedArrayQueue;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -43,18 +46,34 @@ import java.util.concurrent.atomic.AtomicLong;
 @Log4j2
 public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage> implements NetworkPlayerSession {
 
+    private static final int MAX_QUEUED_INBOUND_PACKETS = 1300;
+
     private static final ThreadLocal<Sha256> HASH_LOCAL = ThreadLocal.withInitial(Natives.SHA_256);
     private static final ThreadLocal<byte[]> CHECKSUM_LOCAL = ThreadLocal.withInitial(() -> new byte[8]);
 
     private final RakNetInterface server;
     private final RakChildChannel channel;
 
-    private final Queue<DataPacket> inbound = PlatformDependent.newSpscQueue();
+    // Array queue indexes make the admission size check constant time even during a burst.
+    private final Queue<DataPacket> inbound = new SpscUnboundedArrayQueue<>(128);
     private final Queue<DataPacket> outbound = PlatformDependent.newMpscQueue();
     private final ScheduledFuture<?> tickFuture;
+    private final NetworkPacketBudget inboundBudget = new NetworkPacketBudget(120, 6L * 1024 * 1024);
+    private volatile boolean processingClosed;
+    private final NetworkEventQueue.Task pendingTask = new NetworkEventQueue.Task() {
+        @Override
+        public NetworkEventQueue.Result process(long deadlineNanos) {
+            return processingClosed ? NetworkEventQueue.Result.DONE : server.processSession(RakNetPlayerSession.this, deadlineNanos);
+        }
 
-    private Player player;
-    private String disconnectReason = null;
+        @Override
+        public boolean hasWork() {
+            return !processingClosed && player != null && (disconnectReason != null || !inbound.isEmpty());
+        }
+    };
+
+    private volatile Player player;
+    private volatile String disconnectReason = null;
 
     private CompressionProvider compressionIn;
     private CompressionProvider compressionOut;
@@ -81,6 +100,7 @@ public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage>
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RakMessage msg) throws Exception {
+        if (this.disconnectReason != null) return;
         ByteBuf buffer = msg.content();
         short packetId = buffer.readUnsignedByte();
         if (packetId == 0xfe) {
@@ -151,6 +171,10 @@ public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage>
 
             try {
                 this.server.getNetwork().processBatch(packetBuffer, this.inbound, compressionIn, this.channel.config().getProtocolVersion(), this.player);
+                if (this.inbound.size() > MAX_QUEUED_INBOUND_PACKETS) {
+                    this.disconnect("Too much inbound data");
+                }
+                if (!this.inbound.isEmpty()) this.server.getNetwork().events().signal(this.pendingTask);
             } catch (Exception e) {
                 Server.getInstance().getScheduler().scheduleDelayedTask(InternalPlugin.INSTANCE, () -> {
                     try {
@@ -185,6 +209,7 @@ public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage>
         }
 
         this.disconnectReason = reason;
+        this.server.getNetwork().events().signal(this.pendingTask);
         if (this.tickFuture != null) {
             this.tickFuture.cancel(false);
         }
@@ -276,6 +301,32 @@ public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage>
         }
     }
 
+    public void stopProcessing() {
+        this.processingClosed = true;
+        this.inbound.clear();
+    }
+
+    public NetworkEventQueue.Result processInbound(long deadlineNanos, NetworkPacketBudget transportBudget) {
+        int tick = this.server.getNetwork().events().tick();
+        for (int i = 0; i < 32 && System.nanoTime() < deadlineNanos && this.disconnectReason == null; i++) {
+            DataPacket packet = this.inbound.peek();
+            if (packet == null) return NetworkEventQueue.Result.DONE;
+            int bytes = Math.max(packet.getCount(), 1);
+            if (!this.inboundBudget.allows(tick, bytes) || !transportBudget.allows(tick, bytes)) {
+                return NetworkEventQueue.Result.NEXT_TICK;
+            }
+            this.inbound.poll();
+            this.inboundBudget.record(bytes);
+            transportBudget.record(bytes);
+            try {
+                this.player.handleDataPacket(packet);
+            } catch (Throwable e) {
+                log.error("An error occurred whilst handling {} for {}", packet.getClass().getSimpleName(), this.player.getName(), e);
+            }
+        }
+        return this.pendingTask.hasWork() ? NetworkEventQueue.Result.MORE : NetworkEventQueue.Result.DONE;
+    }
+
     private void sendPackets(Collection<DataPacket> packets) {
         BinaryStream batched = new BinaryStream();
         for (DataPacket packet : packets) {
@@ -359,6 +410,7 @@ public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage>
     public void setPlayer(Player player) {
         Preconditions.checkArgument(this.player == null && player != null);
         this.player = player;
+        this.server.getNetwork().events().signal(this.pendingTask);
     }
 
     @Override

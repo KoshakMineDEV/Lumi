@@ -130,6 +130,8 @@ dependencies {
     // Test dependencies
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.mockito:mockito-core:5.15.2")
+    testImplementation("org.objenesis:objenesis:3.3")
 
     // Annotation processors
     annotationProcessor("org.projectlombok:lombok:1.18.36")
@@ -199,4 +201,23 @@ gitProperties {
 
 tasks.processResources {
     dependsOn("generateGitProperties")
+}
+
+tasks.register<JavaExec>("networkLoadBenchmark") {
+    group = "verification"
+    description = "Measure immediate packet dispatch through real RakNet/NetherNet session codecs"
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("cn.nukkit.network.session.NetworkLoadBenchmark")
+    maxHeapSize = "2g"
+    args(providers.gradleProperty("benchArgs").orElse("").get().split(Regex("\\s+")).filter { it.isNotBlank() })
+}
+
+tasks.register<JavaExec>("netherNetLatencyProbe") {
+    group = "verification"
+    description = "Measure actual NetherNet SCTP RTT and application echo latency with separate local client/server JVMs"
+    dependsOn(tasks.testClasses, tasks.shadowJar)
+    classpath = files(sourceSets.test.get().output, tasks.shadowJar.flatMap { it.archiveFile })
+    mainClass.set("cn.nukkit.network.NetherNetLatencyProbe")
+    args(providers.gradleProperty("probeArgs").orElse("").get().split(Regex("\\s+")).filter { it.isNotBlank() })
 }

@@ -77,13 +77,25 @@ public class NetherNetInterface implements AdvancedSourceInterface {
     private boolean mediaAlarmRaised;
     private final Map<InetSocketAddress, NetherNetPlayerSession> sessions = new HashMap<>();
     private final Queue<NetherNetPlayerSession> sessionCreationQueue = PlatformDependent.newMpscQueue();
+    private final NetworkPacketBudget inboundBudget = new NetworkPacketBudget(2048, 6L * 1024 * 1024);
+    private final NetworkEventQueue.Task creationTask = new NetworkEventQueue.Task() {
+        @Override
+        public NetworkEventQueue.Result process(long deadlineNanos) {
+            createPendingSessions(deadlineNanos);
+            return hasWork() ? NetworkEventQueue.Result.MORE : NetworkEventQueue.Result.DONE;
+        }
+
+        @Override
+        public boolean hasWork() {
+            return !sessionCreationQueue.isEmpty();
+        }
+    };
     private final Set<NetherNetPlayerSession> pendingSessions = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Map<InetAddress, Long> blockedAddresses = new ConcurrentHashMap<>();
 
     private final AtomicReference<String> pongNonce = new AtomicReference<>(String.format("%016x", new SecureRandom().nextLong()));
 
     private volatile boolean accepting = true;
-    private int inboundRoundRobinCursor;
 
     public NetherNetInterface(Server server, NetherNetSettings settings) {
         this(server, settings, null);
@@ -319,12 +331,35 @@ public class NetherNetInterface implements AdvancedSourceInterface {
     }
 
     @Override
-    public boolean process() {
+    public void processMaintenance() {
         this.expireLoginSessions();
         this.sampleStatsAndEvaluateMediaAlarm();
+        Iterator<NetherNetPlayerSession> iterator = this.sessions.values().iterator();
+        while (iterator.hasNext()) {
+            NetherNetPlayerSession nukkitSession = iterator.next();
+            Player player = nukkitSession.getPlayer();
+            if (nukkitSession.getDisconnectReason() != null) {
+                nukkitSession.stopProcessing();
+                try {
+                    if (player != null) {
+                        player.close(player.getLeaveMessage(), nukkitSession.getDisconnectReason(), false);
+                    }
+                } catch (Exception e) {
+                    nukkitSession.disconnect("Internal error");
+                    log.error("Exception closing player " + player.getName(), e);
+                }
+                iterator.remove();
+            } else if (!nukkitSession.getChannel().isActive()) {
+                nukkitSession.disconnect("transport:closed_by_remote_peer");
+            }
+        }
+    }
 
+    private void createPendingSessions(long deadlineNanos) {
         NetherNetPlayerSession session;
-        while ((session = this.sessionCreationQueue.poll()) != null) {
+        int created = 0;
+        while (created++ < 32 && System.nanoTime() < deadlineNanos
+                && (session = this.sessionCreationQueue.poll()) != null) {
             this.pendingSessions.remove(session);
             if (session.getDisconnectReason() != null || !session.getChannel().isActive()) {
                 continue;
@@ -354,58 +389,31 @@ public class NetherNetInterface implements AdvancedSourceInterface {
             }
         }
 
-        List<NetherNetPlayerSession> activeSessions = new ArrayList<>(this.sessions.size());
-        Iterator<NetherNetPlayerSession> iterator = this.sessions.values().iterator();
-        while (iterator.hasNext()) {
-            NetherNetPlayerSession nukkitSession = iterator.next();
-            Player player = nukkitSession.getPlayer();
-            if (nukkitSession.getDisconnectReason() != null) {
-                try {
-                    if (player != null) {
-                        player.close(player.getLeaveMessage(), nukkitSession.getDisconnectReason(), false);
-                    }
-                } catch (Exception e) {
-                    player.getNetworkSession().disconnect("Internal error");
-                    log.error("Exception closing player " + player.getName(), e);
-                }
-                iterator.remove();
-            } else if (!nukkitSession.getChannel().isActive()) {
-                // Last resort when every session-level signal went missing: a session in the map
-                // was active when it entered, so an inactive channel is a remote close
-                nukkitSession.disconnect("transport:closed_by_remote_peer");
-            } else {
-                activeSessions.add(nukkitSession);
-            }
-        }
-        this.drainInboundFairly(activeSessions);
-        return true;
     }
 
-    private void drainInboundFairly(List<NetherNetPlayerSession> activeSessions) {
-        if (activeSessions.isEmpty()) {
-            this.inboundRoundRobinCursor = 0;
-            return;
+    public NetworkEventQueue.Result processSession(NetherNetPlayerSession session, long deadlineNanos) {
+        Player player = session.getPlayer();
+        if (player == null) return NetworkEventQueue.Result.DONE;
+        if (session.getDisconnectReason() != null) {
+            session.stopProcessing();
+            if (this.sessions.get(player.getSocketAddress()) != session) return NetworkEventQueue.Result.DONE;
+            try {
+                player.close(player.getLeaveMessage(), session.getDisconnectReason(), false);
+            } catch (Exception e) {
+                session.disconnect("Internal error");
+                log.error("Exception closing player " + player.getName(), e);
+            }
+            this.sessions.remove(player.getSocketAddress(), session);
+            return NetworkEventQueue.Result.DONE;
         }
-        int size = activeSessions.size();
-        int start = Math.floorMod(this.inboundRoundRobinCursor, size);
-        int remainingPackets = 2048;
-        long remainingBytes = 6L * 1024L * 1024L;
-        int visited = 0;
-        while (visited < size && remainingPackets > 0 && remainingBytes > 0L) {
-            NetherNetPlayerSession nukkitSession = activeSessions.get((start + visited) % size);
-            NetherNetPlayerSession.InboundDrain drained =
-                    nukkitSession.serverTick(remainingPackets, remainingBytes);
-            remainingPackets -= drained.packets();
-            remainingBytes -= drained.bytes();
-            visited++;
-        }
-        this.inboundRoundRobinCursor = (start + (visited < size ? visited : 1)) % size;
+        return session.processInbound(deadlineNanos, this.inboundBudget);
     }
 
     public void queueSessionForPlayerCreation(NetherNetPlayerSession session) {
         if (!this.accepting || !session.markQueuedForPlayerCreation()) return;
         this.pendingSessions.add(session);
         this.sessionCreationQueue.offer(session);
+        this.server.getNetwork().events().signal(this.creationTask);
     }
 
     private void expireLoginSessions() {

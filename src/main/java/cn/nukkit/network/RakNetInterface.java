@@ -53,6 +53,19 @@ public class RakNetInterface implements AdvancedSourceInterface {
     private final EventLoopGroup eventLoopGroup;
     private final Map<InetSocketAddress, RakNetPlayerSession> sessions = new HashMap<>();
     private final Queue<RakNetPlayerSession> sessionCreationQueue = PlatformDependent.newMpscQueue();
+    private final NetworkPacketBudget inboundBudget = new NetworkPacketBudget(2048, 6L * 1024 * 1024);
+    private final NetworkEventQueue.Task creationTask = new NetworkEventQueue.Task() {
+        @Override
+        public NetworkEventQueue.Result process(long deadlineNanos) {
+            createPendingSessions(deadlineNanos);
+            return hasWork() ? NetworkEventQueue.Result.MORE : NetworkEventQueue.Result.DONE;
+        }
+
+        @Override
+        public boolean hasWork() {
+            return !sessionCreationQueue.isEmpty();
+        }
+    };
 
     private final long serverId = ThreadLocalRandom.current().nextLong();
 
@@ -98,6 +111,7 @@ public class RakNetInterface implements AdvancedSourceInterface {
                         RakNetPlayerSession nukkitSession = new RakNetPlayerSession(RakNetInterface.this, (RakChildChannel) channel);
                         channel.pipeline().addLast("nukkit-handler", nukkitSession);
                         RakNetInterface.this.sessionCreationQueue.offer(nukkitSession);
+                        server.getNetwork().events().signal(creationTask);
                     }
                 });
 
@@ -124,10 +138,12 @@ public class RakNetInterface implements AdvancedSourceInterface {
         this.network = network;
     }
 
-    @Override
-    public boolean process() {
+    private void createPendingSessions(long deadlineNanos) {
         RakNetPlayerSession session;
-        while ((session = this.sessionCreationQueue.poll()) != null) {
+        int created = 0;
+        while (created++ < 32 && System.nanoTime() < deadlineNanos
+                && (session = this.sessionCreationQueue.poll()) != null) {
+            if (session.getDisconnectReason() != null || !session.getChannel().isOpen()) continue;
             InetSocketAddress address = session.getChannel().remoteAddress();
             try {
                 PlayerCreationEvent event = new PlayerCreationEvent(this, Player.class, Player.class, null, address);
@@ -146,24 +162,24 @@ public class RakNetInterface implements AdvancedSourceInterface {
                 this.sessions.remove(address);
             }
         }
+    }
 
-        Iterator<RakNetPlayerSession> iterator = this.sessions.values().iterator();
-        while (iterator.hasNext()) {
-            RakNetPlayerSession nukkitSession = iterator.next();
-            Player player = nukkitSession.getPlayer();
-            if (nukkitSession.getDisconnectReason() != null) {
-                try {
-                    player.close(player.getLeaveMessage(), nukkitSession.getDisconnectReason(), false);
-                } catch (Exception e) {
-                    player.getNetworkSession().disconnect("Internal error");
-                    log.error("Exception closing player " + player.getName(), e);
-                }
-                iterator.remove();
-            } else {
-                nukkitSession.serverTick();
+    public NetworkEventQueue.Result processSession(RakNetPlayerSession session, long deadlineNanos) {
+        Player player = session.getPlayer();
+        if (player == null) return NetworkEventQueue.Result.DONE;
+        if (session.getDisconnectReason() != null) {
+            session.stopProcessing();
+            if (this.sessions.get(player.getSocketAddress()) != session) return NetworkEventQueue.Result.DONE;
+            try {
+                player.close(player.getLeaveMessage(), session.getDisconnectReason(), false);
+            } catch (Exception e) {
+                session.disconnect("Internal error");
+                log.error("Exception closing player " + player.getName(), e);
             }
+            this.sessions.remove(player.getSocketAddress(), session);
+            return NetworkEventQueue.Result.DONE;
         }
-        return true;
+        return session.processInbound(deadlineNanos, this.inboundBudget);
     }
 
     @Override

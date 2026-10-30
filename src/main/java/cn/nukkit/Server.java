@@ -106,7 +106,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.LockSupport;
 import java.util.regex.Pattern;
 
 /**
@@ -136,7 +135,8 @@ public class Server {
     private final ServerScheduler scheduler;
 
     private int tickCounter;
-    private long nextTick;
+    private volatile long nextTick;
+    private long networkTimeBetweenTicks;
     private final float[] tickAverage = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
     private final float[] useAverage = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     private float maxTick = 20;
@@ -202,6 +202,7 @@ public class Server {
     private final ServiceManager serviceManager = new NKServiceManager();
     private Level defaultLevel;
     private final Thread currentThread;
+    private final GameLoop gameLoop;
     /**
      * This is needed for structure generation
      */
@@ -214,6 +215,16 @@ public class Server {
     Server(final String filePath, String dataPath, String pluginPath, boolean loadPlugins, boolean debug) {
         Preconditions.checkState(instance == null, "Already initialized!");
         currentThread = Thread.currentThread(); // Saves the current thread instance as a reference, used in Server#isPrimaryThread()
+        this.gameLoop = GameLoop.builder()
+                .ownerThread(currentThread)
+                .running(this.isRunning::get)
+                .onTick(this::tick)
+                .onIdle(this::processNetworkEvents)
+                .hasPendingTasks(this::hasPendingNetworkTasks)
+                .afterTick(this::doIdleGarbageCollection)
+                .onDeadline(deadline -> this.nextTick = deadline)
+                .onException(e -> log.error("A RuntimeException happened while ticking the server", e))
+                .build();
         instance = this;
 
         this.filePath = filePath;
@@ -675,6 +686,7 @@ public class Server {
 
     public void shutdown() {
         isRunning.compareAndSet(true, false);
+        this.gameLoop.stop();
     }
 
     public void forceShutdown() {
@@ -688,6 +700,7 @@ public class Server {
 
         try {
             this.isRunning.compareAndSet(true, false);
+            this.gameLoop.stop();
             this.hasStopped = true;
 
             ServerStopEvent serverStopEvent = new ServerStopEvent();
@@ -802,79 +815,42 @@ public class Server {
      * Internal: Tick the server
      */
     public void tickProcessor() {
-        final long tickTime = 50_000_000L;
-        this.nextTick = System.nanoTime();
-
         try {
-            while (this.isRunning.get()) {
-                try {
-                    this.tick();
-
-                    nextTick += tickTime;
-
-                    long now = System.nanoTime();
-                    long remaining = nextTick - now;
-
-                    if (remaining <= 0L) {
-                        if (remaining < -(tickTime * 5L)) {
-                            nextTick = now;
-                        }
-                        continue;
-                    }
-
-                    if (settings.world().doWorldGc()) {
-                        long gcBudget = remaining - 1_000_000L;
-
-                        if (gcBudget > 0L) {
-                            final Level[] levels = this.levelArray;
-                            final int length = levels.length;
-
-                            if (length > 0) {
-                                int offset = this.lastLevelGC;
-
-                                for (int i = 0; i < length; i++) {
-                                    offset++;
-
-                                    if (offset >= length) {
-                                        offset = 0;
-                                    }
-
-                                    Level level = levels[offset];
-
-                                    if (level == null || level.isBeingConverted) {
-                                        continue;
-                                    }
-
-                                    long gcStart = System.nanoTime();
-
-                                    level.doGarbageCollection(
-                                            Math.max(1L, gcBudget / 1_000_000L)
-                                    );
-
-                                    gcBudget -= System.nanoTime() - gcStart;
-
-                                    if (gcBudget <= 0L) {
-                                        break;
-                                    }
-                                }
-
-                                this.lastLevelGC = offset;
-                                remaining = nextTick - System.nanoTime();
-                            }
-                        }
-                    }
-
-                    if (remaining > 0L) {
-                        LockSupport.parkNanos(remaining);
-                    }
-
-                } catch (RuntimeException e) {
-                    log.error("A RuntimeException happened while ticking the server", e);
-                }
-            }
+            if (this.isRunning.get()) this.gameLoop.startLoop();
         } catch (Throwable e) {
             log.fatal("Exception happened while ticking server\n{}", Utils.getAllThreadDumps(), e);
         }
+    }
+
+    private boolean hasPendingNetworkTasks() {
+        return this.network.events().hasReadyTasks();
+    }
+
+    private void processNetworkEvents(long deadlineNanos) {
+        long networkStart = System.nanoTime();
+        try {
+            this.network.processPendingSessions(deadlineNanos);
+        } finally {
+            this.networkTimeBetweenTicks += System.nanoTime() - networkStart;
+        }
+    }
+
+    private void doIdleGarbageCollection(long deadlineNanos) {
+        if (!settings.world().doWorldGc() || this.hasPendingNetworkTasks()) return;
+        long gcBudget = deadlineNanos - System.nanoTime() - 1_000_000L;
+        final Level[] levels = this.levelArray;
+        if (gcBudget <= 0L || levels.length == 0) return;
+        int offset = this.lastLevelGC;
+        for (int i = 0; i < levels.length; i++) {
+            if (++offset >= levels.length) offset = 0;
+            Level level = levels[offset];
+            if (level == null || level.isBeingConverted) continue;
+            long gcStart = System.nanoTime();
+            level.doGarbageCollection(Math.max(1L, gcBudget / 1_000_000L));
+            gcBudget -= System.nanoTime() - gcStart;
+            if (gcBudget <= 0L || this.hasPendingNetworkTasks()) break;
+        }
+        this.lastLevelGC = offset;
     }
 
     public void onPlayerCompleteLoginSequence(Player player) {
@@ -1053,20 +1029,13 @@ public class Server {
     }
 
     private void tick() {
-        long tickTime = System.nanoTime();
-
-        long diff = tickTime - this.nextTick;
-        
-        if (diff < -25_000_000L) {
-            long parkNanos = -diff - 25_000_000L;
-            LockSupport.parkNanos(Math.max(5_000_000L, parkNanos));
-        }
-
         long tickTimeNano = System.nanoTime();
 
         ++this.tickCounter;
 
+        this.network.events().beginTick();
         this.network.processInterfaces();
+        this.network.processPendingSessions(tickTimeNano + 2_000_000L);
 
         if (this.rcon != null) {
             this.rcon.check();
@@ -1113,9 +1082,11 @@ public class Server {
         }
 
         long nowNano = System.nanoTime();
+        long workNanos = nowNano - tickTimeNano + this.networkTimeBetweenTicks;
+        this.networkTimeBetweenTicks = 0;
 
-        float tick = (float) Math.min(20, 1_000_000_000.0 / Math.max(1_000_000, (double) (nowNano - tickTimeNano)));
-        float use  = (float) Math.min(1, (double) (nowNano - tickTimeNano) / 50_000_000.0);
+        float tick = (float) Math.min(20, 1_000_000_000.0 / Math.max(1_000_000, (double) workNanos));
+        float use  = (float) Math.min(1, (double) workNanos / 50_000_000.0);
 
         if (this.maxTick > tick) {
             this.maxTick = tick;
@@ -2176,6 +2147,11 @@ public class Server {
      */
     public Thread getPrimaryThread() {
         return currentThread;
+    }
+
+    /** One loop for all levels, permanently bound to the existing primary thread. */
+    public GameLoop getGameLoop() {
+        return this.gameLoop;
     }
 
     private void registerProfessions() {

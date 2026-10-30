@@ -40,12 +40,11 @@ public class Network {
 
     private final Server server;
 
+    private final NetworkEventQueue events;
+
     private final Set<SourceInterface> interfaces = new HashSet<>();
 
     private final Set<AdvancedSourceInterface> advancedInterfaces = new HashSet<>();
-
-    /*private double upload = 0;
-    private double download = 0;*/
 
     private String name;
     private String subName;
@@ -57,6 +56,7 @@ public class Network {
         this.registerPackets();
         DataPacketManager.registerDefaultProcessors();
         this.server = server;
+        this.events = new NetworkEventQueue(server.getGameLoop());
         List<NetworkIF> tmpIfs = null;
         try {
             tmpIfs = new SystemInfo().getHardware().getNetworkIFs();
@@ -67,14 +67,7 @@ public class Network {
         }
     }
 
-    @Deprecated
-    public void addStatistics(double upload, double download) {
-        /*this.upload += upload;
-        this.download += download;*/
-    }
-
     public double getUpload() {
-        //return upload;
         if (netWorkStatisticDataList.size() < 2) {
             return 0;
         }
@@ -82,7 +75,6 @@ public class Network {
     }
 
     public double getDownload() {
-        //return download;
         if (netWorkStatisticDataList.size() < 2) {
             return 0;
         }
@@ -90,8 +82,6 @@ public class Network {
     }
 
     public void resetStatistics() {
-        /*this.upload = 0;
-        this.download = 0;*/
         long upload = 0;
         long download = 0;
         if (netWorkStatisticDataList.size() > 1) {
@@ -125,6 +115,14 @@ public class Network {
                 log.fatal(this.server.getLanguage().translateString("nukkit.server.networkError", new String[]{interfaz.getClass().getName(), Utils.getExceptionMessage(e)}));
             }
         }
+    }
+
+    public NetworkEventQueue events() {
+        return this.events;
+    }
+
+    public void processPendingSessions(long deadlineNanos) {
+        this.events.process(Math.min(deadlineNanos, System.nanoTime() + 2_000_000L));
     }
 
     public void registerInterface(SourceInterface interfaz) {
