@@ -1,6 +1,9 @@
 package cn.nukkit.inventory.transaction.action;
 
 import cn.nukkit.Player;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.inventory.BaseInventory;
+import cn.nukkit.inventory.DoubleChestInventory;
 import cn.nukkit.inventory.FurnaceInventory;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.inventory.transaction.InventoryTransaction;
@@ -49,9 +52,24 @@ public class SlotChangeAction extends InventoryAction {
      */
     @Override
     public boolean isValid(Player source) {
+        if (!isInventoryAvailable()) {
+            return false;
+        }
         Item check = inventory.getItem(this.inventorySlot);
 
         return check.equalsExact(this.sourceItem);
+    }
+
+    private boolean isInventoryAvailable() {
+        if (inventory instanceof BaseInventory base && base.destroyed) {
+            return false;
+        }
+        if (inventory.getHolder() instanceof BlockEntity entity && entity.closed) {
+            return false;
+        }
+        // The combined inventory exposes only the left chest as its holder.
+        return !(inventory instanceof DoubleChestInventory chest)
+                || (!chest.getRightSide().destroyed && !chest.getRightSide().getHolder().closed);
     }
 
     /**
@@ -62,6 +80,9 @@ public class SlotChangeAction extends InventoryAction {
      */
     @Override
     public boolean execute(Player source) {
+        if (!isInventoryAvailable()) {
+            return false;
+        }
         if(this.getInventory() instanceof FurnaceInventory){
             return ((FurnaceInventory) this.getInventory()).setItemByPlayer(source, this.inventorySlot, this.targetItem, false);
         } else {

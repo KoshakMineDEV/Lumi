@@ -264,6 +264,16 @@ public class InventoryTransaction {
             }
         }
 
+        // Event handlers may move or close a container after the initial validation.
+        // Recheck every action before applying any part of the transfer.
+        for (InventoryAction action : this.actions) {
+            if (!action.isValid(this.source)) {
+                this.invalid = true;
+                this.sendInventories();
+                return false;
+            }
+        }
+
         for (InventoryAction action : this.actions) {
             if (action.execute(this.source)) {
                 action.onExecuteSuccess(this.source);

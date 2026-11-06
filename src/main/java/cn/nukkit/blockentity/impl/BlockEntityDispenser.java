@@ -1,5 +1,6 @@
 package cn.nukkit.blockentity.impl;
 
+import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
@@ -14,6 +15,8 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
+
+import java.util.HashSet;
 
 /**
  * Created by PetteriM1
@@ -118,6 +121,17 @@ public class BlockEntityDispenser extends BlockEntitySpawnable implements Invent
     @Override
     public DispenserInventory getInventory() {
         return inventory;
+    }
+
+    @Override
+    public void close() {
+        if (!closed) {
+            inventory.destroyed = true;
+            for (Player player : new HashSet<>(inventory.getViewers())) {
+                player.removeWindow(inventory);
+            }
+            super.close();
+        }
     }
 
     @Override

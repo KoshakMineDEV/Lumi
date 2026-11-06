@@ -228,7 +228,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                         chest.unpair();
                     }
                     blockEntity.saveNBT();
-                    tag = new CompoundTag(blockEntity.namedTag.getTags());
+                    tag = blockEntity.namedTag.clone();
                     blockEntity.close();
                 }
                 namedTags.add(tag);
