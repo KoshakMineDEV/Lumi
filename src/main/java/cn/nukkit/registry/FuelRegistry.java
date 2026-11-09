@@ -57,6 +57,7 @@ public class FuelRegistry implements IRegistry<String, Integer, Integer> {
         register(ItemNamespaceId.WOODEN_HOE, 200);
         register(ItemNamespaceId.WOODEN_AXE, 200);
         register(ItemNamespaceId.WOODEN_SWORD, 200);
+        register(ItemNamespaceId.WOODEN_SPEAR, 200);
         register(ItemNamespaceId.BOWL, 200);
         register(ItemNamespaceId.STICK, 100);
         register(ItemNamespaceId.DEADBUSH, 100);

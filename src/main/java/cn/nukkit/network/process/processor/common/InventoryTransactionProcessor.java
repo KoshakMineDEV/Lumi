@@ -633,6 +633,10 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
                             return;
                         }
 
+                        if (item instanceof ItemSpear) {
+                            break;
+                        }
+
                         if (!player.canInteractEntity(targetEntity, handle.isCreative() ? 8 : 5)) {
                             break;
                         } else if (targetEntity instanceof Player) {

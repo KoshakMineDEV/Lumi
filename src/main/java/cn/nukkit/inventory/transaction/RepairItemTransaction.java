@@ -15,8 +15,11 @@ import cn.nukkit.inventory.transaction.action.InventoryAction;
 import cn.nukkit.inventory.transaction.action.RepairItemAction;
 import cn.nukkit.inventory.transaction.action.SlotChangeAction;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemNamespaceId;
+import cn.nukkit.item.ItemSpear;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.item.enchantment.EnchantmentID;
+import cn.nukkit.item.material.tags.ItemTags;
 import cn.nukkit.network.protocol.LevelEventPacket;
 import cn.nukkit.network.protocol.types.NetworkInventoryAction;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -335,6 +338,19 @@ public class RepairItemTransaction extends InventoryTransaction {
     }
 
     private boolean matchRepairItem() {
+        if (this.inputItem instanceof ItemSpear) {
+            return switch (this.inputItem.getNamespaceId()) {
+                case ItemNamespaceId.WOODEN_SPEAR -> this.materialItem.hasItemTag(ItemTags.PLANKS);
+                case ItemNamespaceId.STONE_SPEAR -> this.materialItem.hasItemTag(ItemTags.STONE_TOOL_MATERIALS);
+                case ItemNamespaceId.COPPER_SPEAR -> this.materialItem.getNamespaceId().equals(ItemNamespaceId.COPPER_INGOT);
+                case ItemNamespaceId.IRON_SPEAR -> this.materialItem.getNamespaceId().equals(ItemNamespaceId.IRON_INGOT);
+                case ItemNamespaceId.GOLDEN_SPEAR -> this.materialItem.getNamespaceId().equals(ItemNamespaceId.GOLD_INGOT);
+                case ItemNamespaceId.DIAMOND_SPEAR -> this.materialItem.getNamespaceId().equals(ItemNamespaceId.DIAMOND);
+                case ItemNamespaceId.NETHERITE_SPEAR -> this.materialItem.getNamespaceId().equals(ItemNamespaceId.NETHERITE_INGOT);
+                default -> false;
+            };
+        }
+
         switch (this.inputItem.getId()) {
             case Item.LEATHER_CAP:
             case Item.LEATHER_TUNIC:

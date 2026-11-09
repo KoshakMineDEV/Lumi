@@ -5,6 +5,7 @@ import cn.nukkit.PlayerHandle;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemSpear;
 import cn.nukkit.network.process.DataPacketProcessor;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.MobEquipmentPacket;
@@ -61,6 +62,7 @@ public class MobEquipmentProcessor extends DataPacketProcessor<MobEquipmentPacke
             ((PlayerInventory) inv).equipItem(pk.hotbarSlot);
         }
 
+        if (item instanceof ItemSpear) return; // To prevent not needed reset of charge attack
         player.setDataFlag(Player.DATA_FLAGS, Player.DATA_FLAG_ACTION, false);
     }
 
