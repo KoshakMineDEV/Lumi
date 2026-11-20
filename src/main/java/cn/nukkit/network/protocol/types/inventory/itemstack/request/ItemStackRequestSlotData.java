@@ -18,4 +18,17 @@ public class ItemStackRequestSlotData {
     // must check if these IDs match. If they do not match, servers should reject the stack request that the
     // action holding this info was in.
     int stackNetworkId;
+
+    Integer dynamicId;
+
+    public ItemStackRequestSlotData(ContainerSlotType container, int slot, int stackNetworkId) {
+        this(container, slot, stackNetworkId, null);
+    }
+
+    public ItemStackRequestSlotData(ContainerSlotType container, int slot, int stackNetworkId, Integer dynamicId) {
+        this.container = container;
+        this.slot = slot;
+        this.stackNetworkId = stackNetworkId;
+        this.dynamicId = dynamicId;
+    }
 }

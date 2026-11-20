@@ -24,7 +24,9 @@ public class ItemStackResponsePacket extends DataPacket {
             this.putByte((byte) response.getResult().ordinal());
             this.putVarInt(response.getRequestId());
             if (this.protocol >= ProtocolInfo.v1_26_40) {
-                this.putBoolean(true);
+                if (this.protocol < ProtocolInfo.v1_26_50) {
+                    this.putBoolean(true);
+                }
                 boolean present = !response.getContainers().isEmpty();
                 this.putBoolean(present);
                 if (!present) return;
@@ -32,17 +34,22 @@ public class ItemStackResponsePacket extends DataPacket {
                 return;
             }
             this.putArray(response.getContainers(), container -> {
-                if (this.protocol >= ProtocolInfo.v1_26_40) {
-                    this.writeFullContainerName(new FullContainerName(container.getContainer(), null));
+                if (this.protocol >= ProtocolInfo.v1_21_30) {
+                    this.writeFullContainerName(new FullContainerName(container.getContainer(), container.getDynamicId()));
                 } else {
                     this.putByte((byte) container.getContainer().getId());
+                    if (this.protocol >= ProtocolInfo.v1_21_20) {
+                        this.putLInt(container.getDynamicId() == null ? 0 : container.getDynamicId());
+                    }
                 }
                 this.putArray(container.getItems(), item -> {
                     this.putByte((byte) item.getSlot());
                     this.putByte((byte) item.getHotbarSlot());
                     this.putByte((byte) item.getCount());
                     if (this.protocol >= ProtocolInfo.v1_26_40) {
-                        this.putBoolean(true);
+                        if (this.protocol < ProtocolInfo.v1_26_50) {
+                            this.putBoolean(true);
+                        }
                         boolean present = item.getStackNetworkId() != 0;
                         this.putBoolean(present);
                         if (present) this.putVarInt(item.getStackNetworkId());
@@ -50,7 +57,11 @@ public class ItemStackResponsePacket extends DataPacket {
                         this.putVarInt(item.getStackNetworkId());
                     }
                     this.putString(item.getCustomName());
-                    if (this.protocol >= ProtocolInfo.v1_21_50) this.putString("");
+                    if (this.protocol >= ProtocolInfo.v1_26_40) {
+                        this.putOptionalNull(item.getFilteredCustomName(), this::putString);
+                    } else if (this.protocol >= ProtocolInfo.v1_21_50) {
+                        this.putString(item.getFilteredCustomName() == null ? "" : item.getFilteredCustomName());
+                    }
                     this.putVarInt(item.getDurabilityCorrection());
                 });
             });

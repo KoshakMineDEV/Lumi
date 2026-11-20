@@ -71,6 +71,10 @@ public class GeneralSettings extends OkaeriConfig {
     @Comment("Whether to enable server authoritative block breaking")
     private boolean serverAuthoritativeBlockBreaking = true;
 
+    @CustomKey("server-authoritative-inventory")
+    @Comment("Use server-authoritative inventory transactions for all players. Changes require a server restart.")
+    private boolean serverAuthoritativeInventory = false;
+
     @Setter(value = AccessLevel.NONE)
     @Comment("Multiversion settings")
     private MultiversionSettings multiversion = new MultiversionSettings();

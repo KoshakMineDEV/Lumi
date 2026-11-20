@@ -464,6 +464,8 @@ public class Network {
                 .registerPacket(ProtocolInfo.INTERACT_PACKET, InteractPacket.class, InteractPacket::new)
                 .registerPacket(ProtocolInfo.INVENTORY_CONTENT_PACKET, InventoryContentPacket.class, InventoryContentPacket::new)
                 .registerPacket(ProtocolInfo.INVENTORY_SLOT_PACKET, InventorySlotPacket.class, InventorySlotPacket::new)
+                .registerPacket(ProtocolInfo.ITEM_STACK_REQUEST_PACKET, ItemStackRequestPacket.class, ItemStackRequestPacket::new)
+                .registerPacket(ProtocolInfo.ITEM_STACK_RESPONSE_PACKET, ItemStackResponsePacket.class, ItemStackResponsePacket::new)
                 .registerPacket(ProtocolInfo.INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket.class, InventoryTransactionPacket::new)
                 .registerPacket(ProtocolInfo.ITEM_FRAME_DROP_ITEM_PACKET, ItemFrameDropItemPacket.class, ItemFrameDropItemPacket::new)
                 .registerPacket(ProtocolInfo.LEVEL_EVENT_PACKET, LevelEventPacket.class, LevelEventPacket::new)

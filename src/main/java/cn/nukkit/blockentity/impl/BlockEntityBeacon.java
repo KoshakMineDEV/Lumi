@@ -180,6 +180,17 @@ public class BlockEntityBeacon extends BlockEntitySpawnable {
         return POWER_LEVEL_MAX;
     }
 
+    public static boolean isAllowedEffect(int id) {
+        return id == 0 || allowedEffects.contains(id);
+    }
+
+    public static boolean isPaymentItem(int itemId) {
+        return switch (itemId) {
+            case Item.IRON_INGOT, Item.GOLD_INGOT, Item.DIAMOND, Item.EMERALD, Item.NETHERITE_INGOT -> true;
+            default -> false;
+        };
+    }
+
     public int getPowerLevel() {
         return namedTag.getInt("Level");
     }
@@ -221,7 +232,7 @@ public class BlockEntityBeacon extends BlockEntitySpawnable {
 
     @Override
     public boolean updateCompoundTag(CompoundTag nbt, Player player) {
-        if (!nbt.getString("id").equals(BlockEntity.BEACON)) {
+        if (player.isInventoryServerAuthoritative() || !nbt.getString("id").equals(BlockEntity.BEACON)) {
             return false;
         }
 

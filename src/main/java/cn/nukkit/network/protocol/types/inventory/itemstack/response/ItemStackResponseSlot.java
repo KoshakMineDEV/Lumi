@@ -1,12 +1,14 @@
 package cn.nukkit.network.protocol.types.inventory.itemstack.response;
 
 import lombok.NonNull;
+import lombok.AllArgsConstructor;
 import lombok.Value;
 
 /**
  * ItemEntry holds information on what item stack should be present in a specific slot.
  */
 @Value
+@AllArgsConstructor
 public class ItemStackResponseSlot {
     int slot;
     int hotbarSlot;
@@ -28,4 +30,10 @@ public class ItemStackResponseSlot {
      * @since v428
      */
     int durabilityCorrection;
+    String filteredCustomName;
+
+    public ItemStackResponseSlot(int slot, int hotbarSlot, int count, int stackNetworkId, String customName,
+                                 int durabilityCorrection) {
+        this(slot, hotbarSlot, count, stackNetworkId, customName, durabilityCorrection, null);
+    }
 }

@@ -20,6 +20,10 @@ public class FakeBlockUIComponent extends PlayerUIComponent {
     }
 
 
+    public InventoryType getFakeBlockType() {
+        return this.type;
+    }
+
     @Override
     public FakeBlockMenu getHolder() {
         return (FakeBlockMenu) this.holder;

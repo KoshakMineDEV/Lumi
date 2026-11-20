@@ -53,6 +53,7 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
     private final Map<UUID, SmithingRecipe> SMITHING = new Object2ObjectOpenHashMap<>();
     private final Map<String, StonecutterRecipe> STONECUTTER = new HashMap<>();
     private final Object2DoubleOpenHashMap<Recipe> FURNACE_XP = new Object2DoubleOpenHashMap<>();
+    private final Map<Integer, Recipe> networkRecipes = new HashMap<>();
     private final Collection<Recipe> RECIPES = new ArrayDeque<>();
 
     private static final AtomicBoolean isLoad = new AtomicBoolean(false);
@@ -116,6 +117,14 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
         throw new UnsupportedOperationException("Not supported for RecipeRegistry");
     }
 
+    public Recipe getNetworkRecipe(int protocol, int networkId) {
+        Recipe recipe = this.networkRecipes.get(networkId);
+        if (recipe == null || !recipe.isValidRecipe(protocol) || recipe instanceof MultiRecipe multi && multi.hideRecipe()) {
+            return null;
+        }
+        return recipe;
+    }
+
     @Override
     public void trim() {
 
@@ -135,6 +144,7 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
         SMITHING.clear();
         FURNACE_XP.clear();
         RECIPES.clear();
+        networkRecipes.clear();
         init();
         buildPackets();
     }
@@ -180,12 +190,14 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
         String resultHash = RecipeUtils.getItemHash(recipe.getResult());
         SHAPED.computeIfAbsent(resultHash, (key) -> new ArrayList<>()).add(recipe);
         RECIPES.add(recipe);
+        this.networkRecipes.put(recipe.getNetworkId(), recipe);
     }
 
     public void registerShapelessRecipe(ShapelessRecipe recipe) {
         String resultHash = RecipeUtils.getItemHash(recipe.getResult());
         SHAPELESS.computeIfAbsent(resultHash, (key) -> new ArrayList<>()).add(recipe);
         RECIPES.add(recipe);
+        this.networkRecipes.put(recipe.getNetworkId(), recipe);
     }
 
     public void addStonecutterRecipe(StonecutterRecipe recipe) {
@@ -200,6 +212,7 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
 
     public void registerSmithingRecipe(SmithingRecipe recipe) {
         this.SMITHING.put(UUID.randomUUID(), recipe);
+        this.networkRecipes.put(recipe.getNetworkId(), recipe);
     }
 
     public void registerBrewingRecipe(BrewingRecipe recipe) {
@@ -230,6 +243,7 @@ public class RecipeRegistry implements IRegistry<Integer, Recipe, Recipe> {
     public void registerMultiRecipe(MultiRecipe recipe) {
         this.MULTI.put(recipe.getId(), recipe);
         RECIPES.add(recipe);
+        this.networkRecipes.put(recipe.getNetworkId(), recipe);
     }
 
     public FurnaceRecipe matchBlastFurnaceRecipe(Item input) {

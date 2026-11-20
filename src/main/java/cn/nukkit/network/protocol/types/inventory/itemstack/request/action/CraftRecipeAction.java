@@ -1,5 +1,6 @@
 package cn.nukkit.network.protocol.types.inventory.itemstack.request.action;
 
+import lombok.AllArgsConstructor;
 import lombok.Value;
 
 /**
@@ -9,8 +10,15 @@ import lombok.Value;
  * crafting, where the old item is consumed.
  */
 @Value
+@AllArgsConstructor
 public class CraftRecipeAction implements RecipeItemStackRequestAction {
     int recipeNetworkId;
+
+    int numberOfRequestedCrafts;
+
+    public CraftRecipeAction(int recipeNetworkId) {
+        this(recipeNetworkId, 1);
+    }
 
     @Override
     public ItemStackRequestActionType getType() {

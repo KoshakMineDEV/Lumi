@@ -45,6 +45,8 @@ import cn.nukkit.event.server.DataPacketReceiveEvent;
 import cn.nukkit.event.server.DataPacketSendEvent;
 import cn.nukkit.form.window.FormWindow;
 import cn.nukkit.form.window.FormWindowDialog;
+import cn.nukkit.inventory.request.ItemStackRequestHandler;
+import cn.nukkit.network.protocol.types.inventory.itemstack.request.ItemStackRequest;
 import cn.nukkit.inventory.*;
 import cn.nukkit.inventory.transaction.*;
 import cn.nukkit.item.*;
@@ -164,6 +166,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public static final int SMITHING_WINDOW_ID = 6;
     public static final int GRINDSTONE_WINDOW_ID = 7;
     public static final int STONECUTTER_WINDOW_ID = 8;
+    public static final int CARTOGRAPHY_WINDOW_ID = 9;
     /**
      * @since 649 1.20.60
      * 自1.20.60开始，需要发送ContainerOpenPacket给玩家才能正常打开讲台上的书
@@ -186,6 +189,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     public boolean playedBefore;
     public boolean spawned = false;
+    private final Set<Integer> inventoryRequestIds = new HashSet<>();
+    private int inventoryRequestTick = -1;
     public boolean loggedIn = false;
     protected boolean loginVerified = false;
     private int unverifiedPackets;
@@ -1360,6 +1365,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return false;
         }
 
+        BundleInventory.sendContents(this, packet);
+
         if (Nukkit.DEBUG > 2) {
             log.trace("Outbound {}: {}", this.getName(), packet);
         }
@@ -1588,6 +1595,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return false;
         }
 
+        TradeInventory tradeInventory = this.getTradeInventory();
+        if (tradeInventory != null) {
+            this.removeWindow(tradeInventory);
+        }
         this.gamemode = gamemode;
 
         List<Player> updatePlayers = this.hasSpawned.values().stream().filter(p -> p != this).toList();
@@ -2841,6 +2852,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 startGamePacket.lightningLevel = this.getLevel().getThunderTime();
             }
         }
+        startGamePacket.isInventoryServerAuthoritative = this.isInventoryServerAuthoritative();
         startGamePacket.isMovementServerAuthoritative = this.isMovementServerAuthoritative();
         startGamePacket.isServerAuthoritativeBlockBreaking = this.isServerAuthoritativeBlockBreaking();
         if (protocol >= ProtocolInfo.v1_26_50) {
@@ -4827,7 +4839,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     public Optional<Inventory> getTopWindow() {
         for (Entry<Inventory, Integer> entry : this.windows.entrySet()) {
-            if (!this.permanentWindows.contains(entry.getValue())) {
+            if (!this.permanentWindows.contains(entry.getValue())
+                    && (!this.isInventoryServerAuthoritative() || entry.getValue() != ContainerIds.NONE)) {
                 return Optional.of(entry.getKey());
             }
         }
@@ -4839,6 +4852,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     protected void removeWindow(Inventory inventory, boolean isResponse) {
+        if (inventory instanceof TradeInventory trade && this.tradingTransaction != null
+                && this.tradingTransaction.isFor(trade)) {
+            this.tradingTransaction = null;
+        }
         inventory.close(this);
         // TODO: This needs a proper fix
         // Requiring isResponse here causes issues with inventory events and an item duplication glitch
@@ -4882,8 +4899,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     public TradeInventory getTradeInventory() {
         for (Inventory inv : this.windows.keySet()) {
-            if (inv instanceof TradeInventory) {
-                return (TradeInventory) inv;
+            if (inv instanceof TradeInventory trade && trade.getViewers().contains(this)) {
+                return trade;
             }
         }
         return null;
@@ -4923,6 +4940,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.moveBlockUIContents(Player.BEACON_WINDOW_ID);
             this.moveBlockUIContents(Player.SMITHING_WINDOW_ID);
             this.moveBlockUIContents(Player.STONECUTTER_WINDOW_ID);
+            this.moveBlockUIContents(Player.CARTOGRAPHY_WINDOW_ID);
 
             this.playerUIInventory.clearAll();
 
@@ -5686,6 +5704,35 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         for (Item failed : getInventory().addItem(items)) {
             getLevel().dropItem(this, failed);
         }
+    }
+
+    public void handleItemStackRequests(List<ItemStackRequest> requests) {
+        if (!this.spawned || !this.isAlive() || requests.isEmpty()) {
+            return;
+        }
+        if (!this.isInventoryServerAuthoritative()) {
+            BundleRequestHandler.handle(this, requests);
+            return;
+        }
+
+        int tick = this.server.getTick();
+        if (this.inventoryRequestTick != tick) {
+            this.inventoryRequestTick = tick;
+            this.inventoryRequestIds.clear();
+        }
+        List<ItemStackRequest> pending = new ArrayList<>(requests.size());
+        for (ItemStackRequest request : requests) {
+            if (this.inventoryRequestIds.add(request.getRequestId())) {
+                pending.add(request);
+            }
+        }
+        if (!pending.isEmpty()) {
+            ItemStackRequestHandler.handleRequests(this, pending);
+        }
+    }
+
+    public boolean isInventoryServerAuthoritative() {
+        return this.server.getSettings().general().serverAuthoritativeInventory();
     }
 
     public boolean isMovementServerAuthoritative() {

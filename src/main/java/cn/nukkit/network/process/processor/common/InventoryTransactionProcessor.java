@@ -6,7 +6,6 @@ import cn.nukkit.block.*;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.passive.EntityVillager;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.player.PlayerInteractEntityEvent;
@@ -15,6 +14,8 @@ import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.inventory.*;
 import cn.nukkit.inventory.transaction.*;
 import cn.nukkit.inventory.transaction.action.InventoryAction;
+import cn.nukkit.inventory.transaction.action.SlotChangeAction;
+import cn.nukkit.inventory.transaction.action.TradeAction;
 import cn.nukkit.inventory.transaction.data.ReleaseItemData;
 import cn.nukkit.inventory.transaction.data.UseItemData;
 import cn.nukkit.inventory.transaction.data.UseItemOnEntityData;
@@ -26,8 +27,6 @@ import cn.nukkit.level.particle.ItemBreakParticle;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.nbt.tag.Tag;
 import cn.nukkit.network.process.DataPacketProcessor;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
@@ -45,10 +44,7 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
 
     @Override
     public void handle(@NotNull PlayerHandle handle, @NotNull InventoryTransactionPacket packet) {
-        var player = handle.player;
-        var server = player.getServer();
-        var level = player.getLevel();
-        var inventory = player.getInventory();
+        Player player = handle.player;
         
         if (!handle.isSpawned() || !handle.isAlive()) {
             log.debug("Player {} sent inventory transaction packet while not spawned or not alive", player.getName());
@@ -59,6 +55,28 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
             player.setNeedSendInventory(true);
             return;
         }
+        if (packet.actions.length > 50) {
+            player.close("", "Client sent invalid packet");
+            return;
+        }
+
+        if (player.isInventoryServerAuthoritative()) {
+            player.setNeedSendInventory(true);
+            switch (packet.transactionType) {
+                case InventoryTransactionPacket.TYPE_USE_ITEM,
+                     InventoryTransactionPacket.TYPE_USE_ITEM_ON_ENTITY,
+                     InventoryTransactionPacket.TYPE_RELEASE_ITEM -> this.handleItemInteraction(handle, packet);
+            }
+            return;
+        }
+
+        this.handleClientTransaction(handle, packet);
+    }
+
+    private void handleClientTransaction(PlayerHandle handle, InventoryTransactionPacket packet) {
+        Player player = handle.player;
+        var level = player.getLevel();
+        var inventory = player.getInventory();
 
         InventoryTransactionPacket transactionPacket = packet;
         // Nasty hack because the client won't change the right packet in survival when creating netherite stuff,
@@ -164,15 +182,21 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
 
             if (a == null) {
                 log.debug("Unmatched inventory action from " + player.getName() + ": " + networkInventoryAction);
+                if (transactionPacket.isTradeItemPart) {
+                    handle.setTradingTransaction(null);
+                }
                 player.setNeedSendInventory(true);
                 return;
             }
 
             actions.add(a);
+            if (a instanceof TradeAction) {
+                transactionPacket.isTradeItemPart = true;
+            }
         }
-        if (actions.size() > 50) {
-            player.close("", "Client sent invalid packet");
-            return;
+        if (!transactionPacket.isTradeItemPart && handle.getTradingTransaction() != null) {
+            handle.setTradingTransaction(null);
+            player.setNeedSendInventory(true);
         }
 
         if (transactionPacket.isCraftingPart) {
@@ -283,34 +307,30 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
             }
             return;
         } else if (transactionPacket.isTradeItemPart) {
-            if (handle.getTradingTransaction() == null) {
-                handle.setTradingTransaction(new TradingTransaction(player, actions));
+            TradeInventory inventoryView = player.getTradeInventory();
+            if (inventoryView == null || transactionPacket.transactionType != InventoryTransactionPacket.TYPE_NORMAL) {
+                handle.setTradingTransaction(null);
+                player.setNeedSendInventory(true);
+                return;
+            }
+            TradingTransaction trade = handle.getTradingTransaction();
+            if (trade == null || !trade.isFor(inventoryView)
+                    || hasTradeOutput(actions) && hasTradeOutput(trade.getActionList())) {
+                trade = new TradingTransaction(player, actions);
+                handle.setTradingTransaction(trade);
             } else {
                 for (InventoryAction action : actions) {
-                    handle.getTradingTransaction().addAction(action);
+                    trade.addAction(action);
                 }
             }
-            if (handle.getTradingTransaction().canExecute()) {
-                handle.getTradingTransaction().execute();
-
-                for (Inventory inv : handle.getTradingTransaction().getInventories()) {
-                    if (inv instanceof TradeInventory tradeInventory) {
-                        EntityVillager ent = tradeInventory.getHolder();
-                        ent.namedTag.putBoolean("traded", true);
-                        //TODO: uncomment this
-                        /*for (Tag tag : ent.getRecipes().getAll()) {
-                            CompoundTag ta = (CompoundTag) tag;
-                            if (ta.getCompound("buyA").getShort("id") == tradeInventory.getItem(0).getId()) {
-                                int tradeXP = ta.getInt("traderExp");
-                                player.addExperience(ta.getByte("rewardExp"));
-                                ent.addExperience(tradeXP);
-                                level.addSound(player, Sound.RANDOM_ORB, 0, 3f, player);
-                            }
-                        }*/
-                    }
-                }
-
+            if (trade.isInvalid()) {
                 handle.setTradingTransaction(null);
+                player.setNeedSendInventory(true);
+            } else if (trade.canExecute()) {
+                handle.setTradingTransaction(null);
+                if (!trade.execute()) {
+                    player.setNeedSendInventory(true);
+                }
             }
             return;
         } else if (handle.getCraftingTransaction() != null) {
@@ -378,7 +398,9 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
 
         switch (transactionPacket.transactionType) {
             case InventoryTransactionPacket.TYPE_NORMAL:
-                InventoryTransaction transaction = new InventoryTransaction(player, actions);
+                boolean hasBundle = actions.stream().anyMatch(action -> action.getSourceItemUnsafe() instanceof ItemBundle
+                        || action.getTargetItemUnsafe() instanceof ItemBundle);
+                InventoryTransaction transaction = hasBundle ? new BundleTransaction(player, actions) : new InventoryTransaction(player, actions);
 
                 if (!transaction.execute()) {
                     log.debug("Failed to execute inventory transaction from " + player.getName() + " with actions: " + Arrays.toString(transactionPacket.actions));
@@ -395,6 +417,19 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
                 }
                 player.setNeedSendInventory(true);
                 return;
+            default:
+                this.handleItemInteraction(handle, transactionPacket);
+                break;
+        }
+    }
+
+    private void handleItemInteraction(PlayerHandle handle, InventoryTransactionPacket transactionPacket) {
+        Player player = handle.player;
+        var server = player.getServer();
+        var level = player.getLevel();
+        var inventory = player.getInventory();
+
+        switch (transactionPacket.transactionType) {
             case InventoryTransactionPacket.TYPE_USE_ITEM:
                 UseItemData useItemData;
                 BlockVector3 blockVector;
@@ -539,6 +574,11 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
 
                         if (!interactEvent.call()) {
                             handle.setNeedSendHeldItem(true);
+                            return;
+                        }
+
+                        if (item instanceof ItemBundle) {
+                            item.onClickAir(player, directionVector);
                             return;
                         }
 
@@ -755,5 +795,10 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
     @Override
     public Class<InventoryTransactionPacket> getPacketClass() {
         return InventoryTransactionPacket.class;
+    }
+
+    private static boolean hasTradeOutput(List<InventoryAction> actions) {
+        return actions.stream().anyMatch(action -> action instanceof TradeAction trade
+                && trade.getType() == NetworkInventoryAction.SOURCE_TYPE_TRADING_OUTPUT);
     }
 }

@@ -28,6 +28,8 @@ public class CraftingDataPacket extends DataPacket {
 
     public static final byte NETWORK_ID = ProtocolInfo.CRAFTING_DATA_PACKET;
 
+    public static final int SMITHING_ARMOR_TRIM_NETWORK_ID = 1;
+
     public static final String CRAFTING_TAG_CRAFTING_TABLE = "crafting_table";
     public static final String CRAFTING_TAG_CARTOGRAPHY_TABLE = "cartography_table";
     public static final String CRAFTING_TAG_STONECUTTER = "stonecutter";
@@ -128,7 +130,7 @@ public class CraftingDataPacket extends DataPacket {
 
                     this.putUnsignedVarInt(stonecutterRecipe.getNetworkId());
                     break;
-                case SHAPELESS:
+                case SHAPELESS, SHULKER_BOX:
                     ShapelessRecipe shapeless = (ShapelessRecipe) recipe;
                     this.putString(shapeless.getRecipeId());
                     Collection<ItemDescriptor> ingredients = shapeless.getIngredientList();
@@ -259,7 +261,7 @@ public class CraftingDataPacket extends DataPacket {
         new ItemTagDescriptor(ItemTags.TRIMMABLE_ARMORS, "minecraft:trimmable_armors").putRecipe(this, protocol);
         new ItemTagDescriptor(ItemTags.TRIM_MATERIALS, "minecraft:trim_materials").putRecipe(this, protocol);
         this.putString(CRAFTING_TAG_SMITHING_TABLE);
-        this.putUnsignedVarInt(1);
+        this.putUnsignedVarInt(SMITHING_ARMOR_TRIM_NETWORK_ID);
 
 
         this.putUnsignedVarInt(this.brewingEntries.size());
@@ -341,7 +343,7 @@ public class CraftingDataPacket extends DataPacket {
         new ItemTagDescriptor(ItemTags.TRIMMABLE_ARMORS, "minecraft:trimmable_armors").putRecipe(this, protocol);
         new ItemTagDescriptor(ItemTags.TRIM_MATERIALS, "minecraft:trim_materials").putRecipe(this, protocol);
         this.putString(CRAFTING_TAG_SMITHING_TABLE);
-        this.putUnsignedVarInt(1);
+        this.putUnsignedVarInt(SMITHING_ARMOR_TRIM_NETWORK_ID);
         this.putUnsignedVarInt(this.brewingEntries.size());
         for (BrewingRecipe recipe : brewingEntries) {
             this.putVarInt(recipe.getInput().getNetworkId(protocol));

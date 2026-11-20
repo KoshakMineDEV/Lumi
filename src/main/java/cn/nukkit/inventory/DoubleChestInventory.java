@@ -1,5 +1,7 @@
 package cn.nukkit.inventory;
 
+import cn.nukkit.network.protocol.types.inventory.ContainerSlotType;
+import cn.nukkit.network.protocol.types.inventory.FullContainerName;
 import cn.nukkit.Player;
 import cn.nukkit.blockentity.impl.BlockEntityChest;
 import cn.nukkit.item.Item;
@@ -63,8 +65,31 @@ public class DoubleChestInventory extends ContainerInventory implements Inventor
     }
 
     @Override
+    public Item getItemFast(int index) {
+        return index < this.left.getSize()
+                ? this.left.getItemFast(index)
+                : this.right.getItemFast(index - this.left.getSize());
+    }
+
+    @Override
+    public void setItemForce(int index, Item item) {
+        if (index < this.left.getSize()) {
+            this.left.setItemForce(index, item);
+        } else {
+            this.right.setItemForce(index - this.left.getSize(), item);
+        }
+    }
+
+    @Override
     public boolean setItem(int index, Item item, boolean send) {
         return index < this.left.getSize() ? this.left.setItem(index, item, send) : this.right.setItem(index - this.right.getSize(), item, send);
+    }
+
+    @Override
+    public boolean clear(int index, boolean send) {
+        return index < this.left.getSize()
+                ? this.left.clear(index, send)
+                : this.right.clear(index - this.left.getSize(), send);
     }
 
     @Override
@@ -188,6 +213,8 @@ public class DoubleChestInventory extends ContainerInventory implements Inventor
                 continue;
             }
             pk.inventoryId = id;
+            pk.containerNameData = FullContainerName.of(player.isInventoryServerAuthoritative()
+                    ? ContainerSlotType.LEVEL_ENTITY : ContainerSlotType.ANVIL_INPUT);
             player.dataPacket(pk);
         }
     }

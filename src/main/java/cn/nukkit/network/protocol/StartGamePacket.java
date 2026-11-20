@@ -112,6 +112,7 @@ public class StartGamePacket extends DataPacket {
     public String worldName;
     public String premiumWorldTemplateId = "";
     public boolean isTrial = false;
+    public boolean isInventoryServerAuthoritative;
     public boolean isMovementServerAuthoritative;
     public boolean isServerAuthoritativeBlockBreaking;
     public long currentTick;
@@ -377,7 +378,7 @@ public class StartGamePacket extends DataPacket {
             this.put(RuntimeItems.getMapping(protocol).getItemPalette());
         }
         this.putString(this.multiplayerCorrelationId);
-        this.putBoolean(false); // isInventoryServerAuthoritative
+        this.putBoolean(this.isInventoryServerAuthoritative);
         this.putString(""); // serverEngine
         try {
             this.put(NBTIO.writeNetwork(this.playerPropertyData));

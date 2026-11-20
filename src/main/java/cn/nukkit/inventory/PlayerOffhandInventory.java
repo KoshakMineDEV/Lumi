@@ -1,5 +1,7 @@
 package cn.nukkit.inventory;
 
+import cn.nukkit.network.protocol.types.inventory.ContainerSlotType;
+import cn.nukkit.network.protocol.types.inventory.FullContainerName;
 import cn.nukkit.Player;
 import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.EntityHumanType;
@@ -32,6 +34,9 @@ public class PlayerOffhandInventory extends BaseInventory {
             return;
         }
 
+        if (!send && holder instanceof Player player && player.isInventoryServerAuthoritative()) {
+            return;
+        }
         this.sendContents(this.getViewers());
         this.sendContents(holder.getViewers().values());
     }
@@ -46,6 +51,9 @@ public class PlayerOffhandInventory extends BaseInventory {
                 InventoryContentPacket pk2 = new InventoryContentPacket();
                 pk2.inventoryId = ContainerIds.OFFHAND;
                 pk2.slots = new Item[]{item};
+                if (player.isInventoryServerAuthoritative()) {
+                    pk2.containerNameData = FullContainerName.of(ContainerSlotType.OFFHAND);
+                }
                 player.dataPacket(pk2);
             } else {
                 player.dataPacket(pk);
@@ -63,6 +71,9 @@ public class PlayerOffhandInventory extends BaseInventory {
                 InventorySlotPacket pk2 = new InventorySlotPacket();
                 pk2.inventoryId = ContainerIds.OFFHAND;
                 pk2.item = item;
+                if (player.isInventoryServerAuthoritative()) {
+                    pk2.containerNameData = FullContainerName.of(ContainerSlotType.OFFHAND);
+                }
                 player.dataPacket(pk2);
             } else {
                 player.dataPacket(pk);

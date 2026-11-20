@@ -26,6 +26,19 @@ public class ContainerCloseProcessor extends DataPacketProcessor<ContainerCloseP
             return;
         }
 
+        TradeInventory trade = handle.player.getTradeInventory();
+        if (trade != null && packet.windowId != -1 && packet.windowId == (byte) handle.player.getWindowId(trade)) {
+            handle.setInventoryOpen(false);
+            new InventoryCloseEvent(trade, handle.player).call();
+            handle.setClosingWindowId(packet.windowId);
+            try {
+                handle.removeWindow(trade, true);
+            } finally {
+                handle.setClosingWindowId(Integer.MIN_VALUE);
+            }
+            return;
+        }
+
         if (packet.windowId == -1) {
             if (handle.isInventoryOpen()) {
                 handle.setInventoryOpen(false);
@@ -52,9 +65,8 @@ public class ContainerCloseProcessor extends DataPacketProcessor<ContainerCloseP
             pk.wasServerInitiated = false;
             handle.player.dataPacket(pk);
 
-            TradeInventory tradeInventory = handle.player.getTradeInventory();
-            if (tradeInventory != null) {
-                handle.removeWindow(tradeInventory, true);
+            if (trade != null) {
+                handle.removeWindow(trade, true);
             }
 
         } else if (handle.getWindowIndex().containsKey(packet.windowId)) {

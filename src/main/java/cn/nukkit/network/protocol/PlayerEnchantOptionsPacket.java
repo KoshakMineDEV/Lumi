@@ -12,6 +12,8 @@ public class PlayerEnchantOptionsPacket extends DataPacket {
 
     public static final byte NETWORK_ID = ProtocolInfo.PLAYER_ENCHANT_OPTIONS_PACKET;
 
+    public static final int ENCH_RECIPEID = 0x10000000;
+
     public final List<EnchantOptionData> options = new ArrayList<>();
 
     @Override

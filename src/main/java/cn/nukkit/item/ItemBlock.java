@@ -1,6 +1,7 @@
 package cn.nukkit.item;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.block.material.tags.BlockInternalTags;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -43,6 +44,11 @@ public class ItemBlock extends Item {
     @Override
     public Block getBlock() {
         return this.block.clone();
+    }
+
+    @Override
+    public boolean canBePutInHelmetSlot() {
+        return this.block.hasBlockTag(BlockInternalTags.WEARABLE_BLOCK);
     }
     
     @Override

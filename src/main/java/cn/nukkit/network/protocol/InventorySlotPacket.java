@@ -1,5 +1,6 @@
 package cn.nukkit.network.protocol;
 
+import cn.nukkit.Server;
 import cn.nukkit.item.Item;
 import cn.nukkit.network.protocol.types.inventory.ContainerSlotType;
 import cn.nukkit.network.protocol.types.inventory.FullContainerName;
@@ -35,7 +36,7 @@ public class InventorySlotPacket extends DataPacket {
     /**
      * @since v748
      */
-    private Item storageItem;
+    public Item storageItem = Item.AIR_ITEM.clone();
 
     @Override
     public void decode() {
@@ -50,8 +51,17 @@ public class InventorySlotPacket extends DataPacket {
         this.putUnsignedVarInt(this.inventoryId);
         this.putUnsignedVarInt(this.slot);
         if (this.protocol >= ProtocolInfo.v1_26_20_26) {
-            this.putBoolean(false); // optional full container name present
-            this.putBoolean(false); // optional storage item present
+            boolean dynamic = this.containerNameData.getDynamicId() != null;
+            Server server = Server.getInstance();
+            boolean named = dynamic || (server.getSettings().general().serverAuthoritativeInventory());
+            this.putBoolean(named);
+            if (named) {
+                this.writeFullContainerName(this.containerNameData);
+            }
+            this.putBoolean(dynamic);
+            if (dynamic) {
+                this.putNetworkItemStackDescriptor(this.protocol, this.storageItem);
+            }
         } else {
             if (this.protocol >= ProtocolInfo.v1_21_30) {
                 this.putByte((byte) this.containerNameData.getContainer().getId());
@@ -65,6 +75,6 @@ public class InventorySlotPacket extends DataPacket {
                 this.putUnsignedVarInt(this.containerNameData == null || this.containerNameData.getDynamicId() == null ? 0 : this.containerNameData.getDynamicId());
             }
         }
-        this.putNetworkItemStackDescriptor(protocol, item);
+        this.putNetworkItemStackDescriptor(this.protocol, this.item);
     }
 }

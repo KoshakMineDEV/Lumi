@@ -1,6 +1,6 @@
 package cn.nukkit.network.protocol.types.inventory.itemstack.request.action;
 
-import cn.nukkit.item.Item;
+import cn.nukkit.network.protocol.types.inventory.itemstack.request.CraftIngredient;
 import lombok.Value;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class AutoCraftRecipeAction implements RecipeItemStackRequestAction {
     /**
      * @since v557
      */
-    List<Item> ingredients;
+    List<CraftIngredient> ingredients;
 
     @Override
     public ItemStackRequestActionType getType() {

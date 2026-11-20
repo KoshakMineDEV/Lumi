@@ -1,7 +1,6 @@
 package cn.nukkit.network.protocol.types;
 
 import cn.nukkit.Player;
-import cn.nukkit.block.material.tags.BlockInternalTags;
 import cn.nukkit.inventory.*;
 import cn.nukkit.inventory.transaction.action.*;
 import cn.nukkit.item.*;
@@ -220,9 +219,7 @@ public class NetworkInventoryAction {
                     this.inventorySlot += 36;
                     this.windowId = ContainerIds.INVENTORY;
                     if (this.newItem == null ||
-                            (this.inventorySlot == 36 && !this.newItem.canBePutInHelmetSlot() && !this.oldItem.canBePutInHelmetSlot() &&
-                                    !((this.newItem instanceof ItemBlock itemBlockNew && itemBlockNew.getBlock().hasBlockTag(BlockInternalTags.WEARABLE_BLOCK)) ||
-                                            (this.oldItem instanceof ItemBlock itemBlockOld && itemBlockOld.getBlock().hasBlockTag(BlockInternalTags.WEARABLE_BLOCK)))) ||
+                            (this.inventorySlot == 36 && !this.newItem.canBePutInHelmetSlot() && !this.oldItem.canBePutInHelmetSlot()) ||
                             (this.inventorySlot == 37 && !this.newItem.isChestplate() && !this.oldItem.isChestplate()) ||
                             (this.inventorySlot == 38 && !this.newItem.isLeggings() && !this.oldItem.isLeggings()) ||
                             (this.inventorySlot == 39 && !this.newItem.isBoots() && !this.oldItem.isBoots())) {
@@ -235,6 +232,10 @@ public class NetworkInventoryAction {
                 if (this.windowId == ContainerIds.UI) {
                     switch (this.inventorySlot) {
                         case PlayerUIComponent.CREATED_ITEM_OUTPUT_UI_SLOT:
+                            TradeInventory tradeResult = player.getTradeInventory();
+                            if (tradeResult != null && !this.oldItem.isNull() && this.newItem.isNull()) {
+                                return new TradeAction(this.oldItem, this.newItem, SOURCE_TYPE_TRADING_OUTPUT, tradeResult);
+                            }
                             if (player.getWindowById(Player.ANVIL_WINDOW_ID) != null) {
                                 this.windowId = Player.ANVIL_WINDOW_ID;
                                 this.inventorySlot = 2;
@@ -316,28 +317,27 @@ public class NetworkInventoryAction {
                             this.windowId = Player.GRINDSTONE_WINDOW_ID;
                             this.inventorySlot = 1;
                             break;
-                        //124:4 -> 500:0
                         case TradeInventory.TRADE_INPUT1_UI_SLOT:
-                            if (player.getWindowById(Player.TRADE_WINDOW_ID) == null) {
-                                player.getServer().getLogger().error("Player " + player.getName() + " does not have trade window open");
-                                return null;
-                            }
-                            this.windowId = Player.TRADE_WINDOW_ID;
-                            this.inventorySlot = 0;
-                            break;
-                        //124:5 -> 500:1
+                        case TradeInventory.LEGACY_TRADE_INPUT1_UI_SLOT:
                         case TradeInventory.TRADE_INPUT2_UI_SLOT:
-                            if (player.getTradeInventory() == null) {
-                                player.getServer().getLogger().error("Player " + player.getName() + " does not have trade window open");
-                                return null;
-                            }
-                            this.windowId = Player.TRADE_WINDOW_ID;
-                            this.inventorySlot = 1;
-                            break;
+                        case TradeInventory.LEGACY_TRADE_INPUT2_UI_SLOT:
+                            TradeInventory trade = player.getTradeInventory();
+                            int slot = this.inventorySlot == TradeInventory.TRADE_INPUT1_UI_SLOT
+                                    || this.inventorySlot == TradeInventory.LEGACY_TRADE_INPUT1_UI_SLOT ? 0 : 1;
+                            return trade == null ? null : new SlotChangeAction(trade, slot, this.oldItem, this.newItem);
                     }
                 }
 
                 Inventory window = player.getWindowById(this.windowId);
+                if (window == null) {
+                    TradeInventory trade = player.getTradeInventory();
+                    if (trade != null && this.windowId == (byte) player.getWindowId(trade)) {
+                        window = trade;
+                    }
+                }
+                if (window instanceof TradeInventory && (this.inventorySlot < 0 || this.inventorySlot >= window.getSize())) {
+                    return null;
+                }
                 if (window != null) {
                     if (window instanceof BaseInventory) {
                         if (((BaseInventory) window).destroyed) {
@@ -512,13 +512,12 @@ public class NetworkInventoryAction {
                     this.inventorySlot = 0;
                     return new SlotChangeAction(beacon, this.inventorySlot, this.oldItem, this.newItem);
                 } else if (this.windowId >= SOURCE_TYPE_TRADING_USE_INPUTS && this.windowId <= SOURCE_TYPE_TRADING_OUTPUT) {
-                    Inventory inv = player.getWindowById(Player.TRADE_WINDOW_ID);
-                    //verify
-                    if (!(inv instanceof TradeInventory trade)) {
+                    TradeInventory trade = player.getTradeInventory();
+                    if (trade == null) {
                         player.getServer().getLogger().debug("Player " + player.getName() + " has no open trade inventory");
                         return null;
                     }
-                    return new TradeAction(this.oldItem, this.newItem, this.windowId, trade.getHolder());
+                    return new TradeAction(this.oldItem, this.newItem, this.windowId, trade);
                 }
 
                 player.getServer().getLogger().debug("Player " + player.getName() + " has no open container with window ID " + this.windowId);

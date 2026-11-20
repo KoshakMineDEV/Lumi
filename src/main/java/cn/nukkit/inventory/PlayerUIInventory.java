@@ -1,5 +1,7 @@
 package cn.nukkit.inventory;
 
+import cn.nukkit.network.protocol.types.inventory.ContainerSlotType;
+import cn.nukkit.network.protocol.types.inventory.FullContainerName;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 import cn.nukkit.network.protocol.InventoryContentPacket;
@@ -72,8 +74,34 @@ public class PlayerUIInventory extends BaseInventory {
                 }
                 pk.inventoryId = id;
             }
+            pk.containerNameData = FullContainerName.of(p.isInventoryServerAuthoritative()
+                    ? getSlotType(index) : ContainerSlotType.ANVIL_INPUT);
             p.dataPacket(pk);
         }
+    }
+
+    private ContainerSlotType getSlotType(int slot) {
+        return switch (slot) {
+            case 0 -> ContainerSlotType.CURSOR;
+            case 1 -> ContainerSlotType.ANVIL_INPUT;
+            case 2 -> ContainerSlotType.ANVIL_MATERIAL;
+            case 3 -> ContainerSlotType.STONECUTTER_INPUT;
+            case 9 -> ContainerSlotType.LOOM_INPUT;
+            case 10 -> ContainerSlotType.LOOM_DYE;
+            case 11 -> ContainerSlotType.LOOM_MATERIAL;
+            case 12 -> ContainerSlotType.CARTOGRAPHY_INPUT;
+            case 13 -> ContainerSlotType.CARTOGRAPHY_ADDITIONAL;
+            case 14 -> ContainerSlotType.ENCHANTING_INPUT;
+            case 15 -> ContainerSlotType.ENCHANTING_MATERIAL;
+            case 16 -> ContainerSlotType.GRINDSTONE_INPUT;
+            case 17 -> ContainerSlotType.GRINDSTONE_ADDITIONAL;
+            case 27 -> ContainerSlotType.BEACON_PAYMENT;
+            case 50 -> ContainerSlotType.CREATED_OUTPUT;
+            case 51 -> ContainerSlotType.SMITHING_TABLE_INPUT;
+            case 52 -> ContainerSlotType.SMITHING_TABLE_MATERIAL;
+            case 53 -> ContainerSlotType.SMITHING_TABLE_TEMPLATE;
+            default -> ContainerSlotType.CRAFTING_INPUT;
+        };
     }
 
     @Override

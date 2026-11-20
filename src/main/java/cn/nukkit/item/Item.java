@@ -66,6 +66,7 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
     protected Block block = null;
     protected int meta;
     protected boolean hasMeta = true;
+    private int stackNetId;
     private byte[] tags = new byte[0];
     private CompoundTag cachedNBT = null;
     public int count;
@@ -438,16 +439,8 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
         }
 
         CompoundTag tag = this.getNamedTag();
-
-        if (tag.contains("ench")) {
-            Tag enchTag = tag.get("ench");
-            return enchTag instanceof ListTag;
-        } else if (tag.contains("custom_ench")) {
-            Tag enchTag = tag.get("custom_ench");
-            return enchTag instanceof ListTag;
-        }
-
-        return false;
+        return (tag.get("ench") instanceof ListTag<?> enchants && enchants.size() > 0)
+                || (tag.get("custom_ench") instanceof ListTag<?> customEnchants && customEnchants.size() > 0);
     }
 
     public boolean hasEnchantment(int id) {
@@ -883,6 +876,20 @@ public class Item implements Cloneable, BlockID, ItemID, ProtocolInfo {
 
     public int getBlockId() {
         return block == null ? 0 : block.getId();
+    }
+
+    public int getStackNetId() {
+        return this.isNull() ? 0 : this.stackNetId;
+    }
+
+    public Item setStackNetId(int stackNetId) {
+        this.stackNetId = stackNetId;
+        return this;
+    }
+
+    public Item autoAssignStackNetworkId() {
+        this.stackNetId = this.isNull() ? 0 : ItemStackNetManager.allocate();
+        return this;
     }
 
     public int getId() {

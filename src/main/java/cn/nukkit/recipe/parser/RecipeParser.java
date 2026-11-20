@@ -1,7 +1,9 @@
 package cn.nukkit.recipe.parser;
 
 import cn.nukkit.Server;
+import cn.nukkit.block.BlockShulkerBox;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemBlock;
 import cn.nukkit.item.material.tags.ItemTags;
 import cn.nukkit.recipe.descriptor.ItemDescriptor;
 import cn.nukkit.recipe.descriptor.DefaultDescriptor;
@@ -162,12 +164,13 @@ public class RecipeParser {
 
                                 String id = recipe.get("id").getAsString();
                                 if (!id.startsWith("paper_sulphur")) {
-                                    Registries.RECIPE.registerShapelessRecipe(new ShapelessRecipe(
-                                            id,
-                                            recipe.get("priority").getAsInt(),
-                                            parseOutput(recipe.get("output"), List.of()).getItem(),
-                                            inputs
-                                    ));
+                                    int priority = recipe.get("priority").getAsInt();
+                                    Item output = parseOutput(recipe.get("output"), List.of()).getItem();
+                                    ShapelessRecipe shapeless = type == 5 && output instanceof ItemBlock outputBlock
+                                            && outputBlock.getBlockUnsafe() instanceof BlockShulkerBox
+                                            ? new ShulkerBoxDyeRecipe(id, priority, output, inputs)
+                                            : new ShapelessRecipe(id, priority, output, inputs);
+                                    Registries.RECIPE.registerShapelessRecipe(shapeless);
                                 }
                             }
 

@@ -31,6 +31,14 @@ public interface Inventory {
         return getItem(index);
     }
 
+    default Item getUnclonedItem(int index) {
+        return this.getItemFast(index);
+    }
+
+    default void setItemForce(int index, Item item) {
+        this.setItem(index, item, false);
+    }
+
     default boolean setItem(int index, Item item) {
         return setItem(index, item, true);
     }

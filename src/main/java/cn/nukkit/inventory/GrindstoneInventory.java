@@ -27,6 +27,10 @@ public class GrindstoneInventory extends FakeBlockUIComponent {
     }
 
     public Item getResult() {
+        return this.getResult(true);
+    }
+
+    public Item getResult(boolean updateExperience) {
         Item eq = getEquipment();
         Item iq = getIngredient();
 
@@ -42,9 +46,8 @@ public class GrindstoneInventory extends FakeBlockUIComponent {
             return Item.get(Item.AIR);
         }
 
-        CompoundTag tag = eq.getNamedTag();
-        if (tag == null) tag = new CompoundTag();
-        eq.setNamedTag(tag.remove("ench").putInt("RepairCost", 0));
+        CompoundTag tag = eq.getOrCreateNamedTag();
+        eq.setNamedTag(tag.remove("ench").remove("custom_ench").putInt("RepairCost", 0));
         if (eq.getNamespaceId().equals(iq.getNamespaceId())) {
             // Output durability is the sum of the durabilities of the two input items
             // plus 5% of the maximum durability of the output item (rounded down)
@@ -52,7 +55,7 @@ public class GrindstoneInventory extends FakeBlockUIComponent {
             // https://minecraft.wiki/w/Grindstone#Repairing_and_disenchanting
             eq.setDamage(Math.max(eq.getMaxDurability() - ((eq.getMaxDurability() - eq.getDamage()) + (iq.getMaxDurability() - iq.getDamage()) + NukkitMath.floorDouble(eq.getMaxDurability() * 0.05)) + 1, 0));
         }
-        if(holder instanceof Position position) {
+        if (updateExperience && holder instanceof Position position) {
             if(position.getLevelBlock() instanceof BlockGrindstone grindstone) {
                 grindstone.releaseExperience(recalculateResultExperience());
             }

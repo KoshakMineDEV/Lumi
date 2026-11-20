@@ -24,6 +24,8 @@ import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInputPacket> {
 
     public static final PlayerAuthInputProcessor INSTANCE = new PlayerAuthInputProcessor();
@@ -34,6 +36,10 @@ public class PlayerAuthInputProcessor extends DataPacketProcessor<PlayerAuthInpu
         Server server = player.getServer();
         Level level = player.getLevel();
         int protocol = handle.getProtocol();
+
+        if (packet.getItemStackRequest() != null) {
+            player.handleItemStackRequests(List.of(packet.getItemStackRequest()));
+        }
 
         if (!handle.isMovementServerAuthoritative()) {
             return;

@@ -201,6 +201,7 @@ public final class DataPacketManager {
                 BlockEntityDataProcessor.INSTANCE,
                 SettingsCommandProcessor.INSTANCE,
                 InventoryTransactionProcessor.INSTANCE,
+                ItemStackRequestProcessor.INSTANCE,
                 CommandBlockUpdateProcessor.INSTANCE
         );
     }

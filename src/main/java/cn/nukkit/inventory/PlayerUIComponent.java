@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,6 +49,30 @@ public class PlayerUIComponent extends BaseInventory {
         return this.playerUI.getItem(index + this.offset);
     }
 
+    public PlayerUIInventory getBackingInventory() {
+        return this.playerUI;
+    }
+
+    protected Player playerUIHolder() {
+        return (Player) this.playerUI.getHolder();
+    }
+
+    public int getOffset() {
+        return this.offset;
+    }
+
+    @Override
+    public Item getItemFast(int index) {
+        return this.playerUI.getItemFast(index + this.offset);
+    }
+
+    @Override
+    public void setItemForce(int index, Item item) {
+        if (index >= 0 && index < this.size) {
+            this.playerUI.setItemForce(index + this.offset, item);
+        }
+    }
+
     @Override
     public boolean setItem(int index, Item item, boolean send) {
         //return this.playerUI.setItem(index + this.offset, item, send);
@@ -72,8 +97,13 @@ public class PlayerUIComponent extends BaseInventory {
     @Override
     public Map<Integer, Item> getContents() {
         Map<Integer, Item> contents = playerUI.getContents();
-        contents.keySet().removeIf(slot -> slot < offset || slot > offset + size);
-        return contents;
+        Map<Integer, Item> local = new HashMap<>();
+        contents.forEach((slot, item) -> {
+            if (slot >= this.offset && slot < this.offset + this.size) {
+                local.put(slot - this.offset, item);
+            }
+        });
+        return local;
     }
 
 

@@ -41,23 +41,19 @@ public class MobArmorEquipmentPacket extends DataPacket {
     public void encode() {
         this.reset();
         this.putEntityRuntimeId(this.eid);
-        if (this.protocol >= ProtocolInfo.v1_26_30) {
-            this.putNetworkItemStackDescriptor(this.protocol, this.slots[0]);
-            this.putNetworkItemStackDescriptor(this.protocol, this.slots[1]);
-            this.putNetworkItemStackDescriptor(this.protocol, this.slots[2]);
-            this.putNetworkItemStackDescriptor(this.protocol, this.slots[3]);
-        } else {
-            this.putSlot(this.protocol, this.slots[0]);
-            this.putSlot(this.protocol, this.slots[1]);
-            this.putSlot(this.protocol, this.slots[2]);
-            this.putSlot(this.protocol, this.slots[3]);
+        for (int i = 0; i < 4; i++) {
+            this.putEquipmentItem(this.slots[i]);
         }
         if (this.protocol >= ProtocolInfo.v1_21_20) {
-            if (this.protocol >= ProtocolInfo.v1_26_30) {
-                this.putNetworkItemStackDescriptor(this.protocol, this.body);
-            } else {
-                this.putSlot(this.protocol, this.body);
-            }
+            this.putEquipmentItem(this.body);
+        }
+    }
+
+    private void putEquipmentItem(Item item) {
+        if (this.protocol >= ProtocolInfo.v1_26_30) {
+            this.putNetworkItemStackDescriptor(this.protocol, item);
+        } else {
+            this.putSlot(this.protocol, item);
         }
     }
 }

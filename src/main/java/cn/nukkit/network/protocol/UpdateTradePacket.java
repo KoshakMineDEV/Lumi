@@ -35,22 +35,12 @@ public class UpdateTradePacket extends DataPacket {
         this.putByte(windowId);
         this.putByte(windowType);
         this.putVarInt(size);
-        if (protocol < 354) {
-            this.putVarInt(unknownVarInt2);
-            if (this.protocol >= 313) {
-                this.putVarInt(unknownVarInt3);
-            }
-            this.putBoolean(usingEconomyTrade);
-        } else {
-            this.putVarInt(tradeTier);
-        }
+        this.putVarInt(tradeTier);
         this.putEntityUniqueId(traderUniqueEntityId);
         this.putEntityUniqueId(playerUniqueEntityId);
         this.putString(displayName);
-        if (protocol >= 354) {
-            this.putBoolean(newTradingUi);
-            this.putBoolean(usingEconomyTrade);
-        }
+        this.putBoolean(newTradingUi);
+        this.putBoolean(usingEconomyTrade);
         this.put(this.offers);
     }
 }

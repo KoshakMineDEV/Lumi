@@ -57,6 +57,7 @@ public class LegacyPropertiesConverter {
             case "server-auth-with-rewind" -> ServerAuthoritativeMovement.SERVER_AUTH_WITH_REWIND;
             default -> ServerAuthoritativeMovement.SERVER_AUTH;
         });
+        general.serverAuthoritativeInventory(this.getPropertyBoolean("server-authoritative-inventory", general.serverAuthoritativeInventory()));
         general.serverAuthoritativeBlockBreaking(this.getPropertyBoolean("server-authoritative-block-breaking", general.serverAuthoritativeBlockBreaking()));
 
         // Multiversion settings

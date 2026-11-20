@@ -1,5 +1,7 @@
 package cn.nukkit.inventory;
 
+import cn.nukkit.network.protocol.types.inventory.ContainerSlotType;
+import cn.nukkit.network.protocol.types.inventory.FullContainerName;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
@@ -10,6 +12,7 @@ import cn.nukkit.event.entity.EntityInventoryChangeEvent;
 import cn.nukkit.event.inventory.InventoryOpenEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
+import cn.nukkit.item.ItemBundle;
 import cn.nukkit.network.protocol.InventoryContentPacket;
 import cn.nukkit.network.protocol.InventorySlotPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
@@ -171,10 +174,40 @@ public abstract class BaseInventory implements Inventory {
             ((BlockEntity) holder).setDirty();
         }
 
+        if (item instanceof ItemBundle bundle) {
+            ensureUniqueBundleId(index, bundle);
+        }
+
         Item old = this.getItem(index);
-        this.slots.put(index, item.clone());
+        this.slots.put(index, this.copyStackForSlot(item));
         this.onSlotChange(index, old, send);
         return true;
+    }
+
+    protected Item copyStackForSlot(Item item) {
+        Item copy = item.clone();
+        if (copy.getStackNetId() <= 0) {
+            copy.autoAssignStackNetworkId();
+        }
+        return copy;
+    }
+
+    @Override
+    public void setItemForce(int index, Item item) {
+        if (this.destroyed || index < 0 || index >= this.size) {
+            return;
+        }
+
+        Item before = this.getItem(index);
+        if (item == null || item.isNull()) {
+            this.slots.remove(index);
+        } else {
+            this.slots.put(index, this.copyStackForSlot(item));
+        }
+        if (this.getHolder() instanceof BlockEntity blockEntity) {
+            blockEntity.setDirty();
+        }
+        this.onSlotChange(index, before, false);
     }
 
     @Override
@@ -332,6 +365,7 @@ public abstract class BaseInventory implements Inventory {
                     slot.setCount(slot.getCount() - amount);
                     Item item = slot.clone();
                     item.setCount(amount);
+                    item.autoAssignStackNetworkId();
                     this.setItem(slotIndex, item);
                     if (slot.getCount() <= 0) {
                         itemSlots.remove(slot);
@@ -398,7 +432,7 @@ public abstract class BaseInventory implements Inventory {
             }
 
             if (item.getId() != Item.AIR) {
-                this.slots.put(index, item.clone());
+                this.slots.put(index, this.copyStackForSlot(item));
             } else {
                 this.slots.remove(index);
             }
@@ -424,6 +458,32 @@ public abstract class BaseInventory implements Inventory {
     @Override
     public InventoryHolder getHolder() {
         return holder;
+    }
+
+    protected void ensureUniqueBundleId(int targetSlot, ItemBundle bundle) {
+        HashSet<Integer> existingBundleIds = new HashSet<>();
+        for (var entry : this.slots.entrySet()) {
+            if (entry.getKey() != targetSlot) {
+                collectBundleIds(entry.getValue(), existingBundleIds, new HashSet<>());
+            }
+        }
+        while (existingBundleIds.contains(bundle.getBundleId())) {
+            bundle.assignNewBundleId();
+        }
+    }
+
+    private void collectBundleIds(Item item, Set<Integer> bundleIds, Set<Integer> visitedBundleIds) {
+        if (!(item instanceof ItemBundle bundle)) {
+            return;
+        }
+        int currentId = bundle.getBundleId();
+        if (!visitedBundleIds.add(currentId)) {
+            return;
+        }
+        bundleIds.add(currentId);
+        for (Item nested : bundle.getInventory().getContents().values()) {
+            collectBundleIds(nested, bundleIds, visitedBundleIds);
+        }
     }
 
     @Override
@@ -484,6 +544,7 @@ public abstract class BaseInventory implements Inventory {
                 continue;
             }
             packet.inventoryId = id;
+            packet.containerNameData = getPacketContainerName(player, 0);
             player.dataPacket(packet);
         }
     }
@@ -556,6 +617,7 @@ public abstract class BaseInventory implements Inventory {
             return;
         }
         packet.inventoryId = id;
+        packet.containerNameData = getPacketContainerName(player, index);
         player.dataPacket(packet);
     }
 
@@ -572,6 +634,7 @@ public abstract class BaseInventory implements Inventory {
                 continue;
             }
             packet.inventoryId = id;
+            packet.containerNameData = getPacketContainerName(player, index);
             player.dataPacket(packet);
         }
     }
@@ -579,6 +642,29 @@ public abstract class BaseInventory implements Inventory {
     @Override
     public void sendSlot(int index, Collection<Player> players) {
         this.sendSlot(index, players.toArray(Player.EMPTY_ARRAY));
+    }
+
+    private FullContainerName getPacketContainerName(Player player, int index) {
+        ContainerSlotType type = ContainerSlotType.ANVIL_INPUT;
+        if (player.isInventoryServerAuthoritative()) {
+            type = switch (this.type) {
+                case BARREL -> ContainerSlotType.BARREL;
+                case SHULKER_BOX -> ContainerSlotType.SHULKER_BOX;
+                case FURNACE, BLAST_FURNACE, SMOKER -> switch (index) {
+                    case 0 -> switch (this.type) {
+                        case BLAST_FURNACE -> ContainerSlotType.BLAST_FURNACE_INGREDIENT;
+                        case SMOKER -> ContainerSlotType.SMOKER_INGREDIENT;
+                        default -> ContainerSlotType.FURNACE_INGREDIENT;
+                    };
+                    case 1 -> ContainerSlotType.FURNACE_FUEL;
+                    default -> ContainerSlotType.FURNACE_RESULT;
+                };
+                case BREWING_STAND -> index == 0 ? ContainerSlotType.BREWING_INPUT
+                        : index == 4 ? ContainerSlotType.BREWING_FUEL : ContainerSlotType.BREWING_RESULT;
+                default -> ContainerSlotType.LEVEL_ENTITY;
+            };
+        }
+        return FullContainerName.of(type);
     }
 
     @Override

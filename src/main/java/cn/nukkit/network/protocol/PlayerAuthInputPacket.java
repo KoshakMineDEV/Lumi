@@ -73,6 +73,8 @@ public class PlayerAuthInputPacket extends DataPacket {
 
     @Override
     public void decode() {
+        this.itemStackRequest = null;
+        this.inputData.clear();
         this.pitch = this.getLFloat();
         this.yaw = this.getLFloat();
         this.position = this.getVector3f();

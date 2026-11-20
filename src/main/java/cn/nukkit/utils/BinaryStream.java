@@ -28,6 +28,9 @@ import cn.nukkit.network.protocol.types.EntityLink;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
 import cn.nukkit.network.protocol.types.inventory.ContainerSlotType;
 import cn.nukkit.network.protocol.types.inventory.FullContainerName;
+import cn.nukkit.item.material.tags.ItemTag;
+import cn.nukkit.item.material.tags.ItemTags;
+import cn.nukkit.network.protocol.types.inventory.itemstack.request.CraftIngredient;
 import cn.nukkit.network.protocol.types.inventory.itemstack.request.ItemStackRequest;
 import cn.nukkit.network.protocol.types.inventory.itemstack.request.ItemStackRequestSlotData;
 import cn.nukkit.network.protocol.types.inventory.itemstack.request.TextProcessingEventOrigin;
@@ -697,7 +700,7 @@ public class BinaryStream {
                     if (compoundTag.contains(MV_ORIGIN_NBT)) {
                         item.setNamedTag(compoundTag.getCompound(MV_ORIGIN_NBT));
                     }
-                    return item;
+                    return item.setStackNetId(stackNetId);
                 }
             } else if (compoundTag != null && compoundTag.contains(MV_ORIGIN_ID) && compoundTag.contains(MV_ORIGIN_META)) {
                 int originID = compoundTag.getInt(MV_ORIGIN_ID);
@@ -713,7 +716,7 @@ public class BinaryStream {
                 if (compoundTag.contains(MV_ORIGIN_NBT)) {
                     item.setNamedTag(compoundTag.getCompound(MV_ORIGIN_NBT));
                 }
-                return item;
+                return item.setStackNetId(stackNetId);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Unable to read item user data", e);
@@ -754,7 +757,7 @@ public class BinaryStream {
             item.setNamedTag(namedTag);
         }
 
-        return item;
+        return item.setStackNetId(stackNetId);
     }
 
     public void putSlot(Item item) {
@@ -776,6 +779,7 @@ public class BinaryStream {
             return;
         }
 
+        int stackNetId = instanceItem ? 0 : item.getStackNetId();
         boolean isBlock = item instanceof ItemBlock;
         Item mappingItem = isBlock ? GlobalBlockPalette.getDowngradedItemBlock(protocolId, item.getBlockId()) : null;
 
@@ -855,8 +859,11 @@ public class BinaryStream {
         this.putUnsignedVarInt(damage);
 
         if (!instanceItem) {
-            this.putBoolean(true);
-            this.putVarInt(1); // Item is present
+            boolean hasNetId = stackNetId > 0;
+            this.putBoolean(hasNetId);
+            if (hasNetId) {
+                this.putVarInt(stackNetId);
+            }
         }
 
         Block block = isBlock ? item.getBlockUnsafe() : null;
@@ -1025,11 +1032,11 @@ public class BinaryStream {
             return;
         }
 
-
         if (item == null) {
             item = Item.AIR_ITEM.clone();
         }
 
+        int stackNetId = instanceItem ? 0 : item.getStackNetId();
         RuntimeItemMapping mapping = RuntimeItems.getMapping(protocolId);
         boolean isErrorItem = false;
         boolean isStringItem = item instanceof StringItem;
@@ -1112,13 +1119,13 @@ public class BinaryStream {
         this.putUnsignedVarInt(damage);
 
         if (!instanceItem) {
-            boolean hasNetId = id != Item.AIR;
+            boolean hasNetId = id != Item.AIR && stackNetId > 0;
             this.putBoolean(hasNetId);
             if (hasNetId) {
                 if (protocolId < ProtocolInfo.v1_26_40) {
                     this.putUnsignedVarInt(0); // ItemStackNetId variant
                 }
-                this.putVarInt(1); // Lumi does not expose stack net IDs on Item
+                this.putVarInt(stackNetId);
             }
         }
 
@@ -1308,7 +1315,7 @@ public class BinaryStream {
                     if (compoundTag.contains(MV_ORIGIN_NBT)) {
                         item.setNamedTag(compoundTag.getCompound(MV_ORIGIN_NBT));
                     }
-                    return item;
+                    return item.setStackNetId(stackNetId);
                 }
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to read item user data", e);
@@ -1354,7 +1361,7 @@ public class BinaryStream {
             item.setNamedTag(namedTag);
         }
 
-        return item;
+        return item.setStackNetId(stackNetId);
     }
 
     public byte[] getByteArray() {
@@ -1773,21 +1780,33 @@ public class BinaryStream {
         return readItemStackRequest(ProtocolInfo.CURRENT_PROTOCOL);
     }
 
+    public int getItemStackRequestLength(int maxLength) {
+        long length = this.getUnsignedVarInt();
+        if (length > maxLength) {
+            throw new IllegalArgumentException("Item stack request array too long: " + length);
+        }
+        return (int) length;
+    }
+
     public ItemStackRequest readItemStackRequest(int protocol) {
         int requestId = getVarInt();
         boolean v2168 = protocol >= ProtocolInfo.v1_26_40;
-        ItemStackRequestAction[] actions = getArray(ItemStackRequestAction.class, (s) -> {
-            int typeId = v2168 ? (int) s.getUnsignedVarInt() : s.getByte();
-            ItemStackRequestActionType itemStackRequestActionType = ItemStackRequestActionType.fromId(typeId, protocol);
-            if (itemStackRequestActionType == null) {
+        ItemStackRequestAction[] actions = new ItemStackRequestAction[this.getItemStackRequestLength(128)];
+        for (int i = 0; i < actions.length; i++) {
+            int typeId = v2168 ? (int) this.getUnsignedVarInt() : this.getByte() & 0xff;
+            ItemStackRequestActionType type = ItemStackRequestActionType.fromId(typeId, protocol);
+            if (type == null) {
                 throw new UnsupportedOperationException("Unhandled stack request action type id " + typeId + " for protocol " + protocol);
             }
             if (v2168) {
-                s.getByte(); // duplicated action type
+                this.getByte();
             }
-            return readRequestActionData(protocol, itemStackRequestActionType);
-        });
-        String[] filteredStrings = getArray(String.class, BinaryStream::getString);
+            actions[i] = this.readRequestActionData(protocol, type);
+        }
+        String[] filteredStrings = new String[this.getItemStackRequestLength(16)];
+        for (int i = 0; i < filteredStrings.length; i++) {
+            filteredStrings[i] = this.getString(256);
+        }
 
         int originVal = getLInt();
         TextProcessingEventOrigin origin = originVal == -1 ? null : TextProcessingEventOrigin.fromId(originVal);  // new for v552
@@ -1799,26 +1818,27 @@ public class BinaryStream {
         return switch (type) {
             case CRAFT_REPAIR_AND_DISENCHANT -> {
                 int recipeId = protocol >= ProtocolInfo.v1_26_40 ? getLInt() : (int) getUnsignedVarInt();
-                if (protocol >= ProtocolInfo.v1_26_40) getByte(); // numberOfRequestedCrafts
-                yield new CraftGrindstoneAction(recipeId, getVarInt());
+                int crafts = hasNumberOfCrafts ? getByte() & 0xff : 1;
+                yield new CraftGrindstoneAction(recipeId, getVarInt(), crafts);
             }
             case CRAFT_LOOM -> {
                 String pattern = getString();
-                if (protocol >= ProtocolInfo.v1_26_40) getByte(); // numberOfRequestedCrafts
-                yield new CraftLoomAction(pattern);
+                yield new CraftLoomAction(pattern, hasNumberOfCrafts ? getByte() & 0xff : 1);
             }
-            case CRAFT_RESERVED -> new CraftReservedAction(getString(256), getByte() & 0xFF);
+            case CRAFT_RESERVED -> new CraftReservedAction(getString(256), getByte() & 0xff);
             case CRAFT_RECIPE_AUTO -> {
                 int recipeId = (int) getUnsignedVarInt();
-                int numberOfRequestedCrafts = hasNumberOfCrafts ? (getByte() & 0xFF) : 0;
-                // No separate timesCrafted byte since v2168 (aligned with CB's reader since its 26.50
-                // commit removed the duplicated count byte): timesCrafted mirrors numberOfRequestedCrafts
-                int timesCrafted = protocol < ProtocolInfo.v1_26_40 ? (getByte() & 0xFF) : numberOfRequestedCrafts;
-                if (protocol >= ProtocolInfo.v1_26_40) {
-                    int ingredientCount = (int) getUnsignedVarInt();
-                    for (int i = 0; i < ingredientCount; i++) skipIngredientDescriptorV2168();
+                int requestedCrafts = hasNumberOfCrafts ? getByte() & 0xff : 1;
+                int timesCrafted = protocol < ProtocolInfo.v1_26_40 ? getByte() & 0xff : requestedCrafts;
+                long count = protocol >= ProtocolInfo.v1_26_40 ? getUnsignedVarInt() : getByte() & 0xff;
+                if (count > 128) {
+                    throw new IllegalArgumentException("Too many auto-craft ingredients: " + count);
                 }
-                yield new AutoCraftRecipeAction(recipeId, timesCrafted, Collections.emptyList());
+                List<CraftIngredient> ingredients = new ArrayList<>((int) count);
+                for (int i = 0; i < count; i++) {
+                    ingredients.add(readCraftIngredient(protocol));
+                }
+                yield new AutoCraftRecipeAction(recipeId, timesCrafted, ingredients);
             }
             case CRAFT_RESULTS_DEPRECATED -> new CraftResultsDeprecatedAction(
                     getArray(Item.class, s -> protocol >= ProtocolInfo.v1_26_40
@@ -1830,12 +1850,22 @@ public class BinaryStream {
                     protocol >= ProtocolInfo.v1_26_40 ? getLInt() : getVarInt());
             case CRAFT_RECIPE_OPTIONAL -> new CraftRecipeOptionalAction((int) getUnsignedVarInt(), getLInt());
             case TAKE -> new TakeAction(
-                    getByte(),
+                    getByte() & 0xff,
                     readStackRequestSlotInfo(protocol),
                     readStackRequestSlotInfo(protocol)
             );
             case PLACE -> new PlaceAction(
-                    getByte(),
+                    getByte() & 0xff,
+                    readStackRequestSlotInfo(protocol),
+                    readStackRequestSlotInfo(protocol)
+            );
+            case PLACE_IN_ITEM_CONTAINER -> new PlaceInItemContainerAction(
+                    getByte() & 0xff,
+                    readStackRequestSlotInfo(protocol),
+                    readStackRequestSlotInfo(protocol)
+            );
+            case TAKE_FROM_ITEM_CONTAINER -> new TakeFromItemContainerAction(
+                    getByte() & 0xff,
                     readStackRequestSlotInfo(protocol),
                     readStackRequestSlotInfo(protocol)
             );
@@ -1844,16 +1874,16 @@ public class BinaryStream {
                     readStackRequestSlotInfo(protocol)
             );
             case DROP -> new DropAction(
-                    getByte(),
+                    getByte() & 0xff,
                     readStackRequestSlotInfo(protocol),
                     getBoolean()
             );
             case DESTROY -> new DestroyAction(
-                    getByte(),
+                    getByte() & 0xff,
                     readStackRequestSlotInfo(protocol)
             );
             case CONSUME -> new ConsumeAction(
-                    getByte(),
+                    getByte() & 0xff,
                     readStackRequestSlotInfo(protocol)
             );
             case CREATE -> new CreateAction(
@@ -1866,13 +1896,11 @@ public class BinaryStream {
             );
             case CRAFT_RECIPE -> {
                 int recipeId = (int) getUnsignedVarInt();
-                if (protocol >= ProtocolInfo.v1_26_40) getByte();
-                yield new CraftRecipeAction(recipeId);
+                yield new CraftRecipeAction(recipeId, hasNumberOfCrafts ? getByte() & 0xff : 1);
             }
             case CRAFT_CREATIVE -> {
                 int creativeId = (int) getUnsignedVarInt();
-                if (protocol >= ProtocolInfo.v1_26_40) getByte();
-                yield new CraftCreativeAction(creativeId);
+                yield new CraftCreativeAction(creativeId, hasNumberOfCrafts ? getByte() & 0xff : 1);
             }
             case CRAFT_NON_IMPLEMENTED_DEPRECATED -> new CraftNonImplementedAction();
             default -> throw new UnsupportedOperationException("Unhandled stack request action type: " + type);
@@ -1880,28 +1908,66 @@ public class BinaryStream {
     }
 
     private ItemStackRequestSlotData readStackRequestSlotInfo(int protocol) {
+        ContainerSlotType container = ContainerSlotType.fromId(getByte());
+        Integer dynamicId = null;
+        if (protocol >= ProtocolInfo.v1_21_30) {
+            dynamicId = getBoolean() ? getLInt() : null;
+        } else if (protocol >= ProtocolInfo.v1_21_20) {
+            dynamicId = getLInt();
+        }
         return new ItemStackRequestSlotData(
-                ContainerSlotType.fromId(getByte()),
-                getByte(),
-                protocol >= ProtocolInfo.v1_26_40 ? getLInt() : getVarInt()
+                container,
+                getByte() & 0xff,
+                protocol >= ProtocolInfo.v1_26_40 ? getLInt() : getVarInt(),
+                dynamicId
         );
     }
 
-    private void skipIngredientDescriptorV2168() {
-        int descriptorType = (int) getUnsignedVarInt();
-        getByte(); // duplicated descriptor type
-        switch (descriptorType) {
+    private CraftIngredient readCraftIngredient(int protocol) {
+        boolean modern = protocol >= ProtocolInfo.v1_26_40;
+        int type = modern ? (int) getUnsignedVarInt() : getByte() & 0xff;
+        if (modern) {
+            getByte();
+        }
+        Item item = null;
+        ItemTag tag = null;
+        switch (type) {
             case 0 -> { }
-            case 1, 3 -> {
-                getString();
-                if (descriptorType == 1) getVarInt();
+            case 1 -> {
+                if (modern) {
+                    String identifier = getString(256);
+                    item = Item.get(identifier, getVarInt(), 1);
+                } else {
+                    int runtimeId = getLShort();
+                    if (runtimeId != 0) {
+                        int aux = (short) getLShort();
+                        RuntimeItemMapping mapping = RuntimeItems.getMapping(protocol);
+                        String identifier = mapping.getNamespacedIdByNetworkId(runtimeId);
+                        item = identifier == null
+                                ? Item.get(mapping.fromRuntime(runtimeId).getLegacyId(), aux, 1)
+                                : Item.get(identifier, aux, 1);
+                    }
+                }
             }
             case 2 -> {
                 getString();
-                getLShort();
+                if (modern) {
+                    getLShort();
+                } else {
+                    getByte();
+                }
             }
-            default -> throw new UnsupportedOperationException("Unhandled v2168 ingredient descriptor " + descriptorType);
+            case 3 -> {
+                String identifier = getString(256);
+                tag = ItemTags.getTag(identifier.contains(":") ? identifier : "minecraft:" + identifier);
+            }
+            case 4 -> {
+                String identifier = getString(256);
+                item = Item.get(identifier, (int) (short) getLShort(), 1);
+            }
+            case 5 -> getString(256);
+            default -> throw new IllegalArgumentException("Unknown ingredient descriptor type: " + type);
         }
-        getLShort(); // count
+        return new CraftIngredient(item, tag, modern ? getLShort() & 0xffff : getVarInt());
     }
 }

@@ -1,5 +1,7 @@
 package cn.nukkit.inventory;
 
+import cn.nukkit.network.protocol.types.inventory.ContainerSlotType;
+import cn.nukkit.network.protocol.types.inventory.FullContainerName;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
@@ -11,6 +13,7 @@ import cn.nukkit.event.entity.EntityInventoryChangeEvent;
 import cn.nukkit.event.player.PlayerItemHeldEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
+import cn.nukkit.item.ItemBundle;
 import cn.nukkit.item.ItemMap;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
@@ -191,6 +194,9 @@ public class PlayerInventory extends BaseInventory {
         }
 
         if (index >= this.getSize()) {
+            if (!send && holder instanceof Player player && player.isInventoryServerAuthoritative()) {
+                return;
+            }
             this.sendArmorSlot(index, this.getViewers());
             this.sendArmorSlot(index, this.getHolder().getViewers().values());
         } else {
@@ -291,8 +297,12 @@ public class PlayerInventory extends BaseInventory {
             item = event.getNewItem();
         }
 
+        if (item instanceof ItemBundle bundle) {
+            ensureUniqueBundleId(index, bundle);
+        }
+
         Item old = this.getItem(index);
-        this.slots.put(index, item.clone());
+        this.slots.put(index, this.copyStackForSlot(item));
         this.onSlotChange(index, old, send);
         return true;
     }
@@ -327,7 +337,7 @@ public class PlayerInventory extends BaseInventory {
             }
 
             if (item.getId() != Item.AIR) {
-                this.slots.put(index, item.clone());
+                this.slots.put(index, this.copyStackForSlot(item));
             } else {
                 this.slots.remove(index);
             }
@@ -372,6 +382,9 @@ public class PlayerInventory extends BaseInventory {
                 InventoryContentPacket contentPacket = new InventoryContentPacket();
                 contentPacket.inventoryId = InventoryContentPacket.SPECIAL_ARMOR;
                 contentPacket.slots = armor;
+                if (player.isInventoryServerAuthoritative()) {
+                    contentPacket.containerNameData = FullContainerName.of(ContainerSlotType.ARMOR);
+                }
                 player.dataPacket(contentPacket);
             } else {
                 player.dataPacket(equipmentPacket);
@@ -430,6 +443,9 @@ public class PlayerInventory extends BaseInventory {
                 slotPacket.inventoryId = InventoryContentPacket.SPECIAL_ARMOR;
                 slotPacket.slot = index - this.getSize();
                 slotPacket.item = this.getItem(index);
+                if (player.isInventoryServerAuthoritative()) {
+                    slotPacket.containerNameData = FullContainerName.of(ContainerSlotType.ARMOR);
+                }
                 player.dataPacket(slotPacket);
             } else {
                 player.dataPacket(equipmentPacket);
@@ -468,6 +484,8 @@ public class PlayerInventory extends BaseInventory {
                 continue;
             }
             packet.inventoryId = id;
+            packet.containerNameData = FullContainerName.of(player.isInventoryServerAuthoritative()
+                    ? ContainerSlotType.HOTBAR_AND_INVENTORY : ContainerSlotType.ANVIL_INPUT);
             player.dataPacket(packet.clone());
         }
     }
@@ -493,6 +511,9 @@ public class PlayerInventory extends BaseInventory {
         packet.item = this.getItem(index).clone();
 
         for (Player player : players) {
+            packet.containerNameData = FullContainerName.of(player.isInventoryServerAuthoritative()
+                    ? (index < 9 ? ContainerSlotType.HOTBAR : ContainerSlotType.INVENTORY)
+                    : ContainerSlotType.ANVIL_INPUT);
             if (player.equals(this.getHolder())) {
                 packet.inventoryId = ContainerIds.INVENTORY;
                 player.dataPacket(packet);
