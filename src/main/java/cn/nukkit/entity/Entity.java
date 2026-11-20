@@ -3,7 +3,6 @@ package cn.nukkit.entity;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockFire;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockWater;
 import cn.nukkit.blockentity.impl.BlockEntityPistonArm;
@@ -16,7 +15,6 @@ import cn.nukkit.entity.item.EntityArmorStand;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.entity.item.EntityVehicle;
 import cn.nukkit.entity.mob.EntityCreeper;
-import cn.nukkit.entity.mob.EntityWolf;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.entity.*;
@@ -484,6 +482,9 @@ public abstract class Entity extends Location implements Metadatable {
 
     public List<Block> blocksAround = new ArrayList<>();
     public List<Block> collisionBlocks = new ArrayList<>();
+
+    public int[] collisionBlocksIds;
+    public int[] collisionBlocksData;
 
     public double lastX;
     public double lastY;
@@ -1811,6 +1812,8 @@ public abstract class Entity extends Location implements Metadatable {
         if (!this.isPlayer) {
             //this.blocksAround = null; // Use only when entity moves for better performance
             this.collisionBlocks = null;
+            this.collisionBlocksIds = null;
+            this.collisionBlocksData = null;
         }
 
         this.justCreated = false;
@@ -2450,8 +2453,8 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public boolean isInsideOfFire() {
-        for (Block block : this.getCollisionBlocks()) {
-            if (block instanceof BlockFire) {
+        for (int blockId : this.getCollisionBlocksIds()) {
+            if (blockId == BlockID.FIRE || blockId == BlockID.SOUL_FIRE) {
                 return true;
             }
         }
@@ -2658,6 +2661,48 @@ public abstract class Entity extends Location implements Metadatable {
         return this.blocksAround;
     }
 
+    /**
+     * Optimized getBlocksAround() method version for fewer allocations
+     * @return block id array
+     */
+    public int[] getBlocksIdsAround() {
+        int minX = NukkitMath.floorDouble(this.boundingBox.getMinX());
+        int minY = NukkitMath.floorDouble(this.boundingBox.getMinY());
+        int minZ = NukkitMath.floorDouble(this.boundingBox.getMinZ());
+        int maxX = NukkitMath.ceilDouble(this.boundingBox.getMaxX());
+        int maxY = NukkitMath.ceilDouble(this.boundingBox.getMaxY());
+        int maxZ = NukkitMath.ceilDouble(this.boundingBox.getMaxZ());
+
+        if (!this.level.isYInRange(minY) && !this.level.isYInRange(maxY)) {
+            return new int[0];
+        }
+
+        minY = Math.max(minY, this.level.getMinBlockY());
+        maxY = Math.min(maxY, this.level.getMaxBlockY());
+
+        if (minY > maxY) {
+            return new int[0];
+        }
+
+        int sizeX = maxX - minX + 1;
+        int sizeY = maxY - minY + 1;
+        int sizeZ = maxZ - minZ + 1;
+        int total = sizeX * sizeY * sizeZ;
+
+        int[] ids = new int[total];
+        int idx = 0;
+
+        for (int z = minZ; z <= maxZ; ++z) {
+            for (int x = minX; x <= maxX; ++x) {
+                for (int y = minY; y <= maxY; ++y) {
+                    ids[idx++] = this.level.getBlockIdAt(x, y, z);
+                }
+            }
+        }
+
+        return ids;
+    }
+
     public List<Block> getCollisionBlocks() {
         if (this.collisionBlocks == null) {
             this.collisionBlocks = new ArrayList<>();
@@ -2671,6 +2716,92 @@ public abstract class Entity extends Location implements Metadatable {
         }
 
         return this.collisionBlocks;
+    }
+    /**
+     * Optimized getCollisionBlocks() method version for fewer allocations
+     *
+     * @return [id1, x1, y1, z1, id2, x2, y2, z2, ...] — 4 ints per colliding block
+     */
+    public int[] getCollisionBlocksData() {
+        if (this.collisionBlocksData == null) {
+            this.collisionBlocksData = scanCollisionBlocks(true);
+        }
+        return this.collisionBlocksData;
+    }
+
+    /**
+     * Optimized getCollisionBlocks() method version for fewer allocations
+     *
+     * @return [id1, id2, id3, ...] — IDs of colliding blocks
+     */
+    public int[] getCollisionBlocksIds() {
+        if (this.collisionBlocksIds == null) {
+            this.collisionBlocksIds = scanCollisionBlocks(false);
+        }
+        return this.collisionBlocksIds;
+    }
+
+    /**
+     * Shared scan for both collision getters
+     *
+     * @param withCoords true -> [id, x, y, z, ...], false -> [id, ...]
+     * @return packed collision data
+     */
+    private int[] scanCollisionBlocks(boolean withCoords) {
+        int minX = NukkitMath.floorDouble(this.boundingBox.getMinX());
+        int minY = NukkitMath.floorDouble(this.boundingBox.getMinY());
+        int minZ = NukkitMath.floorDouble(this.boundingBox.getMinZ());
+        int maxX = NukkitMath.ceilDouble(this.boundingBox.getMaxX());
+        int maxY = NukkitMath.ceilDouble(this.boundingBox.getMaxY());
+        int maxZ = NukkitMath.ceilDouble(this.boundingBox.getMaxZ());
+
+        if (!this.level.isYInRange(minY) && !this.level.isYInRange(maxY)) {
+            return new int[0];
+        }
+
+        minY = Math.max(minY, this.level.getMinBlockY());
+        maxY = Math.min(maxY, this.level.getMaxBlockY());
+
+        if (minY > maxY) {
+            return new int[0];
+        }
+
+        double bbMinX = this.boundingBox.getMinX();
+        double bbMinY = this.boundingBox.getMinY();
+        double bbMinZ = this.boundingBox.getMinZ();
+        double bbMaxX = this.boundingBox.getMaxX();
+        double bbMaxY = this.boundingBox.getMaxY();
+        double bbMaxZ = this.boundingBox.getMaxZ();
+
+        int sizeX = maxX - minX + 1;
+        int sizeY = maxY - minY + 1;
+        int sizeZ = maxZ - minZ + 1;
+        int stride = withCoords ? 4 : 1;
+        int[] buf = new int[sizeX * sizeY * sizeZ * stride];
+        int idx = 0;
+
+        for (int z = minZ; z <= maxZ; ++z) {
+            for (int x = minX; x <= maxX; ++x) {
+                for (int y = minY; y <= maxY; ++y) {
+                    // simple bb
+                    if (bbMaxX <= x || bbMinX >= x + 1) continue;
+                    if (bbMaxY <= y || bbMinY >= y + 1) continue;
+                    if (bbMaxZ <= z || bbMinZ >= z + 1) continue;
+
+                    int id = this.level.getBlockIdAt(x, y, z);
+                    if (id == 0) continue; // skip air
+
+                    buf[idx++] = id;
+                    if (withCoords) {
+                        buf[idx++] = x;
+                        buf[idx++] = y;
+                        buf[idx++] = z;
+                    }
+                }
+            }
+        }
+
+        return (idx == buf.length) ? buf : java.util.Arrays.copyOf(buf, idx);
     }
 
     /**
@@ -2691,20 +2822,37 @@ public abstract class Entity extends Location implements Metadatable {
         boolean portal = false;
         boolean powderSnow = false;
 
-        for (Block block : this.getCollisionBlocks()) {
-            if (block.getId() == Block.NETHER_PORTAL) {
+        int[] collisionData = this.getCollisionBlocksData();
+
+        for (int i = 0; i < collisionData.length; i += 4) {
+            int blockId = collisionData[i];
+            int x = collisionData[i + 1];
+            int y = collisionData[i + 2];
+            int z = collisionData[i + 3];
+
+            if (blockId == Block.NETHER_PORTAL) {
                 portal = true;
                 continue;
             }
 
-            if (block.getId() == Block.POWDER_SNOW) {
+            if (blockId == Block.POWDER_SNOW) {
                 powderSnow = true;
                 continue;
             }
 
-            block.onEntityCollide(this);
-            block.getLevelBlockAtLayer(1).onEntityCollide(this);
-            block.addVelocityToEntity(this, vector);
+            if (this instanceof EntityProjectile || Registries.BLOCK.hasEntityCollision(blockId)) {
+                Block block = this.level.getBlock(x, y, z, false);
+                if (block == null) continue;
+
+                block.onEntityCollide(this);
+
+                Block layer1 = block.getLevelBlockAtLayer(1);
+                if (layer1 != null) {
+                    layer1.onEntityCollide(this);
+                }
+
+                block.addVelocityToEntity(this, vector);
+            }
         }
 
         if (portal) {
@@ -2827,6 +2975,8 @@ public abstract class Entity extends Location implements Metadatable {
                 // 切换世界后重置碰撞计算
                 this.blocksAround = null;
                 this.collisionBlocks = null;
+                this.collisionBlocksIds = null;
+                this.collisionBlocksData = null;
             } else {
                 this.x = pos.x;
                 this.y = pos.y;

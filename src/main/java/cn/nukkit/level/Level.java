@@ -1932,6 +1932,7 @@ public class Level implements ChunkManager, Metadatable {
                     if (block.getId() == BlockID.BARRIER && entity.canPassThroughBarrier()) {
                         continue;
                     }
+                    // TODO optimize?
                     if (!block.canPassThrough() && block.collidesWithBB(bb)) {
                         collides.add(block.getBoundingBox());
                     }

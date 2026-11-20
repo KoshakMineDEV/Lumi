@@ -3,6 +3,7 @@ package cn.nukkit.item;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockWater;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.entity.projectile.EntityThrownTrident;
@@ -71,8 +72,8 @@ public class ItemTrident extends ItemTool {
                 playerToggleSpinAttackEvent.setCancelled(true);
             } else {
                 boolean inWater = false;
-                for (Block block : player.getCollisionBlocks()) {
-                    if (block instanceof BlockWater) {
+                for (int blockId : player.getCollisionBlocksIds()) {
+                    if (blockId == BlockID.WATER || blockId == BlockID.STILL_WATER) {
                         inWater = true;
                         break;
                     }

@@ -46,6 +46,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
     private static boolean[] SOLID = new boolean[65536];
     private static boolean[] TRANSPARENT = new boolean[65536];
     private static boolean[] DIFFUSES_SKY_LIGHT = new boolean[65536];
+    private static boolean[] HAS_ENTITY_COLLISION = new boolean[65536];
 
     private static final List<CustomBlockDefinition> CUSTOM_BLOCK_DEFINITIONS = new ArrayList<>();
     private static final Int2ObjectOpenHashMap<List<VanillaBlockDefinition>> VANILLA_BLOCK_DEFINITIONS = new Int2ObjectOpenHashMap<>();
@@ -1259,6 +1260,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                 TRANSPARENT[id] = block.isTransparent();
                 DIFFUSES_SKY_LIGHT[id] = block.diffusesSkyLight();
                 LIGHT[id] = block.getLightLevel();
+                HAS_ENTITY_COLLISION[id] = block.hasEntityCollision();
 
                 if (block.isSolid()) {
                     if (block.isTransparent()) {
@@ -1371,6 +1373,7 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
                 SOLID[id] = ((Block) block).isSolid();
                 TRANSPARENT[id] = ((Block) block).isTransparent();
                 DIFFUSES_SKY_LIGHT[id] = ((Block) block).diffusesSkyLight();
+                HAS_ENTITY_COLLISION[id] = ((Block) block).hasEntityCollision();
 
                 // Registering custom block type
                 BlockTypes.register(new CustomBlockType(block));
@@ -1500,6 +1503,10 @@ public class BlockRegistry implements IRegistry<Integer, Block, Class<? extends 
 
     public boolean isDiffusesSkyLight(int blockId) {
         return DIFFUSES_SKY_LIGHT[blockId];
+    }
+
+    public boolean hasEntityCollision(int blockId) {
+        return HAS_ENTITY_COLLISION[blockId];
     }
 
     public int getListSize() {

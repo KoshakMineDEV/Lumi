@@ -348,6 +348,8 @@ public class EntityItem extends Entity {
     @Override
     public boolean entityBaseTick(int tickDiff) {
         this.collisionBlocks = null;
+        this.collisionBlocksIds = null;
+        this.collisionBlocksData = null;
         this.justCreated = false;
 
         if (!this.isAlive()) {
