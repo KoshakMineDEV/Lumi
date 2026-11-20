@@ -25,6 +25,8 @@ import java.util.Set;
  */
 public final class NetworkMapping {
 
+    private static final int WORKBENCH_RESULT_SLOT = 9;
+
     @Nullable
     public static Inventory getInventory(Player player, ItemStackRequestSlotData data) {
         if (data == null || data.getContainer() == null || data.getSlot() < 0) {
@@ -39,6 +41,8 @@ public final class NetworkMapping {
             case ARMOR -> wireSlot < 4;
             case OFFHAND -> wireSlot <= 1;
             case CURSOR -> wireSlot == 0;
+            case CRAFTING_OUTPUT -> wireSlot == 0 || wireSlot == WORKBENCH_RESULT_SLOT
+                    || wireSlot == PlayerUIComponent.CREATED_ITEM_OUTPUT_UI_SLOT;
             case CREATED_OUTPUT -> wireSlot == 0 || wireSlot == PlayerUIComponent.CREATED_ITEM_OUTPUT_UI_SLOT;
             case TRADE2_INGREDIENT_1 -> wireSlot == 0 || wireSlot == TradeInventory.TRADE_INPUT1_UI_SLOT;
             case TRADE2_INGREDIENT_2 -> wireSlot == 1 || wireSlot == TradeInventory.TRADE_INPUT2_UI_SLOT;
@@ -58,6 +62,9 @@ public final class NetworkMapping {
         }
         int slot = toInternalSlot(type, wireSlot);
         int size = inventory.getSize() + (type == ContainerSlotType.ARMOR ? 4 : 0);
+        if (type == ContainerSlotType.CRAFTING_INPUT && inventory.getType() == InventoryType.WORKBENCH) {
+            size = Math.min(size, WORKBENCH_RESULT_SLOT);
+        }
         return slot >= 0 && slot < size ? inventory : null;
     }
 
@@ -73,11 +80,13 @@ public final class NetworkMapping {
             case CURSOR -> ui.getCursorInventory();
             case CREATED_OUTPUT -> ui; // slot 50 of PlayerUIInventory hosts the created output
             case CRAFTING_INPUT -> {
-                // Crafting tables are tracked through Player.craftingGrid rather
-                // than a normal top window. Only use topWindow when it is already a
-                // crafting-grid view; otherwise return the player's active grid.
-                yield topWindow instanceof CraftingGrid ? topWindow : player.getCraftingGrid();
+                if (topWindow instanceof CraftingGrid) {
+                    yield topWindow;
+                }
+                Inventory workbench = viewedContainer(player, topWindow, InventoryType.WORKBENCH);
+                yield workbench != null ? workbench : player.getCraftingGrid();
             }
+            case CRAFTING_OUTPUT -> viewedContainer(player, topWindow, InventoryType.WORKBENCH);
             case HOTBAR, INVENTORY, HOTBAR_AND_INVENTORY, ARMOR -> player.getInventory();
             case OFFHAND -> player.getOffhandInventory();
             case TRADE_INGREDIENT_1, TRADE_INGREDIENT_2, TRADE2_INGREDIENT_1, TRADE2_INGREDIENT_2 ->
@@ -99,12 +108,13 @@ public final class NetworkMapping {
                  ELEMENT_CONSTRUCTOR_OUTPUT,
                  MATERIAL_REDUCER_INPUT, MATERIAL_REDUCER_OUTPUT,
                  LAB_TABLE_INPUT -> null;
-            case FURNACE_FUEL, FURNACE_INGREDIENT, FURNACE_RESULT,
-                 BLAST_FURNACE_INGREDIENT, SMOKER_INGREDIENT ->
-                    typedContainer(topWindow, FurnaceInventory.class);
-            case BREWING_INPUT, BREWING_RESULT, BREWING_FUEL ->
-                    typedContainer(topWindow, BrewingInventory.class);
-            case SHULKER_BOX -> typedContainer(topWindow, ShulkerBoxInventory.class);
+            case FURNACE_FUEL, FURNACE_INGREDIENT, FURNACE_RESULT -> topWindow instanceof FurnaceInventory
+                    ? topWindow : viewedContainer(player, topWindow, InventoryType.FURNACE);
+            case BLAST_FURNACE_INGREDIENT, SMOKER_INGREDIENT -> typedContainer(topWindow, FurnaceInventory.class);
+            case BREWING_INPUT, BREWING_RESULT, BREWING_FUEL -> topWindow instanceof BrewingInventory
+                    ? topWindow : viewedContainer(player, topWindow, InventoryType.BREWING_STAND);
+            case SHULKER_BOX -> topWindow instanceof ShulkerBoxInventory
+                    ? topWindow : viewedContainer(player, topWindow, InventoryType.SHULKER_BOX);
             case BARREL -> typedContainer(topWindow, BarrelInventory.class);
             case LEVEL_ENTITY -> topWindow instanceof PlayerUIComponent ? null : topWindow;
             case DYNAMIC_CONTAINER -> resolveDynamicContainer(player, dynamicId);
@@ -115,6 +125,12 @@ public final class NetworkMapping {
     @Nullable
     private static Inventory typedContainer(@Nullable Inventory topWindow, Class<? extends Inventory> expected) {
         return expected.isInstance(topWindow) ? topWindow : null;
+    }
+
+    @Nullable
+    private static Inventory viewedContainer(Player player, @Nullable Inventory inventory, InventoryType type) {
+        return inventory != null && inventory.getType() == type && inventory.getViewers().contains(player)
+                ? inventory : null;
     }
 
     private static boolean isSlotTypeCompatibleWithFakeUI(FakeBlockUIComponent fakeUI, ContainerSlotType type) {
@@ -151,6 +167,7 @@ public final class NetworkMapping {
             case ARMOR -> networkSlot + 36;
             case CURSOR, OFFHAND, BEACON_PAYMENT -> 0;
             case CREATED_OUTPUT -> 50;
+            case CRAFTING_OUTPUT -> WORKBENCH_RESULT_SLOT;
             case TRADE_INGREDIENT_1, TRADE2_INGREDIENT_1 -> 0;
             case TRADE_INGREDIENT_2, TRADE2_INGREDIENT_2 -> 1;
             case TRADE_RESULT, TRADE2_RESULT -> PlayerUIComponent.CREATED_ITEM_OUTPUT_UI_SLOT;
