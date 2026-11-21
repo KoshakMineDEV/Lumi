@@ -338,7 +338,7 @@ public final class WireUpdateHandler {
     private void authorize(Node wire) {
         if (wire.eventEpoch != this.epoch) {
             wire.eventEpoch = this.epoch;
-            wire.pinned = !new RedstoneUpdateEvent(wire.block).call();
+            wire.pinned = this.level.isRedstoneEnabled() && !new RedstoneUpdateEvent(wire.block).call();
         }
     }
 
@@ -359,6 +359,7 @@ public final class WireUpdateHandler {
     }
 
     private int findPower(Node wire, boolean ignoreSearched) {
+        if (!this.level.isRedstoneEnabled()) return 0;
         if (wire.pinned) return wire.current;
         if (wire.external < 0) wire.external = externalPower(wire);
         int power = wire.external;
@@ -446,7 +447,9 @@ public final class WireUpdateHandler {
         if (current.getId() == BlockID.REDSTONE_WIRE && current instanceof BlockRedstoneWire wire) {
             int previous = wire.getSignal();
             if (previous != node.power) {
-                new BlockRedstoneEvent(wire, previous, node.power).call();
+                if (this.level.isRedstoneEnabled()) {
+                    new BlockRedstoneEvent(wire, previous, node.power).call();
+                }
                 if (!this.pending.isEmpty()) {
                     return;
                 }

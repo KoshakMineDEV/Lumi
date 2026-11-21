@@ -51,6 +51,7 @@ public interface RedstoneComponent {
      * @param ignoredFaces The faces, that shouldn't get updated.
      */
     static void updateAroundRedstone(@NotNull Position pos, @NotNull Set<BlockFace> ignoredFaces) {
+        if (pos.getLevel() == null || !pos.getLevel().isRedstoneEnabled()) return;
         for (BlockFace face : BlockFace.values()) {
             if (ignoredFaces.contains(face)) continue;
             pos.getLevelBlock().getSide(face).onUpdate(Level.BLOCK_UPDATE_REDSTONE);

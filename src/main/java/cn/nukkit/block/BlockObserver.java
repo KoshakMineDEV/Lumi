@@ -122,6 +122,10 @@ public class BlockObserver extends BlockSolidMeta implements Faceable {
 
     @Override
     public int onUpdate(int type) {
+        if (!this.level.isRedstoneEnabled()) {
+            return 0;
+        }
+
         if (type == Level.BLOCK_UPDATE_SCHEDULED) {
             RedstoneUpdateEvent ev = new RedstoneUpdateEvent(this);
             PluginManager pluginManager = level.getServer().getPluginManager();
@@ -153,6 +157,10 @@ public class BlockObserver extends BlockSolidMeta implements Faceable {
 
     @Override
     public void onNeighborChange(@NotNull BlockFace side) {
+        if (!this.level.isRedstoneEnabled()) {
+            return;
+        }
+
         if (side != this.getBlockFace() || this.level.isUpdateScheduled(this, this)) {
             return;
         }

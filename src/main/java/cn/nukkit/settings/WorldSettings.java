@@ -48,6 +48,10 @@ public class WorldSettings extends OkaeriConfig {
     @CustomKey("allow-pvp")
     private boolean allowPvp = true;
 
+    @CustomKey("redstone-enabled")
+    @Comment("Enable or disable redstone circuits and powered block behavior")
+    private boolean redstoneEnabled = true;
+
     @CustomKey("enable-hardcore")
     private boolean enableHardcore = false;
 

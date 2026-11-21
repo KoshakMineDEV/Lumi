@@ -1642,6 +1642,10 @@ public class Level implements ChunkManager, Metadatable {
         this.updateAroundRedstone(pos, null);
     }
 
+    public boolean isRedstoneEnabled() {
+        return Server.getInstance().getSettings().world().redstoneEnabled();
+    }
+
     public WireUpdateHandler getWireUpdateHandler() {
         if (this.wireUpdateHandler == null) {
             this.wireUpdateHandler = new WireUpdateHandler(this);
@@ -1650,10 +1654,16 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void updateRedstoneBlock(@NotNull Block block) {
+        if (!this.isRedstoneEnabled()) {
+            return;
+        }
         block.onUpdate(BLOCK_UPDATE_REDSTONE);
     }
 
     public void updateAroundRedstone(@NotNull Vector3 pos, @Nullable BlockFace ignoredFace) {
+        if (!this.isRedstoneEnabled()) {
+            return;
+        }
         for (BlockFace side : BlockFace.values()) {
             if (ignoredFace != null && side == ignoredFace) {
                 continue;
@@ -1668,6 +1678,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void updateComparatorOutputLevelSelective(Vector3 v, boolean observer) {
+        if (!this.isRedstoneEnabled()) {
+            return;
+        }
         for (BlockFace face : Plane.HORIZONTAL) {
             Vector3 pos = v.getSideVec(face);
 
@@ -1705,6 +1718,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void updateAroundObserver(Vector3 pos) {
+        if (!this.isRedstoneEnabled()) {
+            return;
+        }
         for (BlockFace face : BlockFace.values()) {
             Block neighborBlock = getBlock(pos.getSide(face));
             if (neighborBlock.getId() == BlockID.OBSERVER) {
@@ -4826,10 +4842,16 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public int getStrongPower(Vector3 pos, BlockFace direction) {
+        if (!this.isRedstoneEnabled()) {
+            return 0;
+        }
         return this.getBlock(pos).getStrongPower(direction);
     }
 
     public int getStrongPower(Vector3 pos) {
+        if (!this.isRedstoneEnabled()) {
+            return 0;
+        }
         int i = 0;
 
         for (BlockFace face : BlockFace.values()) {
@@ -4848,6 +4870,9 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public int getRedstonePower(Vector3 pos, BlockFace face) {
+        if (!this.isRedstoneEnabled()) {
+            return 0;
+        }
         Block block = this.getBlock(pos);
         return block.isNormalBlock() ? this.getStrongPower(pos) : block.getWeakPower(face);
     }
