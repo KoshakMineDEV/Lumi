@@ -234,9 +234,7 @@ public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage>
             while ((packet = this.outbound.poll()) != null) {
                 if (packet instanceof DisconnectPacket) {
                     BinaryStream batched = new BinaryStream();
-                    byte[] buf = packet.getBuffer();
-                    batched.putUnsignedVarInt(buf.length);
-                    batched.put(buf);
+                    packet.writeLengthPrefixedTo(batched);
 
                     try {
                         this.sendPacket(this.compressionOut.compress(batched, Server.getInstance().getSettings().network().compression().compressionLevel()));
@@ -286,13 +284,11 @@ public class RakNetPlayerSession extends SimpleChannelInboundHandler<RakMessage>
                 throw new IllegalStateException("Packet should have already been encoded");
             }
 
-            byte[] buf = packet.getBuffer();
-            if (batched.getCount() + buf.length > 3145728) { // 3 * 1024 * 1024
+            if (batched.getCount() + packet.getSerializedLength() > 3145728) { // 3 * 1024 * 1024
                 this.sendPackets(batched);
                 batched = new BinaryStream();
             }
-            batched.putUnsignedVarInt(buf.length);
-            batched.put(buf);
+            packet.writeLengthPrefixedTo(batched);
         }
 
         this.sendPackets(batched);

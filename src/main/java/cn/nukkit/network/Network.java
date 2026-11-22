@@ -9,7 +9,6 @@ import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.exception.DataPacketDecodeException;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.Utils;
-import cn.nukkit.utils.VarInt;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -21,7 +20,6 @@ import oshi.SystemInfo;
 import oshi.hardware.NetworkIF;
 
 import javax.annotation.Nonnegative;
-import java.io.ByteArrayInputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ProtocolException;
@@ -220,6 +218,8 @@ public class Network {
         }
         BinaryStream stream = new BinaryStream(data);
         List<DataPacket> decoded = new ArrayList<>();
+        int protocol = player == null ? ProtocolInfo.CURRENT_PROTOCOL : player.protocol;
+        int packetProtocol = player == null ? Integer.MAX_VALUE : player.protocol;
         int count = 0;
         try {
             while (!stream.feof()) {
@@ -228,22 +228,17 @@ public class Network {
                 if (length <= 0 || length > stream.getCount() - stream.getOffset()) {
                     throw new ProtocolException("Invalid batch frame length: " + length);
                 }
-                byte[] buf = stream.get((int) length);
-                ByteArrayInputStream input = new ByteArrayInputStream(buf);
-                int packetId;
-                switch (raknetProtocol) {
-                    case 7 -> packetId = input.read();
-                    case 8 -> {
-                        packetId = input.read();
-                        if (input.skip(2L) != 2L) throw new ProtocolException("Truncated legacy packet header");
-                    }
-                    default -> packetId = (int) VarInt.readUnsignedVarInt(input) & 0x3ff;
-                }
-                int protocol = player == null ? ProtocolInfo.CURRENT_PROTOCOL : player.protocol;
+                int packetStart = stream.getOffset();
+                int packetEnd = packetStart + (int) length;
+                stream.setOffset(packetEnd);
+
+                long header = readPacketHeader(data, packetStart, packetEnd, raknetProtocol, 1);
+                int packetId = (int) header;
+                int packetOffset = (int) (header >>> 32);
                 DataPacket packet = this.getPacket(packetId, protocol);
                 if (packet == null) continue;
-                packet.protocol = player == null ? Integer.MAX_VALUE : player.protocol;
-                packet.setBuffer(buf, buf.length - input.available());
+                packet.protocol = packetProtocol;
+                packet.setBufferSlice(data, packetStart, packetOffset, packetEnd);
                 if (!new DataPacketDecodeEvent(player, packet).call()) {
                     // Plugin cancellation is intentional, not a malformed batch.
                     packets.addAll(decoded);
@@ -285,32 +280,24 @@ public class Network {
                 if (count >= 1000) {
                     throw new ProtocolException("Illegal batch with " + count + " packets");
                 }
-                byte[] buf = stream.getByteArray();
-
-                ByteArrayInputStream bais = new ByteArrayInputStream(buf);
-
-                int packetId;
-                switch (raknetProtocol) {
-                    case 7:
-                        packetId = bais.read();
-                        break;
-                    case 8:
-                        packetId = bais.read();
-                        bais.skip(2L);
-                        break;
-                    default:
-                        int header = (int) VarInt.readUnsignedVarInt(bais);
-                        // | Client ID | Sender ID | Packet ID |
-                        // |   2 bits  |   2 bits  |  10 bits  |
-                        packetId = header & 0x3FF;
-                        break;
+                long length = stream.getUnsignedVarInt();
+                if (length <= 0 || length > stream.getCount() - stream.getOffset()) {
+                    throw new ProtocolException("Invalid batch frame length: " + length);
                 }
 
-                DataPacket pk = this.getPacket(packetId, player == null ? ProtocolInfo.CURRENT_PROTOCOL : player.protocol);
+                int packetStart = stream.getOffset();
+                int packetEnd = packetStart + (int) length;
+                stream.setOffset(packetEnd);
+
+                long header = readPacketHeader(data, packetStart, packetEnd, raknetProtocol, 3);
+                int packetId = (int) header;
+                int packetOffset = (int) (header >>> 32);
+                int protocol = player == null ? ProtocolInfo.CURRENT_PROTOCOL : player.protocol;
+                DataPacket pk = this.getPacket(packetId, protocol);
 
                 if (pk != null) {
                     pk.protocol = player == null ? Integer.MAX_VALUE : player.protocol;
-                    pk.setBuffer(buf, buf.length - bais.available());
+                    pk.setBufferSlice(data, packetStart, packetOffset, packetEnd);
 
                     try {
                         if (raknetProtocol > 8) {
@@ -322,7 +309,7 @@ public class Network {
 
                             pk.decode();
                         } else { // version < 1.6
-                            pk.setBuffer(buf, 3);
+                            pk.setOffset(3);
 
                             DataPacketDecodeEvent event = new DataPacketDecodeEvent(player, pk);
 
@@ -339,7 +326,8 @@ public class Network {
                         return;
                     } catch (Exception e) {
                         if (log.isTraceEnabled()) {
-                            log.trace("Dumping Packet\n{}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(buf)));
+                            byte[] packetBytes = Arrays.copyOfRange(data, packetStart, packetEnd);
+                            log.trace("Dumping Packet\n{}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(packetBytes)));
                         }
 
                         log.error("Unable to decode packet", e);
@@ -356,6 +344,44 @@ public class Network {
                 log.debug("Error whilst decoding batch packet", e);
             }
         }
+    }
+
+    /** Returns the packet ID in the low 32 bits and the payload offset in the high 32 bits. */
+    private static long readPacketHeader(byte[] data, int packetStart, int packetEnd, int raknetProtocol,
+                                         int protocol7HeaderLength) throws ProtocolException {
+        int offset = packetStart;
+        int packetId;
+        if (raknetProtocol == 7 || raknetProtocol == 8) {
+            if (packetStart >= packetEnd) {
+                throw new ProtocolException("Empty packet frame");
+            }
+            packetId = data[offset++] & 0xff;
+            offset = packetStart + (raknetProtocol == 7 ? protocol7HeaderLength : 3);
+            if (offset > packetEnd) {
+                throw new ProtocolException("Truncated legacy packet header");
+            }
+        } else {
+            long header = 0;
+            int shift = 0;
+            boolean complete = false;
+            for (int i = 0; i < 5; i++) {
+                if (offset >= packetEnd) {
+                    throw new ProtocolException("Truncated packet header");
+                }
+                int value = data[offset++] & 0xff;
+                header |= (long) (value & 0x7f) << shift;
+                if ((value & 0x80) == 0) {
+                    complete = true;
+                    break;
+                }
+                shift += 7;
+            }
+            if (!complete) {
+                throw new ProtocolException("Packet header is too long");
+            }
+            packetId = (int) header & 0x3ff;
+        }
+        return ((long) offset << 32) | (packetId & 0xffffffffL);
     }
 
     /**

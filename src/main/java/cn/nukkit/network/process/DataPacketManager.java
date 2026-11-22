@@ -69,14 +69,14 @@ public final class DataPacketManager {
     }
 
     public static DataPacketProcessor getProcessor(int protocol, Class<? extends DataPacket> packet) {
-        int index = getIndex(protocol, packet);
-        if (!REGISTERED_PACKETS_BY_CLASS.contains(packet) || UNREGISTERED_PACKETS_BY_CLASS.contains(index)) {
-            return null;
-        }
-
         DataPacketProcessor processor = getProcessor0(protocol, packet);
         if (processor != null) {
             return processor;
+        }
+
+        int index = getIndex(protocol, packet);
+        if (!REGISTERED_PACKETS_BY_CLASS.contains(packet) || UNREGISTERED_PACKETS_BY_CLASS.contains(index)) {
+            return null;
         }
 
         for (int p : PROTOCOL_PROCESSORS_KEYS) {
@@ -105,14 +105,14 @@ public final class DataPacketManager {
     }
 
     public static DataPacketProcessor getProcessor(int protocol, int packetId) {
-        int index = getIndex(protocol, packetId);
-        if (!REGISTERED_PACKETS.contains(packetId) || UNREGISTERED_PACKETS.contains(index)) {
-            return null;
-        }
-
         DataPacketProcessor processor = getProcessor0(protocol, packetId);
         if (processor != null) {
             return processor;
+        }
+
+        int index = getIndex(protocol, packetId);
+        if (!REGISTERED_PACKETS.contains(packetId) || UNREGISTERED_PACKETS.contains(index)) {
+            return null;
         }
 
         for (int p : PROTOCOL_PROCESSORS_KEYS) {

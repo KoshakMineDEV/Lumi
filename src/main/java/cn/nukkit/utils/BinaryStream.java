@@ -17,12 +17,14 @@ import cn.nukkit.level.GameRules;
 import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.BlockVector3;
+import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector2f;
 import cn.nukkit.math.Vector3f;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
+import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.network.protocol.types.EntityLink;
 import cn.nukkit.network.protocol.types.ScriptDebugShapeType;
@@ -164,8 +166,34 @@ public class BinaryStream {
         this.count += bytes.length;
     }
 
+    public void put(byte[] bytes, int offset, int length) {
+        if (length < 0) {
+            throw new IndexOutOfBoundsException("Negative byte range length: " + length);
+        }
+        if (length == 0) {
+            return;
+        }
+
+        this.ensureCapacity(this.count + length);
+        System.arraycopy(bytes, offset, this.buffer, this.count, length);
+        this.count += length;
+    }
+
     public long getLong() {
-        return Binary.readLong(this.get(8));
+        int index = this.offset;
+        if (this.count - index < 8) {
+            return Binary.readLong(this.get(8));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 8;
+        return ((long) data[index] << 56)
+                | ((long) (data[index + 1] & 0xff) << 48)
+                | ((long) (data[index + 2] & 0xff) << 40)
+                | ((long) (data[index + 3] & 0xff) << 32)
+                | ((long) (data[index + 4] & 0xff) << 24)
+                | ((long) (data[index + 5] & 0xff) << 16)
+                | ((long) (data[index + 6] & 0xff) << 8)
+                | (data[index + 7] & 0xffL);
     }
 
     public void putLong(long l) {
@@ -173,7 +201,16 @@ public class BinaryStream {
     }
 
     public int getInt() {
-        return Binary.readInt(this.get(4));
+        int index = this.offset;
+        if (this.count - index < 4) {
+            return Binary.readInt(this.get(4));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 4;
+        return ((data[index] & 0xff) << 24)
+                | ((data[index + 1] & 0xff) << 16)
+                | ((data[index + 2] & 0xff) << 8)
+                | (data[index + 3] & 0xff);
     }
 
     public void putInt(int i) {
@@ -181,7 +218,20 @@ public class BinaryStream {
     }
 
     public long getLLong() {
-        return Binary.readLLong(this.get(8));
+        int index = this.offset;
+        if (this.count - index < 8) {
+            return Binary.readLLong(this.get(8));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 8;
+        return ((long) data[index + 7] << 56)
+                | ((long) (data[index + 6] & 0xff) << 48)
+                | ((long) (data[index + 5] & 0xff) << 40)
+                | ((long) (data[index + 4] & 0xff) << 32)
+                | ((long) (data[index + 3] & 0xff) << 24)
+                | ((long) (data[index + 2] & 0xff) << 16)
+                | ((long) (data[index + 1] & 0xff) << 8)
+                | (data[index] & 0xffL);
     }
 
     public void putLLong(long l) {
@@ -189,7 +239,16 @@ public class BinaryStream {
     }
 
     public int getLInt() {
-        return Binary.readLInt(this.get(4));
+        int index = this.offset;
+        if (this.count - index < 4) {
+            return Binary.readLInt(this.get(4));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 4;
+        return (data[index + 3] << 24)
+                | ((data[index + 2] & 0xff) << 16)
+                | ((data[index + 1] & 0xff) << 8)
+                | (data[index] & 0xff);
     }
 
     public void putLInt(int i) {
@@ -197,7 +256,13 @@ public class BinaryStream {
     }
 
     public int getShort() {
-        return Binary.readShort(this.get(2));
+        int index = this.offset;
+        if (this.count - index < 2) {
+            return Binary.readShort(this.get(2));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 2;
+        return ((data[index] & 0xff) << 8) | (data[index + 1] & 0xff);
     }
 
     public void putShort(int s) {
@@ -205,7 +270,13 @@ public class BinaryStream {
     }
 
     public int getLShort() {
-        return Binary.readLShort(this.get(2));
+        int index = this.offset;
+        if (this.count - index < 2) {
+            return Binary.readLShort(this.get(2));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 2;
+        return ((data[index + 1] & 0xff) << 8) | (data[index] & 0xff);
     }
 
     public void putLShort(int s) {
@@ -217,7 +288,8 @@ public class BinaryStream {
     }
 
     public float getFloat(int accuracy) {
-        return Binary.readFloat(this.get(4), accuracy);
+        float value = Float.intBitsToFloat(this.getInt());
+        return accuracy > -1 ? (float) NukkitMath.round(value, accuracy) : value;
     }
 
     public void putFloat(float v) {
@@ -229,7 +301,8 @@ public class BinaryStream {
     }
 
     public float getLFloat(int accuracy) {
-        return Binary.readLFloat(this.get(4), accuracy);
+        float value = Float.intBitsToFloat(this.getLInt());
+        return accuracy > -1 ? (float) NukkitMath.round(value, accuracy) : value;
     }
 
     public void putLFloat(float v) {
@@ -237,7 +310,15 @@ public class BinaryStream {
     }
 
     public int getTriad() {
-        return Binary.readTriad(this.get(3));
+        int index = this.offset;
+        if (this.count - index < 3) {
+            return Binary.readTriad(this.get(3));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 3;
+        return ((data[index] & 0xff) << 16)
+                | ((data[index + 1] & 0xff) << 8)
+                | (data[index + 2] & 0xff);
     }
 
     public void putTriad(int triad) {
@@ -245,7 +326,15 @@ public class BinaryStream {
     }
 
     public int getLTriad() {
-        return Binary.readLTriad(this.get(3));
+        int index = this.offset;
+        if (this.count - index < 3) {
+            return Binary.readLTriad(this.get(3));
+        }
+        byte[] data = this.buffer;
+        this.offset = index + 3;
+        return ((data[index + 2] & 0xff) << 16)
+                | ((data[index + 1] & 0xff) << 8)
+                | (data[index] & 0xff);
     }
 
     public void putLTriad(int triad) {
@@ -315,11 +404,12 @@ public class BinaryStream {
     }
 
     public void putUUID(UUID uuid) {
-        this.put(Binary.writeUUID(uuid));
+        this.putLLong(uuid.getMostSignificantBits());
+        this.putLLong(uuid.getLeastSignificantBits());
     }
 
     public UUID getUUID() {
-        return Binary.readUUID(this.get(16));
+        return new UUID(this.getLLong(), this.getLLong());
     }
 
     public void putSkin(Skin skin) {
@@ -1003,8 +1093,12 @@ public class BinaryStream {
 
     private static CompoundTag readItemUserDataNbt(BinaryStream stream) throws IOException {
         int remaining = stream.getCount() - stream.getOffset();
+        int bufferOffset = stream.getOffset();
+        if (stream instanceof DataPacket packet) {
+            bufferOffset += packet.getPacketBufferStart();
+        }
         ByteArrayInputStream input = new ByteArrayInputStream(
-                stream.getBufferUnsafe(), stream.getOffset(), remaining);
+                stream.getBufferUnsafe(), bufferOffset, remaining);
         CompoundTag tag = NBTIO.read(input, ByteOrder.LITTLE_ENDIAN);
         stream.skip(remaining - input.available());
         return tag;

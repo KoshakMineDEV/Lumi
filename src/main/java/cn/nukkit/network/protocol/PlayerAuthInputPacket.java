@@ -163,9 +163,7 @@ public class PlayerAuthInputPacket extends DataPacket {
         InventoryTransactionPacket packet = new InventoryTransactionPacket();
         packet.protocol = this.protocol;
         packet.transactionType = InventoryTransactionPacket.TYPE_USE_ITEM;
-        packet.setBuffer(this.getBufferUnsafe());
-        packet.setCount(this.getCount());
-        packet.setOffset(this.getOffset());
+        packet.setBufferSlice(this.getBufferUnsafe(), this.getPacketBufferStart(), this.offset, this.count);
 
         boolean v2168 = packet.protocol >= ProtocolInfo.v1_26_40;
         boolean v2192 = packet.protocol >= ProtocolInfo.v1_26_50;

@@ -248,9 +248,7 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
                 if (packet instanceof DisconnectPacket) {
                     packet.tryEncode();
                     BinaryStream batched = new BinaryStream();
-                    byte[] buf = packet.getBuffer();
-                    batched.putUnsignedVarInt(buf.length);
-                    batched.put(buf);
+                    packet.writeLengthPrefixedTo(batched);
 
                     try {
                         this.sendPacket(this.compressionOut.compress(batched, Server.getInstance().getSettings().network().compression().compressionLevel()));
@@ -321,13 +319,11 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
             }
             packet.tryEncode();
 
-            byte[] buf = packet.getBuffer();
-            if (batched.getCount() + buf.length > 3145728) { // 3 * 1024 * 1024
+            if (batched.getCount() + packet.getSerializedLength() > 3145728) { // 3 * 1024 * 1024
                 this.sendPackets(batched);
                 batched = new BinaryStream();
             }
-            batched.putUnsignedVarInt(buf.length);
-            batched.put(buf);
+            packet.writeLengthPrefixedTo(batched);
         }
 
         this.sendPackets(batched);
@@ -553,7 +549,7 @@ public class NetherNetPlayerSession extends SimpleChannelInboundHandler<ByteBuf>
     }
 
     private static int packetBytes(DataPacket packet) {
-        return Math.max(packet.getCount(), 1);
+        return Math.max(packet.getSerializedLength(), 1);
     }
 
     /** Called only on the event loop. Never decrypt retained payloads a second time. */
