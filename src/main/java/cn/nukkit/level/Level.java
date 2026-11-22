@@ -36,6 +36,8 @@ import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
 import cn.nukkit.level.format.generic.serializer.NetworkChunkSerializer;
+import cn.nukkit.level.format.leveldb.LevelDBProvider;
+import cn.nukkit.level.format.leveldb.structure.LevelDBChunk;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.PopChunkManager;
 import cn.nukkit.level.generator.task.GenerationTask;
@@ -238,6 +240,7 @@ public class Level implements ChunkManager, Metadatable {
 
     @NonComputationAtomic
     private final Long2ObjectNonBlockingMap<BlockEntity> blockEntities = new Long2ObjectNonBlockingMap<>();
+    private final Collection<BlockEntity> blockEntityValues = this.blockEntities.values();
 
     @NonComputationAtomic
     private final Long2ObjectNonBlockingMap<Player> players = new Long2ObjectNonBlockingMap<>();
@@ -379,6 +382,8 @@ public class Level implements ChunkManager, Metadatable {
     @Getter
     private ExecutorService asyncChuckExecutor;
     private final Queue<NetworkChunkSerializer.NetworkChunkSerializerCallbackData> asyncChunkRequestCallbackQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<AsyncChunkLoadResult> asyncChunkLoadCallbackQueue = new ConcurrentLinkedQueue<>();
+    private final Set<Long> pendingAsyncChunkLoads = ConcurrentHashMap.newKeySet();
 
     private Iterator<LongObjectEntry<Long>> lastUsingUnloadingIter;
 
@@ -390,6 +395,9 @@ public class Level implements ChunkManager, Metadatable {
     private static final AtomicInteger callbackIdCounter = new AtomicInteger();
     private final Int2ObjectMap<Consumer<Block>> callbackBlockSet = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<BiConsumer<Long, DataPacket>> callbackChunkPacketSend = new Int2ObjectOpenHashMap<>();
+
+    private record AsyncChunkLoadResult(LevelDBProvider provider, int x, int z, LevelDBChunk chunk, Exception error) {
+    }
 
     public Level(Server server, String name, String path, Class<? extends LevelProvider> provider) {
         this.levelId = levelIdCounter++;
@@ -613,6 +621,8 @@ public class Level implements ChunkManager, Metadatable {
             if (this.asyncChuckExecutor != null) {
                 this.asyncChuckExecutor.shutdownNow();
             }
+            this.pendingAsyncChunkLoads.clear();
+            this.asyncChunkLoadCallbackQueue.clear();
 
             LevelProvider levelProvider = this.provider;
             if (levelProvider != null) {
@@ -1223,13 +1233,11 @@ public class Level implements ChunkManager, Metadatable {
 
         this.updateBlockEntities.removeIf(blockEntity -> !blockEntity.isValid() || !blockEntity.onUpdate());
         // Closing invalid block entities
-        Set<BlockEntity> blockEntities = new HashSet<>(this.blockEntities.values());
-        blockEntities.forEach(blockEntity -> {
-            boolean valid = blockEntity.isValid() && blockEntity.isBlockEntityValid();
-            if (!valid) {
+        for (BlockEntity blockEntity : this.blockEntityValues) {
+            if (!blockEntity.isValid() || !blockEntity.isBlockEntityValid()) {
                 blockEntity.close();
             }
-        });
+        }
 
         this.tickChunks();
 
@@ -1276,6 +1284,8 @@ public class Level implements ChunkManager, Metadatable {
                 this.chunkRequestCallback(data.getProtocol(), data.getTimestamp(), data.getX(), data.getZ(), data.getSubChunkCount(), data.getPayload());
             }
         }
+
+        this.processAsyncChunkLoadCallbacks();
 
         this.processChunkRequest();
 
@@ -3896,6 +3906,33 @@ public class Level implements ChunkManager, Metadatable {
         }
     }
 
+    private void processAsyncChunkLoadCallbacks() {
+        int count = Math.max(8, (this.getPlayers().size() + 1) * this.server.getSettings().world().chunk().sendingPerTick());
+        AsyncChunkLoadResult result;
+        for (int i = 0; i < count && (result = this.asyncChunkLoadCallbackQueue.poll()) != null; i++) {
+            long index = Level.chunkHash(result.x(), result.z());
+            this.pendingAsyncChunkLoads.remove(index);
+
+            if (this.getProvider() != result.provider()) {
+                continue;
+            }
+            if (result.error() != null) {
+                this.server.getLogger().error("Failed to read chunk " + result.x() + ", " + result.z(), result.error());
+            }
+
+            LevelDBChunk chunk = result.chunk();
+            if (chunk == null) {
+                chunk = result.provider().getEmptyChunk(result.x(), result.z());
+            }
+
+            try {
+                this.forceLoadChunk(index, result.x(), result.z(), true, chunk);
+            } catch (Exception error) {
+                this.server.getLogger().error("Failed to finish loading chunk " + result.x() + ", " + result.z(), error);
+            }
+        }
+    }
+
     public void asyncChunkRequestCallback(int protocol, long timestamp, int x, int z, int subChunkCount, byte[] payload) {
         this.asyncChunkRequestCallbackQueue.add(new NetworkChunkSerializer.NetworkChunkSerializerCallbackData(protocol, timestamp, x, z, subChunkCount, payload));
     }
@@ -4030,6 +4067,10 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     private BaseFullChunk forceLoadChunk(long index, int x, int z, boolean generate) {
+        return this.forceLoadChunk(index, x, z, generate, null);
+    }
+
+    private BaseFullChunk forceLoadChunk(long index, int x, int z, boolean generate, BaseFullChunk preloadedChunk) {
         ReentrantLock lock = this.getChunkLock(index);
 
         lock.lock();
@@ -4041,7 +4082,14 @@ public class Level implements ChunkManager, Metadatable {
                 return provider.getLoadedChunk(x, z);
             }
 
-            BaseFullChunk chunk = provider.getChunk(x, z, generate);
+            BaseFullChunk chunk;
+            if (preloadedChunk != null) {
+                chunk = preloadedChunk;
+                chunk.setProvider(provider);
+                provider.setChunk(x, z, chunk);
+            } else {
+                chunk = provider.getChunk(x, z, generate);
+            }
 
             if (chunk == null) {
                 if (generate) {
@@ -4348,7 +4396,35 @@ public class Level implements ChunkManager, Metadatable {
             return false;
         }
 
-        BaseFullChunk chunk = this.getChunk(x, z, true);
+        if (!force && this.server.getSettings().world().chunk().asyncChunks()
+                && this.requireProvider() instanceof LevelDBProvider levelDBProvider
+                && !levelDBProvider.isChunkLoaded(index)) {
+            this.requestAsyncChunkLoad(levelDBProvider, index, x, z);
+            return false;
+        }
+
+        BaseFullChunk chunk = this.getChunkIfLoaded(x, z);
+        if (!force && this.server.getSettings().world().chunk().asyncChunks()
+                && this.requireProvider() instanceof LevelDBProvider levelDBProvider
+                && chunk != null && !chunk.isPopulated()) {
+            boolean neighboursLoaded = true;
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    long neighbourIndex = Level.chunkHash(x + dx, z + dz);
+                    if (!levelDBProvider.isChunkLoaded(neighbourIndex)) {
+                        this.requestAsyncChunkLoad(levelDBProvider, neighbourIndex, x + dx, z + dz);
+                        neighboursLoaded = false;
+                    }
+                }
+            }
+            if (!neighboursLoaded) {
+                return false;
+            }
+        }
+
+        if (chunk == null) {
+            chunk = this.getChunk(x, z, true);
+        }
         boolean populate;
         if (!chunk.isPopulated()) {
             populate = true;
@@ -4377,6 +4453,21 @@ public class Level implements ChunkManager, Metadatable {
         }
 
         return true;
+    }
+
+    private void requestAsyncChunkLoad(LevelDBProvider provider, long index, int x, int z) {
+        if (this.pendingAsyncChunkLoads.contains(index)) {
+            return;
+        }
+        if (this.pendingAsyncChunkLoads.size() >= 128 || !this.pendingAsyncChunkLoads.add(index)) {
+            return;
+        }
+
+        boolean submitted = provider.loadChunkAsync(x, z, (chunk, error) ->
+                this.asyncChunkLoadCallbackQueue.add(new AsyncChunkLoadResult(provider, x, z, chunk, error)));
+        if (!submitted) {
+            this.pendingAsyncChunkLoads.remove(index);
+        }
     }
 
     public void generateChunk(int x, int z) {

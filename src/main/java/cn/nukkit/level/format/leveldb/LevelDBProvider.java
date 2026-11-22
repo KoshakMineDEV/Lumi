@@ -50,6 +50,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static cn.nukkit.level.format.leveldb.LevelDBConstants.*;
@@ -58,6 +60,7 @@ import static cn.nukkit.level.format.leveldb.LevelDBKey.*;
 @Log4j2
 public class LevelDBProvider implements LevelProvider {
 
+    private static final int CHUNK_LOAD_LOCK_STRIPES = 64;
     private static final DBProvider JAVA_LDB_PROVIDER = (DBProvider) FeatureBuilder.create(LevelDBProvider.class).addJava("net.daporkchop.ldbjni.java.JavaDBProvider").build();
     private static final byte[] CONNECTION_FIX_PENDING = {0};
     private static final byte[] CONNECTION_FIX_COMPLETE = {(byte) ConnectionStateMigration.REVISION};
@@ -76,6 +79,9 @@ public class LevelDBProvider implements LevelProvider {
 
     protected volatile boolean closed;
     protected final Lock gcLock;
+    private final ReentrantReadWriteLock chunkLoadLifecycleLock = new ReentrantReadWriteLock();
+    private final ReentrantLock[] chunkLoadLocks = createChunkLoadLocks();
+    private final ThreadPoolExecutor chunkLoadExecutor;
     private final ExecutorService executor;
 
     private Task autoCompactionTask;
@@ -92,6 +98,14 @@ public class LevelDBProvider implements LevelProvider {
     );
 
     private static final long CHUNK_COMPRESSION_COOLDOWN = 30_000L;
+
+    private static ReentrantLock[] createChunkLoadLocks() {
+        ReentrantLock[] locks = new ReentrantLock[CHUNK_LOAD_LOCK_STRIPES];
+        for (int i = 0; i < locks.length; i++) {
+            locks[i] = new ReentrantLock();
+        }
+        return locks;
+    }
 
     public LevelDBProvider(Level level, String path) {
         this.level = level;
@@ -159,6 +173,21 @@ public class LevelDBProvider implements LevelProvider {
         }
 
         this.gcLock = new ReentrantLock();
+
+        if (level.getServer().getSettings().world().chunk().asyncChunks()) {
+            int loadThreads = Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 2));
+            this.chunkLoadExecutor = new ThreadPoolExecutor(
+                    loadThreads,
+                    loadThreads,
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(128),
+                    new ThreadFactoryBuilder().setNameFormat("Chunk Load Worker for " + this.getName() + "-%d").setDaemon(true).build(),
+                    new ThreadPoolExecutor.AbortPolicy()
+            );
+        } else {
+            this.chunkLoadExecutor = null;
+        }
 
         ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
         builder.setNameFormat("LevelDB Executor for " + this.getName());
@@ -478,6 +507,38 @@ public class LevelDBProvider implements LevelProvider {
         return chunk;
     }
 
+    public boolean loadChunkAsync(int chunkX, int chunkZ, BiConsumer<LevelDBChunk, Exception> callback) {
+        if (this.chunkLoadExecutor == null || this.closed) {
+            return false;
+        }
+
+        try {
+            this.chunkLoadExecutor.execute(() -> {
+                Lock lifecycleReadLock = this.chunkLoadLifecycleLock.readLock();
+                lifecycleReadLock.lock();
+                try {
+                    if (this.closed) {
+                        return;
+                    }
+
+                    LevelDBChunk chunk = null;
+                    Exception error = null;
+                    try {
+                        chunk = this.readChunk(chunkX, chunkZ);
+                    } catch (Exception exception) {
+                        error = exception;
+                    }
+                    callback.accept(chunk, error);
+                } finally {
+                    lifecycleReadLock.unlock();
+                }
+            });
+            return true;
+        } catch (RejectedExecutionException rejected) {
+            return false;
+        }
+    }
+
     @Override
     public boolean unloadChunk(int chunkX, int chunkZ) {
         return this.unloadChunk(chunkX, chunkZ, true);
@@ -729,22 +790,51 @@ public class LevelDBProvider implements LevelProvider {
         return chunk != null && chunk.isPopulated();
     }
 
-    private synchronized LevelDBChunk readOrCreateChunk(int chunkX, int chunkZ, boolean create) {
-        LevelDBChunk chunk = null;
+    private LevelDBChunk readOrCreateChunk(int chunkX, int chunkZ, boolean create) {
+        Lock lifecycleReadLock = this.chunkLoadLifecycleLock.readLock();
+        lifecycleReadLock.lock();
         try {
-            chunk = this.readChunk(chunkX, chunkZ);
-        } catch (Exception ex) {
-            Server.getInstance().getLogger().error("Failed to read chunk " + chunkX + ", " + chunkZ, ex);
-        }
+            if (this.closed) {
+                return null;
+            }
 
-        if (chunk == null && create) {
-            chunk = this.getEmptyChunk(chunkX, chunkZ);
-        } else if (chunk == null) {
-            return null;
-        }
+            long index = Level.chunkHash(chunkX, chunkZ);
+            int stripeIndex = (int) (index ^ (index >>> 32)) & (this.chunkLoadLocks.length - 1);
+            ReentrantLock chunkLoadLock = this.chunkLoadLocks[stripeIndex];
+            chunkLoadLock.lock();
+            try {
+                BaseFullChunk loadedChunk = this.chunks.get(index);
+                if (loadedChunk != null) {
+                    return (LevelDBChunk) loadedChunk;
+                }
 
-        this.chunks.put(Level.chunkHash(chunkX, chunkZ), chunk);
-        return chunk;
+                LevelDBChunk chunk = null;
+                try {
+                    chunk = this.readChunk(chunkX, chunkZ);
+                } catch (Exception ex) {
+                    Server.getInstance().getLogger().error("Failed to read chunk " + chunkX + ", " + chunkZ, ex);
+                }
+
+                if (chunk == null && create) {
+                    chunk = this.getEmptyChunk(chunkX, chunkZ);
+                } else if (chunk == null) {
+                    return null;
+                }
+
+                synchronized (this.chunks) {
+                    loadedChunk = this.chunks.get(index);
+                    if (loadedChunk != null) {
+                        return (LevelDBChunk) loadedChunk;
+                    }
+                    this.chunks.put(index, chunk);
+                }
+                return chunk;
+            } finally {
+                chunkLoadLock.unlock();
+            }
+        } finally {
+            lifecycleReadLock.unlock();
+        }
     }
 
     @Override
@@ -753,45 +843,59 @@ public class LevelDBProvider implements LevelProvider {
             return;
         }
 
+        Lock lifecycleWriteLock = this.chunkLoadLifecycleLock.writeLock();
+        lifecycleWriteLock.lock();
         try {
-            if (this.autoCompactionTask != null) {
-                this.autoCompactionTask.cancel();
-                this.autoCompactionTask = null;
+            if (this.closed) {
+                return;
             }
 
-            gcLock.lock();
-
-            try {
-                this.unloadChunksUnsafe(true);
-            } catch (Exception e) {
-                log.error("Error unloading chunks during close for: {}", this.getName(), e);
+            if (this.chunkLoadExecutor != null) {
+                this.chunkLoadExecutor.shutdownNow();
             }
-            this.closed = true;
-            this.level = null;
-            this.executor.shutdown();
 
             try {
-                if (!this.executor.awaitTermination(10, TimeUnit.MINUTES)) {
-                    log.warn("LevelDB executor did not terminate in time, forcing shutdown for: {}", this.getName());
-                    java.util.List<Runnable> droppedTasks = this.executor.shutdownNow();
-                    if (!droppedTasks.isEmpty()) {
-                        log.warn("Dropped {} pending tasks during forced shutdown", droppedTasks.size());
-                    }
-                    if (!this.executor.awaitTermination(5, TimeUnit.SECONDS)) {
-                        log.error("LevelDB executor did not terminate even after forced shutdown for: {}", this.getName());
-                    }
+                if (this.autoCompactionTask != null) {
+                    this.autoCompactionTask.cancel();
+                    this.autoCompactionTask = null;
                 }
-            } catch (InterruptedException e) {
-                this.executor.shutdownNow();
+
+                gcLock.lock();
+
+                try {
+                    this.unloadChunksUnsafe(true);
+                } catch (Exception e) {
+                    log.error("Error unloading chunks during close for: {}", this.getName(), e);
+                }
+                this.closed = true;
+                this.level = null;
+                this.executor.shutdown();
+
+                try {
+                    if (!this.executor.awaitTermination(10, TimeUnit.MINUTES)) {
+                        log.warn("LevelDB executor did not terminate in time, forcing shutdown for: {}", this.getName());
+                        java.util.List<Runnable> droppedTasks = this.executor.shutdownNow();
+                        if (!droppedTasks.isEmpty()) {
+                            log.warn("Dropped {} pending tasks during forced shutdown", droppedTasks.size());
+                        }
+                        if (!this.executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                            log.error("LevelDB executor did not terminate even after forced shutdown for: {}", this.getName());
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    this.executor.shutdownNow();
+                }
+            } finally {
+                try {
+                    this.db.close();
+                } catch (IOException e) {
+                    log.error("Can not close database: {}", this.getName(), e);
+                } finally {
+                    this.gcLock.unlock();
+                }
             }
         } finally {
-            try {
-                this.db.close();
-            } catch (IOException e) {
-                log.error("Can not close database: {}", this.getName(), e);
-            } finally {
-                this.gcLock.unlock();
-            }
+            lifecycleWriteLock.unlock();
         }
     }
 

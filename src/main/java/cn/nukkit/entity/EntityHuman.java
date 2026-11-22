@@ -225,6 +225,10 @@ public class EntityHuman extends EntityHumanType {
                 this.setSkin(newSkin);
             }
 
+            if (this.skin == null || !this.skin.isValid()) {
+                this.setSkin(Skin.NO_PERSONA_SKIN);
+            }
+
             this.uuid = Utils.dataToUUID(String.valueOf(this.getId()).getBytes(StandardCharsets.UTF_8), this.skin
                     .getSkinData().data, this.getNameTag().getBytes(StandardCharsets.UTF_8));
         } else {

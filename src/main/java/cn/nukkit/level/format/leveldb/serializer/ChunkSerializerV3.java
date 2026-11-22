@@ -14,6 +14,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ShortMap;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 
@@ -95,21 +96,8 @@ public class ChunkSerializerV3 implements ChunkSerializer {
                     stateBlockStorageArray[1] = new StateBlockStorage();
                 }
 
-                if (extraBlocks != null) {
-                    for (int x = 0; x < 16; ++x) {
-                        for (int z = 0; z < 16; ++z) {
-                            for (int y = ySection << 4; y < y + 16; ++y) {
-                                short index = (short) (x & 0xF | (z & 0xF) << 4 | (y & 0xFF) << 9);
-                                if (!extraBlocks.containsKey(index)) {
-                                    continue;
-                                }
-                                short fullBlock = extraBlocks.get(index);
-                                int blockId = fullBlock & 0xFF;
-                                int blockData = fullBlock >> 8 & 0xF;
-                                stateBlockStorageArray[1].set(StateBlockStorage.elementIndex(x, y, z), BlockStateMapping.get().getState(blockId, blockData));
-                            }
-                        }
-                    }
+                if (extraBlocks != null && !extraBlocks.isEmpty()) {
+                    restoreExtraBlocks(extraBlocks, stateBlockStorageArray[1], ySection);
                 }
 
                 byte[] blockLight = db.get(LevelDBKey.NUKKIT_BLOCK_LIGHT.getKey(chunkX, chunkZ, ySection, chunkBuilder.getLevel().getDimension()));
@@ -121,5 +109,30 @@ public class ChunkSerializerV3 implements ChunkSerializer {
             }
         }
         chunkBuilder.sections(sections);
+    }
+
+    static void restoreExtraBlocks(Int2ShortOpenHashMap extraBlocks, StateBlockStorage storage, int ySection) {
+        int sectionBaseY = (ySection << 4) & 0x7F;
+        for (Int2ShortMap.Entry entry : extraBlocks.int2ShortEntrySet()) {
+            int rawIndex = entry.getIntKey();
+            short packedIndex = (short) rawIndex;
+            // The previous lookup widened a short to int, so only sign-extended short keys matched.
+            if (rawIndex != packedIndex) {
+                continue;
+            }
+
+            int packed = packedIndex & 0xFFFF;
+            int localY = ((packed >>> 9 & 0x7F) - sectionBaseY) & 0x7F;
+            if (localY >= 16) {
+                continue;
+            }
+
+            int x = packed & 0xF;
+            int z = packed >>> 4 & 0xF;
+            short fullBlock = entry.getShortValue();
+            int blockId = fullBlock & 0xFF;
+            int blockData = fullBlock >>> 8 & 0xF;
+            storage.set(StateBlockStorage.elementIndex(x, localY, z), BlockStateMapping.get().getState(blockId, blockData));
+        }
     }
 }
