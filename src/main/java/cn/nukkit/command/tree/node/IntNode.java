@@ -11,7 +11,15 @@ public class IntNode extends ParamNode<Integer> {
         try {
             this.value = Integer.parseInt(arg);
         } catch (NumberFormatException e) {
-            this.error();
+            // allow values beyond int range and clamp to int limits (for pistonPushLimit)
+            try {
+                long l = Long.parseLong(arg.trim());
+                if (l > Integer.MAX_VALUE) this.value = Integer.MAX_VALUE;
+                else if (l < Integer.MIN_VALUE) this.value = Integer.MIN_VALUE;
+                else this.value = (int) l;
+            } catch (NumberFormatException e2) {
+                this.error();
+            }
         }
     }
 

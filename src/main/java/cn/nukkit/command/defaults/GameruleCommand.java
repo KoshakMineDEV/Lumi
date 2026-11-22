@@ -1,5 +1,6 @@
 package cn.nukkit.command.defaults;
 
+import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandEnum;
 import cn.nukkit.command.data.CommandParamType;
@@ -8,6 +9,7 @@ import cn.nukkit.command.tree.ParamList;
 import cn.nukkit.command.utils.CommandLogger;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.GameRules;
+import cn.nukkit.level.Level;
 
 import java.util.*;
 
@@ -62,7 +64,17 @@ public class GameruleCommand extends VanillaCommand {
 
     @Override
     public int execute(CommandSender sender, String commandLabel, Map.Entry<String, ParamList> result, CommandLogger log) {
-        GameRules rules = sender.getPosition().level.getGameRules();
+        GameRules rules;
+        try {
+            var pos = sender.getPosition();
+            if (pos != null && pos.level != null) {
+                rules = pos.level.getGameRules();
+            } else {
+                rules = Server.getInstance().getDefaultLevel().getGameRules();
+            }
+        } catch (Exception e) {
+            rules = GameRules.getDefault();
+        }
         var list = result.getValue();
         String ruleStr = list.getResult(0);
         if (result.getKey().equals("default")) {
@@ -87,26 +99,116 @@ public class GameruleCommand extends VanillaCommand {
             log.addSyntaxErrors(0).output();
             return 0;
         }
+        GameRule gameRule = optionalRule.get();
+        // helper to get sender level for non-piston rules
+        Level senderLevel = null;
+        try {
+            var pos = sender.getPosition();
+            if (pos != null && pos.level != null) senderLevel = pos.level;
+            else senderLevel = Server.getInstance().getDefaultLevel();
+        } catch (Exception ignored) {
+            senderLevel = Server.getInstance().getDefaultLevel();
+        }
         switch (result.getKey()) {
             case "boolGameRules" -> {
                 boolean value = list.getResult(1);
-                rules.setGameRule(optionalRule.get(), value);
+                if (senderLevel != null) {
+                    senderLevel.getGameRules().setGameRule(gameRule, value);
+                    senderLevel.getProvider().setGameRules(senderLevel.getGameRules());
+                }
             }
             case "intGameRules" -> {
-                int value = list.getResult(1);
-                rules.setGameRule(optionalRule.get(), value);
+                int raw = list.getResult(1);
+                int value = raw;
+                if (gameRule == GameRule.PISTON_PUSH_LIMIT) {
+                    if (raw == -1) value = Integer.MAX_VALUE;
+                    // piston limit must affect all 3 dimensions
+                    applyToAllLevels(gameRule, value);
+                } else {
+                    if (senderLevel != null) {
+                        senderLevel.getGameRules().setGameRule(gameRule, value);
+                        senderLevel.getProvider().setGameRules(senderLevel.getGameRules());
+                    }
+                }
             }
             case "floatGameRules" -> {
                 float value = list.getResult(1);
-                rules.setGameRule(optionalRule.get(), value);
+                if (senderLevel != null) {
+                    senderLevel.getGameRules().setGameRule(gameRule, value);
+                    senderLevel.getProvider().setGameRules(senderLevel.getGameRules());
+                }
             }
             case "unknownGameRules" -> {
                 String value = list.getResult(1);
-                rules.setGameRules(optionalRule.get(), value);
+                if (senderLevel != null) {
+                    senderLevel.getGameRules().setGameRules(gameRule, value);
+                    senderLevel.getProvider().setGameRules(senderLevel.getGameRules());
+                }
             }
         }
-        var str = list.getResult(1);
-        log.addSuccess("commands.gamerule.success", optionalRule.get().getName().toLowerCase(Locale.ROOT), str.toString()).output();
+        Object displayObj = list.getResult(1);
+        String display = displayObj == null ? "" : displayObj.toString();
+        // for pistonPushLimit show clamped value (-1 -> MAX)
+        if (gameRule == GameRule.PISTON_PUSH_LIMIT && result.getKey().equals("intGameRules")) {
+            int raw = list.getResult(1);
+            if (raw == -1) display = String.valueOf(Integer.MAX_VALUE);
+        }
+        log.addSuccess("commands.gamerule.success", gameRule.getName().toLowerCase(Locale.ROOT), display).output();
         return 1;
+    }
+
+    private void applyToAllLevels(GameRule rule, boolean value) {
+        for (Level level : Server.getInstance().getLevels().values()) {
+            try {
+                level.getGameRules().setGameRule(rule, value);
+                level.getProvider().setGameRules(level.getGameRules());
+            } catch (Exception ignored) {}
+        }
+    }
+
+    private void applyToAllLevels(GameRule rule, int value) {
+        for (Level level : Server.getInstance().getLevels().values()) {
+            try {
+                level.getGameRules().setGameRule(rule, value);
+                level.getProvider().setGameRules(level.getGameRules());
+                // immediate persistence to level.dat int tag
+                try { level.getProvider().saveLevelData(); } catch (Exception ignored) {}
+            } catch (Exception ignored) {}
+        }
+        if (rule == GameRule.PISTON_PUSH_LIMIT) {
+            // re-check all loaded pistons immediately - covers structures that were blocked by limit or obstacle
+            for (Level level : Server.getInstance().getLevels().values()) {
+                try {
+                    for (cn.nukkit.blockentity.BlockEntity be : new java.util.ArrayList<>(level.getBlockEntities().values())) {
+                        if (be instanceof cn.nukkit.blockentity.impl.BlockEntityPistonArm) {
+                            try {
+                                cn.nukkit.block.Block b = level.getBlock(be.getFloorX(), be.getFloorY(), be.getFloorZ());
+                                if (b instanceof cn.nukkit.block.BlockPistonBase) {
+                                    level.scheduleUpdate(b, 1);
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+    }
+
+    private void applyToAllLevels(GameRule rule, float value) {
+        for (Level level : Server.getInstance().getLevels().values()) {
+            try {
+                level.getGameRules().setGameRule(rule, value);
+                level.getProvider().setGameRules(level.getGameRules());
+            } catch (Exception ignored) {}
+        }
+    }
+
+    private void applyToAllLevelsString(GameRule rule, String value) {
+        for (Level level : Server.getInstance().getLevels().values()) {
+            try {
+                level.getGameRules().setGameRules(rule, value);
+                level.getProvider().setGameRules(level.getGameRules());
+            } catch (Exception ignored) {}
+        }
     }
 }
