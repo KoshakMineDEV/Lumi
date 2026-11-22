@@ -127,6 +127,7 @@ public class WeakExplosion extends Explosion {
                 int exposure = 1;
                 double impact = (1 - distance) * exposure;
                 int damage = this.doesDamage ? (int) (((impact * impact + impact) / 2) * 5 * explosionSize + 1) : 0;
+                double knockbackImpact = getKnockbackImpact(entity, impact);
                 if (this.what instanceof Entity) {
                     entity.attack(new EntityDamageByEntityEvent((Entity) this.what, entity, DamageCause.ENTITY_EXPLOSION, damage));
                 } else if (this.what instanceof Block) {
@@ -135,7 +136,7 @@ public class WeakExplosion extends Explosion {
                     entity.attack(new EntityDamageEvent(entity, DamageCause.BLOCK_EXPLOSION, damage));
                 }
                 if (!(entity instanceof EntityItem || entity instanceof EntityXPOrb)) {
-                    entity.setMotion(motion.multiply(impact));
+                    entity.setMotion(motion.multiply(knockbackImpact));
                 }
             }
         }

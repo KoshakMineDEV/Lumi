@@ -12,6 +12,7 @@ import cn.nukkit.entity.mob.EntityWolf;
 import cn.nukkit.entity.passive.EntityIronGolem;
 import cn.nukkit.entity.passive.EntitySkeletonHorse;
 import cn.nukkit.entity.projectile.EntityProjectile;
+import cn.nukkit.entity.projectile.EntityWindCharge;
 import cn.nukkit.entity.util.BlockIterator;
 import cn.nukkit.entity.weather.EntityWeather;
 import cn.nukkit.event.entity.*;
@@ -232,6 +233,13 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
         }
     }
 
+    /**
+     * Returns the fraction of incoming knockback absorbed, from 0 to 1.
+     */
+    public double getKnockbackResistance() {
+        return 0;
+    }
+
     public void knockBack(Entity attacker, double damage, double x, double z) {
         this.knockBack(attacker, damage, x, z, 0.3);
     }
@@ -243,6 +251,10 @@ public abstract class EntityLiving extends Entity implements EntityDamageable {
         }
 
         f = 1 / f;
+        double resistance = attacker instanceof EntityWindCharge charge
+                ? charge.getTargetKnockbackResistance(this)
+                : this.getKnockbackResistance();
+        base *= 1.0 - resistance;
 
         Vector3 motion = new Vector3(this.motionX, this.motionY, this.motionZ);
 

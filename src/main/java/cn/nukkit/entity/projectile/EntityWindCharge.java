@@ -1,5 +1,6 @@
 package cn.nukkit.entity.projectile;
 
+import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
@@ -119,14 +120,21 @@ public class EntityWindCharge extends EntityProjectile {
         return 0.2f;
     }
 
+    public double getTargetKnockbackResistance(EntityLiving target) {
+        Entity sender = this.directionChanged != null ? this.directionChanged : this.shootingEntity;
+        return sender instanceof Player && sender != target ? target.getKnockbackResistance() : 0.0;
+    }
+
     protected void knockBack(Entity entity) {
+        double scale = entity instanceof EntityLiving living ? 1.0 - this.getTargetKnockbackResistance(living) : 1.0;
+        double strength = getKnockbackStrength() * scale;
         Vector3 knockback = new Vector3(entity.motionX, entity.motionY, entity.motionZ);
         knockback.x /= 2d;
         knockback.y /= 2d;
         knockback.z /= 2d;
-        knockback.x -= (this.getX() - entity.getX()) * getKnockbackStrength();
-        knockback.y += 1.0f;
-        knockback.z -= (this.getZ() - entity.getZ()) * getKnockbackStrength();
+        knockback.x -= (this.getX() - entity.getX()) * strength;
+        knockback.y += scale;
+        knockback.z -= (this.getZ() - entity.getZ()) * strength;
         entity.setMotion(knockback);
     }
 

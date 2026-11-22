@@ -10,6 +10,7 @@ import cn.nukkit.inventory.PlayerEnderChestInventory;
 import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.inventory.PlayerOffhandInventory;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemArmor;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.NukkitMath;
@@ -42,6 +43,24 @@ public abstract class EntityHumanType extends EntityCreature implements Inventor
 
     public PlayerOffhandInventory getOffhandInventory() {
         return offhandInventory;
+    }
+
+    @Override
+    public double getKnockbackResistance() {
+        if (this.inventory == null) {
+            return 0;
+        }
+
+        int netheritePieces = 0;
+        int armorStart = this.inventory.getSize();
+        for (int slot = 0; slot < 4; slot++) {
+            Item armor = this.inventory.getItemFast(armorStart + slot);
+            if (!armor.isNull() && armor.isArmor() && armor.getTier() == ItemArmor.TIER_NETHERITE) {
+                netheritePieces++;
+            }
+        }
+
+        return netheritePieces * 0.1;
     }
 
     @Override
@@ -217,6 +236,12 @@ public abstract class EntityHumanType extends EntityCreature implements Inventor
                 cause != DamageCause.SUICIDE &&
                 cause != DamageCause.FIRE_TICK &&
                 cause != DamageCause.FALL) { // No armor damage
+
+            if ((cause == DamageCause.FIRE || cause == DamageCause.LAVA
+                    || cause == DamageCause.HOT_FLOOR || cause == DamageCause.MAGMA)
+                    && armor.isArmor() && armor.getTier() == ItemArmor.TIER_NETHERITE) {
+                return armor;
+            }
 
             if (armor.isUnbreakable() || armor.getBlock() instanceof BlockSkull) {
                 return armor;

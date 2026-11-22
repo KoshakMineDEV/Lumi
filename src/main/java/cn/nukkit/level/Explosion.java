@@ -7,6 +7,7 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.impl.BlockEntityShulkerBox;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityExplosive;
+import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.entity.item.EntityXPOrb;
 import cn.nukkit.event.block.BlockExplodeEvent;
@@ -83,6 +84,10 @@ public class Explosion {
         } else if (fireSpawnChance <= 0) {
             fireSpawnChance = 1.0 / 3.0;
         }
+    }
+
+    protected static double getKnockbackImpact(Entity entity, double impact) {
+        return entity instanceof EntityLiving living ? impact * (1.0 - living.getKnockbackResistance()) : impact;
     }
 
     /**
@@ -249,6 +254,7 @@ public class Explosion {
                 double impact = (1.0D - d) * blockDensity;
                 float entityDamageAmount = (float) ((float) (impact * impact + impact) / 2.0D * 7.0D * force + 1.0D);
                 float damage = this.doesDamage ? entityDamageAmount : 0f;
+                double knockbackImpact = getKnockbackImpact(entity, impact);
 
                 if (this.what instanceof Entity) {
                     entity.attack(new EntityDamageByEntityEvent((Entity) this.what, entity, DamageCause.ENTITY_EXPLOSION, damage));
@@ -259,7 +265,7 @@ public class Explosion {
                 }
 
                 if (!(entity instanceof EntityItem || entity instanceof EntityXPOrb)) {
-                    var multipliedMotion = motion.multiply(impact);
+                    var multipliedMotion = motion.multiply(knockbackImpact);
                     entity.motionX += multipliedMotion.x;
                     entity.motionY += multipliedMotion.y;
                     entity.motionZ += multipliedMotion.z;

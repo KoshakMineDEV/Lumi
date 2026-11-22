@@ -141,6 +141,7 @@ public class StrongExplosion extends Explosion {
                 int exposure = 1;
                 double impact = (1 - distance) * exposure;
                 int damage = this.doesDamage ? (int) (((impact * impact + impact) / 2) * 8 * explosionSize + 1) : 0;
+                double knockbackImpact = getKnockbackImpact(entity, impact);
 
                 if (this.what instanceof Entity) {
                     entity.attack(new EntityDamageByEntityEvent((Entity) this.what, entity, DamageCause.ENTITY_EXPLOSION, damage));
@@ -151,7 +152,7 @@ public class StrongExplosion extends Explosion {
                 }
 
                 if (!(entity instanceof EntityItem || entity instanceof EntityXPOrb)) {
-                    entity.setMotion(motion.multiply(impact));
+                    entity.setMotion(motion.multiply(knockbackImpact));
                 }
             }
         }
