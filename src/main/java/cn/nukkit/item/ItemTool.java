@@ -49,6 +49,14 @@ public abstract class ItemTool extends Item implements ItemDurable {
 
     public static final int DURABILITY_MACE = 500;
 
+    public static final int DURABILITY_WOODEN_SPEAR = 60;
+    public static final int DURABILITY_STONE_SPEAR = 130;
+    public static final int DURABILITY_COPPER_SPEAR = 190;
+    public static final int DURABILITY_IRON_SPEAR = 250;
+    public static final int DURABILITY_GOLDEN_SPEAR = 30;
+    public static final int DURABILITY_DIAMOND_SPEAR = 1560;
+    public static final int DURABILITY_NETHERITE_SPEAR = 2030;
+
 
     public ItemTool(int id) {
         this(id, 0, 1, UNKNOWN_STR);

@@ -8,7 +8,7 @@ public class ItemNetheriteSpear extends ItemSpear {
 
     @Override
     public int getMaxDurability() {
-        return ItemTool.DURABILITY_NETHERITE;
+        return ItemTool.DURABILITY_NETHERITE_SPEAR;
     }
 
     @Override
@@ -19,6 +19,41 @@ public class ItemNetheriteSpear extends ItemSpear {
     @Override
     public int getAttackDamage() {
         return 6;
+    }
+
+    @Override
+    public int getChargeDelay() {
+        return 8;
+    }
+
+    @Override
+    public int getJabCooldown() {
+        return 23;
+    }
+
+    @Override
+    protected double getChargeDamageMultiplier() {
+        return 1.20;
+    }
+
+    @Override
+    protected int getChargeDamageDuration() {
+        return 175;
+    }
+
+    @Override
+    protected int getChargeKnockbackDuration() {
+        return 110;
+    }
+
+    @Override
+    protected int getChargeDismountDuration() {
+        return 50;
+    }
+
+    @Override
+    protected double getChargeDismountSpeed() {
+        return 9.0;
     }
 
     @Override
