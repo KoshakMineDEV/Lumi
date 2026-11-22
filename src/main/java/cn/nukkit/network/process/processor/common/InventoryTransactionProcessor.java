@@ -12,6 +12,7 @@ import cn.nukkit.event.player.PlayerInteractEntityEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.inventory.*;
+import cn.nukkit.inventory.request.DropActionProcessor;
 import cn.nukkit.inventory.transaction.*;
 import cn.nukkit.inventory.transaction.action.InventoryAction;
 import cn.nukkit.inventory.transaction.action.SlotChangeAction;
@@ -61,6 +62,11 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
         }
 
         if (player.isInventoryServerAuthoritative()) {
+            if (packet.transactionType == InventoryTransactionPacket.TYPE_NORMAL
+                    && this.handleHotbarDrop(player, packet.actions)) {
+                return;
+            }
+
             player.setNeedSendInventory(true);
             switch (packet.transactionType) {
                 case InventoryTransactionPacket.TYPE_USE_ITEM,
@@ -71,6 +77,25 @@ public class InventoryTransactionProcessor extends DataPacketProcessor<Inventory
         }
 
         this.handleClientTransaction(handle, packet);
+    }
+
+    private boolean handleHotbarDrop(Player player, NetworkInventoryAction[] actions) {
+        if (actions.length != 2) {
+            return false;
+        }
+
+        boolean worldFirst = actions[0].sourceType == NetworkInventoryAction.SOURCE_WORLD;
+        NetworkInventoryAction world = actions[worldFirst ? 0 : 1];
+        NetworkInventoryAction slot = actions[worldFirst ? 1 : 0];
+        if (world.sourceType != NetworkInventoryAction.SOURCE_WORLD
+                || world.inventorySlot != InventoryTransactionPacket.ACTION_MAGIC_SLOT_DROP_ITEM
+                || !world.oldItem.isNull()
+                || slot.sourceType != NetworkInventoryAction.SOURCE_CONTAINER
+                || slot.windowId != ContainerIds.INVENTORY) {
+            return false;
+        }
+
+        return DropActionProcessor.handleHotbarDrop(player, slot.inventorySlot, slot.oldItem, slot.newItem, world.newItem);
     }
 
     private void handleClientTransaction(PlayerHandle handle, InventoryTransactionPacket packet) {

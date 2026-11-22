@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.event.player.PlayerDropItemEvent;
 import cn.nukkit.event.player.PlayerTransferItemEvent;
 import cn.nukkit.inventory.Inventory;
+import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.inventory.transaction.action.InventoryAction;
 import cn.nukkit.inventory.transaction.action.SlotChangeAction;
 import cn.nukkit.item.Item;
@@ -41,22 +42,64 @@ public class DropActionProcessor implements ItemStackRequestActionProcessor<Drop
         if (item.isNull() || item.getCount() < count) {
             return context.error();
         }
-        if (validateStackNetworkId(item.getStackNetId(), src.getStackNetworkId())) {
+        boolean createdOutput = src.getContainer() == ContainerSlotType.CREATED_OUTPUT;
+        if (createdOutput ? !context.hasRecipe() : validateStackNetworkId(item.getStackNetId(), src.getStackNetworkId())) {
             return context.error();
         }
 
+        if (!drop(player, inventory, slot, item, count, createdOutput, context)) {
+            return context.error();
+        }
+
+        ItemStackResponseContainer container = TransferItemActionProcessor.buildContainer(inventory, slot, src);
+        return context.success(List.of(container));
+    }
+
+    public static boolean handleHotbarDrop(Player player, int slot, Item previous, Item remaining, Item dropped) {
+        PlayerInventory inventory = player.getInventory();
+        if (slot < 0 || slot >= inventory.getHotbarSize() || dropped.isNull()) {
+            return false;
+        }
+
+        Item item = inventory.getItem(slot);
+        int count = dropped.getCount();
+        int remainingCount = remaining.isNull() ? 0 : remaining.getCount();
+        if (item.isNull() || !item.equalsExact(previous) || item.getCount() != remainingCount + count
+                || !item.equals(dropped, true, false) || (!remaining.isNull() && !item.equals(remaining, true, false))) {
+            return false;
+        }
+
+        // Hotbar drops arrive without an ItemStackRequest or a response ID.
+        ItemStackRequestContext context = new ItemStackRequestContext(null);
+        if (!drop(player, inventory, slot, item, count, false, context)) {
+            context.rollback();
+            return false;
+        }
+        if (!context.commit()) {
+            return false;
+        }
+
+        inventory.sendSlot(slot, player);
+        if (inventory.getHeldItemIndex() == slot) {
+            inventory.sendHeldItem(player.getViewers().values());
+        }
+        return true;
+    }
+
+    private static boolean drop(Player player, Inventory inventory, int slot, Item item, int count,
+                                boolean createdOutput, ItemStackRequestContext context) {
         Item dropItem = item.clone();
         dropItem.setCount(count);
 
         if (!TransferItemActionProcessor.fireTransferEvent(player, PlayerTransferItemEvent.Type.DROP,
                 inventory, slot, null, -1, item, null, count)) {
-            return context.error();
+            return false;
         }
 
         PlayerDropItemEvent event = new PlayerDropItemEvent(player, dropItem);
         player.getServer().getPluginManager().callEvent(event);
         if (event.isCancelled()) {
-            return context.error();
+            return false;
         }
 
         List<InventoryAction> transactionActions = new ArrayList<>();
@@ -69,21 +112,19 @@ public class DropActionProcessor implements ItemStackRequestActionProcessor<Drop
         }
         transactionActions.add(new SlotChangeAction(inventory, slot, item, targetItem));
         var transaction = new TransferItemActionProcessor.EventOnlyInventoryTransaction(player, transactionActions);
-        if (!transaction.execute()) {
-            return context.error();
+        if (!transaction.execute() || !player.spawned || !player.isAlive()) {
+            return false;
         }
 
-        boolean removed = src.getContainer() == ContainerSlotType.CREATED_OUTPUT
+        boolean removed = createdOutput
                 ? context.takeOutput(inventory, slot, item, targetItem)
                 : context.writeSlot(inventory, slot, item, targetItem);
         if (!removed) {
-            return context.error();
+            return false;
         }
 
         Item committedDrop = event.getItem().clone();
         context.onCommit(() -> player.dropItem(committedDrop));
-
-        ItemStackResponseContainer container = TransferItemActionProcessor.buildContainer(inventory, slot, src);
-        return context.success(List.of(container));
+        return true;
     }
 }

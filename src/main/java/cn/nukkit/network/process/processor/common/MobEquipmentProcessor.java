@@ -37,6 +37,10 @@ public class MobEquipmentProcessor extends DataPacketProcessor<MobEquipmentPacke
 
         if (inv == null) {
             player.getServer().getLogger().debug(player.getName() + " has no open container with window ID " + pk.windowId);
+            // SAI can receive equipment updates for a container that has just closed.
+            if (player.isInventoryServerAuthoritative()) {
+                return;
+            }
             playerHandle.setFailedMobEquipmentPacket(playerHandle.getFailedMobEquipmentPacket() + 1);
             if (playerHandle.getFailedMobEquipmentPacket() > MAX_FAILED) {
                 log.warn("{} Too many failed MobEquipmentPacket", player.getName());
@@ -50,6 +54,9 @@ public class MobEquipmentProcessor extends DataPacketProcessor<MobEquipmentPacke
         if (!item.equals(pk.item, false, true)) {
             Item fixItem = Item.get(item.getId(), item.getDamage(), item.getCount(), item.getCompoundTag());
             if (fixItem.equals(pk.item, false, true)) {
+                if (player.isInventoryServerAuthoritative()) {
+                    fixItem.setStackNetId(item.getStackNetId());
+                }
                 inv.setItem(pk.hotbarSlot, fixItem);
             } else {
                 log.debug("Tried to equip {} but have {} in target slot", pk.item, fixItem);

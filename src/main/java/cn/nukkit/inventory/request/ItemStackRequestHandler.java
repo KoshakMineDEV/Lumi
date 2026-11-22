@@ -52,6 +52,7 @@ public final class ItemStackRequestHandler {
         register(new CraftRecipeOptionalProcessor());
         register(new CraftGrindstoneActionProcessor());
         register(new CraftLoomActionProcessor());
+        register(new CraftNonImplementedActionProcessor());
         register(new CraftResultDeprecatedActionProcessor());
         register(new MineBlockActionProcessor());
         register(new BeaconPaymentActionProcessor());
