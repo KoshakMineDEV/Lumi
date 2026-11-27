@@ -248,7 +248,10 @@ public class Level implements ChunkManager, Metadatable {
     private final ConcurrentLinkedQueue<BlockEntity> updateBlockEntities = new ConcurrentLinkedQueue<>();
 
     private final Server server;
-    private final LongSet queuedChunkUnloads = new LongOpenHashSet();
+    private static final long UNLOAD_DELAY_MS = 20_000L;
+    private static final long UNLOAD_SCAN_INTERVAL_MS = 500L;
+    private final LongArrayList unloadPending = new LongArrayList();
+    private long nextUnloadScan;
 
     private final int levelId;
 
@@ -1189,10 +1192,6 @@ public class Level implements ChunkManager, Metadatable {
         }
 
         this.levelCurrentTick++;
-
-        if (currentTick % 200 == 0) {
-            this.unloadChunks(true);
-        }
 
         this.updateQueue.tick(this.levelCurrentTick);
 
@@ -4423,12 +4422,6 @@ public class Level implements ChunkManager, Metadatable {
                 continue;
             }
 
-            long index = Level.chunkHash(chunkX, chunkZ);
-
-            if (!this.queuedChunkUnloads.add(index)) {
-                continue;
-            }
-
             this.unloadChunkRequest(chunkX, chunkZ, true);
         }
 
@@ -4438,7 +4431,7 @@ public class Level implements ChunkManager, Metadatable {
     public void doGarbageCollection(long allocatedTime) {
         long start = System.nanoTime();
 
-        if (!this.unloadChunks(System.currentTimeMillis(), allocatedTime, false)) {
+        if (!this.unloadChunksBudgeted(allocatedTime * 1_000_000L)) {
             return;
         }
 
@@ -4448,6 +4441,46 @@ public class Level implements ChunkManager, Metadatable {
         if (remaining > 0L) {
             this.provider.doGarbageCollection(remaining);
         }
+    }
+
+    public boolean unloadChunksBudgeted(long budgetNanos) {
+        long deadline = System.nanoTime() + budgetNanos;
+        long nowMs = System.currentTimeMillis();
+
+        if (this.unloadPending.isEmpty() && nowMs >= this.nextUnloadScan) {
+            this.nextUnloadScan = nowMs + UNLOAD_SCAN_INTERVAL_MS;
+            long expiry = nowMs - UNLOAD_DELAY_MS;
+            for (var entry : this.unloadQueue.fastEntrySet()) {
+                if (entry.getValue() <= expiry) {
+                    this.unloadPending.add(entry.getLongKey());
+                }
+            }
+        }
+
+        while (!this.unloadPending.isEmpty()) {
+            if (System.nanoTime() >= deadline) {
+                return false;
+            }
+
+            long index = this.unloadPending.removeLong(this.unloadPending.size() - 1);
+
+            if (!this.unloadQueue.containsKey(index)) {
+                continue;
+            }
+
+            if (this.isChunkInUse(index)) {
+                this.unloadQueue.remove(index);
+                continue;
+            }
+
+            if (this.unloadChunk(getHashX(index), getHashZ(index), true)) {
+                this.unloadQueue.remove(index);
+            } else {
+                this.unloadQueue.put(index, Long.valueOf(System.currentTimeMillis()));
+            }
+        }
+
+        return true;
     }
 
     public void unloadChunks() {
