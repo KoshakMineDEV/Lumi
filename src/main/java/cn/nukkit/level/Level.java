@@ -233,17 +233,13 @@ public class Level implements ChunkManager, Metadatable {
         RANDOM_TICK_BLOCKS.add(Block.BUDDING_AMETHYST);
     }
 
-    @NonComputationAtomic
-    public final Long2ObjectNonBlockingMap<Entity> updateEntities = new Long2ObjectNonBlockingMap<>();
+    public final ConcurrentHashMap<Long, Entity> updateEntities = new ConcurrentHashMap<>();
 
-    @NonComputationAtomic
-    private final Long2ObjectNonBlockingMap<BlockEntity> blockEntities = new Long2ObjectNonBlockingMap<>();
+    private final ConcurrentHashMap<Long, BlockEntity> blockEntities = new ConcurrentHashMap<>();
 
-    @NonComputationAtomic
-    private final Long2ObjectNonBlockingMap<Player> players = new Long2ObjectNonBlockingMap<>();
+    private final ConcurrentHashMap<Long, Player> players = new ConcurrentHashMap<>();
 
-    @NonComputationAtomic
-    private final Long2ObjectNonBlockingMap<Entity> entities = new Long2ObjectNonBlockingMap<>();
+    private final ConcurrentHashMap<Long, Entity> entities = new ConcurrentHashMap<>();
 
     private final ConcurrentLinkedQueue<BlockEntity> updateBlockEntities = new ConcurrentLinkedQueue<>();
 
@@ -1209,7 +1205,7 @@ public class Level implements ChunkManager, Metadatable {
         }
 
         if (!this.updateEntities.isEmpty()) {
-            for (long id : this.updateEntities.keySetLong()) {
+            for (long id : this.updateEntities.keySet()) {
                 Entity entity = this.updateEntities.get(id);
                 if (entity == null) {
                     this.updateEntities.remove(id);
