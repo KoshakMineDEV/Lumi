@@ -43,6 +43,11 @@ public abstract class BlockSignBase extends BlockTransparentMeta implements Face
     }
 
     @Override
+    public boolean canPassThrough() {
+        return true;
+    }
+
+    @Override
     public boolean isSolid(BlockFace side) {
         return false;
     }

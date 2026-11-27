@@ -4,7 +4,6 @@ import cn.nukkit.AdventureSettings.Type;
 import cn.nukkit.block.*;
 import cn.nukkit.block.customblock.CustomBlock;
 import cn.nukkit.block.material.tags.BlockInternalTags;
-import cn.nukkit.block.properties.VanillaBlockDefinition;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
 import cn.nukkit.blockentity.impl.BlockEntityCampfire;
@@ -63,7 +62,6 @@ import cn.nukkit.level.vibration.VanillaVibrationTypes;
 import cn.nukkit.level.vibration.VibrationEvent;
 import cn.nukkit.math.*;
 import cn.nukkit.metadata.MetadataValue;
-import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.encryption.LoginChainVerifier;
@@ -78,7 +76,6 @@ import cn.nukkit.permission.PermissionAttachment;
 import cn.nukkit.permission.PermissionAttachmentInfo;
 import cn.nukkit.plugin.InternalPlugin;
 import cn.nukkit.plugin.Plugin;
-import cn.nukkit.registry.BlockRegistry;
 import cn.nukkit.registry.Registries;
 import cn.nukkit.resourcepacks.ResourcePack;
 import cn.nukkit.scheduler.AsyncTask;
@@ -110,9 +107,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
@@ -1752,6 +1747,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             if (this.collisionBlocks == null) {
                 this.collisionBlocks = new ArrayList<>();
             }
+            if (this.collisionBlocksIds == null) {
+                this.collisionBlocksIds = new int[0];
+            }
+            if (this.collisionBlocksData == null) {
+                this.collisionBlocksData = new int[0];
+            }
             return;
         }
 
@@ -1760,8 +1761,14 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         boolean scaffolding = false;
         boolean powderSnow = false;
 
-        for (Block block : this.getCollisionBlocks()) {
-            switch (block.getId()) {
+        int[] collisionData = this.getCollisionBlocksData();
+        for (int i = 0; i < collisionData.length; i += 4) {
+            int blockId = collisionData[i];
+            int x = collisionData[i + 1];
+            int y = collisionData[i + 2];
+            int z = collisionData[i + 3];
+
+            switch (blockId) {
                 case Block.NETHER_PORTAL:
                     portal = true;
                     continue;
@@ -1776,8 +1783,16 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     break;
             }
 
-            block.onEntityCollide(this);
-            block.getLevelBlockAtLayer(1).onEntityCollide(this);
+            if (Registries.BLOCK.hasEntityCollision(blockId)) {
+                Block block = this.level.getBlock(x, y, z, false);
+                if (block == null) continue;
+                block.onEntityCollide(this);
+
+                Block layer1 = block.getLevelBlockAtLayer(1);
+                if (layer1 != null) {
+                    layer1.onEntityCollide(this);
+                }
+            }
         }
 
         this.setDataFlag(DATA_FLAGS_EXTENDED, DATA_FLAG_IN_SCAFFOLDING, scaffolding);
@@ -2058,6 +2073,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
                 this.blocksAround = null;
                 this.collisionBlocks = null;
+                this.collisionBlocksIds = null;
+                this.collisionBlocksData = null;
 
                 if (!to.equals(moveEvent.getTo())) { // If plugins modify the destination
                     if (this.getGamemode() != Player.SPECTATOR)

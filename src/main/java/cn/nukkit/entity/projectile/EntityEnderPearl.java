@@ -3,6 +3,7 @@ package cn.nukkit.entity.projectile;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.CreatureSpawnEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
@@ -67,11 +68,11 @@ public class EntityEnderPearl extends EntityProjectile {
         }
 
         if (this.isCollided && this.shootingEntity instanceof Player) {
-            List<Block> b = this.getCollisionBlocks();
+            int[] blocks = this.getCollisionBlocksIds();
 
             boolean portal = false;
-            for (Block collided : b) {
-                if (collided.getId() == Block.NETHER_PORTAL) {
+            for (int collided : blocks) {
+                if (collided == BlockID.NETHER_PORTAL) {
                     portal = true;
                 }
             }
