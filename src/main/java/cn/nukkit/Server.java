@@ -797,6 +797,7 @@ public class Server {
     }
 
     private int lastLevelGC;
+    private int lastUnloadLevel;
 
     /**
      * Internal: Tick the server
@@ -820,6 +821,12 @@ public class Server {
                             nextTick = now;
                         }
                         continue;
+                    }
+
+                    if (remaining > 2_000_000L) {
+                        this.unloadChunksIdle(remaining / 4L);
+                        now = System.nanoTime();
+                        remaining = nextTick - now;
                     }
 
                     if (settings.world().doWorldGc()) {
@@ -874,6 +881,29 @@ public class Server {
             }
         } catch (Throwable e) {
             log.fatal("Exception happened while ticking server\n{}", Utils.getAllThreadDumps(), e);
+        }
+    }
+
+    private void unloadChunksIdle(long budgetNanos) {
+        final Level[] levels = this.levelArray;
+        final int length = levels.length;
+        if (length == 0) {
+            return;
+        }
+        long deadline = System.nanoTime() + budgetNanos;
+        for (int i = 0; i < length; i++) {
+            if (++this.lastUnloadLevel >= length) {
+                this.lastUnloadLevel = 0;
+            }
+            Level level = levels[this.lastUnloadLevel];
+            if (level == null || level.isBeingConverted) {
+                continue;
+            }
+            long left = deadline - System.nanoTime();
+            if (left <= 0L) {
+                break;
+            }
+            level.unloadChunksBudgeted(left);
         }
     }
 
