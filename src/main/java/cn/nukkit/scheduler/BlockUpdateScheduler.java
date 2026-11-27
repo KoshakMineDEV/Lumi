@@ -6,7 +6,6 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.level.util.BlockUpdateEntry;
-import cn.nukkit.utils.collection.nb.Long2ObjectNonBlockingMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 
 import java.util.Collections;
@@ -19,12 +18,12 @@ public class BlockUpdateScheduler {
 
     private final Level level;
     private long lastTick;
-    private final Long2ObjectNonBlockingMap<Set<BlockUpdateEntry>> queuedUpdates;
+    private final ConcurrentHashMap<Long, Set<BlockUpdateEntry>> queuedUpdates;
 
     private Set<BlockUpdateEntry> pendingUpdates;
 
     public BlockUpdateScheduler(Level level, long currentTick) {
-        queuedUpdates = new Long2ObjectNonBlockingMap<>();
+        queuedUpdates = new ConcurrentHashMap<>();
         lastTick = currentTick;
         this.level = level;
     }

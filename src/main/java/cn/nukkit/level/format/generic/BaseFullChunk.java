@@ -18,7 +18,6 @@ import cn.nukkit.nbt.tag.NumberTag;
 import cn.nukkit.nbt.tag.Tag;
 import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.registry.Registries;
-import cn.nukkit.utils.collection.nb.Long2ObjectNonBlockingMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.io.IOException;
@@ -26,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author MagicDroidX
@@ -33,12 +33,13 @@ import java.util.Map;
  */
 public abstract class BaseFullChunk implements FullChunk, ChunkManager {
 
-    protected Long2ObjectNonBlockingMap<Entity> entities;
-    protected Long2ObjectNonBlockingMap<Player> players = new Long2ObjectNonBlockingMap<>();
+    protected ConcurrentHashMap<Long, Entity> entities;
 
-    protected Long2ObjectNonBlockingMap<BlockEntity> tiles;
+    protected ConcurrentHashMap<Long, Player> players = new ConcurrentHashMap<>();
 
-    protected Long2ObjectNonBlockingMap<BlockEntity> tileList;
+    protected ConcurrentHashMap<Long, BlockEntity> tiles;
+
+    protected ConcurrentHashMap<Long, BlockEntity> tileList;
 
     /**
      * encoded as:
@@ -116,11 +117,11 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         }
 
         if(this.tiles != null) {
-            chunk.tiles = this.tiles.clone();
+            chunk.tiles = new ConcurrentHashMap<>(this.tiles);
         }
 
         if(this.tileList != null) {
-            chunk.tileList = this.tileList.clone();
+            chunk.tileList = new ConcurrentHashMap<>(this.tileList);
         }
 
         return chunk;
@@ -135,7 +136,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         }
 
         if (this.tiles != null) {
-            chunk.tiles = new Long2ObjectNonBlockingMap<>();
+            chunk.tiles = new ConcurrentHashMap<>();
             chunk.tiles.putAll(this.tiles);
         }
 
@@ -518,7 +519,7 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     @Override
     public void addEntity(Entity entity) {
         if (this.entities == null) {
-            this.entities = new Long2ObjectNonBlockingMap<>();
+            this.entities = new ConcurrentHashMap<>();
         }
 
         this.entities.put(entity.getId(), entity);
@@ -546,12 +547,14 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
     @Override
     public void addBlockEntity(BlockEntity blockEntity) {
         if (this.tiles == null) {
-            this.tiles = new Long2ObjectNonBlockingMap<>();
-            this.tileList = new Long2ObjectNonBlockingMap<>();
+            this.tiles = new ConcurrentHashMap<>();
+            this.tileList = new ConcurrentHashMap<>();
         }
         this.tiles.put(blockEntity.getId(), blockEntity);
         int y = blockEntity.getFloorY() - this.getProvider().getMinBlockY();
-        int index = ((blockEntity.getFloorZ() & 0x0f) << 16) | ((blockEntity.getFloorX() & 0x0f) << 12) | y;
+        long index = ((long) (blockEntity.getFloorZ() & 0x0f) << 16)
+                | ((long) (blockEntity.getFloorX() & 0x0f) << 12)
+                | y;
         if (this.tileList.containsKey(index) && !this.tileList.get(index).equals(blockEntity)) {
             BlockEntity entity = this.tileList.get(index);
             this.tiles.remove(entity.getId());
@@ -569,7 +572,9 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
         if (this.tiles != null) {
             this.tiles.remove(blockEntity.getId());
             int y = blockEntity.getFloorY() - this.getProvider().getMinBlockY();
-            int index = ((blockEntity.getFloorZ() & 0x0f) << 16) | ((blockEntity.getFloorX() & 0x0f) << 12) | y;
+            long index = ((long) (blockEntity.getFloorZ() & 0x0f) << 16)
+                    | ((long) (blockEntity.getFloorX() & 0x0f) << 12)
+                    | y;
             this.tileList.remove(index);
 
             if (!(blockEntity instanceof PersistentDataContainerBlockEntity) && blockEntity.hasPersistentDataContainer()) {
@@ -614,7 +619,12 @@ public abstract class BaseFullChunk implements FullChunk, ChunkManager {
             return null;
         }
         int capY = y - this.getProvider().getMinBlockY();
-        return this.tileList.get((z << 16) | (x << 12) | capY);
+
+        long index = ((long) (z & 0x0f) << 16)
+                | ((long) (x & 0x0f) << 12)
+                | capY;
+
+        return this.tileList.get(index);
 
     }
 
