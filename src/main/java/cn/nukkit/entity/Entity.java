@@ -717,7 +717,7 @@ public abstract class Entity extends Location implements Metadatable {
                         posList.get(2).data
                 ),
                 rotationList.get(0).data,
-                rotationList.get(1).data
+                Math.max(-90.0f, Math.min(90.0f, rotationList.get(1).data))
         );
 
         this.setMotion(this.temporalVector.setComponents(

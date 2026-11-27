@@ -55,8 +55,8 @@ public class MoveEntityAbsolutePacket extends DataPacket {
         this.y = v.y;
         this.z = v.z;
         this.pitch = this.getRotationByte();
-        this.headYaw = this.getRotationByte();
         this.yaw = this.getRotationByte();
+        this.headYaw = this.getRotationByte();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class MoveEntityAbsolutePacket extends DataPacket {
         this.putByte(flags);
         this.putVector3f((float) this.x, (float) this.y, (float) this.z);
         this.putRotationByte(this.pitch);
-        this.putRotationByte(this.headYaw);
         this.putRotationByte(this.yaw);
+        this.putRotationByte(this.headYaw);
     }
 }
